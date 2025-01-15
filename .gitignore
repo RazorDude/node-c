@@ -1,0 +1,8 @@
+.DS_Store
+.vscode
+assets
+dist
+docs
+envFiles/*
+node_modules
+test
