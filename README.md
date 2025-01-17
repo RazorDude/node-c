@@ -1,5 +1,5 @@
 # Node-C
-An end-to-end NodeJS framework for building DDD apps built on top of NestJS.
+An end-to-end NodeJS framework for building DDD apps on top of NestJS.
 
 ## Roadmap
 1. Logger service and its related TODOs.
@@ -19,6 +19,10 @@ An end-to-end NodeJS framework for building DDD apps built on top of NestJS.
   a. Field selection support.
   b. Update method - support update of multiple items at the same time.
   c. Support for the numberItem functionality in the bulkCreate, create, update and delete methods.
-6. QueryBuilder - search inside JSON fields.
+6. QueryBuilder - search inside JSON fields on MySQL DBs.
 7. Domain.IAM.TokenManager - content hash computation.
-7. Multithreaded domain module method execution.
+8. Multithreaded domain module method execution.
+9. CLI
+10. Clickhouse persitance module
+11. Okta SSO
+12. Google SSO

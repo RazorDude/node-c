@@ -33,14 +33,14 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
 export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNames = {
   DOMAIN: {
     children: {
-      IAM: 'iam' // type - IAM
+      IAM: 'iam' // add another key _MODULE_TYPE - IAM
     },
     name: 'domain'
   },
   PERSISTANCE: {
     children: {
-      DB: 'db', // type - RDB
-      REDIS: 'redis' // type - NOSQL
+      DB: 'db', // add another key _MODULE_TYPE - RDB
+      REDIS: 'redis' // add another key _MODULE_TYPE - NOSQL
     },
     name: 'persistance'
   }
@@ -64,6 +64,7 @@ export interface AppConfigCommon {
   domain: { [domainName: string]: GenericObject | AppConfigCommonDomainIAM };
   general: {
     projectName: string;
+    projectRootPath: string;
     projectVersion: string;
   };
   persistance: {
@@ -177,8 +178,10 @@ export interface ConfigProviderModuleOptions {
 }
 
 export interface GenerateOrmconfigOptions {
-  entitiesBasePath: string;
-  migrationsPath: string;
+  entitiesPathInModule: string;
+  migrationsPathInModule: string;
+  moduleName: string;
+  modulePathInProject: string;
 }
 
 export enum NoSQLType {
@@ -187,6 +190,8 @@ export enum NoSQLType {
 }
 
 export enum RDBType {
+  // eslint-disable-next-line no-unused-vars
+  Clickhouse = 'clickhouse',
   // eslint-disable-next-line no-unused-vars
   MySQL = 'mysql',
   // eslint-disable-next-line no-unused-vars

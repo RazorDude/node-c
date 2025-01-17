@@ -17,12 +17,12 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build --path=tsconfig.build.json",
-    "build:watch": "nest build --path=tsconfig.build.json --watch",
-    "generateOrmconfig": "node dist/scripts/generateOrmconfig.js",
+    "build": "./node_modules/.bin/tsc --project tsconfig.build.json",
+    "build:watch": "./node_modules/.bin/tsc --project tsconfig.build.json --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start:debug": "cross-env NODE_ENV=dev nest start --path=tsconfig.build.json --debug --watch",
-    "start:dev": "cross-env NODE_ENV=dev nest start --path=tsconfig.build.json --watch",
+    "start:debug": "NODE_ENV=local nest start --path=tsconfig.test.app.json --debug --watch",
+
+    "start:dev": "cross-env NODE_ENV=dev nest start --path=build.tsconfig.json --watch",
     "start:dev-online": "cross-env NODE_ENV=dev node dist/main",
     "start:staging": "cross-env NODE_ENV=staging node dist/main",
     "start:prod": "cross-env NODE_ENV=prod node dist/main",
@@ -50,9 +50,7 @@
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.5.0",
     "morgan": "^1.10.0",
-    "pg": "^8.13.1",
     "ramda": "^0.30.1",
-    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.20"
   },
@@ -82,6 +80,10 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "pg": "^8.13.1",
+    "redis": "^4.7.0"
   },
   "jest": {
     "moduleFileExtensions": [

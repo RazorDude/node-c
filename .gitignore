@@ -3,6 +3,8 @@
 assets
 dist
 docs
-envFiles/*
+test/app/envFiles/*
+test/app/ormconfig*
 node_modules
-test
+test/app/dist
+test/app/tmp

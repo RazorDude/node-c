@@ -30,27 +30,36 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     config: AppConfig,
     options: GenerateOrmconfigOptions
   ): Promise<void> {
-    const { entitiesBasePath, migrationsPath } = options;
-    const entitiesDirPath = path.join(process.cwd(), entitiesBasePath);
+    const { general: { projectRootPath }, persistance } = config;
+    const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject } = options;
+    const entitiesDirPath = path.join(projectRootPath, modulePathInProject, entitiesPathInModule);
     const entitiesDirData = await fs.readdir(entitiesDirPath);
     const entities: string[] = [];
+    const migrationsPath = path.join(projectRootPath, modulePathInProject, migrationsPathInModule);
     const subscribers: string[] = [];
     for (const i in entitiesDirData) {
       const entityName = entitiesDirData[i];
-      if (entityName.match(/(\.)|(base)/)) {
+      if (entityName.match(/^base$/)) {
         continue;
       }
-      entities.push(`${entitiesBasePath}/${entityName}/${entityName}.entity.ts`);
-      try {
-        await fs.lstat(path.join(entitiesDirPath, entityName, `${entityName}.subscriber.ts`));
-        subscribers.push(`${entitiesBasePath}/${entityName}/${entityName}.subscriber.ts`);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {}
+      const entityFolderPath = path.join(entitiesDirPath, entityName);
+      const entityFolderData = await fs.readdir(entityFolderPath)
+      for (const j in entityFolderData) {
+        const entityFolderFileName = entityFolderData[j];
+        if (entityFolderFileName.match(/\.entity\./)) {
+          entities.push(path.join(entityFolderPath, entityFolderFileName));
+          continue;
+        }
+        if (entityFolderFileName.match(/\.subscriber\./)) {
+          subscribers.push(path.join(entityFolderPath, entityFolderFileName));
+          continue;
+        }
+      }
     }
     await fs.writeFile(
-      path.join(process.cwd(), 'ormconfig.json'),
+      path.join(projectRootPath, `ormconfig-${moduleName}.json`),
       JSON.stringify(
-        mergeDeepRight(config.persistance.db, {
+        mergeDeepRight(persistance[moduleName], {
           entities: [...entities],
           subscribers: [...subscribers],
           migrations: [`${migrationsPath}/**/*.ts`],
@@ -84,10 +93,10 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     const moduleNamesByCategoryAndType: {
       [moduleCategory: string]: { [moduleType: string]: string[] };
     } = {};
-    const moduleTypesRegex = new RegExp(`^((${Object.keys(envKeys).join(')|(')})_`);
+    const moduleTypesRegex = new RegExp(`^((${Object.keys(envKeys).join(')|(')}))_`);
     config.general.environment = envName;
     // populate the data from the .env file into the config object
-    dotenv.parse((await fs.readFile(path.join(process.cwd(), `envFiles/${envName}.env`))).toString());
+    dotenv.parse((await fs.readFile(path.join(config.general.projectRootPath, `envFiles/${envName}.env`))).toString());
     // first pass - create a list of modules by name and map them by module type
     for (const envKey in processEnv) {
       const [, moduleCategory] = envKey.match(moduleTypesRegex) || [];
