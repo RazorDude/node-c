@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Response } from 'express';
 
-import { ConfigProviderService } from '../../common/configProvider';
-import { Constants, RequestWithLocals } from '../../common/definitions';
-import { User as BaseUser, DecodedTokenContent, IAMUsersService, TokenManagerService } from '../../domain/iam';
-import { PersistanceEntityService } from '../../persistance/common/entityService';
+import { ConfigProviderService } from '../../../common/configProvider';
+import { Constants, RequestWithLocals } from '../../../common/definitions';
+import { User as BaseUser, DecodedTokenContent, IAMUsersService, TokenManagerService } from '../../../domain/iam';
+import { PersistanceEntityService } from '../../../persistance/common/entityService';
 
 @Injectable()
-export class AuthenticationMiddleware<
+export class HTTPAuthenticationMiddleware<
   UserId,
   User extends BaseUser<UserId>,
   StoredTokenFields,

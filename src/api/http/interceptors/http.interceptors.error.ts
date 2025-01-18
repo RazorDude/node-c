@@ -2,10 +2,10 @@ import { CallHandler, ExecutionContext, HttpException, Injectable, NestIntercept
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { ApplicationError, ServerError } from '../../common/definitions';
+import { ApplicationError, ServerError } from '../../../common/definitions';
 
 @Injectable()
-export class ErrorInterceptor implements NestInterceptor {
+export class HTTPErrorInterceptor implements NestInterceptor {
   intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       catchError(error => {

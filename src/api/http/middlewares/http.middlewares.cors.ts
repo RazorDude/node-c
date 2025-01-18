@@ -1,13 +1,19 @@
+import { HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Response } from 'express';
 
-import { RequestWithLocals } from '../../common/definitions';
+import { Constants, RequestWithLocals } from '../../../common/definitions';
 
-type MiddlewareFunction = (_req: RequestWithLocals<unknown>, _res: Response, _next: NextFunction) => void;
+@Injectable()
+export class HTTPCORSMiddleware implements NestMiddleware {
+  constructor(
+    @Inject(Constants.API_MODULE_ALLOWED_ORIGINS)
+    // eslint-disable-next-line no-unused-vars
+    protected allowedOrigins?: string[]
+  ) {}
 
-export function getCORSMiddleware(allowedOrigins?: string[]): MiddlewareFunction {
-  return (req: RequestWithLocals<unknown>, res: Response, next: NextFunction) => {
+  use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
     const origin = req.headers.origin as string;
-    if (allowedOrigins!.includes(origin)) {
+    if (this.allowedOrigins?.includes(origin)) {
       res.set('Access-Control-Allow-Origin', origin);
     }
     res.set(
@@ -18,9 +24,9 @@ export function getCORSMiddleware(allowedOrigins?: string[]): MiddlewareFunction
     res.set('Access-Control-Allow-Methods', 'OPTIONS,GET,POST,PUT,PATCH,DELETE');
     res.set('Access-Control-Allow-Credentials', 'true');
     if (req.method.toLowerCase() === 'options') {
-      res.status(200).end();
+      res.status(HttpStatus.OK).end();
       return;
     }
     next();
-  };
+  }
 }

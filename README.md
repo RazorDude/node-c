@@ -26,3 +26,8 @@ An end-to-end NodeJS framework for building DDD apps on top of NestJS.
 10. Clickhouse persitance module
 11. Okta SSO
 12. Google SSO
+13. Cron/Queue module
+14. Message broker or similar module
+15. Reactivity
+16. Feature flag module
+17. Support webserver protocols other than HTTP.

@@ -10,11 +10,11 @@ import {
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
 
-import { Constants, RequestWithLocals } from '../../common/definitions';
-import { AccessControlData, AccessControlService, User as BaseUser } from '../../domain/iam';
+import { Constants, RequestWithLocals } from '../../../common/definitions';
+import { AccessControlData, AccessControlService, User as BaseUser } from '../../../domain/iam';
 
 @Injectable()
-export class AuthorizationInterceptor<UserId, User extends BaseUser<UserId>> implements NestInterceptor {
+export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId>> implements NestInterceptor {
   constructor(
     @Inject(Constants.API_MODULE_ACP)
     // eslint-disable-next-line no-unused-vars

@@ -2,10 +2,10 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 
 import { NextFunction, Response } from 'express';
 
-import { RequestWithLocals } from '../../common/definitions';
+import { RequestWithLocals } from '../../../common/definitions';
 
 @Injectable()
-export class AnonymousRoutesMiddleware implements NestMiddleware {
+export class HTTPAnonymousRoutesMiddleware implements NestMiddleware {
   constructor() {}
 
   use(req: RequestWithLocals<unknown>, _res: Response, next: NextFunction): void {

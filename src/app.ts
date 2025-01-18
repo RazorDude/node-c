@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import { AppConfig, ConfigProviderModuleOptions, ConfigProviderService } from './common/configProvider';
 
 export interface NodeCAppStartOptions {
+  apiModuleName?: string;
   generateOrmConfig?: boolean;
   generateOrmConfigModuleOptions?: {
     [moduleName: string]: {
@@ -20,7 +21,7 @@ export interface NodeCAppStartOptions {
 
 export class NodeCApp {
   static async start(module: NestModule, options?: NodeCAppStartOptions): Promise<INestApplication<unknown>> {
-    const { generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
+    const { apiModuleName, generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
     let config: AppConfig | undefined;
     // generate the ormconfig.json files for the RDB persistance modules that use TypeOrm, such as MySQL and PostgreSQL
     if (loadConfigOptions) {
@@ -43,26 +44,26 @@ export class NodeCApp {
     }
     // create the nest app from the main module
     const app = await NestFactory.create(module, { bodyParser: false });
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true
-      })
-    );
     if (!config) {
       config = app.get(ConfigProviderService).config;
     }
     const { api: apiConfigs } = config;
-    // configure logging
-    app.use(morgan('tiny'));
-    // start the API servers
-    if (apiConfigs) {
-      for (const moduleName in apiConfigs) {
-        const { hostname, port } = apiConfigs[moduleName];
-        if (!hostname || !port) {
-          continue;
+    // start an API server, if requested in the options
+    if (apiConfigs && apiModuleName) {
+      const apiConfig = apiConfigs[apiModuleName];
+      if (apiConfig) {
+        // configure logging
+        app.use(morgan('tiny'));
+        app.useGlobalPipes(
+          new ValidationPipe({
+            whitelist: true
+          })
+        );
+        const { hostname, port } = apiConfig;
+        if (hostname && port) {
+          await app.listen(port as number, hostname as string);
+          console.info(`[API.${apiModuleName}] Server listening at ${hostname}:${port}.`);
         }
-        await app.listen(port as number, hostname as string);
-        console.info(`[API.${moduleName}] Server listening at ${hostname}:${port}.`);
       }
     }
     return app;

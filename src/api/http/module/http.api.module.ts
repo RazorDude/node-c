@@ -3,18 +3,18 @@ import { DynamicModule, Inject, MiddlewareConsumer, Module } from '@nestjs/commo
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
 
-import { APIModuleOptions } from './api.module.definitions';
+import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
-import { ConfigProviderService } from '../../common/configProvider';
-import { Constants, RequestWithLocals } from '../../common/definitions';
-import { loadDynamicModules } from '../../common/utils';
-import { AccessControlService } from '../../domain/iam/services';
+import { AppConfigAPIHTTP, ConfigProviderService } from '../../../common/configProvider';
+import { Constants, RequestWithLocals } from '../../../common/definitions';
+import { loadDynamicModules } from '../../../common/utils';
+import { AccessControlService } from '../../../domain/iam/services';
 import { HttpExceptionFilter } from '../exceptionFilters';
-import { AuthorizationInterceptor, ErrorInterceptor } from '../interceptors';
-import { AnonymousRoutesMiddleware, AuthenticationMiddleware, getCORSMiddleware } from '../middlewares';
+import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
+import { HTTPAnonymousRoutesMiddleware, HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 
 @Module({})
-export class APIModule {
+export class HTTPAPIModule {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
@@ -24,20 +24,19 @@ export class APIModule {
   ) {}
 
   configure(consumer: MiddlewareConsumer): void {
-    const moduleConfig = this.configProvider.config.api![this.moduleName];
-    consumer.apply(express.urlencoded({ verify: APIModule.rawBodyBuffer, extended: true })).forRoutes('*');
-    consumer.apply(express.json({ verify: APIModule.rawBodyBuffer })).forRoutes('*');
+    const { anonymousAccessRoutes } = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
+    consumer.apply(express.urlencoded({ verify: HTTPAPIModule.rawBodyBuffer, extended: true })).forRoutes('*');
+    consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
-    consumer.apply(getCORSMiddleware(moduleConfig.allowedOrigins as string[])).forRoutes('*');
-    const anonymousRoutes = moduleConfig.anonymousRoutes;
-    if (anonymousRoutes && anonymousRoutes.length) {
-      consumer.apply(AnonymousRoutesMiddleware).forRoutes(...anonymousRoutes);
+    consumer.apply(HTTPCORSMiddleware).forRoutes('*');
+    if (anonymousAccessRoutes && anonymousAccessRoutes.length) {
+      consumer.apply(HTTPAnonymousRoutesMiddleware).forRoutes(...anonymousAccessRoutes);
       consumer
-        .apply(AuthenticationMiddleware)
-        .exclude(...anonymousRoutes)
+        .apply(HTTPAuthenticationMiddleware)
+        .exclude(...anonymousAccessRoutes)
         .forRoutes('*');
     } else {
-      consumer.apply(AuthenticationMiddleware).forRoutes('*');
+      consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
     }
   }
 
@@ -47,12 +46,12 @@ export class APIModule {
     }
   }
 
-  static register(options: APIModuleOptions): DynamicModule {
+  static register(options: HTTPAPIModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
     const { modules, services } = loadDynamicModules(folderData);
     return {
-      module: APIModule,
+      module: HTTPAPIModule,
       imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
       providers: [
         {
@@ -66,14 +65,18 @@ export class APIModule {
           inject: [AccessControlService]
         },
         {
+          provide: Constants.API_MODULE_ALLOWED_ORIGINS,
+          useFactory: async (configProviderService: ConfigProviderService) =>
+            (configProviderService.config.api![options.moduleName] as AppConfigAPIHTTP).allowedOrigins,
+          inject: [ConfigProviderService]
+        },
+        {
           provide: Constants.AUTHORIZATION_INTERCEPTOR,
-          useClass: AuthorizationInterceptor,
-          // WTF, @nestjs's TypeScript?? :D
-          inject: [Constants.API_MODULE_ACP] as unknown as undefined
+          useClass: HTTPAuthorizationInterceptor
         },
         {
           provide: Constants.ERROR_INTERCEPTOR,
-          useClass: ErrorInterceptor
+          useClass: HTTPErrorInterceptor
         },
         {
           provide: Constants.HTTP_EXCEPTION_FILTER,

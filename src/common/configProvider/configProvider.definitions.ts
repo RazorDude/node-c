@@ -4,6 +4,16 @@ import { GenericObject } from '../definitions';
  * This object contains the names of the fields within the modules, by module category.
  */
 export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
+  API: {
+    HTTP: {
+      HOSTNAME: 'host',
+      PORT: 'port'
+    },
+    REST: {
+      HOSTNAME: 'host',
+      PORT: 'port'
+    }
+  },
   DOMAIN: {
     IAM: {
       JWT_ACCESS_SECRET: 'jwtAccessSecret',
@@ -29,24 +39,38 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
 /*
  * This object contains the names of the module categories and the modules themselves.
  * The module names here are examples, corresponding to the object above.
+ * In order for this to work, each module in the .env files should have a key ending with
+ * _MODULE_TYPE, whose value correesponds to the values define in the 'children' here.
  */
 export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNames = {
+  API: {
+    children: {
+      HTTP: 'http',
+      REST: 'rest'
+    },
+    name: 'api'
+  },
   DOMAIN: {
     children: {
-      IAM: 'iam' // add another key _MODULE_TYPE - IAM
+      IAM: 'iam'
     },
     name: 'domain'
   },
   PERSISTANCE: {
     children: {
-      DB: 'db', // add another key _MODULE_TYPE - RDB
-      REDIS: 'redis' // add another key _MODULE_TYPE - NOSQL
+      DB: 'db',
+      REDIS: 'redis'
     },
     name: 'persistance'
   }
 };
 
 export type AppConfig = AppConfigCommon & AppConfigProfile & AppConfigFromEnv;
+type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPIHTTP;
+export type AppConfigAPIHTTP =
+  AppConfigAPIHTTPIntermediate &
+  Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>
+export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM;
 export type AppConfigPersistanceNoSQL = AppConfigCommonPersistanceNoSQL & AppConfigFromEnvPersistanceNoSQL;
 export type AppConfigPersistanceRDB = AppConfigCommonPersistanceRDB & AppConfigFromEnvPersistanceRDB;
@@ -56,11 +80,7 @@ export type AppConfigPersistanceRDB = AppConfigCommonPersistanceRDB & AppConfigF
  */
 
 export interface AppConfigCommon {
-  api: {
-    [apiName: string]: {
-      anonymousRoutes?: string[];
-    };
-  };
+  api?: { [apiName: string]: GenericObject | AppConfigCommonAPIHTTP | AppConfigCommonAPIREST };
   domain: { [domainName: string]: GenericObject | AppConfigCommonDomainIAM };
   general: {
     projectName: string;
@@ -71,6 +91,14 @@ export interface AppConfigCommon {
     [moduleName: string]: GenericObject | AppConfigCommonPersistanceNoSQL | AppConfigCommonPersistanceRDB;
   };
 }
+
+export interface AppConfigCommonAPIHTTP {
+  allowedOrigins?: string[];
+  anonymousAccessRoutes?: string[]
+  hostname?: string;
+  port?: number;
+}
+export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 
 export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
@@ -90,11 +118,15 @@ export interface AppConfigCommonPersistanceRDB {
  */
 
 export interface AppConfigFromEnv {
-  domain?: { [domainName: string]: GenericObject | AppConfigCommonDomainIAM };
+  api?: { [apiName: string]: GenericObject | AppConfigFromEnvAPIHTTP | AppConfigFromEnvAPIREST };
+  domain?: { [domainName: string]: GenericObject | AppConfigFromEnvDomainIAM };
   persistance?: {
     [moduleName: string]: GenericObject | AppConfigFromEnvPersistanceNoSQL | AppConfigFromEnvPersistanceRDB;
   };
 }
+
+export type AppConfigFromEnvAPIHTTP = AppConfigCommonAPIHTTP;
+export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
 
 export interface AppConfigFromEnvDomainIAM {
   jwtAccessSecret: string;
@@ -133,16 +165,7 @@ export interface AppConfigFromEnvPersistanceRDB {
  */
 
 export interface AppConfigProfile {
-  api?: {
-    [apiName: string]:
-      | GenericObject
-      | {
-          allowedOrigins: string[];
-          anonymousRoutes?: string[];
-          hostname: string;
-          port: number;
-        };
-  };
+  api?: { [apiName: string]: GenericObject | AppConfigProfileAPIHTTP | AppConfigProfileAPIREST };
   domain?: { [domainName: string]: GenericObject | AppConfingProfileDomainIAM };
   general: {
     environment: AppEnvironment;
@@ -150,6 +173,9 @@ export interface AppConfigProfile {
     projectVersion?: string;
   };
 }
+
+export type AppConfigProfileAPIHTTP = AppConfigCommonAPIHTTP;
+export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 
 export interface AppConfingProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;

@@ -1,6 +1,6 @@
 import { IsArray, IsObject, IsOptional } from 'class-validator';
 
-import { GenericObject } from '../../../common/definitions';
+import { GenericObject } from '../../../../common/definitions';
 
 export class FindOneDto {
   @IsObject()

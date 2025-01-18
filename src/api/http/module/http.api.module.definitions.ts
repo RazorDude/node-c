@@ -1,8 +1,8 @@
 import { ModuleMetadata } from '@nestjs/common';
 
-import { GenericObject } from '../../common/definitions';
+import { GenericObject } from '../../../common/definitions';
 
-export interface APIModuleOptions {
+export interface HTTPAPIModuleOptions {
   exports?: ModuleMetadata['exports'];
   folderData: GenericObject<unknown>;
   imports?: {

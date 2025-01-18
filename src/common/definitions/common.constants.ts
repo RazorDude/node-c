@@ -2,6 +2,8 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   API_MODULE_ACP = 'API_MODULE_ACP',
   // eslint-disable-next-line no-unused-vars
+  API_MODULE_ALLOWED_ORIGINS = 'API_MODULE_ALLOWED_ORIGINS',
+  // eslint-disable-next-line no-unused-vars
   API_MODULE_AUTHENTICATION_IAM_MODULE_NAME = 'API_MODULE_AUTHENTICATION_IAM_MODULE_NAME',
   // eslint-disable-next-line no-unused-vars
   API_MODULE_AUTHENTICATION_USER_DATA_SERVICE = 'API_MODULE_AUTHENTICATION_USER_DATA_SERVICE',

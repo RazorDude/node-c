@@ -13,16 +13,16 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 
-import { UpdateBody } from './api.entity.controller.definitions';
 import {
   DeleteDto as BaseDeleteDto,
   FindDto as BaseFindDto,
   FindOneDto as BaseFindOneDto,
   UpdateDto as BaseUpdateDto
 } from './dto';
+import { UpdateBody } from './rest.entity.controller.definitions';
 
-import { GenericObject, GenericObjectClass } from '../../common/definitions';
-import { DomainPersistanceEntityService } from '../../domain/common/entityService';
+import { GenericObject, GenericObjectClass } from '../../../common/definitions';
+import { DomainPersistanceEntityService } from '../../../domain/common/entityService';
 import {
   DeleteOptions,
   DeleteResult,
@@ -31,12 +31,12 @@ import {
   FindResults,
   PersistanceEntityService,
   UpdateResult
-} from '../../persistance/common/entityService';
+} from '../../../persistance/common/entityService';
 
-import { AuthorizationInterceptor, ErrorInterceptor } from '../interceptors';
+import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../../http/interceptors';
 
-@UseInterceptors(AuthorizationInterceptor, ErrorInterceptor)
-export class APIEntityControlerWithoutDto<
+@UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
+export class RESTAPIEntityControlerWithoutDto<
   Entity,
   EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>
 > {
@@ -118,7 +118,7 @@ export class APIEntityControlerWithoutDto<
  * the compiler doesn't emit generic type metadata, making it impossible to achieve a DRY OOP base class with schema validation.
  * At this point, it's a decade-old issue - see https://www.typescriptneedstypes.com/ for more details.
  */
-export class APIEntityControler<
+export class RESTAPIEntityControler<
   Entity,
   EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>,
   CreateDto extends GenericObject,
@@ -127,7 +127,7 @@ export class APIEntityControler<
   FindOneDto extends BaseFindOneDto,
   UpdateDto extends BaseUpdateDto,
   DeleteDto extends BaseDeleteDto
-> extends APIEntityControlerWithoutDto<Entity, EntityDomainService> {
+> extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRoutes: string[];
   protected validationPipe: ValidationPipe;
 
