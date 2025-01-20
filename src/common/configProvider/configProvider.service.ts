@@ -30,7 +30,10 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     config: AppConfig,
     options: GenerateOrmconfigOptions
   ): Promise<void> {
-    const { general: { projectRootPath }, persistance } = config;
+    const {
+      general: { projectRootPath },
+      persistance
+    } = config;
     const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject } = options;
     const entitiesDirPath = path.join(projectRootPath, modulePathInProject, entitiesPathInModule);
     const entitiesDirData = await fs.readdir(entitiesDirPath);
@@ -43,7 +46,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         continue;
       }
       const entityFolderPath = path.join(entitiesDirPath, entityName);
-      const entityFolderData = await fs.readdir(entityFolderPath)
+      const entityFolderData = await fs.readdir(entityFolderPath);
       for (const j in entityFolderData) {
         const entityFolderFileName = entityFolderData[j];
         if (entityFolderFileName.match(/\.entity\./)) {

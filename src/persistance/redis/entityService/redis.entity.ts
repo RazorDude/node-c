@@ -30,4 +30,4 @@ export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: s
     },
     name
   };
-}
+};

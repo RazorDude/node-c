@@ -8,20 +8,20 @@ import {
   UpdateResult
 } from './peristance.entity.service.definitions';
 
-import { ApplicationError, GenericObject } from '../../../common/definitions';
+import { ApplicationError } from '../../../common/definitions';
 
 /*
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
  * to define classes that are agnostic of the type of persitance.
  */
-export abstract class PersistanceEntityService<Entity> {
+export class PersistanceEntityService<Entity> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async bulkCreate(_data: Entity[] | GenericObject[], _options?: GenericObject): Promise<Entity[]> {
+  public async bulkCreate(_data: Entity[] | unknown[], _options?: unknown): Promise<Entity[]> {
     throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async create(_data: Entity | GenericObject, _options?: GenericObject): Promise<Entity> {
+  public async create(_data: Entity | unknown, _options?: unknown): Promise<Entity> {
     throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
   }
 
@@ -46,7 +46,7 @@ export abstract class PersistanceEntityService<Entity> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async update(_data: Entity | GenericObject, _options: UpdateOptions): Promise<UpdateResult<Entity>> {
+  public async update(_data: Entity | unknown, _options: UpdateOptions): Promise<UpdateResult<Entity>> {
     throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
   }
 }

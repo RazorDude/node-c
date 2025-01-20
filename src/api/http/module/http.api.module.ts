@@ -1,4 +1,4 @@
-import { DynamicModule, Inject, MiddlewareConsumer, Module } from '@nestjs/common';
+import { DynamicModule, Inject, MiddlewareConsumer } from '@nestjs/common';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
@@ -13,7 +13,6 @@ import { HttpExceptionFilter } from '../exceptionFilters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
 import { HTTPAnonymousRoutesMiddleware, HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 
-@Module({})
 export class HTTPAPIModule {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -47,11 +46,11 @@ export class HTTPAPIModule {
   }
 
   static register(options: HTTPAPIModuleOptions): DynamicModule {
-    const { folderData, imports: additionalImports } = options;
+    const { folderData, imports: additionalImports, moduleClass } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
     const { modules, services } = loadDynamicModules(folderData);
     return {
-      module: HTTPAPIModule,
+      module: moduleClass as DynamicModule['module'],
       imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
       providers: [
         {

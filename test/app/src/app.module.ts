@@ -7,7 +7,7 @@ import {
 } from '@node-c/common/configProvider';
 
 import * as AppConfigs from './config';
-// import { DomainAccessModule } from './domain/access';
+import { DomainIAMModule } from './domain/iam';
 // import { DBModule } from './persistance/db';;
 import { PersistanceCacheModule } from './persistance/cache';
 
@@ -43,6 +43,7 @@ export class AppModule {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModule.configProviderModuleRegisterOptions),
-    PersistanceCacheModule.register(PersistanceCacheModule.moduleOptions)
+    PersistanceCacheModule.register(PersistanceCacheModule.moduleOptions),
+    DomainIAMModule.register(DomainIAMModule.moduleOptions)
   ];
 }

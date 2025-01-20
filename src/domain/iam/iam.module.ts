@@ -1,18 +1,17 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 
 import { DomainIAMModuleOptions } from './iam.definitions';
 
 import { Constants } from '../../common/definitions';
 import { loadDynamicModules } from '../../common/utils';
 
-@Module({})
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {
-    const { folderData, imports: additionalImports } = options;
+    const { folderData, imports: additionalImports, moduleClass } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
     const { modules, services } = loadDynamicModules(folderData);
     return {
-      module: DomainIAMModule,
+      module: moduleClass as DynamicModule['module'],
       imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
       providers: [
         {

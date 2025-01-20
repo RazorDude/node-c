@@ -11,6 +11,7 @@ export interface RDBModuleOptions {
     postORM?: ModuleMetadata['imports'];
     preORM?: ModuleMetadata['imports'];
   };
+  moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
 }

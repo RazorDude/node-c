@@ -68,9 +68,8 @@ export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNa
 type AppConfigIntermediate = AppConfigCommon & AppConfigProfile & AppConfigFromEnv;
 export type AppConfig = AppConfigIntermediate & Required<Pick<AppConfigIntermediate, 'api'>>;
 type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPIHTTP;
-export type AppConfigAPIHTTP =
-  AppConfigAPIHTTPIntermediate &
-  Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>
+export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
+  Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM;
 export type AppConfigPersistanceNoSQL = AppConfigCommonPersistanceNoSQL & AppConfigFromEnvPersistanceNoSQL;
@@ -95,7 +94,7 @@ export interface AppConfigCommon {
 
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
-  anonymousAccessRoutes?: string[]
+  anonymousAccessRoutes?: string[];
   hostname?: string;
   port?: number;
 }

@@ -3,9 +3,9 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { RedisRepositoryModuleOptions } from './redis.repository.definitions';
 import { RedisRepositoryService } from './redis.repository.service';
 
-import { RedisStoreModule } from '../store';
-
 import { Constants } from '../../../common/definitions';
+
+import { RedisStoreModule } from '../store';
 
 @Module({})
 export class RedisRepositoryModule {

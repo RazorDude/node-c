@@ -22,13 +22,13 @@ export interface DeleteOptions extends BaseOptions, Omit<CommonDeleteOptions, 's
 export interface FindOneOptions
   extends BaseOptions,
     Omit<CommonFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
-  requirePrimaryKeys: boolean;
+  requirePrimaryKeys?: boolean;
 }
 
 export interface FindOptions
   extends BaseOptions,
     Omit<CommonFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
-  requirePrimaryKeys: boolean;
+  requirePrimaryKeys?: boolean;
 }
 
 export interface ServiceOptions {

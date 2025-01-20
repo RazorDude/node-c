@@ -9,6 +9,7 @@ export interface DomainIAMModuleOptions {
     atEnd?: ModuleMetadata['imports'];
     atStart?: ModuleMetadata['imports'];
   };
-  moduleName?: string;
+  moduleClass: unknown;
+  moduleName: string;
   providers?: ModuleMetadata['providers'];
 }

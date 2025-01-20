@@ -10,6 +10,7 @@ export interface RedisModuleOptions {
     postStore?: ModuleMetadata['imports'];
     preStore?: ModuleMetadata['imports'];
   };
+  moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
   storeKey: string;

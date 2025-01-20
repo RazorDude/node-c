@@ -10,7 +10,7 @@ import { Constants } from '../../../../common/definitions';
 @Module({
   imports: [
     RedisRepositoryModule.register({
-      persistanceModuleName: Constants.CACHE_MODULE_NAME,
+      persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
       schema: CacheTokenSchema,
       storeKey: Constants.CACHE_MODULE_STORE_KEY
     })

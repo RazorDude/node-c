@@ -8,6 +8,7 @@ export enum TokenType {
 }
 
 export interface CacheToken extends RedisEntity<string> {
+  token: string;
   type: TokenType;
 }
 export const CacheTokenSchema = {

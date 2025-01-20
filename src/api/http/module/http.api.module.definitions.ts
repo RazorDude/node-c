@@ -9,6 +9,7 @@ export interface HTTPAPIModuleOptions {
     atEnd?: ModuleMetadata['imports'];
     atStart?: ModuleMetadata['imports'];
   };
+  moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
 }

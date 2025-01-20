@@ -2,7 +2,7 @@ import { AppConfigProfile, AppEnvironment } from '@node-c/common/configProvider/
 
 export const appConfigProfileLocal: AppConfigProfile = {
   api: {
-    admin: {
+    identity: {
       allowedOrigins: ['localhost'],
       hostname: 'localhost',
       port: 2080
