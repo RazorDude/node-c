@@ -1,31 +1,33 @@
-export interface RedisEntity {
+import { EntitySchema, EntitySchemaColumnType } from '../repository';
+
+export interface RedisEntity<Id> {
   createdAt: Date;
   deletedAt?: Date;
-  id: number;
+  id: Id;
   updatedAt: Date;
 }
 
 // TODO: validate this somehow; class-validator?
-export const RedisEntitySchema: {
-  columns: { [columnName: string]: Record<string, unknown> };
-} = {
-  columns: {
-    createdAt: {
-      type: 'timestamp with time zone',
-      createDate: true
+export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: string): EntitySchema => {
+  return {
+    columns: {
+      createdAt: {
+        type: EntitySchemaColumnType.TimestampTz,
+        isCreationDate: true
+      },
+      deletedAt: {
+        type: EntitySchemaColumnType.TimestampTz,
+        isDeletionDate: true
+      },
+      id: {
+        type: idColumn,
+        isCreationDate: true
+      },
+      updatedAt: {
+        type: EntitySchemaColumnType.TimestampTz,
+        isUpdateDate: true
+      }
     },
-    deletedAt: {
-      type: 'timestamp with time zone',
-      deleteDate: true
-    },
-    id: {
-      type: 'integer',
-      primary: true,
-      generated: true
-    },
-    updatedAt: {
-      type: 'timestamp with time zone',
-      updateDate: true
-    }
-  }
-};
+    name
+  };
+}

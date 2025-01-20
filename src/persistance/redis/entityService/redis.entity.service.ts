@@ -18,7 +18,7 @@ import { RedisStoreService } from '../store';
 
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
-export class RedisEntityService<Entity extends RedisEntity> extends PersistanceEntityService<Entity> {
+export class RedisEntityService<Entity extends RedisEntity<unknown>> extends PersistanceEntityService<Entity> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected options: ServiceOptions,

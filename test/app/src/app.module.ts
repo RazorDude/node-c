@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule } from '@nestjs/common';
 
 import {
   APP_CONFIG_FROM_ENV_KEYS,
@@ -8,29 +8,39 @@ import {
 
 import * as AppConfigs from './config';
 // import { DomainAccessModule } from './domain/access';
-// import { DBModule } from './persistance/db';
-
-export const configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
-  appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
-  envKeys: APP_CONFIG_FROM_ENV_KEYS,
-  envKeysParentNames: {
-    DOMAIN: {
-      children: {
-        IAM: 'iam' // add another key _MODULE_TYPE - IAM
-      },
-      name: 'domain'
-    },
-    PERSISTANCE: {
-      children: {
-        MAIN: 'main', // add another key _MODULE_TYPE - RDB
-        CACHE: 'cache' // add another key _MODULE_TYPE - NOSQL
-      },
-      name: 'persistance'
-    }
-  }
-};
+// import { DBModule } from './persistance/db';;
 
 @Module({
-  imports: [ConfigProviderModule.register(configProviderModuleRegisterOptions)]
+  imports: [...AppModule.imports]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(): void {}
+
+  static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
+    appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
+    envKeys: APP_CONFIG_FROM_ENV_KEYS,
+    envKeysParentNames: {
+      API: {
+        children: {
+          HTTP: 'http',
+          REST: 'rest'
+        },
+        name: 'api'
+      },
+      DOMAIN: {
+        children: {
+          IAM: 'iam' // add another key _MODULE_TYPE - IAM
+        },
+        name: 'domain'
+      },
+      PERSISTANCE: {
+        children: {
+          MAIN: 'main', // add another key _MODULE_TYPE - RDB
+          CACHE: 'cache' // add another key _MODULE_TYPE - NOSQL
+        },
+        name: 'persistance'
+      }
+    }
+  };
+  static readonly imports = [ConfigProviderModule.register(AppModule.configProviderModuleRegisterOptions)];
+}

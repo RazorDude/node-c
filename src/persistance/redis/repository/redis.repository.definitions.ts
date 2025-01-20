@@ -4,6 +4,9 @@ export interface EntitySchema {
   columns: {
     [columnName: string]: {
       generated?: boolean;
+      isCreationDate?: boolean;
+      isDeletionDate?: boolean;
+      isUpdateDate?: boolean;
       primary?: boolean;
       type?: EntitySchemaColumnType;
     };
@@ -15,6 +18,10 @@ export interface EntitySchema {
 export enum EntitySchemaColumnType {
   // eslint-disable-next-line no-unused-vars
   Integer = 'integer',
+  // eslint-disable-next-line no-unused-vars
+  String = 'string',
+  // eslint-disable-next-line no-unused-vars
+  TimestampTz = 'timestampTz',
   // eslint-disable-next-line no-unused-vars
   UUIDV4 = 'uuidv4'
 }

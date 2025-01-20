@@ -65,7 +65,8 @@ export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNa
   }
 };
 
-export type AppConfig = AppConfigCommon & AppConfigProfile & AppConfigFromEnv;
+type AppConfigIntermediate = AppConfigCommon & AppConfigProfile & AppConfigFromEnv;
+export type AppConfig = AppConfigIntermediate & Required<Pick<AppConfigIntermediate, 'api'>>;
 type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPIHTTP;
 export type AppConfigAPIHTTP =
   AppConfigAPIHTTPIntermediate &

@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import { AppConfig, ConfigProviderModuleOptions, ConfigProviderService } from './common/configProvider';
 
 export interface NodeCAppStartOptions {
-  apiModuleName?: string;
+  apiModulesOptions?: { appModuleIndex: number; apiModuleName: string }[];
   generateOrmConfig?: boolean;
   generateOrmConfigModuleOptions?: {
     [moduleName: string]: {
@@ -20,8 +20,11 @@ export interface NodeCAppStartOptions {
 }
 
 export class NodeCApp {
-  static async start(module: NestModule, options?: NodeCAppStartOptions): Promise<INestApplication<unknown>> {
-    const { apiModuleName, generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
+  // TODO: start each server in a different process
+  static async start(appModules: NestModule[], options?: NodeCAppStartOptions): Promise<INestApplication<unknown>[]> {
+    const { apiModulesOptions, generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
+    const apiModulesOptionsMap = new Map<string, string>();
+    const apps: INestApplication<unknown>[] = [];
     let config: AppConfig | undefined;
     // generate the ormconfig.json files for the RDB persistance modules that use TypeOrm, such as MySQL and PostgreSQL
     if (loadConfigOptions) {
@@ -42,15 +45,25 @@ export class NodeCApp {
         }
       }
     }
-    // create the nest app from the main module
-    const app = await NestFactory.create(module, { bodyParser: false });
-    if (!config) {
-      config = app.get(ConfigProviderService).config;
+    if (apiModulesOptions && apiModulesOptions.length) {
+      apiModulesOptions.forEach(item => {
+        apiModulesOptionsMap.set(`${item.appModuleIndex}`, item.apiModuleName);
+      });
     }
-    const { api: apiConfigs } = config;
-    // start an API server, if requested in the options
-    if (apiConfigs && apiModuleName) {
+    for (const i in appModules) {
+      // create the nest app from the main module
+      const app = await NestFactory.create(appModules[i], { bodyParser: false });
+      const apiModuleName = apiModulesOptionsMap.get(i);
+      if (!apiModuleName) {
+        apps.push(app);
+        continue;
+      }
+      if (!config) {
+        config = app.get(ConfigProviderService).config;
+      }
+      const { api: apiConfigs } = config;
       const apiConfig = apiConfigs[apiModuleName];
+      // start an API server, if requested in the options
       if (apiConfig) {
         // configure logging
         app.use(morgan('tiny'));
@@ -66,6 +79,6 @@ export class NodeCApp {
         }
       }
     }
-    return app;
+    return apps;
   }
 }
