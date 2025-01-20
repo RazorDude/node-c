@@ -29,10 +29,10 @@ export class RedisStoreService {
     this.transactions = {};
   }
 
-  static createClient(config: AppConfig, options: { moduleName: string }): Promise<RedisClientType> {
+  static createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<RedisClientType> {
     return new Promise((resolve, reject) => {
-      const { moduleName } = options;
-      const { host, password, port } = config.persistance[moduleName] as AppConfigPersistanceNoSQL;
+      const { persistanceModuleName } = options;
+      const { host, password, port } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
       const clientOptions: { host: string; port: number; password?: string } = { host, port };
       if (password) {
         clientOptions.password = password;

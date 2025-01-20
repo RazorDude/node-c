@@ -1,4 +1,4 @@
-import { Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import {
   APP_CONFIG_FROM_ENV_KEYS,
@@ -9,13 +9,12 @@ import {
 import * as AppConfigs from './config';
 // import { DomainAccessModule } from './domain/access';
 // import { DBModule } from './persistance/db';;
+import { PersistanceCacheModule } from './persistance/cache';
 
 @Module({
   imports: [...AppModule.imports]
 })
-export class AppModule implements NestModule {
-  configure(): void {}
-
+export class AppModule {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
     envKeys: APP_CONFIG_FROM_ENV_KEYS,
@@ -42,5 +41,8 @@ export class AppModule implements NestModule {
       }
     }
   };
-  static readonly imports = [ConfigProviderModule.register(AppModule.configProviderModuleRegisterOptions)];
+  static readonly imports = [
+    ConfigProviderModule.register(AppModule.configProviderModuleRegisterOptions),
+    PersistanceCacheModule.register(PersistanceCacheModule.moduleOptions)
+  ];
 }

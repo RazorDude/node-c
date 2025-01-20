@@ -15,7 +15,7 @@ export class RedisModule {
       module: RedisModule,
       imports: [
         ...(importsPreStore || []),
-        RedisStoreModule.register({ moduleName: moduleName, storeKey }),
+        RedisStoreModule.register({ persistanceModuleName: moduleName, storeKey }),
         ...(importsPostStore || []),
         ...(modules || []),
         ...(importsAtEnd || [])

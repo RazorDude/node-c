@@ -9,19 +9,19 @@ import { Constants } from '../../../common/definitions';
 @Module({})
 export class RedisStoreModule {
   static register(options: RedisStoreModuleOptions): DynamicModule {
-    const { moduleName } = options;
+    const { persistanceModuleName, storeKey } = options;
     return {
       module: RedisStoreModule,
       providers: [
         {
           provide: Constants.REDIS_CLIENT,
           useFactory: async (configProvider: ConfigProviderService) =>
-            await RedisStoreService.createClient(configProvider.config, { moduleName }),
+            await RedisStoreService.createClient(configProvider.config, { persistanceModuleName }),
           inject: [ConfigProviderService]
         },
         {
           provide: Constants.REDIS_CLIENT_STORE_KEY,
-          useValue: options.storeKey
+          useValue: storeKey
         },
         RedisStoreService
       ],

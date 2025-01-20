@@ -15,7 +15,7 @@ export type RedisClientScanMethod = (
 ) => Promise<{ cursor: number; keys?: string[]; tuples?: { field: string; value: string }[] }>;
 
 export interface RedisStoreModuleOptions {
-  moduleName: string;
+  persistanceModuleName: string;
   storeKey: string;
 }
 
