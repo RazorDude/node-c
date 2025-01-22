@@ -1,3 +1,3 @@
-export * from './iam.definitions';
-export * from './iam.module';
+export * from './module/iam.definitions';
+export * from './module/iam.module';
 export * from './services';

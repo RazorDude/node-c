@@ -14,18 +14,28 @@ import {
 import { AppConfigDomainIAM, ConfigProviderService } from '../../../../common/configProvider';
 import { ApplicationError } from '../../../../common/definitions';
 import { PersistanceEntityService } from '../../../../persistance/common/entityService';
+import { DomainPersistanceEntityService } from '../../../common/entityService';
 
 // TODO: console.error -> logger
 // TODO: check whether the JWT library actually computes the hash of the content
-export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData> {
+export class TokenManagerService<
+  StoredTokenFields,
+  AccessTokenData,
+  RefreshTokenData
+> extends DomainPersistanceEntityService<
+  StoredToken<StoredTokenFields>,
+  PersistanceEntityService<StoredToken<StoredTokenFields>>
+> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceTokensService?: PersistanceEntityService<StoredToken<StoredTokenFields>>
-  ) {}
+    protected persistanceEntityService: PersistanceEntityService<StoredToken<StoredTokenFields>>
+  ) {
+    super(persistanceEntityService!);
+  }
 
   async createAccessToken(data: AccessTokenData, options?: CreateAccessTokenOptions): Promise<string> {
     const { configProvider, moduleName } = this;
@@ -78,7 +88,7 @@ export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshToke
       type: TokenType;
     }
   ): Promise<string> {
-    const { persistanceTokensService } = this;
+    const { persistanceEntityService } = this;
     const { identifierDataField, persist, purgeOldFromPersistance, secret, signOptions, type } = options;
     const token = await new Promise<string>((resolve, reject) => {
       jwt.sign({ data }, secret, signOptions, (err, token) => {
@@ -91,16 +101,16 @@ export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshToke
       });
     });
     // save the token in the persistance system of choice
-    if (persist && persistanceTokensService) {
+    if (persist && persistanceEntityService) {
       if (purgeOldFromPersistance && identifierDataField) {
         const identifierValue = getNested(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-          await persistanceTokensService.delete({
+          await persistanceEntityService.delete({
             filters: { [identifierDataField]: identifierValue }
           });
         }
       }
-      await persistanceTokensService.create({ ...data, token, type });
+      await persistanceEntityService.create({ ...data, token, type });
     }
     return token;
   }
@@ -109,7 +119,7 @@ export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshToke
     token: string,
     options?: VerifyAccessTokenOptions
   ): Promise<VerifyAccessTokenReturnData<AccessTokenData>> {
-    const { configProvider, moduleName, persistanceTokensService } = this;
+    const { configProvider, moduleName, persistanceEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       deleteFromStoreIfExpired,
@@ -128,7 +138,7 @@ export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshToke
     if (error) {
       let errorToThrow: Error | undefined;
       let throwError = true;
-      if (error === 'Token expired' && identifierDataField && content?.data && persistanceTokensService) {
+      if (error === 'Token expired' && identifierDataField && content?.data && persistanceEntityService) {
         if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
           const { content: refreshTokenContent, error: refreshTokenError } = await this.verifyToken(
             refreshToken,
@@ -152,7 +162,7 @@ export class TokenManagerService<StoredTokenFields, AccessTokenData, RefreshToke
           if (deleteFromStoreIfExpired) {
             const identifierValue = getNested(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-              await persistanceTokensService.delete({
+              await persistanceEntityService.delete({
                 filters: { [identifierDataField]: identifierValue }
               });
             }

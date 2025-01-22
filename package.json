@@ -21,7 +21,6 @@
     "build:watch": "./node_modules/.bin/tsc --project tsconfig.build.json --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start:debug": "NODE_ENV=local nest start --path=tsconfig.test.app.json --debug --watch",
-
     "start:dev": "cross-env NODE_ENV=dev nest start --path=build.tsconfig.json --watch",
     "start:dev-online": "cross-env NODE_ENV=dev node dist/main",
     "start:staging": "cross-env NODE_ENV=staging node dist/main",

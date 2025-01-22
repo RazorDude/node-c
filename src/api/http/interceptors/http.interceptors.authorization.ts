@@ -14,11 +14,11 @@ import { Constants, RequestWithLocals } from '../../../common/definitions';
 import { AccessControlData, AccessControlService, User as BaseUser } from '../../../domain/iam';
 
 @Injectable()
-export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId>> implements NestInterceptor {
+export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, unknown>> implements NestInterceptor {
   constructor(
     @Inject(Constants.API_MODULE_ACP)
     // eslint-disable-next-line no-unused-vars
-    protected accessControlData: AccessControlData
+    protected accessControlData: AccessControlData<unknown>
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {

@@ -1,11 +1,11 @@
 import { GenericObject } from '../../../../common/definitions';
 
-export interface AccessControlPoint {
+export interface AccessControlPoint<Id> {
   allowedInputData?: GenericObject;
   controllerNames?: string[];
   forbiddenInputData?: GenericObject;
   handlerNames?: string[];
-  id: number;
+  id: Id;
   inputDataFieldName?: string;
   moduleNames?: string[];
   name: string;
@@ -14,17 +14,17 @@ export interface AccessControlPoint {
   userTypes: GenericObject[];
 }
 
-export interface AccessControlData {
+export interface AccessControlData<AccessControlPointId> {
   __all: {
-    __all: { [accessControlPointId: number]: AccessControlPoint };
-    [handlerName: string]: { [accessControlPointId: number]: AccessControlPoint };
+    __all: { [accessControlPointId: string | number]: AccessControlPoint<AccessControlPointId> };
+    [handlerName: string]: { [accessControlPointId: string | number]: AccessControlPoint<AccessControlPointId> };
   };
   [controllerName: string]: {
-    __all: { [accessControlPointId: number]: AccessControlPoint };
-    [handlerName: string]: { [accessControlPointId: number]: AccessControlPoint };
+    __all: { [accessControlPointId: string | number]: AccessControlPoint<AccessControlPointId> };
+    [handlerName: string]: { [accessControlPointId: string | number]: AccessControlPoint<AccessControlPointId> };
   };
 }
 
-export interface AccessControlUser {
-  currentAccessControlPoints: { [accessControlPointId: string]: AccessControlPoint };
+export interface AccessControlUser<AccessControlPointId> {
+  currentAccessControlPoints: { [accessControlPointId: string | number]: AccessControlPoint<AccessControlPointId> };
 }

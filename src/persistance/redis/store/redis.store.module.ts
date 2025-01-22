@@ -10,13 +10,16 @@ import { Constants } from '../../../common/definitions';
 export class RedisStoreModule {
   static register(options: RedisStoreModuleOptions): DynamicModule {
     const { persistanceModuleName, storeKey } = options;
+    // console.log(persistanceModuleName, storeKey);
     return {
       module: RedisStoreModule,
       providers: [
         {
           provide: Constants.REDIS_CLIENT,
-          useFactory: async (configProvider: ConfigProviderService) =>
-            await RedisStoreService.createClient(configProvider.config, { persistanceModuleName }),
+          useFactory: async (configProvider: ConfigProviderService) => {
+            // console.log(configProvider.config, persistanceModuleName, storeKey);
+            return await RedisStoreService.createClient(configProvider.config, { persistanceModuleName });
+          },
           inject: [ConfigProviderService]
         },
         {

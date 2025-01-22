@@ -30,6 +30,7 @@ export class RedisRepositoryService<Entity> {
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
+    // console.log('===>', schema, store);
     const { columns } = schema;
     const primaryKeys: string[] = [];
     for (const columnName in columns) {

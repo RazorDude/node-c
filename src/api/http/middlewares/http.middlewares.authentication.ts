@@ -9,7 +9,7 @@ import { PersistanceEntityService } from '../../../persistance/common/entityServ
 @Injectable()
 export class HTTPAuthenticationMiddleware<
   UserId,
-  User extends BaseUser<UserId>,
+  User extends BaseUser<UserId, unknown>,
   StoredTokenFields,
   AccessTokenData extends { userId: UserId },
   RefreshTokenData extends { accessToken: string }

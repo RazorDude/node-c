@@ -10,7 +10,6 @@ export class RedisModule {
     const { folderData, imports: additionalImports, moduleClass, moduleName, storeKey } = options;
     const { atEnd: importsAtEnd, postStore: importsPostStore, preStore: importsPreStore } = additionalImports || {};
     const { modules, services } = loadDynamicModules(folderData);
-    console.log(services, modules);
     return {
       module: moduleClass as DynamicModule['module'],
       imports: [
@@ -20,7 +19,7 @@ export class RedisModule {
         ...(modules || []),
         ...(importsAtEnd || [])
       ],
-      providers: [...(services || []), ...(options.providers || [])],
+      providers: [...(options.providers || []), ...(services || [])],
       exports: [...(services || []), ...(options.exports || [])]
     };
   }

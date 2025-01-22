@@ -1,6 +1,6 @@
 import { ModuleMetadata } from '@nestjs/common';
 
-import { GenericObject } from '../../common/definitions';
+import { GenericObject } from '../../../common/definitions';
 
 export interface DomainIAMModuleOptions {
   exports?: ModuleMetadata['exports'];

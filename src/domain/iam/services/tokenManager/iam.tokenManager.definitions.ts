@@ -24,7 +24,7 @@ export enum TokenType {
   // eslint-disable-next-line no-unused-vars
   Access = 'access',
   // eslint-disable-next-line no-unused-vars
-  Refresh = 'frefresh'
+  Refresh = 'refresh'
 }
 
 export interface VerifyAccessTokenOptions {

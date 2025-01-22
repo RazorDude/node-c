@@ -5,7 +5,7 @@ import { RedisRepositoryService } from './redis.repository.service';
 
 import { Constants } from '../../../common/definitions';
 
-import { RedisStoreModule } from '../store';
+import { RedisStoreModule, RedisStoreService } from '../store';
 
 @Module({})
 export class RedisRepositoryModule {
@@ -19,9 +19,10 @@ export class RedisRepositoryModule {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
-        RedisRepositoryService
+        RedisRepositoryService,
+        RedisStoreService
       ],
-      exports: [RedisRepositoryService]
+      exports: [RedisRepositoryService, RedisStoreService]
     };
   }
 }

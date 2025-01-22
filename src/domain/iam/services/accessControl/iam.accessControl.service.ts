@@ -3,21 +3,25 @@ import { getNested, setNested } from '@ramster/general-tools';
 import immutable from 'immutable';
 import { mergeDeepRight as merge } from 'ramda';
 
-import { AccessControlData, AccessControlPoint, AccessControlUser } from './iam.accessControl.definitions';
+import {
+  AccessControlData,
+  AccessControlUser,
+  AccessControlPoint as BaseAccessControlPoint
+} from './iam.accessControl.definitions';
 
 import { GenericObject } from '../../../../common/definitions';
 import { PersistanceEntityService, SelectOperator } from '../../../../persistance/common/entityService';
 
-export class AccessControlService {
+export class AccessControlService<AccessControlPoint extends BaseAccessControlPoint<unknown>> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected persistanceAccessControlPointsService: PersistanceEntityService<AccessControlPoint>
   ) {}
 
   static checkAccess(
-    accessPoints: { [id: number]: AccessControlPoint },
+    accessPoints: { [id: number]: BaseAccessControlPoint<unknown> },
     inputData: GenericObject,
-    user: AccessControlUser
+    user: AccessControlUser<unknown>
   ): {
     hasAccess: boolean;
     inputDataToBeMutated: GenericObject;
@@ -131,16 +135,16 @@ export class AccessControlService {
     return values;
   }
 
-  async mapAccessControlPoints(moduleName: string): Promise<AccessControlData> {
+  async mapAccessControlPoints(moduleName: string): Promise<AccessControlData<unknown>> {
     const { items: acpList } = await this.persistanceAccessControlPointsService.find({
       filters: { moduleNames: { [SelectOperator.Contains]: moduleName } },
       findAll: true
     });
-    const accessControlData: AccessControlData = { __all: { __all: {} } };
+    const accessControlData: AccessControlData<unknown> = { __all: { __all: {} } };
     const moduleGlobalData = accessControlData.__all.__all;
     acpList.forEach(item => {
       if (!item.controllerNames) {
-        moduleGlobalData[item.id] = item;
+        moduleGlobalData[item.id as string] = item;
         return;
       }
       item.controllerNames.forEach(ctlName => {
@@ -150,7 +154,7 @@ export class AccessControlService {
           accessControlData[ctlName] = ctlData;
         }
         if (!item.handlerNames) {
-          ctlData.__all[item.id] = item;
+          ctlData.__all[item.id as string] = item;
           return;
         }
         item.handlerNames.forEach(hName => {
@@ -159,7 +163,7 @@ export class AccessControlService {
             hData = {};
             ctlData[hName] = hData;
           }
-          hData[item.id] = item;
+          hData[item.id as string] = item;
         });
       });
     });

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 
 import { DomainIAMModule as BaseDomainIAMModule, DomainIAMModuleOptions } from '@node-c/domain/iam';
 
@@ -6,6 +6,7 @@ import * as FolderData from './services';
 
 import { Constants } from '../../common/definitions';
 
+@Global()
 @Module({})
 export class DomainIAMModule extends BaseDomainIAMModule {
   static readonly moduleOptions: DomainIAMModuleOptions = {

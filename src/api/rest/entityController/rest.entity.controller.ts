@@ -40,7 +40,7 @@ export class RESTAPIEntityControlerWithoutDto<
   Entity,
   EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>
 > {
-  inUseDefaultRoutes: { [functionName: string]: boolean };
+  inUseDefaultRoutes: { [handlerName: string]: boolean };
 
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -51,8 +51,8 @@ export class RESTAPIEntityControlerWithoutDto<
     this.refreshDefaultRoutes();
   }
 
-  protected checkRoute(functionName: string): void {
-    if (!this.inUseDefaultRoutes || !this.inUseDefaultRoutes[functionName]) {
+  protected checkRoute(handlerName: string): void {
+    if (!this.inUseDefaultRoutes || !this.inUseDefaultRoutes[handlerName]) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
   }
@@ -98,10 +98,11 @@ export class RESTAPIEntityControlerWithoutDto<
     return await this.domainEntityService.findOne(query);
   }
 
-  refreshDefaultRoutes(): void {
+  refreshDefaultRoutes(newDefaultRoutes?: string[]): void {
+    const defaultRoutes = newDefaultRoutes || this.defaultRoutes;
     this.inUseDefaultRoutes = {};
-    if (this.defaultRoutes instanceof Array) {
-      this.defaultRoutes.forEach(item => (this.inUseDefaultRoutes[item] = true));
+    if (defaultRoutes instanceof Array) {
+      defaultRoutes.forEach(item => (this.inUseDefaultRoutes[item] = true));
     }
   }
 
@@ -121,12 +122,14 @@ export class RESTAPIEntityControlerWithoutDto<
 export class RESTAPIEntityControler<
   Entity,
   EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>,
-  CreateDto extends GenericObject,
-  BulkCreateDto extends GenericObject[],
-  FindDto extends BaseFindDto,
-  FindOneDto extends BaseFindOneDto,
-  UpdateDto extends BaseUpdateDto,
-  DeleteDto extends BaseDeleteDto
+  Dto extends {
+    BulkCreate: GenericObject[];
+    Create: GenericObject;
+    Delete: BaseDeleteDto;
+    Find: BaseFindDto;
+    FindOne: BaseFindOneDto;
+    Update: BaseUpdateDto;
+  }
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRoutes: string[];
   protected validationPipe: ValidationPipe;
@@ -134,12 +137,12 @@ export class RESTAPIEntityControler<
   constructor(
     protected domainEntityService: EntityDomainService,
     protected dto: {
-      create?: CreateDto;
-      bulkCreate?: BulkCreateDto;
-      find?: FindDto;
-      findOne?: FindOneDto;
-      update?: UpdateDto;
-      delete?: DeleteDto;
+      create?: Dto['Create'];
+      bulkCreate?: Dto['BulkCreate'];
+      find?: Dto['Find'];
+      findOne?: Dto['FindOne'];
+      update?: Dto['Update'];
+      delete?: Dto['Delete'];
     },
     defaultRoutes?: string[]
   ) {
@@ -149,7 +152,7 @@ export class RESTAPIEntityControler<
 
   @Post('bulk')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async bulkCreate(@Body() body: BulkCreateDto, ..._args: unknown[]): Promise<Entity[]> {
+  async bulkCreate(@Body() body: Dto['BulkCreate'], ..._args: unknown[]): Promise<Entity[]> {
     this.checkRoute('bulkCreate');
     return await this.domainEntityService.bulkCreate(
       await this.validationPipe.transform(body, {
@@ -162,7 +165,7 @@ export class RESTAPIEntityControler<
   @Post()
   async create(
     @Body()
-    body: CreateDto,
+    body: Dto['Create'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ..._args: unknown[]
   ): Promise<Entity> {
@@ -177,7 +180,7 @@ export class RESTAPIEntityControler<
 
   @Delete()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(@Body() body: DeleteDto, ..._args: unknown[]): Promise<DeleteResult> {
+  async delete(@Body() body: Dto['Delete'], ..._args: unknown[]): Promise<DeleteResult> {
     this.checkRoute('delete');
     return await this.domainEntityService.delete(
       await this.validationPipe.transform(body, {
@@ -189,7 +192,7 @@ export class RESTAPIEntityControler<
 
   @Get()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async find(@Query() query: FindDto, ..._args: unknown[]): Promise<FindResults<Entity> | void> {
+  async find(@Query() query: Dto['Find'], ..._args: unknown[]): Promise<FindResults<Entity> | void> {
     this.checkRoute('find');
     return await this.domainEntityService.find(
       await this.validationPipe.transform(query, {
@@ -202,7 +205,7 @@ export class RESTAPIEntityControler<
   @Get('/item/:id')
   async findOne(
     @Param() id: number | string,
-    @Query() query: FindOneDto,
+    @Query() query: Dto['FindOne'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ..._args: unknown[]
   ): Promise<Entity | null | void> {
@@ -225,7 +228,7 @@ export class RESTAPIEntityControler<
 
   @Patch()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(@Body() body: UpdateDto, ..._args: unknown[]): Promise<UpdateResult<Entity>> {
+  async update(@Body() body: Dto['Update'], ..._args: unknown[]): Promise<UpdateResult<Entity>> {
     this.checkRoute('update');
     const validBody = await this.validationPipe.transform(body, {
       metatype: (this.dto.update as unknown as Type) || BaseUpdateDto,

@@ -14,7 +14,7 @@ import { TokenManagerService } from '../tokenManager';
 
 export class IAMUsersService<
   UserId,
-  User extends BaseUser<UserId>,
+  User extends BaseUser<UserId, unknown>,
   UserMFAEntity extends BaseUserMFAEntity<UserId> | undefined
 > {
   constructor(

@@ -6,15 +6,12 @@ import {
   ConfigProviderModuleOptions
 } from '@node-c/common/configProvider';
 
+import { AdminAPIModule } from './api/admin';
 import * as AppConfigs from './config';
 import { DomainIAMModule } from './domain/iam';
-// import { DBModule } from './persistance/db';;
 import { PersistanceCacheModule } from './persistance/cache';
 
-@Module({
-  imports: [...AppModule.imports]
-})
-export class AppModule {
+export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
     envKeys: APP_CONFIG_FROM_ENV_KEYS,
@@ -42,8 +39,15 @@ export class AppModule {
     }
   };
   static readonly imports = [
-    ConfigProviderModule.register(AppModule.configProviderModuleRegisterOptions),
+    ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
     PersistanceCacheModule.register(PersistanceCacheModule.moduleOptions),
     DomainIAMModule.register(DomainIAMModule.moduleOptions)
   ];
+}
+
+@Module({
+  imports: [...AppModule.imports]
+})
+export class AppModule extends AppModuleBase {
+  static readonly imports = [...AppModuleBase.imports, AdminAPIModule.register(AdminAPIModule.moduleOptions)];
 }

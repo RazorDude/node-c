@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/persistance/redis/repository';
 
-import { CacheTokenSchema } from './tokens.entity';
-import { CacheTokensEntityService } from './tokens.service';
+import { AccessControlPointSchema } from './accessControlPoints.entity';
+import { AccessControlPointsEntityService } from './accessControlPoints.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,11 +11,11 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     RedisRepositoryModule.register({
       persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
-      schema: CacheTokenSchema,
+      schema: AccessControlPointSchema,
       storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
     })
   ],
-  providers: [CacheTokensEntityService],
-  exports: [CacheTokensEntityService]
+  providers: [AccessControlPointsEntityService],
+  exports: [AccessControlPointsEntityService]
 })
-export class CacheTokensEntityModule {}
+export class AccessControlPointsEntityModule {}

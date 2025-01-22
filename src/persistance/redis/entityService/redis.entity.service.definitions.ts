@@ -31,8 +31,4 @@ export interface FindOptions
   requirePrimaryKeys?: boolean;
 }
 
-export interface ServiceOptions {
-  entityStoreName: string;
-}
-
 export interface UpdateOptions extends BaseOptions, CommonUpdateOptions {}

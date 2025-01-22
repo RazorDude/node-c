@@ -8,7 +8,6 @@ import {
   DeleteOptions,
   FindOneOptions,
   FindOptions,
-  ServiceOptions,
   UpdateOptions
 } from './redis.entity.service.definitions';
 
@@ -21,13 +20,12 @@ import { RedisStoreService } from '../store';
 export class RedisEntityService<Entity extends RedisEntity<unknown>> extends PersistanceEntityService<Entity> {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected options: ServiceOptions,
-    // eslint-disable-next-line no-unused-vars
     protected repository: RedisRepositoryService<Entity>,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
     super();
+    // console.log(repository, store);
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {

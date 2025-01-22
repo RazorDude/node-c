@@ -30,6 +30,7 @@ export class RedisStoreService {
   }
 
   static createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<RedisClientType> {
+    // console.log('=> createClient');
     return new Promise((resolve, reject) => {
       const { persistanceModuleName } = options;
       const { host, password, port } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;

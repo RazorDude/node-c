@@ -4,7 +4,7 @@ import { AppConfigCommon, NoSQLType, RDBType } from '@node-c/common/configProvid
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
-    identity: {}
+    admin: {}
   },
   domain: {
     administration: {},

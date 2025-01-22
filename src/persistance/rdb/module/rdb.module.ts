@@ -32,7 +32,7 @@ export class RDBModule {
         ...(modules || []),
         ...(importsAtEnd || [])
       ],
-      providers: [...(services || []), ...(options.providers || [])],
+      providers: [...(options.providers || []), ...(services || [])],
       exports: [...(services || []), ...(options.exports || [])]
     };
   }

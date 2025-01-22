@@ -1,11 +1,7 @@
+import { TokenType as TokenTypeBase } from '@node-c/domain/iam';
 import { EntitySchemaColumnType, RedisEntity, getDefaultEntitySchema } from '@node-c/persistance/redis';
 
-export enum TokenType {
-  // eslint-disable-next-line no-unused-vars
-  Access = 'access',
-  // eslint-disable-next-line no-unused-vars
-  Refresh = 'refresh'
-}
+export type TokenType = TokenTypeBase;
 
 export interface CacheToken extends RedisEntity<string> {
   token: string;

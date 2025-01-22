@@ -8,7 +8,6 @@ import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 import { AppConfigAPIHTTP, ConfigProviderService } from '../../../common/configProvider';
 import { Constants, RequestWithLocals } from '../../../common/definitions';
 import { loadDynamicModules } from '../../../common/utils';
-import { AccessControlService } from '../../../domain/iam/services';
 import { HttpExceptionFilter } from '../exceptionFilters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
 import { HTTPAnonymousRoutesMiddleware, HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
@@ -57,12 +56,7 @@ export class HTTPAPIModule {
           provide: Constants.API_MODULE_NAME,
           useValue: options.moduleName
         },
-        {
-          provide: Constants.API_MODULE_ACP,
-          useFactory: async (accessControlService: AccessControlService) =>
-            await accessControlService.mapAccessControlPoints(options.moduleName),
-          inject: [AccessControlService]
-        },
+        { provide: Constants.API_MODULE_ACP, useValue: [] },
         {
           provide: Constants.API_MODULE_ALLOWED_ORIGINS,
           useFactory: async (configProviderService: ConfigProviderService) =>
@@ -81,8 +75,8 @@ export class HTTPAPIModule {
           provide: Constants.HTTP_EXCEPTION_FILTER,
           useClass: HttpExceptionFilter
         },
-        ...(services || []),
-        ...(options.providers || [])
+        ...(options.providers || []),
+        ...(services || [])
       ],
       exports: [...(services || []), ...(options.exports || [])]
     };

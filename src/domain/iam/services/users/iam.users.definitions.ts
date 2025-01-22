@@ -5,8 +5,8 @@ export interface GetUserWithPermissionsDataOptions {
   keepPassword?: boolean;
 }
 
-export interface User<UserId> {
-  currentAccessControlPoints: GenericObject<AccessControlPoint>;
+export interface User<UserId, AccessControlPointId> {
+  currentAccessControlPoints: GenericObject<AccessControlPoint<AccessControlPointId>>;
   id: UserId;
   mfaCode?: string;
   password?: string;

@@ -2,8 +2,8 @@ import { DynamicModule } from '@nestjs/common';
 
 import { DomainIAMModuleOptions } from './iam.definitions';
 
-import { Constants } from '../../common/definitions';
-import { loadDynamicModules } from '../../common/utils';
+import { Constants } from '../../../common/definitions';
+import { loadDynamicModules } from '../../../common/utils';
 
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {
@@ -18,8 +18,8 @@ export class DomainIAMModule {
           provide: Constants.DOMAIN_MODULE_NAME,
           useValue: options.moduleName
         },
-        ...(services || []),
-        ...(options.providers || [])
+        ...(options.providers || []),
+        ...(services || [])
       ],
       exports: [...(services || []), ...(options.exports || [])]
     };
