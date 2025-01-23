@@ -52,8 +52,11 @@ export class NodeCApp {
     }
     for (const i in appModules) {
       // create the nest app from the main module
+      console.log('=> 0');
       const app = await NestFactory.create(appModules[i], { bodyParser: false });
+      console.log('=> 1');
       const apiModuleName = apiModulesOptionsMap.get(i);
+      console.log('=>', apiModuleName);
       if (!apiModuleName) {
         apps.push(app);
         continue;
@@ -78,6 +81,7 @@ export class NodeCApp {
           console.info(`[API.${apiModuleName}] Server listening at ${hostname}:${port}.`);
         }
       }
+      apps.push(app);
     }
     return apps;
   }

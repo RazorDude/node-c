@@ -13,7 +13,7 @@ export class RDBModule {
   static register(options: RDBModuleOptions): DynamicModule {
     const { connectionName, folderData, imports: additionalImports, moduleClass, moduleName } = options;
     const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
-    const { entities, modules, services } = loadDynamicModules(folderData);
+    const { entities, modules } = loadDynamicModules(folderData);
     return {
       module: moduleClass as DynamicModule['module'],
       imports: [
@@ -32,8 +32,10 @@ export class RDBModule {
         ...(modules || []),
         ...(importsAtEnd || [])
       ],
-      providers: [...(options.providers || []), ...(services || [])],
-      exports: [...(services || []), ...(options.exports || [])]
+      // providers: [...(options.providers || []), ...(services || [])],
+      providers: [...(options.providers || [])],
+      // exports: [...(services || []), ...(options.exports || [])]
+      exports: [...(modules || []), ...(options.exports || [])]
     };
   }
 }

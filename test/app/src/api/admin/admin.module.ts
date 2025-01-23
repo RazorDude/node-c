@@ -3,6 +3,8 @@ import { Module } from '@nestjs/common';
 import { HTTPAPIModule as BaseHTTPAPIModule, HTTPAPIModuleOptions } from '@node-c/api/http';
 import { Constants as NodeCConstants } from '@node-c/common/definitions';
 
+import { AccessControlData } from '@node-c/domain/iam';
+
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
@@ -17,8 +19,11 @@ export class AdminAPIModule extends BaseHTTPAPIModule {
     providers: [
       {
         provide: NodeCConstants.API_MODULE_ACP,
-        useFactory: async (accessControlService: IAMAccessControlService) =>
-          await accessControlService!.mapAccessControlPoints(Constants.API_ADMIN_MODULE_NAME),
+        useFactory: async (accessControlService: IAMAccessControlService): Promise<AccessControlData<unknown>> => {
+          const acps = await accessControlService!.mapAccessControlPoints(Constants.API_ADMIN_MODULE_NAME);
+          console.log(acps);
+          return acps;
+        },
         inject: [IAMAccessControlService]
       }
     ]

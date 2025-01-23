@@ -25,7 +25,6 @@ export class RedisEntityService<Entity extends RedisEntity<unknown>> extends Per
     protected store: RedisStoreService
   ) {
     super();
-    // console.log(repository, store);
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {

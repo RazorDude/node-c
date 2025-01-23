@@ -5,11 +5,13 @@ import {
   ConfigProviderModule,
   ConfigProviderModuleOptions
 } from '@node-c/common/configProvider';
+import { RedisStoreModule } from '@node-c/persistance/redis';
 
-import { AdminAPIModule } from './api/admin';
+// import { AdminAPIModule } from './api/admin';
+import { Constants } from './common/definitions';
 import * as AppConfigs from './config';
-import { DomainIAMModule } from './domain/iam';
-import { PersistanceCacheModule } from './persistance/cache';
+// import { DomainIAMModule } from './domain/iam';
+// import { PersistanceCacheModule } from './persistance/cache';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
@@ -40,14 +42,19 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
-    PersistanceCacheModule.register(PersistanceCacheModule.moduleOptions),
-    DomainIAMModule.register(DomainIAMModule.moduleOptions)
+    RedisStoreModule.register({
+      persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
+      storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
+    })
+    // PersistanceCacheModule.register(),
+    // DomainIAMModule.register()
   ];
 }
 
 @Module({
-  imports: [...AppModule.imports]
+  imports: [
+    ...AppModuleBase.imports
+    // AdminAPIModule.register(AdminAPIModule.moduleOptions)
+  ]
 })
-export class AppModule extends AppModuleBase {
-  static readonly imports = [...AppModuleBase.imports, AdminAPIModule.register(AdminAPIModule.moduleOptions)];
-}
+export class AppModule extends AppModuleBase {}

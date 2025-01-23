@@ -30,21 +30,23 @@ export class RedisStoreService {
   }
 
   static createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<RedisClientType> {
-    // console.log('=> createClient');
     return new Promise((resolve, reject) => {
       const { persistanceModuleName } = options;
       const { host, password, port } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
-      const clientOptions: { host: string; port: number; password?: string } = { host, port };
-      if (password) {
-        clientOptions.password = password;
-      }
-      const client = createClient(clientOptions);
-      client.on('ready', () => {
-        resolve(client as RedisClientType);
-      });
+      const url = `redis://redis:redis${password ? `:${password}` : ''}@${host || '0.0.0.0'}:${port || '6379'}`;
+      console.log(url);
+      const client = createClient({ url });
       client.on('error', err => {
         reject(err);
       });
+      client.connect().then(
+        () => {
+          resolve(client as RedisClientType);
+        },
+        err => {
+          reject(err);
+        }
+      );
     });
   }
 
