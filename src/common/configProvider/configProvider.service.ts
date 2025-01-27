@@ -97,31 +97,23 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       [moduleCategory: string]: { [moduleType: string]: string[] };
     } = {};
     const moduleTypesRegex = new RegExp(`^((${Object.keys(envKeys).join(')|(')}))_`);
-    console.log(moduleTypesRegex);
     config.general.environment = envName;
     // populate the data from the .env file into the config object
     const envVars = dotenv.parse(
       (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
     );
-    console.log(
-      config.general.projectRootPath,
-      (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
-    );
     // first pass - create a list of modules by name and map them by module type
     for (const envKey in envVars) {
       const [, moduleCategory] = envKey.match(moduleTypesRegex) || [];
-      console.log('==>', envKey, moduleCategory);
       if (!moduleCategory) {
         continue;
       }
-      const [, moduleName] = envKey.match(new RegExp(`^${moduleCategory}_(.+)_?MODULE_TYPE$`)) || [];
-      console.log('===>', moduleName);
+      const [, moduleName] = envKey.match(new RegExp(`^${moduleCategory}_(.+)_MODULE_TYPE$`)) || [];
       if (!moduleName) {
         continue;
       }
       const moduleFields = envKeys[moduleCategory as keyof typeof envKeys];
-      const moduleType = processEnv[envKey] as keyof typeof moduleFields;
-      console.log('====>', moduleType, moduleFields[moduleType]);
+      const moduleType = envVars[envKey] as keyof typeof moduleFields;
       if (!moduleFields[moduleType]) {
         continue;
       }
@@ -133,7 +125,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       }
       moduleNamesByCategoryAndType[moduleCategory][moduleType].push(moduleName);
     }
-    console.group(moduleNamesByCategoryAndType);
+    console.group('=> moduleNamesByCategoryAndType:', moduleNamesByCategoryAndType);
     // second pass - actually go through the env vars and populate them in the config accordingly
     for (const moduleCategory in moduleNamesByCategoryAndType) {
       const { children: moduleConfigKeysForCategory, name: categoryConfigKey } = envKeysParentNames[moduleCategory];
@@ -149,7 +141,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           for (const fieldName in moduleFieldsForType) {
             const configKey = `${categoryConfigKey}.${moduleConfigKey}.${moduleFieldsForType[fieldName]}`;
             const envKey = `${moduleCategory}_${moduleName}_${fieldName}`;
-            setNested(config, configKey, processEnv[envKey]);
+            setNested(config, configKey, envVars[envKey]);
           }
         });
       }

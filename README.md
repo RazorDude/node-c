@@ -31,4 +31,5 @@ An end-to-end NodeJS framework for building DDD apps on top of NestJS.
 15. Reactivity
 16. Feature flag module
 17. Support webserver protocols other than HTTP.
-18. Misc todos in the codes, not listed here.
+18. Support multiple persistance store connections.
+19. Misc todos in the codes, not listed here.
