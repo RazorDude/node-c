@@ -125,7 +125,6 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       }
       moduleNamesByCategoryAndType[moduleCategory][moduleType].push(moduleName);
     }
-    console.group('=> moduleNamesByCategoryAndType:', moduleNamesByCategoryAndType);
     // second pass - actually go through the env vars and populate them in the config accordingly
     for (const moduleCategory in moduleNamesByCategoryAndType) {
       const { children: moduleConfigKeysForCategory, name: categoryConfigKey } = envKeysParentNames[moduleCategory];

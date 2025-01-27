@@ -22,7 +22,6 @@ export class HTTPAPIModule {
   ) {}
 
   configure(consumer: MiddlewareConsumer): void {
-    console.log('==>', 'configure');
     const { anonymousAccessRoutes } = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
     consumer.apply(express.urlencoded({ verify: HTTPAPIModule.rawBodyBuffer, extended: true })).forRoutes('*');
     consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');

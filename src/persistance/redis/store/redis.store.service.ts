@@ -34,7 +34,6 @@ export class RedisStoreService {
       const { persistanceModuleName } = options;
       const { host, password, port } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
       const url = `redis://redis:redis${password ? `:${password}` : ''}@${host || '0.0.0.0'}:${port || '6379'}`;
-      console.log(url);
       const client = createClient({ url });
       client.on('error', err => {
         reject(err);

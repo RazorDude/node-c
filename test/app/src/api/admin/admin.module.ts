@@ -21,7 +21,6 @@ export class AdminAPIModule extends BaseHTTPAPIModule {
         provide: NodeCConstants.API_MODULE_ACP,
         useFactory: async (accessControlService: IAMAccessControlService): Promise<AccessControlData<unknown>> => {
           const acps = await accessControlService!.mapAccessControlPoints(Constants.API_ADMIN_MODULE_NAME);
-          console.log(acps);
           return acps;
         },
         inject: [IAMAccessControlService]
