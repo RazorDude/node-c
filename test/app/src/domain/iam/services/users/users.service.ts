@@ -17,7 +17,6 @@ export class IAMUsersService extends BaseIAMUsersService<string, CacheUser> {
     @Inject(Constants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
     protected persistanceUsersService: CacheUsersEntityService,
-    @Inject(IAMTokenManagerService.injectionToken)
     protected tokenManager: IAMTokenManagerService
   ) {
     super(configProvider, moduleName, persistanceUsersService, tokenManager);

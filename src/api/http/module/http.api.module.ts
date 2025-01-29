@@ -1,4 +1,4 @@
-import { DynamicModule, Inject, MiddlewareConsumer } from '@nestjs/common';
+import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
@@ -47,7 +47,7 @@ export class HTTPAPIModule {
   static register(options: HTTPAPIModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
-    const { modules, services } = loadDynamicModules(folderData);
+    const { controllers, modules, services } = loadDynamicModules(folderData);
     return {
       module: moduleClass as DynamicModule['module'],
       imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
@@ -78,6 +78,7 @@ export class HTTPAPIModule {
         ...(options.providers || []),
         ...(services || [])
       ],
+      controllers: [...(controllers || []), ...(options.controllers || [])] as unknown as ModuleMetadata['controllers'],
       exports: [...(services || []), ...(options.exports || [])]
     };
   }

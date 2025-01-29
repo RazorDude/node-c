@@ -4,7 +4,8 @@ export const appConfigProfileLocal: AppConfigProfile = {
   api: {
     admin: {
       allowedOrigins: ['localhost'],
-      hostname: 'localhost',
+      anonymousAccessRoutes: ['/tokens/test'],
+      hostname: '0.0.0.0',
       port: 2080
     }
   },
