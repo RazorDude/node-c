@@ -4,11 +4,11 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   API_MODULE_ALLOWED_ORIGINS = 'API_MODULE_ALLOWED_ORIGINS',
   // eslint-disable-next-line no-unused-vars
-  API_MODULE_AUTHENTICATION_IAM_MODULE_NAME = 'API_MODULE_AUTHENTICATION_IAM_MODULE_NAME',
-  // eslint-disable-next-line no-unused-vars
-  API_MODULE_AUTHENTICATION_USER_DATA_SERVICE = 'API_MODULE_AUTHENTICATION_USER_DATA_SERVICE',
-  // eslint-disable-next-line no-unused-vars
   API_MODULE_NAME = 'API_MODULE_NAME',
+  // eslint-disable-next-line no-unused-vars
+  AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE = 'AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE',
+  // eslint-disable-next-line no-unused-vars
+  AUTHENTICATION_MIDDLEWARE_USERS_SERVICE = 'AUTHENTICATION_MIDDLEWARE_USERS_SERVICE',
   // eslint-disable-next-line no-unused-vars
   AUTHORIZATION_INTERCEPTOR = 'AUTHORIZATION_INTERCEPTOR',
   // eslint-disable-next-line no-unused-vars

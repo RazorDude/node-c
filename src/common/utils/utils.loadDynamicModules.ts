@@ -1,7 +1,11 @@
-import { DynamicModule, Provider } from '@nestjs/common';
+import { ClassProvider, DynamicModule, Provider } from '@nestjs/common';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 import { GenericObject } from '../definitions';
+
+export type ProviderWithInjectionToken = Provider & {
+  injectionToken?: string;
+};
 
 export const loadDynamicModules = (
   folderData: GenericObject<unknown>
@@ -16,7 +20,15 @@ export const loadDynamicModules = (
       continue;
     }
     if (key.match(/[cC]ontroller$/)) {
-      controllers.push(folderData[actualKey] as Provider);
+      const FolderDataItem = folderData[actualKey] as ProviderWithInjectionToken;
+      if (FolderDataItem.injectionToken) {
+        controllers.push({
+          provide: FolderDataItem.injectionToken,
+          useClass: FolderDataItem as ClassProvider['useClass']
+        });
+        continue;
+      }
+      controllers.push(FolderDataItem);
       continue;
     }
     if (key.match(/[eE]ntity$/)) {
@@ -28,7 +40,15 @@ export const loadDynamicModules = (
       continue;
     }
     if (key.match(/[sS]ervice$/)) {
-      services.push(folderData[actualKey] as Provider);
+      const FolderDataItem = folderData[actualKey] as ProviderWithInjectionToken;
+      if (FolderDataItem.injectionToken) {
+        services.push({
+          provide: FolderDataItem.injectionToken,
+          useClass: FolderDataItem as ClassProvider['useClass']
+        });
+        continue;
+      }
+      services.push(FolderDataItem);
       continue;
     }
   }

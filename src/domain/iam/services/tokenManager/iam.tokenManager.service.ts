@@ -18,7 +18,7 @@ import { DomainPersistanceEntityService } from '../../../common/entityService';
 
 // TODO: console.error -> logger
 // TODO: check whether the JWT library actually computes the hash of the content
-export class TokenManagerService<
+export class IAMTokenManagerService<
   StoredTokenFields,
   AccessTokenData,
   RefreshTokenData

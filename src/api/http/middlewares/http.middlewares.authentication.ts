@@ -3,9 +3,7 @@ import { NextFunction, Response } from 'express';
 
 import { ConfigProviderService } from '../../../common/configProvider';
 import { Constants, RequestWithLocals } from '../../../common/definitions';
-import { User as BaseUser, DecodedTokenContent, IAMUsersService, TokenManagerService } from '../../../domain/iam';
-import { PersistanceEntityService } from '../../../persistance/common/entityService';
-
+import { User as BaseUser, DecodedTokenContent, IAMTokenManagerService, IAMUsersService } from '../../../domain/iam';
 @Injectable()
 export class HTTPAuthenticationMiddleware<
   UserId,
@@ -18,14 +16,13 @@ export class HTTPAuthenticationMiddleware<
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    @Inject(Constants.API_MODULE_AUTHENTICATION_IAM_MODULE_NAME)
+    @Inject(Constants.API_MODULE_NAME)
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
-    @Inject(Constants.API_MODULE_AUTHENTICATION_USER_DATA_SERVICE)
+    @Inject(Constants.AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected persistanceUsersWithActiveAccessService: PersistanceEntityService<User>,
-    // eslint-disable-next-line no-unused-vars
-    protected tokenManager: TokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData>,
+    protected tokenManager: IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData>,
+    @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected usersService: IAMUsersService<UserId, User, undefined>
   ) {}
@@ -35,7 +32,7 @@ export class HTTPAuthenticationMiddleware<
       req.locals = {};
     }
     (async () => {
-      const { persistanceUsersWithActiveAccessService, tokenManager, usersService } = this;
+      const { tokenManager, usersService } = this;
       let tokens: string[] = [];
       let authToken = req.headers.authorization;
       let authTokenIsNew = false;
@@ -76,7 +73,7 @@ export class HTTPAuthenticationMiddleware<
         }
       }
       const userId = tokenContent.data?.userId;
-      let userData = await persistanceUsersWithActiveAccessService.findOne({ filters: { id: userId } });
+      let userData = await usersService.findOne({ filters: { id: userId } });
       if (!userData) {
         userData = (await usersService.getUserWithPermissionsData({ filters: { id: userId } })) as User;
       }

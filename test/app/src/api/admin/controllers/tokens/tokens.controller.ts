@@ -1,7 +1,6 @@
 import { Controller, Get, Injectable } from '@nestjs/common';
 import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } from '@node-c/api/rest';
 import { GenericObject } from '@node-c/common/definitions';
-// import
 
 import { IAMTokenManagerService } from '../../../../domain/iam';
 import { CacheToken } from '../../../../persistance/cache/';
@@ -29,8 +28,3 @@ export class AdminTokensEntityController extends RESTAPIEntityControler<
     return await this.domainEntityService.test();
   }
 }
-
-// @Injectable()
-// export class AdminTokensEntityController {
-
-// }

@@ -9,14 +9,15 @@ import {
 import { AppConfigDomainIAM, ConfigProviderService } from '../../../../common/configProvider';
 import { ApplicationError, GenericObject } from '../../../../common/definitions';
 import { FindOneOptions, PersistanceEntityService } from '../../../../persistance/common/entityService';
+import { DomainPersistanceEntityService } from '../../../common/entityService';
 
-import { TokenManagerService } from '../tokenManager';
+import { IAMTokenManagerService } from '../tokenManager';
 
 export class IAMUsersService<
   UserId,
   User extends BaseUser<UserId, unknown>,
-  UserMFAEntity extends BaseUserMFAEntity<UserId> | undefined
-> {
+  UserMFAEntity extends BaseUserMFAEntity<UserId> | undefined = undefined
+> extends DomainPersistanceEntityService<User, PersistanceEntityService<User>> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
@@ -25,12 +26,14 @@ export class IAMUsersService<
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersService: PersistanceEntityService<User>,
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: TokenManagerService<unknown, unknown, unknown>,
+    protected tokenManager: IAMTokenManagerService<unknown, unknown, unknown>,
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersMFAService?: PersistanceEntityService<UserMFAEntity>,
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersWithActiveAccessService?: PersistanceEntityService<User>
-  ) {}
+  ) {
+    super(persistanceUsersService);
+  }
 
   // TODO: console.info -> logger
   async createAccessToken(data: {
