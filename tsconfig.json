@@ -20,8 +20,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@node-c/*": ["dist/*"],
-      "@node-c-source/*": ["src/*"]
+      "@node-c-source/*": [
+        "src/*"
+      ],
+      "@node-c/*": [
+        "dist/*"
+      ]
     },
     "preserveConstEnums": true,
     "removeComments": true,
@@ -34,8 +38,7 @@
     "sourceMap": true,
     "target": "ES2016",
     "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
+      "./node_modules/@types"
     ]
   }
 }
