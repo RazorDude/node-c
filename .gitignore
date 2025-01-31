@@ -1,11 +1,10 @@
 .DS_Store
+.turbo
 .vscode
 assets
 dist
 docs
-test/app/envFiles/*
-test/app/ormconfig*
+apps/test/envFiles/*
+apps/test/ormconfig*
 node_modules
 tmp
-test/app/dist
-test/app/tmp
