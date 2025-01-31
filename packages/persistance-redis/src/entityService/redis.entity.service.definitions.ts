@@ -8,7 +8,7 @@ import {
 
 export interface BaseOptions {
   forceTransaction?: boolean;
-  transactionId?: string
+  transactionId?: string;
 }
 
 export type BulkCreateOptions = BaseOptions;

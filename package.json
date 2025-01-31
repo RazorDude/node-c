@@ -2,7 +2,7 @@
   "name": "node-c",
   "private": true,
   "version": "1.0.0-alpha0",
-  "description": "An end-to-end NodeJS framework for building DDD apps built on top of NestJS.",
+  "description": "An end-to-end NodeJS framework for building DDD apps on top of NestJS.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,11 +22,16 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {
-    "@repo/config-eslint": "*",
     "@repo/config-typescript": "*",
     "@repo/core": "*"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.4.2",
     "turbo": "^2.3.4",
     "typescript": "^4.9.5"
