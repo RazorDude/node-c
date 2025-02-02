@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { RedisRepositoryModule } from '@node-c/persistance/redis/repository';
+import { RedisRepositoryModule } from '@node-c/persistance-redis';
 
 import { AccessControlPoint, AccessControlPointSchema } from './accessControlPoints.entity';
 import { AccessControlPointsEntityService } from './accessControlPoints.service';

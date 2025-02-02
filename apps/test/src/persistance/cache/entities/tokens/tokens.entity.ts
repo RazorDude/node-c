@@ -1,5 +1,5 @@
-import { TokenType as TokenTypeBase } from '@node-c/domain/iam';
-import { EntitySchemaColumnType, RedisEntity, getDefaultEntitySchema } from '@node-c/persistance/redis';
+import { TokenType as TokenTypeBase } from '@node-c/domain-iam';
+import { EntitySchemaColumnType, RedisEntity, getDefaultEntitySchema } from '@node-c/persistance-redis';
 
 export type TokenType = TokenTypeBase;
 

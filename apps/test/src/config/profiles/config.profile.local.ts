@@ -1,4 +1,4 @@
-import { AppConfigProfile, AppEnvironment } from '@node-c/common/configProvider/configProvider.definitions';
+import { AppConfigProfile, AppEnvironment } from '@node-c/core';
 
 export const appConfigProfileLocal: AppConfigProfile = {
   api: {

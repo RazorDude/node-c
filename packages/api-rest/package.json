@@ -2,7 +2,6 @@
   "name": "@node-c/api-rest",
   "version": "1.0.0-alpha0",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "check-types": "tsc --noEmit",

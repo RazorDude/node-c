@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { RedisRepositoryModule } from '@node-c/persistance/redis/repository';
+import { RedisRepositoryModule } from '@node-c/persistance-redis';
 
 import { CacheTokenSchema } from './tokens.entity';
 import { CacheTokensEntityService } from './tokens.service';

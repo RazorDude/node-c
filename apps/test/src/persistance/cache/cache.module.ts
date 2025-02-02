@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { RedisModule } from '@node-c/persistance/redis/module';
+import { RedisModule } from '@node-c/persistance-redis';
 
 import * as FolderData from './entities';
 

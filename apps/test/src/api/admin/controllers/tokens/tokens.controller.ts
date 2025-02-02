@@ -1,6 +1,7 @@
 import { Controller, Get, Injectable } from '@nestjs/common';
-import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } from '@node-c/api/rest';
-import { GenericObject } from '@node-c/common/definitions';
+
+import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } from '@node-c/api-rest';
+import { GenericObject } from '@node-c/core';
 
 import { IAMTokenManagerService } from '../../../../domain/iam';
 import { CacheToken } from '../../../../persistance/cache/';

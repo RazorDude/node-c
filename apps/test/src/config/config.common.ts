@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { AppConfigCommon, NoSQLType, RDBType } from '@node-c/common/configProvider/configProvider.definitions';
+import { AppConfigCommon, NoSQLType, RDBType } from '@node-c/core';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {

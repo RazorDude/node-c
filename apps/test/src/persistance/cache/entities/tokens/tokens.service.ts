@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/persistance/redis';
+import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/persistance-redis';
 
 import { CacheToken } from './tokens.entity';
 

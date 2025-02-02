@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/common/configProvider';
-import { Constants } from '@node-c/common/definitions';
-import { IAMTokenManagerService as BaseIAMTokenManagerService } from '@node-c/domain/iam';
+import { Constants } from '@node-c/api-http';
+import { ConfigProviderService, Constants as CoreConstants } from '@node-c/core';
+import { IAMTokenManagerService as BaseIAMTokenManagerService } from '@node-c/domain-iam';
 
 import { CacheToken, CacheTokensEntityService } from '../../../../persistance/cache';
 
@@ -12,7 +12,7 @@ export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheToke
 
   constructor(
     protected configProvider: ConfigProviderService,
-    @Inject(Constants.DOMAIN_MODULE_NAME)
+    @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
     protected persistanceTokensService: CacheTokensEntityService
   ) {

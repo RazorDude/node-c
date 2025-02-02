@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
 // import { Constants as NodeCConstants } from '@node-c/common/definitions';
-import { DomainIAMModule as BaseDomainIAMModule } from '@node-c/domain/iam';
+import { DomainIAMModule as BaseDomainIAMModule } from '@node-c/domain-iam';
 
 import * as FolderData from './services';
 

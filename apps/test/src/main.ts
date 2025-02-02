@@ -1,5 +1,6 @@
 import { NestModule } from '@nestjs/common';
-import { NodeCApp } from '@node-c/app';
+
+import { NodeCApp } from '@node-c/core';
 
 import { AppModule } from './app.module';
 import { Constants } from './common/definitions';

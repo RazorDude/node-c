@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import {
-  APP_CONFIG_FROM_ENV_KEYS,
-  ConfigProviderModule,
-  ConfigProviderModuleOptions
-} from '@node-c/common/configProvider';
-import { RedisStoreModule } from '@node-c/persistance/redis';
+import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
+import { RedisStoreModule } from '@node-c/persistance-redis';
 
 import { AdminAPIModule } from './api/admin';
 import { Constants } from './common/definitions';

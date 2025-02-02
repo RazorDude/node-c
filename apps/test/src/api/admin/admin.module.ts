@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 
-import { HTTPAPIModule as BaseHTTPAPIModule, HTTPAPIModuleOptions } from '@node-c/api/http';
-import { Constants as NodeCConstants } from '@node-c/common/definitions';
+import {
+  HTTPAPIModule as BaseHTTPAPIModule,
+  HTTPAPIModuleOptions,
+  Constants as NodeCConstants
+} from '@node-c/api-http';
+// import { Constants as NodeCConstants } from '@node-c/common/definitions';
 
-import { AccessControlData } from '@node-c/domain/iam';
+import { AccessControlData } from '@node-c/domain-iam';
 
 import * as FolderData from './controllers';
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AccessControlService as BaseAccessControlService } from '@node-c/domain/iam';
+import { AccessControlService as BaseAccessControlService } from '@node-c/domain-iam';
 
 import { AccessControlPoint, AccessControlPointsEntityService } from '../../../../persistance/cache';
 

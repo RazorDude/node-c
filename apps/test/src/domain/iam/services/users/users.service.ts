@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/common/configProvider';
-import { Constants } from '@node-c/common/definitions';
-import { IAMUsersService as BaseIAMUsersService } from '@node-c/domain/iam';
+import { Constants } from '@node-c/api-http';
+import { ConfigProviderService, Constants as CoreConstants } from '@node-c/core';
+import { IAMUsersService as BaseIAMUsersService } from '@node-c/domain-iam';
 
 import { CacheUser, CacheUsersEntityService } from '../../../../persistance/cache';
 
@@ -14,7 +14,7 @@ export class IAMUsersService extends BaseIAMUsersService<string, CacheUser> {
 
   constructor(
     protected configProvider: ConfigProviderService,
-    @Inject(Constants.DOMAIN_MODULE_NAME)
+    @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
     protected persistanceUsersService: CacheUsersEntityService,
     protected tokenManager: IAMTokenManagerService
