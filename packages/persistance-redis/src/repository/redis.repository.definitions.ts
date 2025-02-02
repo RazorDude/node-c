@@ -1,4 +1,4 @@
-import { GenericObject } from '@node-c/core/common/definitions';
+import { GenericObject } from '@node-c/core';
 
 export interface EntitySchema {
   columns: {
@@ -26,15 +26,6 @@ export enum EntitySchemaColumnType {
   UUIDV4 = 'uuidv4'
 }
 
-export interface FindOptions {
-  exactSearch?: boolean;
-  filters?: GenericObject<unknown>;
-  findAll?: boolean;
-  page?: number;
-  perPage?: number;
-  withValues?: boolean;
-}
-
 export interface PrepareOptions {
   generatePrimaryKeys?: boolean;
   onConflict?: SaveOptionsOnConflict;
@@ -45,6 +36,15 @@ export interface RedisRepositoryModuleOptions {
   persistanceModuleName: string;
   schema: EntitySchema;
   storeKey: string;
+}
+
+export interface RepositoryFindOptions {
+  exactSearch?: boolean;
+  filters?: GenericObject<unknown>;
+  findAll?: boolean;
+  page?: number;
+  perPage?: number;
+  withValues?: boolean;
 }
 
 export interface SaveOptions {

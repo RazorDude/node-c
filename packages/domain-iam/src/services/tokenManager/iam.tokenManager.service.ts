@@ -1,7 +1,11 @@
-import { AppConfigDomainIAM, ConfigProviderService } from '@node-c/core/common/configProvider';
-import { ApplicationError } from '@node-c/core/common/definitions';
-import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
-import { PersistanceEntityService } from '@node-c/core/persistance/entityService';
+import {
+  AppConfigDomainIAM,
+  ApplicationError,
+  ConfigProviderService,
+  DomainPersistanceEntityService,
+  PersistanceEntityService
+} from '@node-c/core';
+
 import { getNested } from '@ramster/general-tools';
 import * as jwt from 'jsonwebtoken';
 

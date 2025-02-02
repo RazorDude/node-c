@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/core/common/configProvider';
+import { ConfigProviderService } from '@node-c/core';
 
 import { RedisStoreModuleOptions } from './redis.store.definitions';
 import { RedisStoreService } from './redis.store.service';

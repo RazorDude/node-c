@@ -1,5 +1,5 @@
-import { GenericObject } from '@node-c/core/common/definitions';
-import { PersistanceEntityService, SelectOperator } from '@node-c/core/persistance/entityService';
+import { GenericObject, PersistanceEntityService, SelectOperator } from '@node-c/core';
+
 import { getNested, setNested } from '@ramster/general-tools';
 
 import immutable from 'immutable';

@@ -1,5 +1,7 @@
 import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from '@nestjs/common';
-import { ApplicationError } from '@node-c/core/common/definitions';
+
+import { ApplicationError } from '@node-c/core';
+
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 

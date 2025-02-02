@@ -1,6 +1,6 @@
 import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
-import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core/common/configProvider';
-import { loadDynamicModules } from '@node-c/core/common/utils';
+
+import { AppConfigAPIHTTP, ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';

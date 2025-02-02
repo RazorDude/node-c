@@ -1,11 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
-import { ConfigProviderService } from '@node-c/core/common/configProvider';
-import {
-  User as BaseUser,
-  DecodedTokenContent,
-  IAMTokenManagerService,
-  IAMUsersService
-} from '@node-c/domain-iam/services';
+
+import { ConfigProviderService } from '@node-c/core';
+import { User as BaseUser, DecodedTokenContent, IAMTokenManagerService, IAMUsersService } from '@node-c/domain-iam';
+
 import { NextFunction, Response } from 'express';
 
 import { Constants, RequestWithLocals } from '../common/definitions';

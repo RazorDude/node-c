@@ -1,7 +1,13 @@
-import { AppConfigDomainIAM, ConfigProviderService } from '@node-c/core/common/configProvider';
-import { ApplicationError, GenericObject } from '@node-c/core/common/definitions';
-import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
-import { FindOneOptions, PersistanceEntityService } from '@node-c/core/persistance/entityService';
+import {
+  AppConfigDomainIAM,
+  ApplicationError,
+  ConfigProviderService,
+  DomainPersistanceEntityService,
+  FindOneOptions,
+  GenericObject,
+  PersistanceEntityService
+} from '@node-c/core';
+
 import * as bcrypt from 'bcryptjs';
 
 import {

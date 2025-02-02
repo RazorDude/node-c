@@ -21,12 +21,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@node-c/api-http/*": ["packages/api-http/dist/*"],
-      "@node-c/api-rest/*": ["packages/api-rest/dist/*"],
-      "@node-c/core/*": ["packages/core/dist/*"],
-      "@node-c/domain-iam/*": ["packages/domain-iam/dist/*"],
-      "@node-c/persistance-rdb/*": ["packages/persistance-rdb/dist/*"],
-      "@node-c/persistance-redis/*": ["packages/persistance-redis/dist/*"]
+      "@node-c/api-http": ["packages/api-http/dist/index"],
+      "@node-c/api-rest": ["packages/api-rest/dist/index"],
+      "@node-c/core": ["packages/core/dist/index"],
+      "@node-c/domain-iam": ["packages/domain-iam/dist/index"],
+      "@node-c/persistance-rdb": ["packages/persistance-rdb/dist/index"],
+      "@node-c/persistance-redis": ["packages/persistance-redis/dist/index"]
     },
     "preserveConstEnums": true,
     "removeComments": true,

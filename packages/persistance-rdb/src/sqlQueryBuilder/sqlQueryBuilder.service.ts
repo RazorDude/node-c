@@ -1,11 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigProviderService, RDBType } from '@node-c/core/common/configProvider';
-import { GenericObject } from '@node-c/core/common/definitions';
-import { SelectOperator } from '@node-c/core/persistance/entityService';
+import { ConfigProviderService, GenericObject, RDBType, SelectOperator } from '@node-c/core';
+
 import { getNested } from '@ramster/general-tools';
 
 import { DeleteQueryBuilder, ObjectLiteral, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
-
 import { SoftDeleteQueryBuilder } from 'typeorm/query-builder/SoftDeleteQueryBuilder';
 
 import { IncludeItems, OrderBy, ParsedFilter } from './sqlQueryBuilder.definitions';

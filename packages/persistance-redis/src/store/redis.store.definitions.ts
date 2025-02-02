@@ -1,9 +1,5 @@
 import { RedisClientType } from 'redis';
 
-export interface DeleteOptions {
-  transactionId?: string;
-}
-
 export interface GetOptions {
   parseToJSON?: boolean;
 }
@@ -30,5 +26,9 @@ export interface ScanOptions {
 }
 
 export interface SetOptions {
+  transactionId?: string;
+}
+
+export interface StoreDeleteOptions {
   transactionId?: string;
 }

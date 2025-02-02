@@ -7,7 +7,9 @@ import {
   Injectable,
   NestInterceptor
 } from '@nestjs/common';
-import { AccessControlData, AccessControlService, User as BaseUser } from '@node-c/domain-iam/services';
+
+import { AccessControlData, AccessControlService, User as BaseUser } from '@node-c/domain-iam';
+
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
 

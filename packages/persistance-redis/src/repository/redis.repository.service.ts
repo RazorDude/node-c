@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ApplicationError } from '@node-c/core/common/definitions';
+import { ApplicationError } from '@node-c/core';
 
 import { validate } from 'class-validator';
 import immutable from 'immutable';
@@ -10,8 +10,8 @@ import { v4 as uuid } from 'uuid';
 import {
   EntitySchema,
   EntitySchemaColumnType,
-  FindOptions,
   PrepareOptions,
+  RepositoryFindOptions,
   SaveOptions,
   SaveOptionsOnConflict
 } from './redis.repository.definitions';
@@ -44,7 +44,7 @@ export class RedisRepositoryService<Entity> {
     this.primaryKeys = primaryKeys;
   }
 
-  async find<ResultItem extends Entity | string = Entity>(options: FindOptions): Promise<ResultItem[]> {
+  async find<ResultItem extends Entity | string = Entity>(options: RepositoryFindOptions): Promise<ResultItem[]> {
     const { primaryKeys, schema, store } = this;
     const { name: entityName } = schema;
     const { exactSearch, filters, findAll, page, perPage, withValues: optWithValues } = options;

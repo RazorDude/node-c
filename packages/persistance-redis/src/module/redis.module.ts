@@ -1,6 +1,6 @@
 import { DynamicModule } from '@nestjs/common';
 
-import { loadDynamicModules } from '@node-c/core/common/utils';
+import { loadDynamicModules } from '@node-c/core';
 
 import { RedisModuleOptions } from './redis.module.definitions';
 

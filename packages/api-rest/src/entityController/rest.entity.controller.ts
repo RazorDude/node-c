@@ -13,18 +13,20 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 
-import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http/interceptors';
-import { GenericObject, GenericObjectClass } from '@node-c/core/common/definitions';
-import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
+import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
+
 import {
   DeleteOptions,
   DeleteResult,
+  DomainPersistanceEntityService,
   FindOneOptions,
   FindOptions,
   FindResults,
+  GenericObject,
+  GenericObjectClass,
   PersistanceEntityService,
   UpdateResult
-} from '@node-c/core/persistance/entityService';
+} from '@node-c/core';
 
 import {
   DeleteDto as BaseDeleteDto,

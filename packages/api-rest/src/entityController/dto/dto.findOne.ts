@@ -1,4 +1,4 @@
-import { GenericObject } from '@node-c/core/common/definitions';
+import { GenericObject } from '@node-c/core';
 
 import { IsArray, IsObject, IsOptional } from 'class-validator';
 

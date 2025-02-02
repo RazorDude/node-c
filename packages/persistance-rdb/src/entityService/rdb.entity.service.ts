@@ -1,12 +1,12 @@
-import { ApplicationError } from '@node-c/core/common/definitions';
 import {
+  ApplicationError,
   DeleteResult,
   FindResults,
   NumberItem,
   PersistanceEntityService,
   SelectOperator,
   UpdateResult
-} from '@node-c/core/persistance/entityService';
+} from '@node-c/core';
 
 import { DeepPartial, EntityManager, EntityTarget, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';

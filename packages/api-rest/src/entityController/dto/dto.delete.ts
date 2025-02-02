@@ -1,4 +1,4 @@
-import { GenericObject } from '@node-c/core/common/definitions';
+import { GenericObject } from '@node-c/core';
 
 import { IsDefined, IsObject } from 'class-validator';
 

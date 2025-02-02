@@ -1,6 +1,6 @@
 import { ModuleMetadata } from '@nestjs/common';
 
-import { GenericObject } from '@node-c/core/common/definitions';
+import { GenericObject } from '@node-c/core';
 
 export interface RDBModuleOptions {
   connectionName: string;

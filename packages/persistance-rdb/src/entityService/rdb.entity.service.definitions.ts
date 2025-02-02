@@ -4,7 +4,7 @@ import {
   FindOneOptions as CommonFindOneOptions,
   FindOptions as CommonFindOptions,
   UpdateOptions as CommonUpdateOptions
-} from '@node-c/core/persistance/entityService';
+} from '@node-c/core';
 
 import { EntityManager } from 'typeorm';
 

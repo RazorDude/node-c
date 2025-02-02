@@ -1,9 +1,4 @@
-import {
-  DeleteResult,
-  FindResults,
-  PersistanceEntityService,
-  UpdateResult
-} from '@node-c/core/persistance/entityService';
+import { DeleteResult, FindResults, PersistanceEntityService, UpdateResult } from '@node-c/core';
 
 import { mergeDeepRight as merge } from 'ramda';
 

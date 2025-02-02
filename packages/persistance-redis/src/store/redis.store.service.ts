@@ -1,18 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AppConfig, AppConfigPersistanceNoSQL } from '@node-c/core/common/configProvider';
-import { ApplicationError, GenericObject } from '@node-c/core/common/definitions';
+import { AppConfig, AppConfigPersistanceNoSQL, ApplicationError, GenericObject } from '@node-c/core';
 
 import { RedisClientType, createClient } from 'redis';
 import { v4 as uuid } from 'uuid';
 
 import {
-  DeleteOptions,
   GetOptions,
   RedisClientScanMethod,
   RedisTransaction,
   ScanOptions,
-  SetOptions
+  SetOptions,
+  StoreDeleteOptions
 } from './redis.store.definitions';
 
 import { Constants } from '../common/definitions';
@@ -50,9 +49,9 @@ export class RedisStoreService {
     return transactionId;
   }
 
-  async delete(handle: string | string[], options?: DeleteOptions): Promise<number> {
+  async delete(handle: string | string[], options?: StoreDeleteOptions): Promise<number> {
     const { transactions } = this;
-    const { transactionId } = options || ({} as DeleteOptions);
+    const { transactionId } = options || ({} as StoreDeleteOptions);
     if (transactionId) {
       const transaction = transactions[transactionId];
       if (!transaction) {
