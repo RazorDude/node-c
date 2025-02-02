@@ -1,3 +1,5 @@
+import { GenericObject } from '@node-c/core/common/definitions';
+import { PersistanceEntityService, SelectOperator } from '@node-c/core/persistance/entityService';
 import { getNested, setNested } from '@ramster/general-tools';
 
 import immutable from 'immutable';
@@ -8,9 +10,6 @@ import {
   AccessControlUser,
   AccessControlPoint as BaseAccessControlPoint
 } from './iam.accessControl.definitions';
-
-import { GenericObject } from '../../../../common/definitions';
-import { PersistanceEntityService, SelectOperator } from '../../../../persistance/common/entityService';
 
 export class AccessControlService<AccessControlPoint extends BaseAccessControlPoint<unknown>> {
   constructor(

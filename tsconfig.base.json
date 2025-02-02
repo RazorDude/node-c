@@ -20,6 +20,14 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "paths": {
+      "@node-c/api-http/*": ["packages/api-http/dist/*"],
+      "@node-c/api-rest/*": ["packages/api-rest/dist/*"],
+      "@node-c/core/*": ["packages/core/dist/*"],
+      "@node-c/domain-iam/*": ["packages/domain-iam/dist/*"],
+      "@node-c/persistance-rdb/*": ["packages/persistance-rdb/dist/*"],
+      "@node-c/persistance-redis/*": ["packages/persistance-redis/dist/*"]
+    },
     "preserveConstEnums": true,
     "removeComments": true,
     "skipLibCheck": true,

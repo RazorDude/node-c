@@ -1,5 +1,4 @@
 import { ClassProvider, DynamicModule, Provider } from '@nestjs/common';
-import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 import { GenericObject } from '../definitions';
 
@@ -9,9 +8,9 @@ export type ProviderWithInjectionToken = Provider & {
 
 export const loadDynamicModules = (
   folderData: GenericObject<unknown>
-): { controllers?: Provider[]; entities?: EntityClassOrSchema[]; modules?: DynamicModule[]; services?: Provider[] } => {
+): { controllers?: Provider[]; entities?: unknown[]; modules?: DynamicModule[]; services?: Provider[] } => {
   const controllers: Provider[] = [];
-  const entities: EntityClassOrSchema[] = [];
+  const entities: unknown[] = [];
   const modules: DynamicModule[] = [];
   const services: Provider[] = [];
   for (const key in folderData) {
@@ -32,7 +31,7 @@ export const loadDynamicModules = (
       continue;
     }
     if (key.match(/[eE]ntity$/)) {
-      entities.push(folderData[actualKey] as EntityClassOrSchema);
+      entities.push(folderData[actualKey]);
       continue;
     }
     if (key.match(/[mM]odule$/)) {

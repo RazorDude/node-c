@@ -1,14 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigProviderService, RDBType } from '@node-c/core/common/configProvider';
+import { GenericObject } from '@node-c/core/common/definitions';
+import { SelectOperator } from '@node-c/core/persistance/entityService';
 import { getNested } from '@ramster/general-tools';
+
 import { DeleteQueryBuilder, ObjectLiteral, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
 
 import { SoftDeleteQueryBuilder } from 'typeorm/query-builder/SoftDeleteQueryBuilder';
 
 import { IncludeItems, OrderBy, ParsedFilter } from './sqlQueryBuilder.definitions';
 
-import { ConfigProviderService, RDBType } from '../../../common/configProvider';
-import { Constants, GenericObject } from '../../../common/definitions';
-import { SelectOperator } from '../../common/entityService';
+import { Constants } from '../common/definitions';
 
 @Injectable()
 export class SQLQueryBuilderService<T extends ObjectLiteral> {
@@ -17,11 +19,13 @@ export class SQLQueryBuilderService<T extends ObjectLiteral> {
   dbType: RDBType;
   iLikeSupported: boolean;
 
+  // TODO: deletedAt column name
   constructor(
     public configProvider: ConfigProviderService,
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
     public dbConfigPath: string
   ) {
+    // TODO: this won't work, it's the whole config, not the DBType
     this.dbType = getNested(configProvider, dbConfigPath);
     if (this.dbType === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';

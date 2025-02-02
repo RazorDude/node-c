@@ -16,14 +16,17 @@
     "node": ">= 22"
   },
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
+    "build": "",
+    "dev": "",
+    "lint": "",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "dependencies": {
-    "@repo/config-typescript": "*",
-    "@repo/core": "*"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.16.0",
@@ -33,14 +36,8 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.4.2",
-    "turbo": "^2.3.4",
     "typescript": "^4.9.5"
   },
   "peerDependencies": {
-  },
-  "packageManager": "npm@10.8.2",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  }
 }

@@ -3,7 +3,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { SQLQueryBuilderModuleOptions } from './sqlQueryBuilder.definitions';
 import { SQLQueryBuilderService } from './sqlQueryBuilder.service';
 
-import { Constants } from '../../../common/definitions';
+import { Constants } from '../common/definitions';
 
 @Module({})
 export class SQLQueryBuilderModule {

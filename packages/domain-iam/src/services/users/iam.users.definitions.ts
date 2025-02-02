@@ -1,4 +1,5 @@
-import { GenericObject } from '../../../../common/definitions';
+import { GenericObject } from '@node-c/core/common/definitions';
+
 import { AccessControlPoint } from '../accessControl';
 
 export interface GetUserWithPermissionsDataOptions {

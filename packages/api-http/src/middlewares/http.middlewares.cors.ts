@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Response } from 'express';
 
-import { Constants, RequestWithLocals } from '../../../common/definitions';
+import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
 export class HTTPCORSMiddleware implements NestMiddleware {

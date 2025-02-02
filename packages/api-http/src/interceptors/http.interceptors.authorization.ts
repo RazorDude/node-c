@@ -7,11 +7,11 @@ import {
   Injectable,
   NestInterceptor
 } from '@nestjs/common';
+import { AccessControlData, AccessControlService, User as BaseUser } from '@node-c/domain-iam/services';
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
 
-import { Constants, RequestWithLocals } from '../../../common/definitions';
-import { AccessControlData, AccessControlService, User as BaseUser } from '../../../domain/iam';
+import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
 export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, unknown>> implements NestInterceptor {

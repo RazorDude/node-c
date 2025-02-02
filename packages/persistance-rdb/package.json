@@ -1,5 +1,5 @@
 {
-  "name": "@node-c/persistance-redis",
+  "name": "@node-c/persistance-rdb",
   "version": "1.0.0-alpha0",
   "license": "MIT",
   "type": "module",
@@ -9,8 +9,9 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
+    "@nestjs/typeorm": "^11.0.0",
     "class-validator": "^0.14.1",
-    "redis": "^4.7.0",
+    "typeorm": "^0.3.20",
     "uuid": "^11.0.5"
   }
 }

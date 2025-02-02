@@ -1,8 +1,9 @@
 import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from '@nestjs/common';
+import { ApplicationError } from '@node-c/core/common/definitions';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { ApplicationError, ServerError } from '../../../common/definitions';
+import { ServerError } from '../common/definitions/common.errors';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {

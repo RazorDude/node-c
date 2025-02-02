@@ -1,9 +1,15 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
+import { ConfigProviderService } from '@node-c/core/common/configProvider';
+import {
+  User as BaseUser,
+  DecodedTokenContent,
+  IAMTokenManagerService,
+  IAMUsersService
+} from '@node-c/domain-iam/services';
 import { NextFunction, Response } from 'express';
 
-import { ConfigProviderService } from '../../../common/configProvider';
-import { Constants, RequestWithLocals } from '../../../common/definitions';
-import { User as BaseUser, DecodedTokenContent, IAMTokenManagerService, IAMUsersService } from '../../../domain/iam';
+import { Constants, RequestWithLocals } from '../common/definitions';
+
 @Injectable()
 export class HTTPAuthenticationMiddleware<
   UserId,

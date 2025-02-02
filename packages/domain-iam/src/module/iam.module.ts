@@ -1,9 +1,10 @@
 import { DynamicModule } from '@nestjs/common';
 
+import { loadDynamicModules } from '@node-c/core/common/utils';
+
 import { DomainIAMModuleOptions } from './iam.definitions';
 
-import { Constants } from '../../../common/definitions';
-import { loadDynamicModules } from '../../../common/utils';
+import { Constants } from '../common/definitions';
 
 // TODO: this shouldn't be IAM domain specific
 // TODO: rework this to support EITHER modules OR services

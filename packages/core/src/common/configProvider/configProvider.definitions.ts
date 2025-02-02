@@ -210,11 +210,13 @@ export interface GenerateOrmconfigOptions {
   modulePathInProject: string;
 }
 
+// TODO: figure out how to move this to the Redis package
 export enum NoSQLType {
   // eslint-disable-next-line no-unused-vars
   Redis = 'redis'
 }
 
+// TODO: figure out how to move this to the RDB package
 export enum RDBType {
   // eslint-disable-next-line no-unused-vars
   Clickhouse = 'clickhouse',

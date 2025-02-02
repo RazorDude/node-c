@@ -1,5 +1,5 @@
 {
-  "name": "@node-c/persistance-redis",
+  "name": "@node-c/api-rest",
   "version": "1.0.0-alpha0",
   "license": "MIT",
   "type": "module",
@@ -9,8 +9,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "class-validator": "^0.14.1",
-    "redis": "^4.7.0",
-    "uuid": "^11.0.5"
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1"
   }
 }

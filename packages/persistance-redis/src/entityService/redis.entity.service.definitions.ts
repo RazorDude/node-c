@@ -4,7 +4,7 @@ import {
   FindOneOptions as CommonFindOneOptions,
   FindOptions as CommonFindOptions,
   UpdateOptions as CommonUpdateOptions
-} from '@repo/core/domain/entityService';
+} from '@node-c/core/persistance/entityService';
 
 export interface BaseOptions {
   forceTransaction?: boolean;

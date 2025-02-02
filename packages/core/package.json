@@ -1,50 +1,24 @@
 {
-  "name": "@repo/core",
+  "name": "@node-c/core",
   "version": "1.0.0-alpha0",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc"
-  },
-  "exports": {
-    "./app": {
-      "types": "./src/app.ts",
-      "default": "./dist/app.js"
-    },
-    "./common/configProvider": {
-      "types": "./src/common/configProvider/index.ts",
-      "default": "./dist/common/configProvider/index.js"
-    },
-    "./common/definitions": {
-      "types": "./src/common/definitions/index.ts",
-      "default": "./dist/common/definitions/index.js"
-    },
-    "./common/utils": {
-      "types": "./src/common/utils/index.ts",
-      "default": "./dist/common/utils/index.js"
-    },
-    "./domain/entityService": {
-      "types": "./src/domain/entityService/index.ts",
-      "default": "./dist/domain/entityService/index.js"
-    },
-    "./persistance/entityService": {
-      "types": "./src/persistance/entityService/index.ts",
-      "default": "./dist/persistance/entityService/index.js"
-    }
+    "build": "tsc",
+    "check-types": "tsc --noEmit",
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
     "@nestjs/core": "^10.4.12",
     "@ramster/general-tools": "^2.3.0",
+    "dotenv": "^16.4.7",
     "morgan": "^1.10.0",
     "ramda": "^0.30.1"
   },
   "devDependencies": {
-    "@repo/config-typescript": "*",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.1",
-    "@types/ramda": "^0.30.2",
-    "typescript": "latest"
+    "@types/ramda": "^0.30.2"
   }
 }

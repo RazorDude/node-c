@@ -1,4 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
+
+import { AppConfig, AppConfigPersistanceNoSQL } from '@node-c/core/common/configProvider';
+import { ApplicationError, GenericObject } from '@node-c/core/common/definitions';
+
 import { RedisClientType, createClient } from 'redis';
 import { v4 as uuid } from 'uuid';
 
@@ -11,8 +15,7 @@ import {
   SetOptions
 } from './redis.store.definitions';
 
-import { AppConfig, AppConfigPersistanceNoSQL } from '../../../common/configProvider';
-import { ApplicationError, Constants, GenericObject } from '../../../common/definitions';
+import { Constants } from '../common/definitions';
 
 @Injectable()
 export class RedisStoreService {

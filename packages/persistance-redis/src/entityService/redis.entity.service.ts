@@ -1,3 +1,10 @@
+import {
+  DeleteResult,
+  FindResults,
+  PersistanceEntityService,
+  UpdateResult
+} from '@node-c/core/persistance/entityService';
+
 import { mergeDeepRight as merge } from 'ramda';
 
 import { RedisEntity } from './redis.entity';
@@ -11,7 +18,6 @@ import {
   UpdateOptions
 } from './redis.entity.service.definitions';
 
-import { DeleteResult, FindResults, PersistanceEntityService, UpdateResult } from '../../common/entityService';
 import { RedisRepositoryService } from '../repository';
 import { RedisStoreService } from '../store';
 

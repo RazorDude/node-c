@@ -1,4 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+
+import { ApplicationError } from '@node-c/core/common/definitions';
+
 import { validate } from 'class-validator';
 import immutable from 'immutable';
 import { mergeDeepRight } from 'ramda';
@@ -13,7 +16,7 @@ import {
   SaveOptionsOnConflict
 } from './redis.repository.definitions';
 
-import { ApplicationError, Constants } from '../../../common/definitions';
+import { Constants } from '../common/definitions';
 import { RedisStoreService } from '../store';
 
 // TODO: support "paranoid" mode

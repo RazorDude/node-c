@@ -1,6 +1,6 @@
 import { ModuleMetadata } from '@nestjs/common';
 
-import { GenericObject } from '../../../common/definitions';
+import { GenericObject } from '@node-c/core/common/definitions';
 
 export interface RedisModuleOptions {
   exports?: ModuleMetadata['exports'];

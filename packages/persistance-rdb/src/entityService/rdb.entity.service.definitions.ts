@@ -1,12 +1,12 @@
-import { EntityManager } from 'typeorm';
-
 import {
   CountOptions as CommonCountOptions,
   DeleteOptions as CommonDeleteOptions,
   FindOneOptions as CommonFindOneOptions,
   FindOptions as CommonFindOptions,
   UpdateOptions as CommonUpdateOptions
-} from '../../common/entityService';
+} from '@node-c/core/persistance/entityService';
+
+import { EntityManager } from 'typeorm';
 
 export interface BaseOptions {
   forceTransaction?: boolean;

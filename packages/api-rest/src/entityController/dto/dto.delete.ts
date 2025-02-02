@@ -1,6 +1,6 @@
-import { IsDefined, IsObject } from 'class-validator';
+import { GenericObject } from '@node-c/core/common/definitions';
 
-import { GenericObject } from '../../../../common/definitions';
+import { IsDefined, IsObject } from 'class-validator';
 
 export class DeleteDto {
   @IsDefined()

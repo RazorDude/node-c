@@ -1,3 +1,7 @@
+import { AppConfigDomainIAM, ConfigProviderService } from '@node-c/core/common/configProvider';
+import { ApplicationError } from '@node-c/core/common/definitions';
+import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
+import { PersistanceEntityService } from '@node-c/core/persistance/entityService';
 import { getNested } from '@ramster/general-tools';
 import * as jwt from 'jsonwebtoken';
 
@@ -10,11 +14,6 @@ import {
   VerifyAccessTokenOptions,
   VerifyAccessTokenReturnData
 } from './iam.tokenManager.definitions';
-
-import { AppConfigDomainIAM, ConfigProviderService } from '../../../../common/configProvider';
-import { ApplicationError } from '../../../../common/definitions';
-import { PersistanceEntityService } from '../../../../persistance/common/entityService';
-import { DomainPersistanceEntityService } from '../../../common/entityService';
 
 // TODO: console.error -> logger
 // TODO: check whether the JWT library actually computes the hash of the content

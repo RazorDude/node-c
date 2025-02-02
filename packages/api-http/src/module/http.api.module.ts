@@ -1,13 +1,13 @@
 import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
+import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core/common/configProvider';
+import { loadDynamicModules } from '@node-c/core/common/utils';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
 
 import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
-import { AppConfigAPIHTTP, ConfigProviderService } from '../../../common/configProvider';
-import { Constants, RequestWithLocals } from '../../../common/definitions';
-import { loadDynamicModules } from '../../../common/utils';
+import { Constants, RequestWithLocals } from '../common/definitions';
 import { HttpExceptionFilter } from '../exceptionFilters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
 import { HTTPAnonymousRoutesMiddleware, HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';

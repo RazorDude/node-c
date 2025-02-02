@@ -1,5 +1,5 @@
 {
-  "name": "@node-c/persistance-redis",
+  "name": "@node-c/api-http",
   "version": "1.0.0-alpha0",
   "license": "MIT",
   "type": "module",
@@ -9,8 +9,11 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "class-validator": "^0.14.1",
-    "redis": "^4.7.0",
-    "uuid": "^11.0.5"
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.0"
   }
 }

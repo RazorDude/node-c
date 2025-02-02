@@ -1,10 +1,12 @@
 import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { ConfigProviderService } from '@node-c/core/common/configProvider';
+import { loadDynamicModules } from '@node-c/core/common/utils';
+
 import { RDBModuleOptions } from './rdb.module.definitions';
 
-import { ConfigProviderService } from '../../../common/configProvider';
-import { loadDynamicModules } from '../../../common/utils';
 import { SQLQueryBuilderModule } from '../sqlQueryBuilder';
 
 // Note: the services here do not have a wrapping module intentionally - because of how TypeORM imports them,
@@ -23,7 +25,11 @@ export class RDBModule {
             const persistanceConfig = configProvider.config.persistance;
             // example : configProvider.config.persistance.db
             const { host, password, port } = persistanceConfig[moduleName as keyof typeof persistanceConfig];
-            return Object.assign({}, { host, password, port }, { entities, name: connectionName });
+            return Object.assign(
+              {},
+              { host, password, port },
+              { entities: entities as EntityClassOrSchema[], name: connectionName }
+            );
           },
           inject: [ConfigProviderService]
         }),

@@ -1,6 +1,6 @@
-import { IsArray, IsBooleanString, IsNumberString, IsObject, IsOptional } from 'class-validator';
+import { GenericObject } from '@node-c/core/common/definitions';
 
-import { GenericObject } from '../../../../common/definitions';
+import { IsArray, IsBooleanString, IsNumberString, IsObject, IsOptional } from 'class-validator';
 
 export class FindDto {
   @IsObject()

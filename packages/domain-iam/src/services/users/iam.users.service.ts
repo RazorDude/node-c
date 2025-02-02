@@ -1,3 +1,7 @@
+import { AppConfigDomainIAM, ConfigProviderService } from '@node-c/core/common/configProvider';
+import { ApplicationError, GenericObject } from '@node-c/core/common/definitions';
+import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
+import { FindOneOptions, PersistanceEntityService } from '@node-c/core/persistance/entityService';
 import * as bcrypt from 'bcryptjs';
 
 import {
@@ -5,11 +9,6 @@ import {
   UserMFAEntity as BaseUserMFAEntity,
   GetUserWithPermissionsDataOptions
 } from './iam.users.definitions';
-
-import { AppConfigDomainIAM, ConfigProviderService } from '../../../../common/configProvider';
-import { ApplicationError, GenericObject } from '../../../../common/definitions';
-import { FindOneOptions, PersistanceEntityService } from '../../../../persistance/common/entityService';
-import { DomainPersistanceEntityService } from '../../../common/entityService';
 
 import { IAMTokenManagerService } from '../tokenManager';
 

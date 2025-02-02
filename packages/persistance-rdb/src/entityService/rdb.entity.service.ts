@@ -1,5 +1,14 @@
-import { DeepPartial, EntityManager, EntityTarget, Repository } from 'typeorm';
+import { ApplicationError } from '@node-c/core/common/definitions';
+import {
+  DeleteResult,
+  FindResults,
+  NumberItem,
+  PersistanceEntityService,
+  SelectOperator,
+  UpdateResult
+} from '@node-c/core/persistance/entityService';
 
+import { DeepPartial, EntityManager, EntityTarget, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import { RDBEntity } from './rdb.entity';
@@ -15,15 +24,6 @@ import {
   UpdateOptions
 } from './rdb.entity.service.definitions';
 
-import { ApplicationError } from '../../../common/definitions';
-import {
-  DeleteResult,
-  FindResults,
-  NumberItem,
-  PersistanceEntityService,
-  SelectOperator,
-  UpdateResult
-} from '../../common/entityService';
 import { IncludeItems, OrderBy, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
 // TODO: investigate whether it's worth it to make create, bulkCreate and update method more specific

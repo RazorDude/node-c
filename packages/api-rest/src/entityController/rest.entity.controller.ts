@@ -13,16 +13,9 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 
-import {
-  DeleteDto as BaseDeleteDto,
-  FindDto as BaseFindDto,
-  FindOneDto as BaseFindOneDto,
-  UpdateDto as BaseUpdateDto
-} from './dto';
-import { UpdateBody } from './rest.entity.controller.definitions';
-
-import { GenericObject, GenericObjectClass } from '../../../common/definitions';
-import { DomainPersistanceEntityService } from '../../../domain/common/entityService';
+import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http/interceptors';
+import { GenericObject, GenericObjectClass } from '@node-c/core/common/definitions';
+import { DomainPersistanceEntityService } from '@node-c/core/domain/entityService';
 import {
   DeleteOptions,
   DeleteResult,
@@ -31,9 +24,15 @@ import {
   FindResults,
   PersistanceEntityService,
   UpdateResult
-} from '../../../persistance/common/entityService';
+} from '@node-c/core/persistance/entityService';
 
-import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../../http/interceptors';
+import {
+  DeleteDto as BaseDeleteDto,
+  FindDto as BaseFindDto,
+  FindOneDto as BaseFindOneDto,
+  UpdateDto as BaseUpdateDto
+} from './dto';
+import { UpdateBody } from './rest.entity.controller.definitions';
 
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
