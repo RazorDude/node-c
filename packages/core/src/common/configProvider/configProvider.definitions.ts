@@ -6,11 +6,11 @@ import { GenericObject } from '../definitions';
 export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
   API: {
     HTTP: {
-      HOSTNAME: 'host',
+      HOSTNAME: 'hostname',
       PORT: 'port'
     },
     REST: {
-      HOSTNAME: 'host',
+      HOSTNAME: 'hostname',
       PORT: 'port'
     }
   },
@@ -229,9 +229,11 @@ export enum RDBType {
 export type LoadConfigAppConfigs<
   AppConfigCommonType extends AppConfigCommon = AppConfigCommon,
   AppConfigProfileType extends AppConfigProfile = AppConfigProfile
-> = {
-  appConfigCommon: AppConfigCommonType;
-} & GenericObject<AppConfigProfileType>;
+> =
+  | {
+      appConfigCommon: AppConfigCommonType;
+    }
+  | GenericObject<AppConfigProfileType>;
 
 export interface LoadConfigOptions {
   envKeys?: AppConfigFromEnvKeys;

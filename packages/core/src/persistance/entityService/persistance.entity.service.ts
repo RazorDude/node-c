@@ -6,7 +6,7 @@ import {
   FindResults,
   UpdateOptions,
   UpdateResult
-} from './peristance.entity.service.definitions';
+} from './persistance.entity.service.definitions';
 
 import { ApplicationError } from '../../common/definitions';
 

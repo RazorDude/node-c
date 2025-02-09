@@ -26,6 +26,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     public config: AppConfig
   ) {}
 
+  // TODO: consider moving this into the persistance-rdb package
   static async generateOrmconfig<AppConfig extends AppConfigDefault = AppConfigDefault>(
     config: AppConfig,
     options: GenerateOrmconfigOptions

@@ -1,2 +1,2 @@
-export * from './peristance.entity.service';
-export * from './peristance.entity.service.definitions';
+export * from './persistance.entity.service';
+export * from './persistance.entity.service.definitions';

@@ -1,1 +1,1 @@
-export * from './domain.entityService.service';
+export * from './domain.entity.service';
