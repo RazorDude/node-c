@@ -7,7 +7,7 @@ assets
 dist
 docs
 apps/test/envFiles/*
-apps/test/ormconfig*
+ormconfig*
 node_modules
 tmp
 coverage
