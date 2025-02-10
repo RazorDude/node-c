@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { INestApplication, NestModule, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import morgan from 'morgan';
@@ -32,13 +30,13 @@ export class NodeCApp {
       config = await ConfigProviderService.loadConfig(appConfigs, otherOptions);
       if (generateOrmConfig) {
         const moduleOptionsPerName = generateOrmConfigModuleOptions || {};
-        const { general, persistance } = config;
+        const { persistance } = config;
         for (const moduleName in persistance) {
           await ConfigProviderService.generateOrmconfig(config, {
             ...(moduleOptionsPerName[moduleName] || {
-              entitiesPathInModule: path.join(general.projectRootPath, `persistance/${moduleName}/entities`),
-              migrationsPathInModule: path.join(general.projectRootPath, `persistance/${moduleName}/migrations`),
-              modulePathInProject: path.join(general.projectRootPath, `persistance/${moduleName}`)
+              entitiesPathInModule: 'entities',
+              migrationsPathInModule: 'migrations',
+              modulePathInProject: `persistance/${moduleName}`
             }),
             moduleName
           });

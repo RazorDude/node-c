@@ -4,7 +4,7 @@ import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } fro
 import { GenericObject } from '@node-c/core';
 
 import { IAMTokenManagerService } from '../../../../domain/iam';
-import { CacheToken } from '../../../../persistance/cache/';
+import { CacheToken } from '../../../../persistance/cache';
 
 @Injectable()
 @Controller('tokens')

@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -195,29 +195,29 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -278,29 +278,29 @@ export interface NumberItem {
   value: number;
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export enum SelectOperator {</span>
+export enum SelectOperator {
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Between = '$between',</span>
+  Between = '$between',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Contains = '$contains',</span>
+  Contains = '$contains',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Equals = '$eq',</span>
+  Equals = '$eq',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  GreaterThan = '$gt',</span>
+  GreaterThan = '$gt',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  GreaterThanOrEqual = '$gte',</span>
+  GreaterThanOrEqual = '$gte',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  LessThan = '$lt',</span>
+  LessThan = '$lt',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  LessThanOrEqual = '$lte',</span>
+  LessThanOrEqual = '$lte',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Like = '$like',</span>
+  Like = '$like',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  ILike = '$ilike',</span>
+  ILike = '$ilike',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Not = '$not',</span>
+  Not = '$not',
   // eslint-disable-next-line no-unused-vars
-<span class="cstat-no" title="statement not covered" >  Or = '$or'</span>
+  Or = '$or'
 }
 &nbsp;
 export interface UpdateOptions {
@@ -319,7 +319,7 @@ export interface UpdateResult&lt;Item&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-02-09T08:23:06.055Z
+                at 2025-02-10T21:58:01.181Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

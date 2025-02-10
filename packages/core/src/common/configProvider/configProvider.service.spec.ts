@@ -164,6 +164,7 @@ describe('ConfigProviderService', () => {
       appConfigs = im.fromJS(defaultAppConfigs).toJS() as unknown as LoadConfigAppConfigs;
     });
     it('should load and merge configuration from env file and populate nested values', async () => {
+      delete process.env['NODE_ENV'];
       const loadedConfig = await ConfigProviderService.loadConfig(appConfigs, {
         envKeys: defaultEnvKeys,
         envKeysParentNames: defaultEnvKeysParentNames

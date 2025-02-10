@@ -1,5 +1,6 @@
 .DS_Store
 *.tsbuildinfo
+.env
 .turbo
 .vscode
 assets
@@ -9,3 +10,4 @@ apps/test/envFiles/*
 apps/test/ormconfig*
 node_modules
 tmp
+coverage
