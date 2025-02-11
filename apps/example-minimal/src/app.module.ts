@@ -6,31 +6,32 @@ import { RedisStoreModule } from '@node-c/persistance-redis';
 import { AdminAPIModule } from './api/admin';
 import { Constants } from './common/definitions';
 import * as AppConfigs from './config';
-import { DomainIAMModule } from './domain/iam';
+import { DomainIAMModule } from './domain/admin';
 import { PersistanceCacheModule } from './persistance/cache';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
-    envKeys: APP_CONFIG_FROM_ENV_KEYS,
+    envKeys: {
+      ...APP_CONFIG_FROM_ENV_KEYS,
+      API: { ...APP_CONFIG_FROM_ENV_KEYS.API, ADMIN: { HOSTNAME: 'hostname', PORT: 'port' } }
+    },
     envKeysParentNames: {
       API: {
         children: {
-          HTTP: 'http',
-          REST: 'rest'
+          ADMIN: 'admin'
         },
         name: 'api'
       },
       DOMAIN: {
         children: {
-          IAM: 'iam' // add another key _MODULE_TYPE - IAM
+          ADMIN: 'admin'
         },
         name: 'domain'
       },
       PERSISTANCE: {
         children: {
-          MAIN: 'main', // add another key _MODULE_TYPE - RDB
-          CACHE: 'cache' // add another key _MODULE_TYPE - NOSQL
+          CACHE: 'cache'
         },
         name: 'persistance'
       }

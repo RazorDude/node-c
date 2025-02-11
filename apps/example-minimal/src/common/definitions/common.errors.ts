@@ -1,3 +1,3 @@
-export class Placeholdererror {
+export class PlaceholderError {
   property: string;
 }
