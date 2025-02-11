@@ -1,12 +1,11 @@
 .DS_Store
 *.tsbuildinfo
-.env
+*.env
 .turbo
 .vscode
 assets
 dist
 docs
-apps/test/envFiles/*
 ormconfig*
 node_modules
 tmp

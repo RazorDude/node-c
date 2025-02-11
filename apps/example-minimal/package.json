@@ -1,10 +1,10 @@
 {
-  "name": "@node-c/app-test",
+  "name": "node-c-minimal-example",
   "version": "1.0.0-alpha0",
   "license": "MIT",
   "scripts": {
-    "start:debug": "NODE_ENV=local nest start --path=tsconfig.json --debug --watch",
-    "start:local": "NODE_ENV=local nest start --path=tsconfig.json --watch"
+    "start:debug": "NODE_ENV=local nest start --path=tsconfig.build.json --debug --watch",
+    "start:local": "NODE_ENV=local nest start --path=tsconfig.build.json --watch"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
@@ -24,7 +24,6 @@
     "@node-c/api-http": "^1.0.0-alpha0",
     "@node-c/api-rest": "^1.0.0-alpha0",
     "@node-c/core": "^1.0.0-alpha0",
-    "@node-c/domain-iam": "^1.0.0-alpha0",
     "@node-c/persistance-redis": "^1.0.0-alpha0"
   }
 }
