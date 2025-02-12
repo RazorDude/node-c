@@ -15,10 +15,9 @@
     "uninstall": "^0.0.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.12",
+    "@nestjs/cli": "^10.4.9",
     "@types/cookie-parser": "^1.4.8",
-    "@types/express": "^5.0.0",
-    "nest-cli": "^0.0.5"
+    "@types/express": "^5.0.0"
   },
   "peerDependencies": {
     "@node-c/api-http": "^1.0.0-alpha0",

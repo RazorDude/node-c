@@ -16,6 +16,7 @@ import {
 
 import { Constants } from '../common/definitions';
 
+// TODO: support switching between h* and non-h* methods (e.g. hget/get)
 @Injectable()
 export class RedisStoreService {
   protected transactions: GenericObject<RedisTransaction>;

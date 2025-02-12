@@ -1,0 +1,74 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "packages/core/src",
+  "monorepo": true,
+  "root": "packages/core",
+  "compilerOptions": {
+    "tsConfigPath": "packages/core/tsconfig.build.json"
+  },
+  "projects": {
+    "@node-c/app-test": {
+      "type": "application",
+      "root": "apps/test",
+      "entryFile": "main",
+      "sourceRoot": "apps/test/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/test/tsconfig.json"
+      }
+    },
+    "@node-c/api-http": {
+      "type": "library",
+      "root": "packages/api-http",
+      "entryFile": "index",
+      "sourceRoot": "packages/api-http/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/api-http/tsconfig.build.json"
+      }
+    },
+    "@node-c/api-rest": {
+      "type": "library",
+      "root": "packages/api-rest",
+      "entryFile": "index",
+      "sourceRoot": "packages/api-rest/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/api-rest/tsconfig.build.json"
+      }
+    },
+    "@node-c/core": {
+      "type": "library",
+      "root": "packages/core",
+      "entryFile": "index",
+      "sourceRoot": "packages/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/core/tsconfig.build.json"
+      }
+    },
+    "@node-c/domain-iam": {
+      "type": "library",
+      "root": "packages/domain-iam",
+      "entryFile": "index",
+      "sourceRoot": "packages/domain-iam/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/domain-iam/tsconfig.build.json"
+      }
+    },
+    "@node-c/persistance-rdb": {
+      "type": "library",
+      "root": "packages/persistance-rdb",
+      "entryFile": "index",
+      "sourceRoot": "packages/persistance-rdb/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/persistance-rdb/tsconfig.build.json"
+      }
+    },
+    "@node-c/persistance-redis": {
+      "type": "library",
+      "root": "packages/persistance-redis",
+      "entryFile": "index",
+      "sourceRoot": "packages/persistance-redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/persistance-redis/tsconfig.build.json"
+      }
+    }
+  }
+}
