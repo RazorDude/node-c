@@ -4,26 +4,27 @@ import { RedisRepositoryModuleOptions } from './redis.repository.definitions';
 import { RedisRepositoryService } from './redis.repository.service';
 
 import { Constants } from '../common/definitions';
-// import { RedisStoreModule, RedisStoreService } from '../store';
+import { RedisStoreService } from '../store';
 
 @Module({})
 export class RedisRepositoryModule {
   static register<Entity>(options: RedisRepositoryModuleOptions): DynamicModule {
-    // const { persistanceModuleName, schema, storeKey } = options;
-    const { schema } = options;
+    const { schema, storeKey } = options;
     return {
       module: RedisRepositoryModule,
-      // imports: [RedisStoreModule.register({ persistanceModuleName, storeKey })],
       imports: [],
       providers: [
         {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
-        // TODO: provide RedisStoreService via a specific injection token
+        { 
+          provide: Constants.REDIS_STORE_SERVICE,
+          useFactory: (redisStoreService: RedisStoreService) => redisStoreService,
+          inject: [`${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`]
+        },
         RedisRepositoryService<Entity>
       ],
-      // exports: [RedisRepositoryService, RedisStoreService]
       exports: [RedisRepositoryService<Entity>]
     };
   }

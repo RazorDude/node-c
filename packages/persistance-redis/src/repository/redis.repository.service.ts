@@ -22,6 +22,7 @@ import { RedisStoreService } from '../store';
 // TODO: support "paranoid" mode
 // TODO: support filtering by keys AND values, and indexing
 // TODO: support validations according to the rules in the schema
+// TODO: support defining the keys' sdelimiter symbol
 @Injectable()
 export class RedisRepositoryService<Entity> {
   protected primaryKeys: string[];
