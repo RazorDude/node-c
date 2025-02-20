@@ -12,7 +12,6 @@ export class RedisStoreModule {
   static register(options: RedisStoreModuleOptions): DynamicModule {
     const { persistanceModuleName, storeKey } = options;
     const serviceToken = `${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
-    console.log('===> RedisStoreModule.register', serviceToken)
     return {
       global: true,
       module: RedisStoreModule,
@@ -25,9 +24,10 @@ export class RedisStoreModule {
           inject: [ConfigProviderService]
         },
         { provide: Constants.REDIS_CLIENT_STORE_KEY, useValue: storeKey },
-        RedisStoreService
+        RedisStoreService,
+        { provide: serviceToken, useClass: RedisStoreService }
       ],
-      // exports: [{ provide: serviceToken, useClass: RedisStoreService }]
+      exports: [{ provide: serviceToken, useClass: RedisStoreService }]
     };
   }
 }

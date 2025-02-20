@@ -18,14 +18,14 @@ export class RedisRepositoryModule {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
-        { 
-          provide: Constants.REDIS_STORE_SERVICE,
+        {
+          provide: RedisStoreService,
           useFactory: (redisStoreService: RedisStoreService) => redisStoreService,
           inject: [`${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`]
         },
         RedisRepositoryService<Entity>
       ],
-      exports: [RedisRepositoryService<Entity>]
+      exports: [RedisRepositoryService<Entity>, RedisStoreService]
     };
   }
 }
