@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 
 import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
-import { RedisStoreModule } from '@node-c/persistance-redis';
 
 import { AdminAPIModule } from './api/admin';
-import { Constants } from './common/definitions';
 import * as AppConfigs from './config';
 import { DomainIAMModule } from './domain/iam';
 import { PersistanceCacheModule } from './persistance/cache';
@@ -38,10 +36,6 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
-    RedisStoreModule.register({
-      persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
-      storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
-    }),
     PersistanceCacheModule.register(),
     DomainIAMModule.register()
   ];
