@@ -79,14 +79,14 @@ export class RedisStoreService {
   // TODO: support get from transaction data
   async get<Value = unknown>(handle: string, options?: GetOptions): Promise<Value> {
     const { parseToJSON } = options || ({} as GetOptions);
-    const value = this.client.hGet(this.storeKey, handle);
+    const value = await this.client.hGet(this.storeKey, handle);
     return parseToJSON && typeof value === 'string' ? JSON.parse(value) : value;
   }
 
   // TODO: support scan from transaction data
-  async scan<Values = unknown[]>(handle: string, options?: ScanOptions): Promise<Values> {
+  async scan<Values = unknown[]>(handle: string, options: ScanOptions): Promise<Values> {
     const { client, storeKey } = this;
-    const { count, cursor: optCursor, parseToJSON, scanAll, withValues } = options || ({} as ScanOptions);
+    const { count, cursor: optCursor, parseToJSON, scanAll, withValues } = options;
     const method = (typeof withValues === 'undefined' || withValues === true
       ? client.hScan.bind(client)
       : client.hScanNoValues.bind(client)) as unknown as RedisClientScanMethod;
@@ -112,6 +112,9 @@ export class RedisStoreService {
         }
       }
     } else {
+      if (typeof count === 'undefined') {
+        throw new ApplicationError('The "count" options is required when the "findAll" options is not positive.');
+      }
       const { keys: newKeys, tuples: newValues } = await method(storeKey, optCursor || 0, { count, match: handle });
       if (newValues) {
         values = values.concat(newValues);

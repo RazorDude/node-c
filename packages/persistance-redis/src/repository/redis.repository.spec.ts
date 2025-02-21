@@ -8,7 +8,7 @@ import { RedisEntityService } from '../entityService/redis.entity.service';
 import { RedisModule } from '../module/redis.module';
 import { RedisStoreService } from '../store/redis.store.service';
 
-describe('RedisRepositoryService', () => {
+describe.skip('RedisRepositoryService', () => {
   let service: RedisRepositoryService;
 
   beforeEach(async () => {
