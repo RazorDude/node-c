@@ -12,8 +12,7 @@ export class PersistanceCacheModule extends RedisModule {
     return super.register({
       folderData: FolderData,
       moduleClass: PersistanceCacheModule,
-      moduleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
-      storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
+      moduleName: Constants.PERSISTANCE_CACHE_MODULE_NAME
     });
   }
 }

@@ -23,12 +23,12 @@ export class SQLQueryBuilderService<T extends ObjectLiteral> {
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
     public dbConfigPath: string
   ) {
-    // TODO: this won't work, it's the whole config, not the DBType
-    this.dbType = getNested(configProvider, dbConfigPath);
-    if (this.dbType === RDBType.MySQL) {
+    const { type } = getNested(configProvider, dbConfigPath) as { type: RDBType };
+    this.dbType = type;
+    if (type === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';
       this.iLikeSupported = false;
-    } else if (this.dbType === RDBType.PG) {
+    } else if (type === RDBType.PG) {
       this.columnQuotesSymbol = '"';
       this.iLikeSupported = true;
     }

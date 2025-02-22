@@ -35,7 +35,6 @@ export interface PrepareOptions {
 export interface RedisRepositoryModuleOptions {
   persistanceModuleName: string;
   schema: EntitySchema;
-  storeKey: string;
 }
 
 export interface RepositoryFindOptions {

@@ -51,8 +51,7 @@ describe('RedisModule', () => {
       expect(result.providers).toEqual(['prov1']);
       expect(result.exports).toEqual([...dummyModules, 'exp1']);
       expect(RedisStoreModule.register).toHaveBeenCalledWith({
-        persistanceModuleName: options.moduleName,
-        storeKey: options.storeKey
+        persistanceModuleName: options.moduleName
       });
       expect(loadDynamicModules).toHaveBeenCalledWith(options.folderData);
     });

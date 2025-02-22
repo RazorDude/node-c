@@ -13,16 +13,18 @@ interface ProviderObject {
 }
 
 describe('RedisRepositoryModule', () => {
+  const moduleName = 'test';
+  const storeKey = 'test-store';
+
   describe('register', () => {
     const dummySchema: EntitySchema = { columns: {}, name: 'testSchema' };
-    const storeKey = 'myStore';
-    const options = { persistanceModuleName: 'testModule', schema: dummySchema, storeKey };
+    const options = { persistanceModuleName: moduleName, schema: dummySchema, storeKey };
     const dynamicModule = RedisRepositoryModule.register(options);
-    const expectedStoreServiceToken = `${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
+    const expectedStoreServiceToken = `${moduleName}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
     it('should return a dynamic module with the expected properties', () => {
       expect(dynamicModule.module).toBe(RedisRepositoryModule);
       expect(dynamicModule.imports).toEqual([]);
-      expect(dynamicModule.providers).toHaveLength(3);
+      expect(dynamicModule.providers).toHaveLength(4);
       expect(dynamicModule.exports).toEqual([RedisRepositoryService, RedisStoreService]);
     });
     it('should include a provider for Constants.REDIS_REPOSITORY_SCHEMA with useValue equal to schema', () => {

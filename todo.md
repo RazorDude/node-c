@@ -1,0 +1,17 @@
+- Core
+  - General
+    - [] Multi-persistance search in the persistance service
+- Redis
+  - General
+    - [] Configs to be moved out of the core module.
+  - Repository
+    - [] Escape regex symbols in the delimeter for the new RegExp in the repository service.
+  - Store
+    - [] Delimiter
+    - [] Non-hashmap methods
+    - [] Unit tests with a real connection
+    - [x] Store key - take from config, instead of passing to the module separately.
+- RDB
+  - General
+    - [] Configs to be moved out of the core module.
+    - [] MySQL JSON search

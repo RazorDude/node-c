@@ -107,6 +107,8 @@ export interface AppConfigCommonDomainIAM {
 
 export interface AppConfigCommonPersistanceNoSQL {
   type: NoSQLType;
+  storeDelimiter?: string;
+  storeKey: string;
 }
 
 export interface AppConfigCommonPersistanceRDB {

@@ -15,7 +15,7 @@ export const appConfigCommon: AppConfigCommon = {
   },
   general: { projectName: 'node-c-app', projectRootPath: path.join(__dirname, '../../'), projectVersion: '1.0.0' },
   persistance: {
-    cache: { type: NoSQLType.Redis },
+    cache: { type: NoSQLType.Redis, storeKey: 'store-cache' },
     main: { type: RDBType.MySQL }
     // pgDB: { type: RDBType.PG }
   }

@@ -9,8 +9,7 @@ import { RedisStoreService } from '../store';
 @Module({})
 export class RedisRepositoryModule {
   static register<Entity>(options: RedisRepositoryModuleOptions): DynamicModule {
-    // TODO: remove storeKey and use persistanceModuleName instead
-    const { schema, storeKey } = options;
+    const { persistanceModuleName, schema } = options;
     return {
       module: RedisRepositoryModule,
       imports: [],
@@ -19,10 +18,11 @@ export class RedisRepositoryModule {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
+        { provide: Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME, useValue: persistanceModuleName },
         {
           provide: RedisStoreService,
           useFactory: (redisStoreService: RedisStoreService) => redisStoreService,
-          inject: [`${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`]
+          inject: [`${persistanceModuleName}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`]
         },
         RedisRepositoryService<Entity>
       ],

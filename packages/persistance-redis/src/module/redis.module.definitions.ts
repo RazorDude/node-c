@@ -13,5 +13,4 @@ export interface RedisModuleOptions {
   moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
-  storeKey: string;
 }

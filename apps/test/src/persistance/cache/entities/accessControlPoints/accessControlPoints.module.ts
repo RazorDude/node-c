@@ -11,8 +11,7 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     RedisRepositoryModule.register<AccessControlPoint>({
       persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
-      schema: AccessControlPointSchema,
-      storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
+      schema: AccessControlPointSchema
     })
   ],
   providers: [AccessControlPointsEntityService],

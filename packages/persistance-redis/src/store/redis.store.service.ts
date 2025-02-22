@@ -1,6 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AppConfig, AppConfigPersistanceNoSQL, ApplicationError, GenericObject } from '@node-c/core';
+import {
+  AppConfig,
+  AppConfigPersistanceNoSQL,
+  ApplicationError,
+  ConfigProviderService,
+  GenericObject
+} from '@node-c/core';
 
 import { RedisClientType, createClient } from 'redis';
 import { v4 as uuid } from 'uuid';
@@ -16,19 +22,23 @@ import {
 
 import { Constants } from '../common/definitions';
 
-// TODO: support switching between h* and non-h* methods (e.g. hget/get)
+// TODO: support switching between hashmap and non-hashmap methods (e.g. hget/get)
 @Injectable()
 export class RedisStoreService {
+  protected storeKey: string;
   protected transactions: GenericObject<RedisTransaction>;
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
     @Inject(Constants.REDIS_CLIENT)
     // eslint-disable-next-line no-unused-vars
     protected client: RedisClientType,
-    @Inject(Constants.REDIS_CLIENT_STORE_KEY)
-    // eslint-disable-next-line no-unused-vars
-    protected storeKey: string
+    @Inject(Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME)
+    protected persistanceModuleName: string
   ) {
+    const { storeKey } = configProvider.config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
+    this.storeKey = storeKey;
     this.transactions = {};
   }
 

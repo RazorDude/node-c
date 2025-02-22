@@ -1,4 +1,4 @@
-import { AppConfig } from '@node-c/core';
+import { AppConfig, ConfigProviderService } from '@node-c/core';
 import { RedisClientType, createClient } from 'redis';
 import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -25,10 +25,17 @@ vi.mock('uuid', () => {
   };
 });
 
+// TODO: unit tests with a real redis connection
 describe('RedisStoreService', () => {
+  const moduleName = 'test';
+  const storeKey = 'test-store';
+  const configProvider = {
+    config: { persistance: { [moduleName]: { storeKey } } }
+  } as unknown as ConfigProviderService;
+
   describe('constructor', () => {
-    it('should create an instance of the class and set its transactions property to an empty object when called', () => {
-      const service = new RedisStoreService({} as unknown as RedisClientType, 'test');
+    it('should create an instance of the class, set its transactions property to an empty object and set its storeKey correctly when called', () => {
+      const service = new RedisStoreService(configProvider, {} as unknown as RedisClientType, 'test');
       expect((service as unknown as { transactions: unknown }).transactions).toEqual({});
     });
   });
@@ -86,7 +93,6 @@ describe('RedisStoreService', () => {
   });
 
   describe('delete', () => {
-    const storeKey = 'testStoreKey';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
     beforeEach(() => {
@@ -95,7 +101,7 @@ describe('RedisStoreService', () => {
         hDel: vi.fn()
       } as unknown as RedisClientType;
       // Instantiate the service with the dummy client and a test store key.
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should call client.hDel when no transactionId is provided', async () => {
       // Arrange: stub hDel to resolve with a number.
@@ -119,11 +125,11 @@ describe('RedisStoreService', () => {
     });
     it('should call transaction.hDel when transactionId is provided and transaction exists, then return 0', async () => {
       // Arrange: create a dummy transaction object with a mocked hDel method.
-      const handle = 'testHandle';
-      const transactionId = 'existingTransaction';
       const dummyTransaction = {
         hDel: vi.fn().mockReturnValue(42) // The actual return value is not used by delete.
       };
+      const handle = 'testHandle';
+      const transactionId = 'existingTransaction';
       // Inject the dummy transaction into the service's transactions map.
       service['transactions'][transactionId] = dummyTransaction as unknown as RedisTransaction;
       // Act: call delete with a valid transactionId.
@@ -139,7 +145,6 @@ describe('RedisStoreService', () => {
 
   describe('createTransaction', () => {
     const dummyTransaction = { transactionProp: 'dummyValue' };
-    const storeKey = 'testStoreKey';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
     beforeEach(() => {
@@ -147,7 +152,7 @@ describe('RedisStoreService', () => {
       dummyClient = {
         multi: vi.fn().mockReturnValue(dummyTransaction)
       } as unknown as RedisClientType;
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should create a transaction and store it in the transactions map', () => {
       const transactionId = service.createTransaction();
@@ -161,13 +166,12 @@ describe('RedisStoreService', () => {
   });
 
   describe('endTransaction', () => {
-    const storeKey = 'testStoreKey';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
     beforeEach(() => {
       // Create a dummy client. Its methods are not needed for endTransaction.
       dummyClient = {} as RedisClientType;
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should throw an ApplicationError when transaction does not exist', async () => {
       const transactionId = 'nonExistentTransaction';
@@ -201,7 +205,6 @@ describe('RedisStoreService', () => {
   });
 
   describe('get', () => {
-    const storeKey = 'testStoreKey';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
     beforeEach(() => {
@@ -209,7 +212,7 @@ describe('RedisStoreService', () => {
       dummyClient = {
         hGet: vi.fn()
       } as unknown as RedisClientType;
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should return the value as is when parseToJSON is not requested', async () => {
       const expectedValue = { foo: 'bar' };
@@ -239,16 +242,15 @@ describe('RedisStoreService', () => {
   });
 
   describe('scan', () => {
+    const handle = 'pattern';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
-    const handle = 'pattern';
-    const storeKey = 'testStoreKey';
     beforeEach(() => {
       dummyClient = {
         hScan: vi.fn(),
         hScanNoValues: vi.fn()
       } as unknown as RedisClientType;
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should throw an error with the correct message when neither the "cursor" nor the "scanAll" options are provided', async () => {
       await expect(service.scan(handle, {})).rejects.toThrow(
@@ -322,14 +324,13 @@ describe('RedisStoreService', () => {
   });
 
   describe('set', () => {
-    const storeKey = 'testStoreKey';
     let dummyClient: RedisClientType;
     let service: RedisStoreService;
     beforeEach(() => {
       dummyClient = {
         hSet: vi.fn()
       } as unknown as RedisClientType;
-      service = new RedisStoreService(dummyClient, storeKey);
+      service = new RedisStoreService(configProvider, dummyClient, moduleName);
     });
     it('should set a non-string entry using client.hSet when no transactionId is provided and result is "OK"', async () => {
       const entry = { a: 1 };

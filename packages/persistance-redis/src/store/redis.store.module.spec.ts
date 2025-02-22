@@ -10,10 +10,9 @@ import { Constants } from '../common/definitions';
 describe('RedisStoreModule', () => {
   describe('register', () => {
     const dummyOptions = {
-      persistanceModuleName: 'testPersistance',
-      storeKey: 'myStoreKey'
+      persistanceModuleName: 'testPersistance'
     };
-    const serviceToken = `${dummyOptions.storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
+    const serviceToken = `${dummyOptions.persistanceModuleName}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
     it('should return a dynamic module with the expected configuration', () => {
       const dynamicModule = RedisStoreModule.register(dummyOptions);
       expect(dynamicModule).toEqual({
@@ -25,8 +24,7 @@ describe('RedisStoreModule', () => {
             useFactory: expect.any(Function),
             inject: [ConfigProviderService]
           },
-          { provide: Constants.REDIS_CLIENT_STORE_KEY, useValue: dummyOptions.storeKey },
-          RedisStoreService,
+          { provide: Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME, useValue: dummyOptions.persistanceModuleName },
           { provide: serviceToken, useClass: RedisStoreService }
         ],
         exports: [{ provide: serviceToken, useClass: RedisStoreService }]

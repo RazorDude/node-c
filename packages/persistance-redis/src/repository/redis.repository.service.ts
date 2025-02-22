@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ApplicationError } from '@node-c/core';
+import { AppConfigPersistanceNoSQL, ApplicationError, ConfigProviderService } from '@node-c/core';
 
 import { validate } from 'class-validator';
 import immutable from 'immutable';
@@ -26,14 +26,19 @@ import { RedisStoreService } from '../store';
 @Injectable()
 export class RedisRepositoryService<Entity> {
   protected primaryKeys: string[];
+  protected storeDelimiter: string;
 
   constructor(
+    protected configProvider: ConfigProviderService,
+    @Inject(Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME)
+    protected persistanceModuleName: string,
     @Inject(Constants.REDIS_REPOSITORY_SCHEMA)
     // eslint-disable-next-line no-unused-vars
     protected schema: EntitySchema,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
+    const { storeDelimiter } = configProvider.config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
     const { columns } = schema;
     const primaryKeys: string[] = [];
     for (const columnName in columns) {
@@ -43,10 +48,11 @@ export class RedisRepositoryService<Entity> {
       }
     }
     this.primaryKeys = primaryKeys;
+    this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
   }
 
   async find<ResultItem extends Entity | string = Entity>(options: RepositoryFindOptions): Promise<ResultItem[]> {
-    const { primaryKeys, schema, store } = this;
+    const { primaryKeys, schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
     const { exactSearch, filters, findAll, page, perPage, withValues: optWithValues } = options;
     const paginationOptions: { count?: number; cursor?: number } = {};
@@ -54,7 +60,7 @@ export class RedisRepositoryService<Entity> {
     let storeEntityKey = '';
     if (filters) {
       storeEntityKey =
-        '-' +
+        storeDelimiter +
         primaryKeys
           .map(field => {
             const value = filters[field];
@@ -73,7 +79,7 @@ export class RedisRepositoryService<Entity> {
             }
             return '*';
           })
-          .join('-');
+          .join(storeDelimiter);
       if (!findAll) {
         const count = perPage || 100;
         paginationOptions.count = count;
@@ -89,7 +95,7 @@ export class RedisRepositoryService<Entity> {
   }
 
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
-    const { primaryKeys, schema, store } = this;
+    const { primaryKeys, schema, store, storeDelimiter } = this;
     const { columns, name: entityName } = schema;
     const opt = options || ({} as PrepareOptions);
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
@@ -121,17 +127,22 @@ export class RedisRepositoryService<Entity> {
         }
         if (type === EntitySchemaColumnType.Integer) {
           let currentMaxValue =
-            (await store.get<number>(`${entityName}-increment-${columnName}`, { parseToJSON: true })) || 0;
+            (await store.get<number>(`${entityName}${storeDelimiter}increment${storeDelimiter}${columnName}`, {
+              parseToJSON: true
+            })) || 0;
           currentMaxValue++;
-          await store.set(`${entityName}-increment-${columnName}`, currentMaxValue);
+          await store.set(`${entityName}${storeDelimiter}increment${storeDelimiter}${columnName}`, currentMaxValue);
           preparedData[columnName] = currentMaxValue;
-          storeEntityKey += `${currentMaxValue}-`;
+          storeEntityKey += `${currentMaxValue}${storeDelimiter}`;
           continue;
         }
         if (type === EntitySchemaColumnType.UUIDV4) {
-          const newValue = uuid().replace(/-/g, '_');
+          let newValue = uuid();
+          if (storeDelimiter === '-') {
+            newValue = newValue.replace(/-/g, '_');
+          }
           preparedData[columnName] = newValue;
-          storeEntityKey += `${newValue}-`;
+          storeEntityKey += `${newValue}${storeDelimiter}`;
           continue;
         }
         throw new ApplicationError(
@@ -155,7 +166,8 @@ export class RedisRepositoryService<Entity> {
         );
       }
     }
-    storeEntityKey = storeEntityKey.replace(/-$/, '');
+    // TODO: escape regex symbols
+    storeEntityKey = storeEntityKey.replace(new RegExp(`${storeDelimiter}$`), '');
     if (onConflict !== SaveOptionsOnConflict.DoNothing && allPKValuesExist) {
       const existingValue = await store.get<string | undefined>(storeEntityKey, { parseToJSON: false });
       if (existingValue) {
@@ -182,7 +194,7 @@ export class RedisRepositoryService<Entity> {
     data: Entity | Entity[],
     options?: SaveOptions
   ): Promise<ResultItem[]> {
-    const { schema, store } = this;
+    const { schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
     const { delete: optDelete, onConflict, transactionId } = options || ({} as SaveOptions);
     const actualData = data instanceof Array ? data : [data];
@@ -206,7 +218,7 @@ export class RedisRepositoryService<Entity> {
     const results: Entity[] = [];
     for (const i in actualData) {
       const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData[i], prepareOptions);
-      await store.set(`${entityName}-${storeEntityKey}`, validatedEntity, { transactionId });
+      await store.set(`${entityName}${storeDelimiter}${storeEntityKey}`, validatedEntity, { transactionId });
       results.push(validatedEntity);
     }
     return results as ResultItem[];

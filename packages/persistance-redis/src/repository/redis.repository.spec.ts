@@ -1,3 +1,5 @@
+import { AppConfigPersistanceNoSQL, ConfigProviderService } from '@node-c/core';
+
 import classValidator from 'class-validator';
 import { mergeDeepRight } from 'ramda';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,6 +13,7 @@ import {
   SaveOptionsOnConflict
 } from './index';
 
+import { Constants } from '../common/definitions';
 import { RedisStoreService } from '../store';
 
 interface DummyFindOptions {
@@ -29,10 +32,17 @@ class TestRedisRepositoryService<Entity> extends RedisRepositoryService<Entity> 
 }
 
 describe('RedisRepositoryService', () => {
+  const moduleName = 'test';
+  const storeKey = 'test-store';
+  const configProvider = {
+    config: { persistance: { [moduleName]: { storeKey } } }
+  } as unknown as ConfigProviderService;
   let dummySchema: EntitySchema;
   let dummyStore: RedisStoreService;
   let repository: RedisRepositoryService<unknown>;
+
   beforeEach(() => {
+    delete (configProvider.config.persistance[moduleName] as AppConfigPersistanceNoSQL).storeDelimiter;
     // Create a dummy schema with two primary key columns: 'id' and 'code'
     dummySchema = {
       name: 'TestEntity',
@@ -46,15 +56,38 @@ describe('RedisRepositoryService', () => {
       scan: vi.fn()
     } as unknown as RedisStoreService;
     // Instantiate the repository service with the dummy schema and store.
-    repository = new RedisRepositoryService(dummySchema, dummyStore as unknown as RedisStoreService);
+    repository = new RedisRepositoryService(
+      configProvider,
+      moduleName,
+      dummySchema,
+      dummyStore as unknown as RedisStoreService
+    );
   });
+
   describe('constructor', () => {
-    it('should extract primary keys from the provided schema', () => {
+    it('should extract primary keys from the provided schema and set the storeDelimiter to the default, if none is provided in the config', () => {
       // Access the protected primaryKeys property using a type assertion.
       const primaryKeys = (repository as unknown as { primaryKeys: string[] }).primaryKeys;
+      const storeDelimiter = (repository as unknown as { storeDelimiter: string[] }).storeDelimiter;
       expect(primaryKeys).toEqual(['id', 'code']);
+      expect(storeDelimiter).toEqual(Constants.DEFAULT_STORE_DELIMITER);
+    });
+    it('should extract primary keys from the provided schema and set the storeDelimiter correctly, if one is provided in the config', () => {
+      (configProvider.config.persistance[moduleName] as AppConfigPersistanceNoSQL).storeDelimiter = ':';
+      repository = new RedisRepositoryService(
+        configProvider,
+        moduleName,
+        dummySchema,
+        dummyStore as unknown as RedisStoreService
+      );
+      // Access the protected primaryKeys property using a type assertion.
+      const primaryKeys = (repository as unknown as { primaryKeys: string[] }).primaryKeys;
+      const storeDelimiter = (repository as unknown as { storeDelimiter: string[] }).storeDelimiter;
+      expect(primaryKeys).toEqual(['id', 'code']);
+      expect(storeDelimiter).toEqual(':');
     });
   });
+
   describe('find', () => {
     it('should return results when filters are provided with pagination options', async () => {
       // Set up dummy scan to return a resolved array.
@@ -159,6 +192,7 @@ describe('RedisRepositoryService', () => {
       expect(result).toEqual(['resultWithFalse']);
     });
   });
+
   describe('prepare', () => {
     let dummySchema: EntitySchema;
     let dummyStore: RedisStoreService;
@@ -166,7 +200,7 @@ describe('RedisRepositoryService', () => {
     beforeEach(() => {
       dummySchema = { name: 'TestEntity', columns: { id: { primary: true, generated: false } } };
       dummyStore = { get: vi.fn(), set: vi.fn() } as unknown as RedisStoreService;
-      repository = new TestRedisRepositoryService(dummySchema, dummyStore);
+      repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
     });
     it('returns prepared data and storeEntityKey for non-generated PK when value exists', async () => {
       const data = { id: 'abc' };
@@ -177,7 +211,7 @@ describe('RedisRepositoryService', () => {
     });
     it('returns prepared data and storeEntityKey for generated PK when value exists', async () => {
       dummySchema = { name: 'TestEntity', columns: { id: { primary: true, generated: true } } };
-      repository = new TestRedisRepositoryService(dummySchema, dummyStore);
+      repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
       const data = { id: 'abc' };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
       const result = await repository.exposePrepare(data);
@@ -201,7 +235,7 @@ describe('RedisRepositoryService', () => {
         name: 'TestEntity',
         columns: { id: { primary: true, generated: true, type: EntitySchemaColumnType.String } }
       };
-      repository = new TestRedisRepositoryService(dummySchema, dummyStore);
+      repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
       await expect(repository.exposePrepare({}, { generatePrimaryKeys: true })).rejects.toThrow(
         '[RedisRepositoryService TestEntity][Validation Error]: Unrecognized type "string" for PK column id'
       );
@@ -273,6 +307,7 @@ describe('RedisRepositoryService', () => {
       );
     });
   });
+
   describe('save', () => {
     let dummySchema: EntitySchema;
     let dummyStore: RedisStoreService;
@@ -284,7 +319,7 @@ describe('RedisRepositoryService', () => {
         get: vi.fn().mockResolvedValue(undefined),
         set: vi.fn().mockResolvedValue(undefined)
       } as unknown as RedisStoreService;
-      repository = new TestRedisRepositoryService(dummySchema, dummyStore);
+      repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
     });
     it('calls delete branch when options.delete is true', async () => {
       const data = { id: 'abc', value: 123 };

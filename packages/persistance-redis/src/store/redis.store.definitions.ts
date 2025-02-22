@@ -12,7 +12,6 @@ export type RedisClientScanMethod = (
 
 export interface RedisStoreModuleOptions {
   persistanceModuleName: string;
-  storeKey: string;
 }
 
 export type RedisTransaction = ReturnType<RedisClientType['multi']>;
