@@ -10,6 +10,7 @@ import { Constants } from '../common/definitions';
 @Module({})
 export class RedisStoreModule {
   static register(options: RedisStoreModuleOptions): DynamicModule {
+    // TODO use persistanceModuleName for the storeKey instead
     const { persistanceModuleName, storeKey } = options;
     const serviceToken = `${storeKey}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`;
     return {

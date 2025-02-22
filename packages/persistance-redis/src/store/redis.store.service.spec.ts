@@ -2,9 +2,7 @@ import { AppConfig } from '@node-c/core';
 import { RedisClientType, createClient } from 'redis';
 import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RedisTransaction } from './redis.store.definitions';
-
-import { RedisStoreService } from './redis.store.service';
+import { RedisStoreService, RedisTransaction } from './index';
 
 interface TestAppConfig {
   persistance: Record<string, TestAppConfigPersistanceNoSQL>;

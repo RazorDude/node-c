@@ -9,6 +9,7 @@ import { RedisStoreService } from '../store';
 @Module({})
 export class RedisRepositoryModule {
   static register<Entity>(options: RedisRepositoryModuleOptions): DynamicModule {
+    // TODO: remove storeKey and use persistanceModuleName instead
     const { schema, storeKey } = options;
     return {
       module: RedisRepositoryModule,
