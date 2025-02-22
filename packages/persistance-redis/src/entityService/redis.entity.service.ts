@@ -62,11 +62,10 @@ export class RedisEntityService<Entity extends RedisEntity<unknown>> extends Per
 
   async delete(options: DeleteOptions): Promise<DeleteResult> {
     const { repository, store } = this;
-    const actualOptions = Object.assign(options || {}) as DeleteOptions;
-    const { filters, forceTransaction, transactionId } = actualOptions;
+    const { filters, forceTransaction, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.delete({ ...actualOptions, transactionId: tId });
+      const result = await this.delete({ ...options, transactionId: tId });
       await store.endTransaction(tId);
       return result;
     }
@@ -104,11 +103,10 @@ export class RedisEntityService<Entity extends RedisEntity<unknown>> extends Per
 
   async update(data: Entity, options: UpdateOptions): Promise<UpdateResult<Entity>> {
     const { repository, store } = this;
-    const actualOptions = Object.assign(options || {}) as UpdateOptions;
-    const { filters, forceTransaction, transactionId } = actualOptions;
+    const { filters, forceTransaction, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.update(data, { ...actualOptions, transactionId: tId });
+      const result = await this.update(data, { ...options, transactionId: tId });
       await store.endTransaction(tId);
       return result;
     }
