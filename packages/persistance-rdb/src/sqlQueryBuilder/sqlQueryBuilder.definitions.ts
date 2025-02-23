@@ -1,5 +1,13 @@
 import { GenericObject } from '@node-c/core';
 
+export interface BuildQueryOptions {
+  where?: { [fieldName: string]: ParsedFilter };
+  include?: IncludeItems;
+  orderBy?: OrderBy[];
+  select?: string[];
+  withDeleted?: boolean;
+}
+
 export interface IncludeItems {
   [relationProperty: string]: string;
 }
@@ -9,11 +17,11 @@ export interface OrderBy {
   direction: 'ASC' | 'DESC';
 }
 
-export interface SQLQueryBuilderModuleOptions {
-  dbConfigPath: string;
-}
-
 export interface ParsedFilter {
   params?: GenericObject<unknown>;
   query: string;
+}
+
+export interface SQLQueryBuilderModuleOptions {
+  dbConfigPath: string;
 }

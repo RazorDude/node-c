@@ -6,12 +6,12 @@ import { getNested } from '@ramster/general-tools';
 import { DeleteQueryBuilder, ObjectLiteral, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
 import { SoftDeleteQueryBuilder } from 'typeorm/query-builder/SoftDeleteQueryBuilder';
 
-import { IncludeItems, OrderBy, ParsedFilter } from './sqlQueryBuilder.definitions';
+import { BuildQueryOptions, IncludeItems, OrderBy, ParsedFilter } from './sqlQueryBuilder.definitions';
 
 import { Constants } from '../common/definitions';
 
 @Injectable()
-export class SQLQueryBuilderService<T extends ObjectLiteral> {
+export class SQLQueryBuilderService<Entity extends ObjectLiteral> {
   allowedStringOperators: string[] = Object.values(SelectOperator);
   columnQuotesSymbol: string;
   dbType: RDBType;
@@ -35,14 +35,12 @@ export class SQLQueryBuilderService<T extends ObjectLiteral> {
   }
 
   buildQuery(
-    queryBuilder: SelectQueryBuilder<T> | UpdateQueryBuilder<T> | DeleteQueryBuilder<T> | SoftDeleteQueryBuilder<T>,
-    options: {
-      where?: { [fieldName: string]: ParsedFilter };
-      include?: IncludeItems;
-      orderBy?: OrderBy[];
-      select?: string[];
-      withDeleted?: boolean;
-    }
+    queryBuilder:
+      | SelectQueryBuilder<Entity>
+      | UpdateQueryBuilder<Entity>
+      | DeleteQueryBuilder<Entity>
+      | SoftDeleteQueryBuilder<Entity>,
+    options: BuildQueryOptions
   ): void {
     const { where, include, orderBy, select, withDeleted = false } = options;
     const cqs = this.columnQuotesSymbol;
@@ -108,15 +106,20 @@ export class SQLQueryBuilderService<T extends ObjectLiteral> {
     isNot: boolean,
     operator?: SelectOperator
   ): ParsedFilter {
-    const cqs = this.columnQuotesSymbol;
+    const { columnQuotesSymbol: cqs, dbType } = this;
     const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}`;
     const parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
-    // TODO: make this work for MySQL, as it will only work for PG
     if (operator === SelectOperator.Contains) {
+      let query = '';
+      if (dbType === RDBType.MySQL) {
+        query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
+      } else if (dbType === RDBType.PG) {
+        query = `${fieldString} ? :${escapedFieldAlias}`;
+      }
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString} ? :${escapedFieldAlias}`
+        query
       };
     }
     if (operator === SelectOperator.GreaterThan) {

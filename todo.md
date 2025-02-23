@@ -15,3 +15,7 @@
   - General
     - [] Configs to be moved out of the core module.
     - [] MySQL JSON search
+- API Client
+  - [] New package to be created
+  - [] Support for Basic and Bearer auth
+  - [] Ability to reconnect / reauthenticate
