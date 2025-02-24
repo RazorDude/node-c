@@ -562,6 +562,18 @@ describe('SQLQueryBuilderService', () => {
       // Expect its query to contain an equality condition.
       expect(result.where['relation.field'].query).toContain(' = ');
     });
+    it('should handle an array of undefined values with non-nested data', () => {
+      const filters = { arr: [undefined] };
+      const result = service.parseFilters(entityName, filters, { isTopLevel: true });
+      expect(result.where).toEqual({});
+      expect(result.include).toEqual({});
+    });
+    it('should handle an array of undefined values with nested data', () => {
+      const filters = { arr: [undefined, { a: undefined }] };
+      const result = service.parseFilters(entityName, filters, { isTopLevel: true });
+      expect(result.where).toEqual({});
+      expect(result.include).toEqual({});
+    });
     it('should handle an array of primitives with an in clause', () => {
       const filters = { arr: [1, 2, 3] };
       const result = service.parseFilters(entityName, filters, { isTopLevel: true });

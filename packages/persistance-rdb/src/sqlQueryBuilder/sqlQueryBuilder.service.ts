@@ -17,7 +17,7 @@ export class SQLQueryBuilderService<Entity extends ObjectLiteral> {
   dbType: RDBType;
   iLikeSupported: boolean;
 
-  // TODO: deletedAt column name
+  // TODO: createdAt, updatedAt and deletedAt column names
   constructor(
     public configProvider: ConfigProviderService,
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
@@ -345,6 +345,9 @@ export class SQLQueryBuilderService<Entity extends ObjectLiteral> {
             fieldAlias,
             operator
           );
+          if (itemData.parsedFilter.query === '()') {
+            continue;
+          }
           where[fieldName] = itemData.parsedFilter;
           include = { ...include, ...itemData.include };
         }
