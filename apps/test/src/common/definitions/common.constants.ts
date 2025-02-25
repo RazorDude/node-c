@@ -4,6 +4,10 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   PERSISTANCE_CACHE_MODULE_NAME = 'cache',
   // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_DB_MODULE_CONNECTION_NAME = 'db_connection',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_DB_MODULE_NAME = 'db',
+  // eslint-disable-next-line no-unused-vars
   DOMAIN_IAM_MODULE_NAME = 'iam'
 }
 

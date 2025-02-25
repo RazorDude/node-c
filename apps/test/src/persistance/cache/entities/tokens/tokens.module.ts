@@ -11,8 +11,7 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     RedisRepositoryModule.register({
       persistanceModuleName: Constants.PERSISTANCE_CACHE_MODULE_NAME,
-      schema: CacheTokenSchema,
-      storeKey: Constants.PERSISTANCE_CACHE_MODULE_STORE_KEY
+      schema: CacheTokenSchema
     })
   ],
   providers: [CacheTokensEntityService],

@@ -1,4 +1,4 @@
-import { Controller, Get, Injectable } from '@nestjs/common';
+import { Controller, Injectable } from '@nestjs/common';
 
 import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } from '@node-c/api-rest';
 import { GenericObject } from '@node-c/core';
@@ -22,10 +22,5 @@ export class AdminTokensEntityController extends RESTAPIEntityControler<
 > {
   constructor(protected domainEntityService: IAMTokenManagerService) {
     super(domainEntityService, {});
-  }
-
-  @Get('test')
-  async test(): Promise<unknown> {
-    return await this.domainEntityService.test();
   }
 }

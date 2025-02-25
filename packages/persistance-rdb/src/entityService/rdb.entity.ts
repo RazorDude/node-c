@@ -7,6 +7,13 @@ export interface RDBEntity {
   updatedAt: Date;
 }
 
+export class RDBEntityClass implements RDBEntity {
+  createdAt: Date;
+  deletedAt?: Date;
+  id: number;
+  updatedAt: Date;
+}
+
 export const RDBEntitySchema: {
   columns: { [columnName: string]: EntitySchemaColumnOptions };
 } = {

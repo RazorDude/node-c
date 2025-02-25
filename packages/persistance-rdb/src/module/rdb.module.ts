@@ -37,9 +37,7 @@ export class RDBModule {
         ...(modules || []),
         ...(importsAtEnd || [])
       ],
-      // providers: [...(options.providers || []), ...(services || [])],
       providers: [...(options.providers || [])],
-      // exports: [...(services || []), ...(options.exports || [])]
       exports: [...(modules || []), ...(options.exports || [])]
     };
   }
