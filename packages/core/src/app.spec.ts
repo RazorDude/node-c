@@ -24,7 +24,7 @@ const appModuleOptions = {
       },
       api: { test: {} },
       domain: {},
-      persistance: { db: { type: 'mysql', extra: 'foo' } }
+      persistance: { db: { type: 'mysql', extra: 'foo' }, notADb: { type: 'unsupported' } }
     },
     appConfigProfileLocal: {
       general: { environment: AppEnvironment.Local }
@@ -83,7 +83,7 @@ describe('NodeCApp.start', () => {
         db: {
           entitiesPathInModule: 'entities',
           migrationsPathInModule: 'migrations',
-          modulePathInProject: 'persistance/db'
+          modulePathInProject: 'src/persistance/db'
         }
       },
       loadConfigOptions: appModuleOptions

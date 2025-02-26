@@ -42,7 +42,7 @@ describe('ConfigProviderService', () => {
       entitiesPathInModule: 'entities',
       migrationsPathInModule: 'migrations',
       moduleName: defaultFakeModuleName,
-      modulePathInProject: 'persistance/db'
+      modulePathInProject: 'src/persistance/db'
     };
     const defaultFakeConfig: AppConfig = {
       api: {},
