@@ -23,5 +23,5 @@ export interface ParsedFilter {
 }
 
 export interface SQLQueryBuilderModuleOptions {
-  dbConfigPath: string;
+  persistanceModuleName: string;
 }

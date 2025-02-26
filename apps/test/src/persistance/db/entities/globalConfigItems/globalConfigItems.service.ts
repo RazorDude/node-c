@@ -11,7 +11,7 @@ import { GlobalConfigItem, GlobalConfigItemEntity } from './globalConfigItems.en
 export class GlobalConfigItemsService extends RDBEntityService<GlobalConfigItem> {
   constructor(
     @Inject(SQLQueryBuilderService)
-    qb: SQLQueryBuilderService<GlobalConfigItem>,
+    qb: SQLQueryBuilderService,
     @InjectRepository(GlobalConfigItemEntity)
     repository: Repository<GlobalConfigItem>
   ) {

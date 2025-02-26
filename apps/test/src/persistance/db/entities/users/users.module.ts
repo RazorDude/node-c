@@ -1,14 +1,20 @@
 import { Module } from '@nestjs/common';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { RDBRepositoryModule } from '@node-c/persistance-rdb';
 
 import { UserEntity } from './users.entity';
 import { UsersService } from './users.service';
 import { UserSubscriber } from './users.subscriber';
 
+import { Constants } from '../../../../common/definitions';
+
 @Module({
-  // TODO: check if removing TypeOrmModule here works and apply it elsewhere
-  imports: [TypeOrmModule.forFeature([UserEntity])],
+  imports: [
+    RDBRepositoryModule.register({
+      entityClass: UserEntity,
+      persistanceModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
+    })
+  ],
   providers: [UsersService, UserSubscriber],
   exports: [UsersService, UserSubscriber]
 })

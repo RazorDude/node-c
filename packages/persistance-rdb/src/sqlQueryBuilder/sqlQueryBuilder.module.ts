@@ -8,17 +8,19 @@ import { Constants } from '../common/definitions';
 @Module({})
 export class SQLQueryBuilderModule {
   static register(options: SQLQueryBuilderModuleOptions): DynamicModule {
-    const { dbConfigPath } = options;
+    const { persistanceModuleName } = options;
+    const serviceToken = `${persistanceModuleName}${Constants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`;
     return {
+      global: true,
       module: SQLQueryBuilderModule,
       providers: [
         {
           provide: Constants.SQL_BUILDER_DB_CONFIG_PATH,
-          useValue: dbConfigPath
+          useValue: `config.persistance.${persistanceModuleName}`
         },
-        SQLQueryBuilderService
+        { provide: serviceToken, useClass: SQLQueryBuilderService }
       ],
-      exports: [SQLQueryBuilderService]
+      exports: [{ provide: serviceToken, useClass: SQLQueryBuilderService }]
     };
   }
 }

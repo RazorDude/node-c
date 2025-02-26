@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ApplicationError, UpdateResult } from '@node-c/core';
@@ -15,8 +15,7 @@ import { User, UserEntity } from './users.entity';
 @Injectable()
 export class UsersService extends RDBEntityService<User> {
   constructor(
-    @Inject(SQLQueryBuilderService)
-    qb: SQLQueryBuilderService<User>,
+    qb: SQLQueryBuilderService,
     @InjectRepository(UserEntity)
     repository: Repository<User>
   ) {

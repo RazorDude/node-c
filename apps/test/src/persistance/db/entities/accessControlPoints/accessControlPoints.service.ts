@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
@@ -10,8 +10,7 @@ import { AccessControlPoint, AccessControlPointEntity } from './accessControlPoi
 @Injectable()
 export class AccessControlPointsService extends RDBEntityService<AccessControlPoint> {
   constructor(
-    @Inject(SQLQueryBuilderService)
-    qb: SQLQueryBuilderService<AccessControlPoint>,
+    qb: SQLQueryBuilderService,
     @InjectRepository(AccessControlPointEntity)
     repository: Repository<AccessControlPoint>
   ) {

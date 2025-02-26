@@ -34,7 +34,7 @@ import { IncludeItems, OrderBy, ParsedFilter, SQLQueryBuilderService } from '../
 export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntityService<Entity> {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected qb: SQLQueryBuilderService<Entity>,
+    protected qb: SQLQueryBuilderService,
     // eslint-disable-next-line no-unused-vars
     protected repository: Repository<Entity>
   ) {
@@ -85,7 +85,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters!);
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
-    this.qb.buildQuery(queryBuilder, { where, include, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, { where, include, withDeleted });
     return await queryBuilder.getCount();
   }
 
@@ -112,7 +112,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery(queryBuilder, { where });
+    this.qb.buildQuery<Entity>(queryBuilder, { where });
     const result = await queryBuilder.execute();
     return { count: typeof result.affected === 'number' ? result.affected : undefined };
   }
@@ -155,7 +155,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
       include = { ...parsedOrderByData.include, ...include };
       orderBy = [...parsedOrderByData.orderBy];
     }
-    this.qb.buildQuery(queryBuilder, { where, include, orderBy, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, { where, include, orderBy, withDeleted });
     if (!findAll) {
       queryBuilder.skip((page - 1) * perPage).take(perPage + 1);
       findResults.page = page;
@@ -200,7 +200,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
       const parsedOrderByData = this.qb.parseOrderBy(tableName, optOrderBy);
       orderBy = [...parsedOrderByData.orderBy];
     }
-    this.qb.buildQuery(queryBuilder, { where, include, orderBy, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, { where, include, orderBy, withDeleted });
     return await queryBuilder.getOne();
   }
 
@@ -301,7 +301,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery(queryBuilder, { where });
+    this.qb.buildQuery<Entity>(queryBuilder, { where });
     if (returnData) {
       const result = await queryBuilder.returning('*').execute();
       return { items: result.raw };

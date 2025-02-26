@@ -11,7 +11,7 @@ import { BuildQueryOptions, IncludeItems, OrderBy, ParsedFilter } from './sqlQue
 import { Constants } from '../common/definitions';
 
 @Injectable()
-export class SQLQueryBuilderService<Entity extends ObjectLiteral> {
+export class SQLQueryBuilderService {
   allowedStringOperators: string[] = Object.values(SelectOperator);
   columnQuotesSymbol: string;
   dbType: RDBType;
@@ -34,7 +34,7 @@ export class SQLQueryBuilderService<Entity extends ObjectLiteral> {
     }
   }
 
-  buildQuery(
+  buildQuery<Entity extends ObjectLiteral>(
     queryBuilder:
       | SelectQueryBuilder<Entity>
       | UpdateQueryBuilder<Entity>

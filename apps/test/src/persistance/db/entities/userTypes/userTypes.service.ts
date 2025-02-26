@@ -11,7 +11,7 @@ import { UserType, UserTypeEntity } from './userTypes.entity';
 export class UserTypesService extends RDBEntityService<UserType> {
   constructor(
     @Inject(SQLQueryBuilderService)
-    qb: SQLQueryBuilderService<UserType>,
+    qb: SQLQueryBuilderService,
     @InjectRepository(UserTypeEntity)
     entity: Repository<UserType>
   ) {

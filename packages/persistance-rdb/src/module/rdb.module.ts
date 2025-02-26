@@ -1,8 +1,8 @@
 import { DynamicModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
-import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
+import { AppConfigPersistanceRDB, ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import { RDBModuleOptions } from './rdb.module.definitions';
 
@@ -16,6 +16,7 @@ export class RDBModule {
     const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
     const { entities, modules } = loadDynamicModules(folderData);
     return {
+      global: true,
       module: moduleClass as DynamicModule['module'],
       imports: [
         ...(importsPreORM || []),
@@ -23,16 +24,23 @@ export class RDBModule {
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
             // example : configProvider.config.persistance.db
-            const { host, password, port } = persistanceConfig[moduleName as keyof typeof persistanceConfig];
-            return Object.assign(
-              {},
-              { host, password, port },
-              { entities: entities as EntityClassOrSchema[], name: connectionName }
-            );
+            const { database, host, password, port, type, user } = persistanceConfig[
+              moduleName as keyof typeof persistanceConfig
+            ] as AppConfigPersistanceRDB;
+            return {
+              database,
+              entities: entities as EntityClassOrSchema[],
+              host,
+              name: connectionName,
+              password,
+              port,
+              type,
+              username: user
+            } as TypeOrmModuleOptions;
           },
           inject: [ConfigProviderService]
         }),
-        SQLQueryBuilderModule.register({ dbConfigPath: `config.persistance.${moduleName}` }),
+        SQLQueryBuilderModule.register({ persistanceModuleName: moduleName }),
         ...(importsPostORM || []),
         ...(modules || []),
         ...(importsAtEnd || [])

@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { RDBRepositoryModule } from '@node-c/persistance-rdb';
 
 import { UserAccountStatusEntity } from './userAccountStatuses.entity';
 import { UserAccountStatusesService } from './userAccountStatuses.service';
 
+import { Constants } from '../../../../common/definitions';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([UserAccountStatusEntity])],
+  imports: [
+    RDBRepositoryModule.register({
+      entityClass: UserAccountStatusEntity,
+      persistanceModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
+    })
+  ],
   providers: [UserAccountStatusesService],
-  exports: [UserAccountStatusesService, TypeOrmModule]
+  exports: [UserAccountStatusesService]
 })
 export class UserAccountStatusesModule {}

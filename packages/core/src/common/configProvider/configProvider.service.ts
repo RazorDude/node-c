@@ -47,6 +47,10 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         continue;
       }
       const entityFolderPath = path.join(entitiesDirPath, entityName);
+      const entityFolderChildItemStat = await fs.lstat(entityFolderPath);
+      if (!entityFolderChildItemStat.isDirectory()) {
+        continue;
+      }
       const entityFolderData = await fs.readdir(entityFolderPath);
       for (const j in entityFolderData) {
         const entityFolderFileName = entityFolderData[j];

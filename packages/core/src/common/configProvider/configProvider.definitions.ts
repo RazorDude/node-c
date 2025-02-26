@@ -28,6 +28,7 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
       USER: 'user'
     },
     RDB: {
+      DATABASE_NAME: 'database',
       HOST: 'host',
       PASSWORD: 'password',
       PORT: 'port',
@@ -156,6 +157,7 @@ export interface AppConfigFromEnvPersistanceNoSQL {
 }
 
 export interface AppConfigFromEnvPersistanceRDB {
+  database: string;
   host: string;
   password: string;
   port: number;
@@ -225,7 +227,7 @@ export enum RDBType {
   // eslint-disable-next-line no-unused-vars
   MySQL = 'mysql',
   // eslint-disable-next-line no-unused-vars
-  PG = 'pg'
+  PG = 'postgres'
 }
 
 export type LoadConfigAppConfigs<

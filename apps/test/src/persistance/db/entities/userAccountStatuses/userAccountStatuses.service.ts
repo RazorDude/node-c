@@ -10,7 +10,7 @@ import { UserAccountStatus, UserAccountStatusEntity } from './userAccountStatuse
 export class UserAccountStatusesService extends RDBEntityService<UserAccountStatus> {
   constructor(
     @Inject(SQLQueryBuilderService)
-    qb: SQLQueryBuilderService<UserAccountStatus>,
+    qb: SQLQueryBuilderService,
     @InjectRepository(UserAccountStatusEntity)
     entity: Repository<UserAccountStatus>
   ) {

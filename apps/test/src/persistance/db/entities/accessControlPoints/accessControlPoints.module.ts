@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { RDBRepositoryModule } from '@node-c/persistance-rdb';
 
 import { AccessControlPointEntity } from './accessControlPoints.entity';
 import { AccessControlPointsService } from './accessControlPoints.service';
 
+import { Constants } from '../../../../common/definitions';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([AccessControlPointEntity])],
+  imports: [
+    RDBRepositoryModule.register({
+      entityClass: AccessControlPointEntity,
+      persistanceModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
+    })
+  ],
   providers: [AccessControlPointsService],
-  exports: [AccessControlPointsService, TypeOrmModule]
+  exports: [AccessControlPointsService]
 })
 export class AccessControlPointsModule {}

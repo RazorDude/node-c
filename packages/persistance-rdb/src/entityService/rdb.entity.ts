@@ -19,11 +19,12 @@ export const RDBEntitySchema: {
 } = {
   columns: {
     createdAt: {
-      type: 'timestamp with time zone',
+      // type: 'timestamp with time zone',
+      type: 'datetime',
       createDate: true
     },
     deletedAt: {
-      type: 'timestamp with time zone',
+      type: 'datetime',
       deleteDate: true
     },
     id: {
@@ -32,7 +33,7 @@ export const RDBEntitySchema: {
       generated: true
     },
     updatedAt: {
-      type: 'timestamp with time zone',
+      type: 'datetime',
       updateDate: true
     }
   }
