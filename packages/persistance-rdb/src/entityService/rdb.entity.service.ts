@@ -2,16 +2,15 @@ import {
   ApplicationError,
   DeleteResult,
   FindResults,
+  GenericObject,
   NumberItem,
   PersistanceEntityService,
   SelectOperator,
   UpdateResult
 } from '@node-c/core';
 
-import { DeepPartial, EntityManager, EntityTarget, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, EntitySchema, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-
-import { RDBEntity } from './rdb.entity';
 
 import {
   BulkCreateOptions,
@@ -26,19 +25,58 @@ import {
 
 import { IncludeItems, OrderBy, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
-// TODO: investigate whether it's worth it to make create, bulkCreate and update method more specific
+// TODO: investigate whether it's worth it to make the create, bulkCreate and update methods more specific
 // with generic data objects for the data passed to them
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
-export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntityService<Entity> {
+export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceEntityService<Entity> {
+  protected primaryKeys: string[];
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected qb: SQLQueryBuilderService,
     // eslint-disable-next-line no-unused-vars
-    protected repository: Repository<Entity>
+    protected repository: Repository<Entity>,
+    protected schema: EntitySchema
   ) {
     super();
+    const { columns } = schema.options;
+    const primaryKeys: string[] = [];
+    for (const columnName in columns) {
+      if (columns[columnName]?.primary) {
+        primaryKeys.push(columnName);
+      }
+    }
+    this.primaryKeys = primaryKeys;
+  }
+
+  protected buildPrimaryKeyWhereClause(data: Entity[]): { field: string; value: ParsedFilter } {
+    const { primaryKeys, qb, repository } = this;
+    const { columnQuotesSymbol: cqs } = qb;
+    const tableName = repository.metadata.tableName;
+    if (primaryKeys.length === 1) {
+      const [primaryKey] = primaryKeys;
+      return {
+        field: primaryKey,
+        value: {
+          params: { [primaryKey]: data.map(item => item[primaryKey]) },
+          query: `${cqs}${tableName}${cqs}.${cqs}${primaryKey}${cqs} in :${primaryKey}`
+        }
+      };
+    }
+    const params: GenericObject<unknown> = {};
+    const query: string[] = [];
+    data.forEach((item, itemIndex) => {
+      const innerQuery: string[] = [];
+      primaryKeys.forEach(fieldName => {
+        const primaryKeyName = `${fieldName}${itemIndex}`;
+        params[primaryKeyName] = item[fieldName];
+        innerQuery.push(`${cqs}${tableName}${cqs}.${cqs}${fieldName}${cqs} = :${primaryKeyName}`);
+      });
+      query.push(`(${innerQuery.join(' and ')})`);
+    });
+    return { field: SelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
@@ -67,7 +105,9 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
       if (error.code === PostgresErrorCode.UniqueViolation) {
         const extractVariableName = new RegExp(/^Key \((.*)\)\=(.*)$/g);
         const result = extractVariableName.exec(error.detail as string);
-        throw new ApplicationError(`${error.table} ${result ? result[1] : 'name'} needs to be unique`);
+        throw new ApplicationError(
+          `${error.table} ${result ? result[1] : 'a coumn value you have provided'} needs to be unique`
+        );
       }
       throw e;
     }
@@ -96,7 +136,6 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
         return this.delete({ ...options, transactionManager: tm });
       });
     }
-    const { columnQuotesSymbol: cqs } = this.qb;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.tableName;
     const deleteType = softDelete ? 'softDelete' : 'delete';
@@ -105,10 +144,8 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length) {
       const findData = await this.find({ filters, transactionManager });
-      where.id = {
-        params: { id: findData.items.map(item => item.id) },
-        query: `${cqs}${tableName}${cqs}.id = :id`
-      };
+      const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
+      where[field] = value;
     } else {
       where = parsedWhere;
     }
@@ -216,6 +253,7 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
   }
 
   // TODO: introduce this in the bulkCreate, create, update and delete methods
+  // TODO: support a primary key that's not "id", as well as multiple primary keys
   protected async processManyToMany(
     data: {
       counterpartColumn: string;
@@ -283,7 +321,6 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
         return this.update(data, { ...options, transactionManager: tm });
       });
     }
-    const { columnQuotesSymbol: cqs } = this.qb;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.tableName;
     const queryBuilder = this.getRepository(transactionManager)
@@ -294,10 +331,8 @@ export class RDBEntityService<Entity extends RDBEntity> extends PersistanceEntit
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length) {
       const findData = await this.find({ filters, transactionManager });
-      where.id = {
-        params: { id: findData.items.map(item => item.id) },
-        query: `${cqs}${tableName}${cqs}.id = :id`
-      };
+      const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
+      where[field] = value;
     } else {
       where = parsedWhere;
     }

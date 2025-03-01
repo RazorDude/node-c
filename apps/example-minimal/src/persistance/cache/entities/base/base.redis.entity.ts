@@ -1,4 +1,4 @@
-import { EntitySchema, EntitySchemaColumnType } from '../repository';
+import { EntitySchema, EntitySchemaColumnType } from '@node-c/persistance-redis';
 
 export interface RedisEntity<Id> {
   createdAt: Date;
@@ -21,7 +21,7 @@ export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: s
       },
       id: {
         type: idColumn,
-        isCreationDate: true
+        primary: true
       },
       updatedAt: {
         type: EntitySchemaColumnType.TimestampTz,

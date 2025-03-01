@@ -1,8 +1,8 @@
-import { RDBEntity, RDBEntitySchema } from '@node-c/persistance-rdb';
-
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-export interface UserAccountStatus<User extends RDBEntity = RDBEntity> extends RDBEntity {
+import { DBEntity, DBEntitySchema } from '../../base';
+
+export interface UserAccountStatus<User extends DBEntity = DBEntity> extends DBEntity {
   label: string;
   name: string;
   userLoginAllowed: boolean;
@@ -11,7 +11,7 @@ export interface UserAccountStatus<User extends RDBEntity = RDBEntity> extends R
 
 export const UserAccountStatusEntity = new EntitySchema<UserAccountStatus>({
   columns: {
-    ...RDBEntitySchema.columns,
+    ...DBEntitySchema.columns,
     label: { type: 'varchar', unique: true },
     name: { type: 'varchar', unique: true },
     userLoginAllowed: { type: 'boolean', default: true }

@@ -1,10 +1,9 @@
-import { RDBEntity, RDBEntitySchema } from '@node-c/persistance-rdb';
-
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
+import { DBEntity, DBEntitySchema } from '../../base';
 import { AccessControlPoint } from '../accessControlPoints';
 
-export interface UserType<User extends RDBEntity = RDBEntity> extends RDBEntity {
+export interface UserType<User extends DBEntity = DBEntity> extends DBEntity {
   accessControlPoints: AccessControlPoint[];
   assignedUsers: User[];
   isActive: boolean;
@@ -14,7 +13,7 @@ export interface UserType<User extends RDBEntity = RDBEntity> extends RDBEntity 
 
 export const UserTypeEntity = new EntitySchema<UserType>({
   columns: {
-    ...RDBEntitySchema.columns,
+    ...DBEntitySchema.columns,
     isActive: { type: 'boolean', default: true },
     isEditable: { type: 'boolean', default: true },
     name: { type: 'varchar', unique: true }

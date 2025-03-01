@@ -1,20 +1,20 @@
 import { EntitySchemaColumnOptions } from 'typeorm';
 
-export interface RDBEntity {
+export interface DBEntity {
   createdAt: Date;
   deletedAt?: Date;
   id: number;
   updatedAt: Date;
 }
 
-export class RDBEntityClass implements RDBEntity {
+export class DBEntityClass implements DBEntity {
   createdAt: Date;
   deletedAt?: Date;
   id: number;
   updatedAt: Date;
 }
 
-export const RDBEntitySchema: {
+export const DBEntitySchema: {
   columns: { [columnName: string]: EntitySchemaColumnOptions };
 } = {
   columns: {

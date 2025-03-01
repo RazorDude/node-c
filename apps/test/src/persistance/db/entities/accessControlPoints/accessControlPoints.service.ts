@@ -14,6 +14,6 @@ export class AccessControlPointsService extends RDBEntityService<AccessControlPo
     @InjectRepository(AccessControlPointEntity)
     repository: Repository<AccessControlPoint>
   ) {
-    super(qb, repository);
+    super(qb, repository, AccessControlPointEntity);
   }
 }

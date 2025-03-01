@@ -1,12 +1,11 @@
-import { RDBEntity, RDBEntitySchema } from '@node-c/persistance-rdb';
-
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
+import { DBEntity, DBEntitySchema } from '../../base';
 import { AccessControlPoint } from '../accessControlPoints';
 import { UserAccountStatus } from '../userAccountStatuses/userAccountStatuses.entity';
 import { UserType } from '../userTypes/userTypes.entity';
 
-export interface User extends RDBEntity {
+export interface User extends DBEntity {
   accountStatus: UserAccountStatus;
   accountStatusId: number;
   assignedUserTypes: UserType[];
@@ -25,7 +24,7 @@ export interface User extends RDBEntity {
 
 export const UserEntity = new EntitySchema<User>({
   columns: {
-    ...RDBEntitySchema.columns,
+    ...DBEntitySchema.columns,
     accountStatusId: { type: 'integer' },
     email: { type: 'varchar' },
     firstName: { type: 'varchar' },

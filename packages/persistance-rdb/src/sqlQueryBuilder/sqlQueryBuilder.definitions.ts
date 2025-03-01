@@ -1,10 +1,11 @@
 import { GenericObject } from '@node-c/core';
 
 export interface BuildQueryOptions {
-  where?: { [fieldName: string]: ParsedFilter };
+  deletedColumnName?: string;
   include?: IncludeItems;
   orderBy?: OrderBy[];
   select?: string[];
+  where?: { [fieldName: string]: ParsedFilter };
   withDeleted?: boolean;
 }
 

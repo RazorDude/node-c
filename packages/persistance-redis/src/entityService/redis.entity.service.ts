@@ -2,8 +2,6 @@ import { DeleteResult, FindResults, PersistanceEntityService, UpdateResult } fro
 
 import { mergeDeepRight as merge } from 'ramda';
 
-import { RedisEntity } from './redis.entity';
-
 import {
   BulkCreateOptions,
   CreateOptions,
@@ -18,7 +16,7 @@ import { RedisStoreService } from '../store';
 
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
-export class RedisEntityService<Entity extends RedisEntity<unknown>> extends PersistanceEntityService<Entity> {
+export class RedisEntityService<Entity extends object> extends PersistanceEntityService<Entity> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected repository: RedisRepositoryService<Entity>,

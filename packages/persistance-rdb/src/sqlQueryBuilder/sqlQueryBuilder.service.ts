@@ -44,6 +44,7 @@ export class SQLQueryBuilderService {
   ): void {
     const { where, include, orderBy, select, withDeleted = false } = options;
     const cqs = this.columnQuotesSymbol;
+    const deletedColumnName = options.deletedColumnName || 'deletedAt';
     if (queryBuilder instanceof SelectQueryBuilder) {
       if (withDeleted) {
         queryBuilder.withDeleted();
@@ -56,7 +57,7 @@ export class SQLQueryBuilderService {
             queryBuilder.leftJoinAndSelect(
               relationProperty,
               include[relationProperty],
-              `${cqs}${include[relationProperty]}${cqs}.${cqs}deletedAt${cqs} IS NULL`
+              `${cqs}${include[relationProperty]}${cqs}.${cqs}${deletedColumnName}${cqs} IS NULL`
             );
           }
         }
@@ -76,8 +77,8 @@ export class SQLQueryBuilderService {
         if (isFirst) {
           isFirst = false;
         } else {
-          // methodName = fieldName === SelectOperator.Or ? 'orWhere' : 'andWhere'
-          methodName = 'andWhere';
+          methodName = fieldName === SelectOperator.Or ? 'orWhere' : 'andWhere';
+          // methodName = 'andWhere';
         }
         (queryBuilder as unknown as { [methodName: string]: (..._args: unknown[]) => void })[methodName](
           whereItem.query,

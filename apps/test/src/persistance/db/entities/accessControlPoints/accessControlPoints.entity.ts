@@ -1,9 +1,10 @@
 import { GenericObject } from '@node-c/core';
-import { RDBEntity, RDBEntitySchema } from '@node-c/persistance-rdb';
 
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-export interface AccessControlPoint<UserType extends RDBEntity = RDBEntity> extends RDBEntity {
+import { DBEntity, DBEntitySchema } from '../../base';
+
+export interface AccessControlPoint<UserType extends DBEntity = DBEntity> extends DBEntity {
   allowedInputData?: GenericObject;
   controllerNames?: string[];
   forbiddenInputData?: GenericObject;
@@ -18,7 +19,7 @@ export interface AccessControlPoint<UserType extends RDBEntity = RDBEntity> exte
 
 export const AccessControlPointEntity = new EntitySchema<AccessControlPoint>({
   columns: {
-    ...RDBEntitySchema.columns,
+    ...DBEntitySchema.columns,
     allowedInputData: { type: 'json', nullable: true },
     controllerNames: { type: 'json', nullable: true },
     forbiddenInputData: { type: 'json', nullable: true },

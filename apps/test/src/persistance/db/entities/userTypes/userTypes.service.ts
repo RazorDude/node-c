@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
@@ -10,11 +10,10 @@ import { UserType, UserTypeEntity } from './userTypes.entity';
 @Injectable()
 export class UserTypesService extends RDBEntityService<UserType> {
   constructor(
-    @Inject(SQLQueryBuilderService)
     qb: SQLQueryBuilderService,
     @InjectRepository(UserTypeEntity)
     entity: Repository<UserType>
   ) {
-    super(qb, entity);
+    super(qb, entity, UserTypeEntity);
   }
 }

@@ -19,7 +19,7 @@ export class UsersService extends RDBEntityService<User> {
     @InjectRepository(UserEntity)
     repository: Repository<User>
   ) {
-    super(qb, repository);
+    super(qb, repository, UserEntity);
   }
 
   async update(data: UpdateUserData, options: UpdateOptions): Promise<UpdateResult<User>> {
