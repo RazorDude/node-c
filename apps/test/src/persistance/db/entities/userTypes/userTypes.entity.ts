@@ -1,6 +1,6 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../base';
+import { DBEntity, DBEntitySchema } from '../../../dbBase';
 import { AccessControlPoint } from '../accessControlPoints';
 
 export interface UserType<User extends DBEntity = DBEntity> extends DBEntity {

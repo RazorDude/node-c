@@ -2,7 +2,7 @@ import { GenericObject } from '@node-c/core';
 
 import { EntitySchema } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../base';
+import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
 export interface GlobalConfigItem extends DBEntity {
   data: GenericObject;

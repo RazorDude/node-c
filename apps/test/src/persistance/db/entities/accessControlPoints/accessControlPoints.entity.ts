@@ -2,7 +2,7 @@ import { GenericObject } from '@node-c/core';
 
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../base';
+import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
 export interface AccessControlPoint<UserType extends DBEntity = DBEntity> extends DBEntity {
   allowedInputData?: GenericObject;

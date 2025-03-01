@@ -6,7 +6,9 @@ import { AdminAPIModule } from './api/admin';
 import * as AppConfigs from './config';
 import { DomainIAMModule } from './domain/iam';
 import { PersistanceCacheModule } from './persistance/cache';
+import { PersistanceCacheAuthModule } from './persistance/cacheAuth';
 import { PersistanceDBModule } from './persistance/db';
+import { PersistanceDBConfigsModule } from './persistance/dbConfigs';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
@@ -28,8 +30,10 @@ export class AppModuleBase {
       },
       PERSISTANCE: {
         children: {
+          CACHE: 'cache', // add another key _MODULE_TYPE - NOSQL
+          CACHE_AUTH: 'cacheAuth', // add another key _MODULE_TYPE - NOSQL
           DB: 'db', // add another key _MODULE_TYPE - RDB
-          CACHE: 'cache' // add another key _MODULE_TYPE - NOSQL
+          DB_CONFIGS: 'dbConfigs' // add another key _MODULE_TYPE - RDB
         },
         name: 'persistance'
       }
@@ -37,7 +41,9 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
+    PersistanceCacheAuthModule.register(),
     PersistanceCacheModule.register(),
+    PersistanceDBConfigsModule.register(),
     PersistanceDBModule.register(),
     DomainIAMModule.register()
   ];

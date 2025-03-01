@@ -2,7 +2,17 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   API_ADMIN_MODULE_NAME = 'admin',
   // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_CACHE_AUTH_MODULE_NAME = 'cacheAuth',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_CACHE_AUTH_STORE_KEY = 'store-cache-auth',
+  // eslint-disable-next-line no-unused-vars
   PERSISTANCE_CACHE_MODULE_NAME = 'cache',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_CACHE_STORE_KEY = 'store-cache',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME = 'db_configs_connection',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_DB_CONFIGS_MODULE_NAME = 'dbConfigs',
   // eslint-disable-next-line no-unused-vars
   PERSISTANCE_DB_MODULE_CONNECTION_NAME = 'db_connection',
   // eslint-disable-next-line no-unused-vars

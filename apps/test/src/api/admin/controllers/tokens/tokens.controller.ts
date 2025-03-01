@@ -4,12 +4,12 @@ import { DeleteDto, FindDto, FindOneDto, RESTAPIEntityControler, UpdateDto } fro
 import { GenericObject } from '@node-c/core';
 
 import { IAMTokenManagerService } from '../../../../domain/iam';
-import { CacheToken } from '../../../../persistance/cache';
+import { CacheAuthToken } from '../../../../persistance/cacheAuth';
 
 @Injectable()
 @Controller('tokens')
 export class AdminTokensEntityController extends RESTAPIEntityControler<
-  CacheToken,
+  CacheAuthToken,
   IAMTokenManagerService,
   {
     BulkCreate: GenericObject<string>[];

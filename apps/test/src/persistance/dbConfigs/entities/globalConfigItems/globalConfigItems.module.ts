@@ -11,7 +11,7 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     RDBRepositoryModule.register({
       entityClass: GlobalConfigItemEntity,
-      persistanceModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
+      persistanceModuleName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_NAME
     })
   ],
   providers: [GlobalConfigItemsService],
