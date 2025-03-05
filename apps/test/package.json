@@ -2,7 +2,10 @@
   "name": "@node-c/app-test",
   "version": "1.0.0-alpha0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "test": "vitest --config test/vitest.config.ts",
+    "test:coverage": "vitest --config test/vitest.config.ts --coverage"
+  },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
     "@ramster/general-tools": "^2.3.0",

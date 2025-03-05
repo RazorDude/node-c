@@ -25,7 +25,7 @@ describe('RDBModule.register', () => {
     // Spy on SQLQueryBuilderModule.register and provide a dummy implementation.
     const sqlQueryRegisterSpy = vi
       .spyOn(SQLQueryBuilderModule, 'register')
-      .mockImplementation((options: { dbConfigPath: string }) => {
+      .mockImplementation((options: { persistanceModuleName: string }) => {
         return { module: 'SQLQueryBuilderModule', options } as unknown as DynamicModule;
       });
     const options = {
@@ -57,11 +57,11 @@ describe('RDBModule.register', () => {
     expect(typeOrmAsyncModule.module).toBe(TypeOrmModule);
     expect((dynamicModule.imports![1] as unknown as { module: string }).module).toEqual('SQLQueryBuilderModule');
     // Verify that SQLQueryBuilderModule.register was called with the proper argument.
-    expect(sqlQueryRegisterSpy).toHaveBeenCalledWith({ dbConfigPath: 'config.persistance.testModule' });
+    expect(sqlQueryRegisterSpy).toHaveBeenCalledWith({ persistanceModuleName: 'testModule' });
     const sqlQueryModule = dynamicModule.imports![1];
     expect(sqlQueryModule).toEqual({
       module: 'SQLQueryBuilderModule',
-      options: { dbConfigPath: 'config.persistance.testModule' }
+      options: { persistanceModuleName: 'testModule' }
     });
     // Finally, check that the loaded module from loadDynamicModules is included.
     expect(dynamicModule.imports![2]).toBe(LoadedModule);
@@ -72,7 +72,7 @@ describe('RDBModule.register', () => {
     // Spy on SQLQueryBuilderModule.register.
     const sqlQueryRegisterSpy = vi
       .spyOn(SQLQueryBuilderModule, 'register')
-      .mockImplementation((options: { dbConfigPath: string }) => {
+      .mockImplementation((options: { persistanceModuleName: string }) => {
         return { module: 'SQLQueryBuilderModule', options } as unknown as DynamicModule;
       });
     const dummyProvider = { provide: 'DUMMY', useValue: 123 };
@@ -134,11 +134,11 @@ describe('RDBModule.register', () => {
     //   name: 'customConnection'
     // });
     // Verify SQLQueryBuilderModule.register call.
-    expect(sqlQueryRegisterSpy).toHaveBeenCalledWith({ dbConfigPath: 'config.persistance.customModule' });
+    expect(sqlQueryRegisterSpy).toHaveBeenCalledWith({ persistanceModuleName: 'customModule' });
     const sqlQueryModule = dynamicModule.imports![2];
     expect(sqlQueryModule).toEqual({
       module: 'SQLQueryBuilderModule',
-      options: { dbConfigPath: 'config.persistance.customModule' }
+      options: { persistanceModuleName: 'customModule' }
     });
     // Check the rest of the ordering.
     expect(dynamicModule.imports![3]).toBe(PostORMModule);
