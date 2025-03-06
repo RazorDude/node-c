@@ -106,7 +106,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
         const extractVariableName = new RegExp(/^Key \((.*)\)\=(.*)$/g);
         const result = extractVariableName.exec(error.detail as string);
         throw new ApplicationError(
-          `${error.table} ${result ? result[1] : 'a coumn value you have provided'} needs to be unique`
+          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`
         );
       }
       throw e;

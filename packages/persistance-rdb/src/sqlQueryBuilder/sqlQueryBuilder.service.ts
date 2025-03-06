@@ -17,7 +17,6 @@ export class SQLQueryBuilderService {
   dbType: RDBType;
   iLikeSupported: boolean;
 
-  // TODO: createdAt, updatedAt and deletedAt column names
   constructor(
     public configProvider: ConfigProviderService,
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
