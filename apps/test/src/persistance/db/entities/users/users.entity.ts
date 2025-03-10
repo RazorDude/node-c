@@ -2,19 +2,21 @@ import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 import { AccessControlPoint } from '../accessControlPoints';
-import { UserAccountStatus } from '../userAccountStatuses/userAccountStatuses.entity';
-import { UserType } from '../userTypes/userTypes.entity';
+import { Course } from '../courses';
+import { UserAccountStatus } from '../userAccountStatuses';
+import { UserType } from '../userTypes';
 
 export interface User extends DBEntity {
-  accountStatus: UserAccountStatus;
+  accountStatus?: UserAccountStatus;
   accountStatusId: number;
-  assignedUserTypes: UserType[];
+  assignedCourses?: Course[];
+  assignedUserTypes?: UserType[];
   currentAccessControlPoints?: { [accessControlPointId: string]: AccessControlPoint };
   email: string;
   firstName: string;
   hasTakenIntro: boolean;
-  lastName: string;
   isVerified: boolean;
+  lastName: string;
   mfaIsEnabled: boolean;
   password?: string;
   phoneNumber: string;
@@ -29,8 +31,8 @@ export const UserEntity = new EntitySchema<User>({
     email: { type: 'varchar' },
     firstName: { type: 'varchar' },
     hasTakenIntro: { type: 'boolean', default: false },
-    lastName: { type: 'varchar' },
     isVerified: { type: 'boolean', default: false },
+    lastName: { type: 'varchar' },
     mfaIsEnabled: { type: 'boolean', default: false },
     // TODO: fix this!!!
     password: { type: 'varchar', nullable: true /*, select: false*/ },
@@ -50,6 +52,11 @@ export const UserEntity = new EntitySchema<User>({
       type: 'many-to-one',
       target: 'userAccountStatus',
       inverseSide: 'users'
+    } as EntitySchemaRelationOptions,
+    assignedCourses: {
+      type: 'many-to-many',
+      target: 'course',
+      inverseSide: 'assignedCourses'
     } as EntitySchemaRelationOptions,
     assignedUserTypes: {
       type: 'many-to-many',

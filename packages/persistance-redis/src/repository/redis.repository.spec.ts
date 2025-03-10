@@ -1,4 +1,4 @@
-import { AppConfigPersistanceNoSQL, ConfigProviderService } from '@node-c/core';
+import { AppConfigPersistanceNoSQL, ApplicationError, ConfigProviderService } from '@node-c/core';
 
 import classValidator from 'class-validator';
 import { mergeDeepRight } from 'ramda';
@@ -47,8 +47,8 @@ describe('RedisRepositoryService', () => {
     dummySchema = {
       name: 'TestEntity',
       columns: {
-        id: { primary: true },
-        code: { primary: true },
+        id: { primary: true, primaryOrder: 0 },
+        code: { primary: true, primaryOrder: 1 },
         description: { primary: false }
       }
     };
@@ -65,6 +65,26 @@ describe('RedisRepositoryService', () => {
   });
 
   describe('constructor', () => {
+    it('should throw an error if a primary key does not have the primaryOrder field provided in it for the config', () => {
+      // Access the protected primaryKeys property using a type assertion.
+      let errorMessage: string;
+      try {
+        new RedisRepositoryService(
+          configProvider,
+          moduleName,
+          {
+            ...dummySchema,
+            columns: { ...dummySchema.columns, id: { ...dummySchema.columns.id, primaryOrder: undefined } }
+          },
+          dummyStore
+        );
+      } catch (err) {
+        errorMessage = (err as ApplicationError).message;
+      }
+      expect(errorMessage!).toEqual(
+        'At schema "TestEntity", column "id": the field "primaryOrder" is required for primary key columns.'
+      );
+    });
     it('should extract primary keys from the provided schema and set the storeDelimiter to the default, if none is provided in the config', () => {
       // Access the protected primaryKeys property using a type assertion.
       const primaryKeys = (repository as unknown as { primaryKeys: string[] }).primaryKeys;
@@ -198,7 +218,7 @@ describe('RedisRepositoryService', () => {
     let dummyStore: RedisStoreService;
     let repository: TestRedisRepositoryService<unknown>;
     beforeEach(() => {
-      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, generated: false } } };
+      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, primaryOrder: 0, generated: false } } };
       dummyStore = { get: vi.fn(), set: vi.fn() } as unknown as RedisStoreService;
       repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
     });
@@ -210,7 +230,7 @@ describe('RedisRepositoryService', () => {
       expect(result.storeEntityKey).toEqual('abc');
     });
     it('returns prepared data and storeEntityKey for generated PK when value exists', async () => {
-      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, generated: true } } };
+      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, primaryOrder: 0, generated: true } } };
       repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
       const data = { id: 'abc' };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
@@ -224,7 +244,9 @@ describe('RedisRepositoryService', () => {
       );
     });
     it('throws error for generated PK when value is missing and generatePrimaryKeys is false', async () => {
-      dummySchema.columns = { id: { primary: true, generated: true, type: EntitySchemaColumnType.Integer } };
+      dummySchema.columns = {
+        id: { primary: true, primaryOrder: 0, generated: true, type: EntitySchemaColumnType.Integer }
+      };
       const options: PrepareOptions = { generatePrimaryKeys: false };
       await expect(repository.exposePrepare({}, options)).rejects.toThrow(
         '[RedisRepositoryService TestEntity][Validation Error]: A value is required for generated PK column id when the generatePrimaryKeys is set to false.'
@@ -233,7 +255,7 @@ describe('RedisRepositoryService', () => {
     it('throws error for generated PK when the column type is not supported for generation', async () => {
       dummySchema = {
         name: 'TestEntity',
-        columns: { id: { primary: true, generated: true, type: EntitySchemaColumnType.String } }
+        columns: { id: { primary: true, primaryOrder: 0, generated: true, type: EntitySchemaColumnType.String } }
       };
       repository = new TestRedisRepositoryService(configProvider, moduleName, dummySchema, dummyStore);
       await expect(repository.exposePrepare({}, { generatePrimaryKeys: true })).rejects.toThrow(
@@ -241,7 +263,9 @@ describe('RedisRepositoryService', () => {
       );
     });
     it('generates integer PK when missing and generatePrimaryKeys is true and the redis store returns a value', async () => {
-      dummySchema.columns = { id: { primary: true, generated: true, type: EntitySchemaColumnType.Integer } };
+      dummySchema.columns = {
+        id: { primary: true, primaryOrder: 0, generated: true, type: EntitySchemaColumnType.Integer }
+      };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue(5);
       const options: PrepareOptions = { generatePrimaryKeys: true };
       const result = await repository.exposePrepare({}, options);
@@ -250,7 +274,9 @@ describe('RedisRepositoryService', () => {
       expect(dummyStore.set).toHaveBeenCalledWith('TestEntity-increment-id', 6);
     });
     it('generates integer PK when missing and generatePrimaryKeys is true and the store does not return a value', async () => {
-      dummySchema.columns = { id: { primary: true, generated: true, type: EntitySchemaColumnType.Integer } };
+      dummySchema.columns = {
+        id: { primary: true, primaryOrder: 0, generated: true, type: EntitySchemaColumnType.Integer }
+      };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
       const options: PrepareOptions = { generatePrimaryKeys: true };
       const result = await repository.exposePrepare({}, options);
@@ -259,7 +285,9 @@ describe('RedisRepositoryService', () => {
       expect(dummyStore.set).toHaveBeenCalledWith('TestEntity-increment-id', 1);
     });
     it('generates UUIDV4 PK when missing and generatePrimaryKeys is true', async () => {
-      dummySchema.columns = { id: { primary: true, generated: true, type: EntitySchemaColumnType.UUIDV4 } };
+      dummySchema.columns = {
+        id: { primary: true, primaryOrder: 0, generated: true, type: EntitySchemaColumnType.UUIDV4 }
+      };
       const options: PrepareOptions = { generatePrimaryKeys: true };
       const result = await repository.exposePrepare({}, options);
       const resultData = result.data as { id: string };
@@ -278,7 +306,7 @@ describe('RedisRepositoryService', () => {
       validateSpy.mockRestore();
     });
     it('throws unique error when onConflict is ThrowError and existing entry exists', async () => {
-      dummySchema.columns = { id: { primary: true, generated: false } };
+      dummySchema.columns = { id: { primary: true, primaryOrder: 0, generated: false } };
       const data = { id: 'unique' };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue('existing');
       const options: PrepareOptions = { onConflict: SaveOptionsOnConflict.ThrowError };
@@ -287,7 +315,7 @@ describe('RedisRepositoryService', () => {
       );
     });
     it('merges data when onConflict is Update and existing entry exists', async () => {
-      dummySchema.columns = { id: { primary: true, generated: false }, name: { primary: false } };
+      dummySchema.columns = { id: { primary: true, primaryOrder: 0, generated: false }, name: { primary: false } };
       const data = { id: 'unique', name: 'new' };
       const existingData = { id: 'unique', name: 'old', extra: 'x' };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue(JSON.stringify(existingData));
@@ -298,7 +326,7 @@ describe('RedisRepositoryService', () => {
       expect(result.storeEntityKey).toEqual('unique');
     });
     it('throws error when onConflict has invalid value', async () => {
-      dummySchema.columns = { id: { primary: true, generated: false } };
+      dummySchema.columns = { id: { primary: true, primaryOrder: 0, generated: false } };
       const data = { id: 'unique' };
       (dummyStore.get as ReturnType<typeof vi.fn>).mockResolvedValue('existing');
       const options: PrepareOptions = { onConflict: 'invalidConflict' as SaveOptionsOnConflict };
@@ -313,7 +341,7 @@ describe('RedisRepositoryService', () => {
     let dummyStore: RedisStoreService;
     let repository: TestRedisRepositoryService<unknown>;
     beforeEach(() => {
-      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, generated: false } } };
+      dummySchema = { name: 'TestEntity', columns: { id: { primary: true, primaryOrder: 0, generated: false } } };
       dummyStore = {
         delete: vi.fn().mockResolvedValue(0),
         get: vi.fn().mockResolvedValue(undefined),

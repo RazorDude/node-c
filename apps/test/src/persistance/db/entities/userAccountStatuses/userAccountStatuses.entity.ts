@@ -6,7 +6,7 @@ export interface UserAccountStatus<User extends DBEntity = DBEntity> extends DBE
   label: string;
   name: string;
   userLoginAllowed: boolean;
-  users: User[];
+  users?: User[];
 }
 
 export const UserAccountStatusEntity = new EntitySchema<UserAccountStatus>({

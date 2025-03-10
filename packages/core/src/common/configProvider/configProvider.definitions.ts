@@ -212,6 +212,7 @@ export interface GenerateOrmconfigOptions {
   migrationsPathInModule: string;
   moduleName: string;
   modulePathInProject: string;
+  seedsPathInModule?: string;
 }
 
 // TODO: figure out how to move this to the Redis package

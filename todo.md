@@ -1,6 +1,6 @@
 - Core
   - General
-    - [] Multi-persistance search in the persistance service
+    - [] Multi-persistance search in the domain service
 - Redis
   - General
     - [] Configs to be moved out of the core module.

@@ -14,7 +14,7 @@ export interface AccessControlPoint<UserType extends DBEntity = DBEntity> extend
   name: string;
   requiredStaticData?: GenericObject;
   userFieldName?: string;
-  userTypes: UserType[];
+  userTypes?: UserType[];
 }
 
 export const AccessControlPointEntity = new EntitySchema<AccessControlPoint>({

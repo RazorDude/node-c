@@ -39,15 +39,22 @@ export class RedisRepositoryService<Entity> {
     protected store: RedisStoreService
   ) {
     const { storeDelimiter } = configProvider.config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
-    const { columns } = schema;
+    const { columns, name: entityName } = schema;
     const primaryKeys: string[] = [];
     for (const columnName in columns) {
-      const { primary } = columns[columnName];
+      const { primary, primaryOrder } = columns[columnName];
       if (primary) {
+        if (typeof primaryOrder === 'undefined') {
+          throw new ApplicationError(
+            `At schema "${entityName}", column "${columnName}": the field "primaryOrder" is required for primary key columns.`
+          );
+        }
         primaryKeys.push(columnName);
       }
     }
-    this.primaryKeys = primaryKeys;
+    this.primaryKeys = primaryKeys.sort(
+      (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
+    );
     this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
   }
 

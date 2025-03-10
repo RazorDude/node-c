@@ -8,6 +8,7 @@ export interface EntitySchema {
       isDeletionDate?: boolean;
       isUpdateDate?: boolean;
       primary?: boolean;
+      primaryOrder?: number;
       type?: EntitySchemaColumnType;
     };
   };

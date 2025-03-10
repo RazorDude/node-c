@@ -4,8 +4,8 @@ import { DBEntity, DBEntitySchema } from '../../../dbBase';
 import { AccessControlPoint } from '../accessControlPoints';
 
 export interface UserType<User extends DBEntity = DBEntity> extends DBEntity {
-  accessControlPoints: AccessControlPoint[];
-  assignedUsers: User[];
+  accessControlPoints?: AccessControlPoint[];
+  assignedUsers?: User[];
   isActive: boolean;
   isEditable: boolean;
   name: string;

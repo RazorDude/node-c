@@ -10,6 +10,7 @@ import {
   APP_CONFIG_FROM_ENV_KEYS as APP_CONFIG_FROM_ENV_KEYS_DEFAULT,
   APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES as APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT,
   AppConfig as AppConfigDefault,
+  AppConfigPersistanceRDB,
   AppEnvironment,
   GenerateOrmconfigOptions,
   LoadConfigAppConfigs,
@@ -35,7 +36,8 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       general: { projectRootPath },
       persistance
     } = config;
-    const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject } = options;
+    const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject, seedsPathInModule } =
+      options;
     const entitiesDirPath = path.join(projectRootPath, modulePathInProject, entitiesPathInModule);
     const entitiesDirData = await fs.readdir(entitiesDirPath);
     const entities: string[] = [];
@@ -64,18 +66,50 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         }
       }
     }
+    // write the ORM Config file
+    const ormconfigMigrations: string[] = [`${migrationsPath}/**/*.ts`];
+    if (seedsPathInModule) {
+      ormconfigMigrations.push(`${path.join(projectRootPath, modulePathInProject, seedsPathInModule)}/**/*.ts`);
+    }
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}.json`),
       JSON.stringify(
         mergeDeepRight(persistance[moduleName], {
           entities: [...entities],
           subscribers: [...subscribers],
-          migrations: [`${migrationsPath}/**/*.ts`],
+          migrations: ormconfigMigrations,
           cli: {
             migrationsDir: migrationsPath
           }
         })
       )
+    );
+    // write the Datasource file
+    const moduleConfig = persistance[moduleName] as AppConfigPersistanceRDB;
+    const entitiesPathInProject = path.join(modulePathInProject, entitiesPathInModule);
+    await fs.writeFile(
+      path.join(projectRootPath, `datasource-${moduleName}.ts`),
+      "import { loadDynamicModules } from '@node-c/core';\n" +
+        '\n' +
+        "import { DataSource } from 'typeorm';\n" +
+        '\n' +
+        `import * as FolderData from './${entitiesPathInProject}';\n` +
+        '\n' +
+        'const { entities } = loadDynamicModules(FolderData);\n' +
+        '\n' +
+        'export default new DataSource({\n' +
+        `  database: '${moduleConfig.database}',\n` +
+        '  entities: entities as unknown as string[],\n' +
+        `  host: '${moduleConfig.host}',\n` +
+        '  logging: false,\n' +
+        `  migrations: [${ormconfigMigrations.map(item => `'${item.replace(projectRootPath.replace(/\/$/, ''), '.')}'`).join(', ')}],\n` +
+        `  password: '${moduleConfig.password}',\n` +
+        `  port: ${moduleConfig.port},\n` +
+        '  subscribers: [],\n' +
+        '  synchronize: false,\n' +
+        `  type: '${moduleConfig.type}',\n` +
+        `  username: '${moduleConfig.user}'\n` +
+        '});\n'
     );
   }
 

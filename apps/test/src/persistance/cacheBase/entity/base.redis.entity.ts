@@ -12,20 +12,21 @@ export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: s
   return {
     columns: {
       createdAt: {
-        type: EntitySchemaColumnType.TimestampTz,
-        isCreationDate: true
+        isCreationDate: true,
+        type: EntitySchemaColumnType.TimestampTz
       },
       deletedAt: {
-        type: EntitySchemaColumnType.TimestampTz,
-        isDeletionDate: true
+        isDeletionDate: true,
+        type: EntitySchemaColumnType.TimestampTz
       },
       id: {
-        type: idColumn,
-        primary: true
+        primary: true,
+        primaryOrder: 0,
+        type: idColumn
       },
       updatedAt: {
-        type: EntitySchemaColumnType.TimestampTz,
-        isUpdateDate: true
+        isUpdateDate: true,
+        type: EntitySchemaColumnType.TimestampTz
       }
     },
     name

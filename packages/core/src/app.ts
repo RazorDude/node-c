@@ -40,7 +40,8 @@ export class NodeCApp {
             ...(moduleOptionsPerName[moduleName] || {
               entitiesPathInModule: 'entities',
               migrationsPathInModule: 'migrations',
-              modulePathInProject: `src/persistance/${moduleName}`
+              modulePathInProject: `src/persistance/${moduleName}`,
+              seedsPathInModule: 'seeds'
             }),
             moduleName
           });
