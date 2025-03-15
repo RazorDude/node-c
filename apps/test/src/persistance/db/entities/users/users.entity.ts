@@ -47,6 +47,7 @@ export const UserEntity = new EntitySchema<User>({
       where: '"deletedAt" IS NULL'
     }
   ],
+  name: 'user',
   relations: {
     accountStatus: {
       type: 'many-to-one',
@@ -56,7 +57,7 @@ export const UserEntity = new EntitySchema<User>({
     assignedCourses: {
       type: 'many-to-many',
       target: 'course',
-      inverseSide: 'assignedCourses'
+      inverseSide: 'users'
     } as EntitySchemaRelationOptions,
     assignedUserTypes: {
       type: 'many-to-many',
@@ -64,6 +65,5 @@ export const UserEntity = new EntitySchema<User>({
       inverseSide: 'assignedUsers'
     } as EntitySchemaRelationOptions
   },
-  tableName: 'users',
-  name: 'user'
+  tableName: 'users'
 });

@@ -17,6 +17,14 @@ export const CourseEntity = new EntitySchema<Course>({
     courseTypeId: { type: 'integer' },
     name: { type: 'varchar' }
   },
+  indices: [
+    {
+      name: 'COURSES_UNIQUE_IDX_0',
+      unique: true,
+      columns: ['courseTypeId', 'name'],
+      where: '"deletedAt" IS NULL'
+    }
+  ],
   relations: {
     courseType: {
       type: 'many-to-one',
@@ -26,12 +34,22 @@ export const CourseEntity = new EntitySchema<Course>({
     lessons: {
       type: 'many-to-many',
       target: 'lesson',
-      inverseSide: 'courses'
+      inverseSide: 'courses',
+      joinTable: {
+        name: 'courseLessons',
+        joinColumn: { name: 'courseId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'lessonId', referencedColumnName: 'id' }
+      }
     } as EntitySchemaRelationOptions,
     users: {
       type: 'many-to-many',
       target: 'user',
-      inverseSide: 'assignedCourses'
+      inverseSide: 'assignedCourses',
+      joinTable: {
+        name: 'userAssignedCourses',
+        joinColumn: { name: 'courseId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' }
+      }
     } as EntitySchemaRelationOptions
   },
   tableName: 'courses',

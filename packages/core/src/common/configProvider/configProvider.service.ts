@@ -69,7 +69,9 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     // write the ORM Config file
     const ormconfigMigrations: string[] = [`${migrationsPath}/**/*.ts`];
     if (seedsPathInModule) {
-      ormconfigMigrations.push(`${path.join(projectRootPath, modulePathInProject, seedsPathInModule)}/**/*.ts`);
+      const baseSeedsBath = path.join(projectRootPath, modulePathInProject, seedsPathInModule);
+      ormconfigMigrations.push(`${baseSeedsBath}/common/**/*.ts`);
+      // ormconfigMigrations.push(`${baseSeedsBath}/common/**/*.ts`);
     }
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}.json`),
