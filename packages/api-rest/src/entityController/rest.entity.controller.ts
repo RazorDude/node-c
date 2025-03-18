@@ -124,12 +124,12 @@ export class RESTAPIEntityControler<
   Entity,
   EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>,
   Dto extends {
-    BulkCreate: GenericObject[];
-    Create: GenericObject;
-    Delete: BaseDeleteDto;
-    Find: BaseFindDto;
-    FindOne: BaseFindOneDto;
-    Update: BaseUpdateDto;
+    BulkCreate?: GenericObject[];
+    Create?: GenericObject;
+    Delete?: BaseDeleteDto;
+    Find?: BaseFindDto;
+    FindOne?: BaseFindOneDto;
+    Update?: BaseUpdateDto;
   }
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRoutes: string[];
@@ -211,7 +211,7 @@ export class RESTAPIEntityControler<
     ..._args: unknown[]
   ): Promise<Entity | null | void> {
     this.checkRoute('findOne');
-    let filters = query.filters;
+    let filters = query!.filters;
     if (!filters) {
       filters = {};
     }

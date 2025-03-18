@@ -1,3 +1,5 @@
+import { RequestMethod } from '@nestjs/common';
+
 import { GenericObject } from '../definitions';
 
 /*
@@ -95,7 +97,7 @@ export interface AppConfigCommon {
 
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
-  anonymousAccessRoutes?: string[];
+  anonymousAccessRoutes?: Record<string, RequestMethod[]>;
   hostname?: string;
   port?: number;
 }

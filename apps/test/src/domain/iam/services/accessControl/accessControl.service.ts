@@ -5,12 +5,8 @@ import { AccessControlService as BaseAccessControlService } from '@node-c/domain
 import { AccessControlPoint, AccessControlPointsEntityService } from '../../../../persistance/cache';
 
 @Injectable()
-export class IAMAccessControlService extends BaseAccessControlService<AccessControlPoint> {
-  constructor(protected persistanceTokensService: AccessControlPointsEntityService) {
-    super(persistanceTokensService);
-  }
-
-  async test(): Promise<unknown> {
-    return await this.persistanceTokensService?.find({ filters: { id: 10 } });
+export class IAMAccessControlPointsService extends BaseAccessControlService<AccessControlPoint> {
+  constructor(protected persistanceAccessControlPointsService: AccessControlPointsEntityService) {
+    super(persistanceAccessControlPointsService);
   }
 }

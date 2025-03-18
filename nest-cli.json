@@ -13,7 +13,7 @@
       "entryFile": "main",
       "sourceRoot": "apps/test/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/test/tsconfig.json"
+        "tsConfigPath": "apps/test/tsconfig.build.json"
       }
     },
     "@node-c/api-http": {

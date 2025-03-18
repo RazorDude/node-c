@@ -1,6 +1,8 @@
 export enum Constants {
   // eslint-disable-next-line no-unused-vars
-  API_ADMIN_MODULE_NAME = 'admin',
+  API_COURSE_PLATFORM_MODULE_NAME = 'coursePlatform',
+  // eslint-disable-next-line no-unused-vars
+  API_SSO_MODULE_NAME = 'sso',
   // eslint-disable-next-line no-unused-vars
   PERSISTANCE_CACHE_AUTH_MODULE_NAME = 'cacheAuth',
   // eslint-disable-next-line no-unused-vars
@@ -25,7 +27,8 @@ export const domainMap: {
   [key: string]: { domain: string; secure: boolean; sameSite: boolean | 'lax' | 'strict' | 'none' };
 } = {
   'http://localhost:2080': { domain: 'localhost', secure: false, sameSite: 'lax' },
-  'https://dev.admin.node-c.com': { domain: '.dev.node-c.com', secure: true, sameSite: 'none' },
-  'https://staging.admin.node-c.com': { domain: '.staging.node-c.com', secure: true, sameSite: 'none' },
-  'https://admin.node-c.com': { domain: '.node-c.com', secure: true, sameSite: 'none' }
+  'http://localhost:2090': { domain: 'localhost', secure: false, sameSite: 'lax' },
+  'https://dev.course-platform.node-c.com': { domain: '.dev.node-c.com', secure: true, sameSite: 'none' },
+  'https://staging.course-platform.node-c.com': { domain: '.staging.node-c.com', secure: true, sameSite: 'none' },
+  'https://course-platform.node-c.com': { domain: '.node-c.com', secure: true, sameSite: 'none' }
 };

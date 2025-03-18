@@ -1,4 +1,5 @@
 import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
+import { RouteInfo } from '@nestjs/common/interfaces';
 
 import { AppConfigAPIHTTP, ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
@@ -28,10 +29,18 @@ export class HTTPAPIModule {
     consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
     if (anonymousAccessRoutes && anonymousAccessRoutes.length) {
-      consumer.apply(HTTPAnonymousRoutesMiddleware).forRoutes(...anonymousAccessRoutes);
+      const anonymousRoutes: RouteInfo[] = [];
+      for (const route in anonymousAccessRoutes) {
+        const anonymousMethodsMapForRoute: Record<string, true> = {};
+        anonymousAccessRoutes[route].forEach(method => {
+          anonymousMethodsMapForRoute[method] = true;
+          anonymousRoutes.push({ method, path: route });
+        });
+      }
+      consumer.apply(HTTPAnonymousRoutesMiddleware).forRoutes(...anonymousRoutes);
       consumer
         .apply(HTTPAuthenticationMiddleware)
-        .exclude(...anonymousAccessRoutes)
+        .exclude(...anonymousRoutes)
         .forRoutes('*');
     } else {
       consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');

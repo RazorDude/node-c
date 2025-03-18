@@ -8,11 +8,10 @@ import { CacheAuthToken } from '../../../../persistance/cacheAuth';
 
 @Injectable()
 @Controller('tokens')
-export class AdminTokensEntityController extends RESTAPIEntityControler<
+export class SSOTokensEntityController extends RESTAPIEntityControler<
   CacheAuthToken,
   IAMTokenManagerService,
   {
-    BulkCreate: GenericObject<string>[];
     Create: GenericObject<string>;
     Delete: DeleteDto;
     Find: FindDto;

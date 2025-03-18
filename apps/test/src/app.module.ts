@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
 
-import { AdminAPIModule } from './api/admin';
+import { SSOAPIModule } from './api/sso';
 import * as AppConfigs from './config';
 import { DomainIAMModule } from './domain/iam';
 import { PersistanceCacheModule } from './persistance/cache';
@@ -50,6 +50,6 @@ export class AppModuleBase {
 }
 
 @Module({
-  imports: [...AppModuleBase.imports, AdminAPIModule.register(AdminAPIModule.moduleOptions)]
+  imports: [...AppModuleBase.imports, SSOAPIModule.register(SSOAPIModule.moduleOptions)]
 })
 export class AppModule extends AppModuleBase {}

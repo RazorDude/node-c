@@ -11,10 +11,16 @@ import {
   UpdateResult
 } from '../../persistance/entityService';
 
-export class DomainPersistanceEntityService<Entity, EntityService extends PersistanceEntityService<Entity>> {
+export class DomainPersistanceEntityService<
+  Entity,
+  EntityService extends PersistanceEntityService<Entity>,
+  AdditionalEntityServices extends Record<string, PersistanceEntityService<Entity>> | undefined = undefined
+> {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected persistanceEntityService: EntityService
+    protected persistanceEntityService: EntityService,
+    // eslint-disable-next-line no-unused-vars
+    protected additionalPersistanceEntityServices?: AdditionalEntityServices
   ) {}
 
   // eslint-disable-next-line no-unused-vars
