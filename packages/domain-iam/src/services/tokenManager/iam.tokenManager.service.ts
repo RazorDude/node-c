@@ -109,7 +109,7 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
           });
         }
       }
-      await persistanceEntityService.create({ ...data, token, type });
+      await persistanceEntityService.create({ ...data, token, type } as unknown as StoredToken<StoredTokenFields>);
     }
     return token;
   }

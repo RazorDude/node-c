@@ -76,7 +76,7 @@ export class HTTPAuthenticationMiddleware<
         }
       }
       const userId = tokenContent.data?.userId;
-      let userData = await usersService.findOne({ filters: { id: userId } });
+      let userData = (await usersService.findOne({ filters: { id: userId } })).result;
       if (!userData) {
         userData = (await usersService.getUserWithPermissionsData({ filters: { id: userId } })) as User;
       }

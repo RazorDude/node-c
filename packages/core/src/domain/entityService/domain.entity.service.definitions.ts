@@ -20,9 +20,13 @@ export interface DomainBaseResult<Result> {
   resultsByService?: GenericObject<Result>;
 }
 
+export type DomainBulkCreateData<Entity> = Partial<Entity>[];
+
 export type DomainBulkCreateOptions = Omit<DomainBaseOptions<object>, 'optionsOverridesByService'>;
 
 export type DomainBulkCreateResult<Entity> = DomainBaseResult<Entity[]>;
+
+export type DomainCreateData<Entity> = Partial<Entity>;
 
 export type DomainCreateOptions = Omit<DomainBaseOptions<object>, 'optionsOverridesByService'>;
 
@@ -48,6 +52,8 @@ export enum DomainPersistanceEntityServiceType {
 }
 
 export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | string;
+
+export type DomainUpdateData<Entity> = Partial<Entity>;
 
 export type DomainUpdateOptions = DomainBaseOptions<PersistanceUpdateOptions>;
 

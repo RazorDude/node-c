@@ -1,13 +1,18 @@
-import { GenericObject, GenericObjectClass } from '@node-c/core';
+import { GenericObject } from '@node-c/core';
 
-import { Type } from 'class-transformer';
 import { IsDefined, IsObject, ValidateNested } from 'class-validator';
 
-export class UpdateDto {
+import { BaseDto } from './dto.base';
+
+import { UpdateBody, UpdateOptions } from '../rest.entity.controller.definitions';
+
+export class UpdateDto<Entity, Options extends UpdateOptions<Entity>>
+  extends BaseDto<Options>
+  implements UpdateBody<Entity>
+{
   @IsDefined()
   @ValidateNested()
-  @Type(() => GenericObjectClass)
-  data: GenericObject<unknown>;
+  data: Entity;
 
   @IsDefined()
   @IsObject()

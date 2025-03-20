@@ -1,8 +1,10 @@
-import { GenericObject } from '@node-c/core';
+import { DomainDeleteOptions, GenericObject } from '@node-c/core';
 
 import { IsDefined, IsObject } from 'class-validator';
 
-export class DeleteDto {
+import { BaseDto } from './dto.base';
+
+export class DeleteDto<Options extends DomainDeleteOptions> extends BaseDto<Options> implements DomainDeleteOptions {
   @IsDefined()
   @IsObject()
   filters: GenericObject<unknown>;

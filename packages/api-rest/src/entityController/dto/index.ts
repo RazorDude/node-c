@@ -1,3 +1,6 @@
+export * from './dto.base';
+export * from './dto.bulkCreate';
+export * from './dto.create';
 export * from './dto.delete';
 export * from './dto.find';
 export * from './dto.findOne';

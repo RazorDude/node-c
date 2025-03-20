@@ -1,6 +1,8 @@
 import {
+  DomainBulkCreateData,
   DomainBulkCreateOptions,
   DomainBulkCreateResult,
+  DomainCreateData,
   DomainCreateOptions,
   DomainCreateResult,
   DomainDeleteOptions,
@@ -10,6 +12,7 @@ import {
   DomainFindOptions,
   DomainFindResult,
   DomainPersistanceEntityServiceType,
+  DomainUpdateData,
   DomainUpdateOptions,
   DomainUpdateResult
 } from './domain.entity.service.definitions';
@@ -21,6 +24,15 @@ import { PersistanceEntityService } from '../../persistance/entityService';
 export class DomainEntityService<
   Entity,
   EntityService extends PersistanceEntityService<Entity>,
+  Data extends {
+    BulkCreate: DomainBulkCreateData<Entity>;
+    Create: DomainCreateData<Entity>;
+    Update: DomainUpdateData<Entity>;
+  } = {
+    BulkCreate: DomainBulkCreateData<Entity>;
+    Create: DomainCreateData<Entity>;
+    Update: DomainUpdateData<Entity>;
+  },
   AdditionalEntityServices extends Record<string, PersistanceEntityService<Entity>> | undefined = undefined
 > {
   constructor(
@@ -32,11 +44,14 @@ export class DomainEntityService<
 
   public bulkCreate(
     // eslint-disable-next-line no-unused-vars
-    data: Entity[] | GenericObject[],
+    data: Data['BulkCreate'],
     // eslint-disable-next-line no-unused-vars
     options?: DomainBulkCreateOptions
   ): Promise<DomainBulkCreateResult<Entity>>;
-  async bulkCreate(data: Entity[], options?: DomainBulkCreateOptions): Promise<DomainBulkCreateResult<Entity>> {
+  async bulkCreate(
+    data: Data['BulkCreate'],
+    options?: DomainBulkCreateOptions
+  ): Promise<DomainBulkCreateResult<Entity>> {
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main] } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).bulkCreate(data);
@@ -50,8 +65,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public create(data: Entity | GenericObject, options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>>;
-  async create(data: Entity, options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>> {
+  public create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>>;
+  async create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>> {
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main] } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).create(data);
@@ -156,8 +171,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public update(data: Entity | GenericObject, options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>>;
-  async update(data: Entity, options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>> {
+  public update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>>;
+  async update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>> {
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main], ...otherOptions } = options;
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).update(data, otherOptions);

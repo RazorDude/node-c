@@ -16,12 +16,12 @@ import { ApplicationError } from '../../common/definitions';
  */
 export class PersistanceEntityService<Entity> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async bulkCreate(_data: Entity[] | unknown[], _options?: unknown): Promise<Entity[]> {
+  public async bulkCreate(_data: Partial<Entity>[], _options?: unknown): Promise<Entity[]> {
     throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async create(_data: Entity | unknown, _options?: unknown): Promise<Entity> {
+  public async create(_data: Partial<Entity>, _options?: unknown): Promise<Entity> {
     throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
   }
 
@@ -52,7 +52,7 @@ export class PersistanceEntityService<Entity> {
 
   public async update(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: Entity | unknown,
+    _data: Partial<Entity>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: PersistanceUpdateOptions
   ): Promise<PersistanceUpdateResult<Entity>> {
