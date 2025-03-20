@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigProviderService, GenericObject, RDBType, SelectOperator } from '@node-c/core';
+import { ConfigProviderService, GenericObject, PersistanceSelectOperator, RDBType } from '@node-c/core';
 
 import { getNested } from '@ramster/general-tools';
 
@@ -12,7 +12,7 @@ import { Constants } from '../common/definitions';
 
 @Injectable()
 export class SQLQueryBuilderService {
-  allowedStringOperators: string[] = Object.values(SelectOperator);
+  allowedStringOperators: string[] = Object.values(PersistanceSelectOperator);
   columnQuotesSymbol: string;
   dbType: RDBType;
   iLikeSupported: boolean;
@@ -76,7 +76,7 @@ export class SQLQueryBuilderService {
         if (isFirst) {
           isFirst = false;
         } else {
-          methodName = fieldName === SelectOperator.Or ? 'orWhere' : 'andWhere';
+          methodName = fieldName === PersistanceSelectOperator.Or ? 'orWhere' : 'andWhere';
           // methodName = 'andWhere';
         }
         (queryBuilder as unknown as { [methodName: string]: (..._args: unknown[]) => void })[methodName](
@@ -104,13 +104,13 @@ export class SQLQueryBuilderService {
     fieldAlias: string,
     fieldValue: unknown,
     isNot: boolean,
-    operator?: SelectOperator
+    operator?: PersistanceSelectOperator
   ): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
     const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}`;
     const parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
-    if (operator === SelectOperator.Contains) {
+    if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
       if (dbType === RDBType.MySQL) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
@@ -122,37 +122,40 @@ export class SQLQueryBuilderService {
         query
       };
     }
-    if (operator === SelectOperator.GreaterThan) {
+    if (operator === PersistanceSelectOperator.GreaterThan) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
         query: `${fieldString} > :${escapedFieldAlias}`
       };
     }
-    if (operator === SelectOperator.GreaterThanOrEqual) {
+    if (operator === PersistanceSelectOperator.GreaterThanOrEqual) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
         query: `${fieldString} >= :${escapedFieldAlias}`
       };
     }
-    if (operator === SelectOperator.LessThan) {
+    if (operator === PersistanceSelectOperator.LessThan) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
         query: `${fieldString} < :${escapedFieldAlias}`
       };
     }
-    if (operator === SelectOperator.LessThanOrEqual) {
+    if (operator === PersistanceSelectOperator.LessThanOrEqual) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
         query: `${fieldString} <= :${escapedFieldAlias}`
       };
     }
-    if (operator === SelectOperator.Like || (operator === SelectOperator.ILike && !this.iLikeSupported)) {
+    if (
+      operator === PersistanceSelectOperator.Like ||
+      (operator === PersistanceSelectOperator.ILike && !this.iLikeSupported)
+    ) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
         query: `${fieldString}${isNot ? ' not ' : ' '}` + `like :${escapedFieldAlias}`
       };
     }
-    if (operator === SelectOperator.ILike) {
+    if (operator === PersistanceSelectOperator.ILike) {
       return {
         params: { [escapedFieldAlias]: typeof parsedInnerValue },
         query: `${fieldString}${isNot ? ' not ' : ' '}` + `ilike :${escapedFieldAlias}`
@@ -242,7 +245,7 @@ export class SQLQueryBuilderService {
     options: {
       fieldAliases?: { [fieldName: string]: string };
       isTopLevel: boolean;
-      operator?: SelectOperator;
+      operator?: PersistanceSelectOperator;
     } = { isTopLevel: true }
   ): {
     where: { [fieldName: string]: ParsedFilter };
@@ -259,7 +262,7 @@ export class SQLQueryBuilderService {
         continue;
       }
       const fieldAlias = fieldAliases[fieldName] || fieldName;
-      const isNot = operator === SelectOperator.Not;
+      const isNot = operator === PersistanceSelectOperator.Not;
       // handle relation fields
       if (fieldName.match(/\./)) {
         const fieldData = fieldName.split('.');
@@ -303,7 +306,7 @@ export class SQLQueryBuilderService {
           continue;
         }
         if (isSimple) {
-          if (operator === SelectOperator.Between) {
+          if (operator === PersistanceSelectOperator.Between) {
             where[fieldName] = {
               params: paramsForQuery,
               query:
@@ -321,7 +324,7 @@ export class SQLQueryBuilderService {
           continue;
         }
         // otherwise, go through the array's items recursively and build the query
-        if (isTopLevel && fieldName === SelectOperator.Or) {
+        if (isTopLevel && fieldName === PersistanceSelectOperator.Or) {
           const finalWhereValue = { params: {}, query: '' };
           fieldValue.forEach((orFieldValue, orFieldIndex) => {
             const itemData = this.parseInnerFilters(
@@ -377,7 +380,7 @@ export class SQLQueryBuilderService {
     filtersObject: GenericObject,
     fieldName: string,
     fieldAlias: string,
-    operator?: SelectOperator
+    operator?: PersistanceSelectOperator
   ): { parsedFilter: ParsedFilter; include: IncludeItems } {
     const itemsCount = filtersObject instanceof Array ? filtersObject.length : Object.keys(filtersObject).length;
     const hasBrackets = itemsCount > 1;
@@ -389,7 +392,7 @@ export class SQLQueryBuilderService {
       if (this.allowedStringOperators.indexOf(key) !== -1) {
         op = key;
       }
-      const actualFieldName = fieldName === SelectOperator.Or ? key : fieldName;
+      const actualFieldName = fieldName === PersistanceSelectOperator.Or ? key : fieldName;
       const innerValue = filtersObject[key];
       const itemData = this.parseFilters(
         entityName,
@@ -397,7 +400,7 @@ export class SQLQueryBuilderService {
         {
           fieldAliases: { [actualFieldName]: `${fieldAlias}_${parsedValueCount}` },
           isTopLevel: false,
-          operator: op as SelectOperator
+          operator: op as PersistanceSelectOperator
         }
       );
       const fieldWhereData = itemData.where[actualFieldName];
@@ -407,7 +410,7 @@ export class SQLQueryBuilderService {
       const innerQuery = itemData.where[actualFieldName].query;
       parsedFilterItem.params = { ...parsedFilterItem.params, ...(fieldWhereData.params || {}) };
       parsedFilterItem.query +=
-        (parsedValueCount > 0 ? (operator === SelectOperator.Or ? ' or ' : ' and ') : '') +
+        (parsedValueCount > 0 ? (operator === PersistanceSelectOperator.Or ? ' or ' : ' and ') : '') +
         (hasBrackets ? `(${innerQuery})` : innerQuery);
       include = { ...include, ...itemData.include };
       parsedValueCount++;

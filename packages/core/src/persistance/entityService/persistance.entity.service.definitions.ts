@@ -1,30 +1,30 @@
 import { GenericObject } from '../../common/definitions';
 
-export interface CountOptions {
+export interface PersistanceCountOptions {
   filters?: GenericObject;
   findAll?: boolean;
   withDeleted?: boolean;
 }
 
-export interface DeleteOptions {
+export interface PersistanceDeleteOptions {
   filters: GenericObject;
   softDelete?: boolean;
 }
 
-export interface DeleteResult {
+export interface PersistanceDeleteResult {
   count?: number;
 }
 
-export interface FindOneOptions {
+export interface PersistanceFindOneOptions {
   filters: GenericObject;
   include?: string[];
   orderBy?: GenericObject<string>;
   select?: string[];
-  selectOperator?: SelectOperator;
+  selectOperator?: PersistanceSelectOperator;
   withDeleted?: boolean;
 }
 
-export interface FindOptions {
+export interface PersistanceFindOptions {
   filters?: GenericObject;
   findAll?: boolean;
   include?: string[];
@@ -35,19 +35,19 @@ export interface FindOptions {
   withDeleted?: boolean;
 }
 
-export interface FindResults<Item> {
+export interface PersistanceFindResults<Item> {
   items: Item[];
   more: boolean;
   page: number;
   perPage: number;
 }
 
-export interface NumberItem {
+export interface PersistanceNumberItem {
   deleted?: boolean;
   value: number;
 }
 
-export enum SelectOperator {
+export enum PersistanceSelectOperator {
   // eslint-disable-next-line no-unused-vars
   Between = '$between',
   // eslint-disable-next-line no-unused-vars
@@ -72,12 +72,12 @@ export enum SelectOperator {
   Or = '$or'
 }
 
-export interface UpdateOptions {
+export interface PersistanceUpdateOptions {
   filters: GenericObject;
   returnData?: boolean;
 }
 
-export interface UpdateResult<Item> {
+export interface PersistanceUpdateResult<Item> {
   count?: number;
   items?: Item[];
 }

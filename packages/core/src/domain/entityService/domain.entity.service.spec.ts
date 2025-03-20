@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DomainPersistanceEntityService } from './domain.entity.service';
+import { DomainEntityService } from './domain.entity.service';
 
 import {
   DeleteOptions,
@@ -18,9 +18,9 @@ interface TestEntity {
   name: string;
 }
 
-describe('DomainPersistanceEntityService', () => {
+describe('DomainEntityService', () => {
   let mockPersistanceService: PersistanceEntityService<TestEntity>;
-  let domainService: DomainPersistanceEntityService<TestEntity, PersistanceEntityService<TestEntity>>;
+  let domainService: DomainEntityService<TestEntity, PersistanceEntityService<TestEntity>>;
 
   beforeEach(() => {
     // Create a fully typed mock for the underlying persistence service.
@@ -33,7 +33,7 @@ describe('DomainPersistanceEntityService', () => {
       findOne: vi.fn().mockResolvedValue({ id: 4, name: 'Test4' }),
       update: vi.fn().mockResolvedValue({ updated: { id: 5, name: 'Test5' } } as UpdateResult<TestEntity>)
     };
-    domainService = new DomainPersistanceEntityService<TestEntity, PersistanceEntityService<TestEntity>>(
+    domainService = new DomainEntityService<TestEntity, PersistanceEntityService<TestEntity>>(
       mockPersistanceService
     );
   });

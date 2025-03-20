@@ -1,4 +1,4 @@
-import { GenericObject, PersistanceEntityService, SelectOperator } from '@node-c/core';
+import { GenericObject, PersistanceEntityService, PersistanceSelectOperator } from '@node-c/core';
 
 import { getNested, setNested } from '@ramster/general-tools';
 
@@ -136,7 +136,7 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
 
   async mapAccessControlPoints(moduleName: string): Promise<AccessControlData<unknown>> {
     const { items: acpList } = await this.persistanceAccessControlPointsService.find({
-      filters: { moduleNames: { [SelectOperator.Contains]: moduleName } },
+      filters: { moduleNames: { [PersistanceSelectOperator.Contains]: moduleName } },
       findAll: true
     });
     const accessControlData: AccessControlData<unknown> = { __all: { __all: {} } };

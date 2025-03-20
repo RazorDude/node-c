@@ -16,16 +16,19 @@ import {
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
 
 import {
-  DeleteOptions,
-  DeleteResult,
-  DomainPersistanceEntityService,
-  FindOneOptions,
-  FindOptions,
-  FindResults,
+  DomainBulkCreateResult,
+  DomainCreateResult,
+  DomainDeleteOptions,
+  DomainDeleteResult,
+  DomainEntityService,
+  DomainFindOneOptions,
+  DomainFindOneResult,
+  DomainFindOptions,
+  DomainFindResult,
+  DomainUpdateResult,
   GenericObject,
   GenericObjectClass,
-  PersistanceEntityService,
-  UpdateResult
+  PersistanceEntityService
 } from '@node-c/core';
 
 import {
@@ -39,7 +42,7 @@ import { UpdateBody } from './rest.entity.controller.definitions';
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
   Entity,
-  EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>
+  EntityDomainService extends DomainEntityService<Entity, PersistanceEntityService<Entity>>
 > {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
@@ -58,37 +61,44 @@ export class RESTAPIEntityControlerWithoutDto<
     }
   }
 
-  public bulkCreate(_body: GenericObject[], ..._args: unknown[]): Promise<Entity[] | void>;
+  public bulkCreate(_body: GenericObject[], ..._args: unknown[]): Promise<DomainBulkCreateResult<Entity>> | void;
   @Post('bulk')
-  async bulkCreate(@Body() body: GenericObject[]): Promise<Entity[]> {
+  async bulkCreate(@Body() body: GenericObject[]): Promise<DomainBulkCreateResult<Entity>> {
     this.checkRoute('bulkCreate');
     return await this.domainEntityService.bulkCreate(body);
   }
 
-  public create(_body: GenericObject, ..._args: unknown[]): Promise<Entity | void>;
+  public create(_body: GenericObject, ..._args: unknown[]): Promise<DomainCreateResult<Entity> | void>;
   @Post()
-  async create(@Body() body: GenericObject): Promise<Entity> {
+  async create(@Body() body: GenericObject): Promise<DomainCreateResult<Entity>> {
     this.checkRoute('create');
     return await this.domainEntityService.create(body);
   }
 
-  public delete(_body: DeleteOptions, ..._args: unknown[]): Promise<DeleteResult | void>;
+  public delete(_body: DomainDeleteOptions, ..._args: unknown[]): Promise<DomainDeleteResult | void>;
   @Delete()
-  async delete(@Body() body: DeleteOptions): Promise<DeleteResult> {
+  async delete(@Body() body: DomainDeleteOptions): Promise<DomainDeleteResult> {
     this.checkRoute('delete');
     return await this.domainEntityService.delete(body);
   }
 
-  public find(_query: FindOptions, ..._args: unknown[]): Promise<FindResults<Entity> | void>;
+  public find(_query: DomainFindOptions, ..._args: unknown[]): Promise<DomainFindResult<Entity> | void>;
   @Get()
-  async find(@Query() query: FindOptions): Promise<FindResults<Entity> | void> {
+  async find(@Query() query: DomainFindOptions): Promise<DomainFindResult<Entity> | void> {
     this.checkRoute('find');
     return await this.domainEntityService.find(query);
   }
 
-  public findOne(_id: number | string, _query: FindOneOptions, ..._args: unknown[]): Promise<Entity | null | void>;
+  public findOne(
+    _id: number | string,
+    _query: DomainFindOneOptions,
+    ..._args: unknown[]
+  ): Promise<DomainFindOneResult<Entity> | void>;
   @Get('/item/:id')
-  async findOne(@Param() id: number | string, @Query() query: FindOneOptions): Promise<Entity | null | void> {
+  async findOne(
+    @Param() id: number | string,
+    @Query() query: DomainFindOneOptions
+  ): Promise<DomainFindOneResult<Entity> | void> {
     this.checkRoute('findOne');
     let filters = query.filters;
     if (!filters) {
@@ -107,9 +117,9 @@ export class RESTAPIEntityControlerWithoutDto<
     }
   }
 
-  public update(_body: UpdateBody, ..._args: unknown[]): Promise<UpdateResult<Entity> | void>;
+  public update(_body: UpdateBody, ..._args: unknown[]): Promise<DomainUpdateResult<Entity> | void>;
   @Patch()
-  async update(@Body() body: UpdateBody): Promise<UpdateResult<Entity>> {
+  async update(@Body() body: UpdateBody): Promise<DomainUpdateResult<Entity>> {
     this.checkRoute('update');
     return await this.domainEntityService.update(body.data, { filters: body.filters });
   }
@@ -122,7 +132,7 @@ export class RESTAPIEntityControlerWithoutDto<
  */
 export class RESTAPIEntityControler<
   Entity,
-  EntityDomainService extends DomainPersistanceEntityService<Entity, PersistanceEntityService<Entity>>,
+  EntityDomainService extends DomainEntityService<Entity, PersistanceEntityService<Entity>>,
   Dto extends {
     BulkCreate?: GenericObject[];
     Create?: GenericObject;
@@ -138,8 +148,8 @@ export class RESTAPIEntityControler<
   constructor(
     protected domainEntityService: EntityDomainService,
     protected dto: {
-      create?: Dto['Create'];
       bulkCreate?: Dto['BulkCreate'];
+      create?: Dto['Create'];
       find?: Dto['Find'];
       findOne?: Dto['FindOne'];
       update?: Dto['Update'];
@@ -181,7 +191,7 @@ export class RESTAPIEntityControler<
 
   @Delete()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(@Body() body: Dto['Delete'], ..._args: unknown[]): Promise<DeleteResult> {
+  async delete(@Body() body: Dto['Delete'], ..._args: unknown[]): Promise<DomainDeleteResult> {
     this.checkRoute('delete');
     return await this.domainEntityService.delete(
       await this.validationPipe.transform(body, {
@@ -193,7 +203,7 @@ export class RESTAPIEntityControler<
 
   @Get()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async find(@Query() query: Dto['Find'], ..._args: unknown[]): Promise<FindResults<Entity> | void> {
+  async find(@Query() query: Dto['Find'], ..._args: unknown[]): Promise<DomainFindResult<Entity> | void> {
     this.checkRoute('find');
     return await this.domainEntityService.find(
       await this.validationPipe.transform(query, {
@@ -229,7 +239,7 @@ export class RESTAPIEntityControler<
 
   @Patch()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(@Body() body: Dto['Update'], ..._args: unknown[]): Promise<UpdateResult<Entity>> {
+  async update(@Body() body: Dto['Update'], ..._args: unknown[]): Promise<DomainUpdateResult<Entity>> {
     this.checkRoute('update');
     const validBody = await this.validationPipe.transform(body, {
       metatype: (this.dto.update as unknown as Type) || BaseUpdateDto,

@@ -1,4 +1,4 @@
-import { ApplicationError, FindResults, GenericObject, SelectOperator } from '@node-c/core';
+import { ApplicationError, GenericObject, PersistanceFindResults, PersistanceSelectOperator } from '@node-c/core';
 import { EntityManager, EntitySchema, Repository } from 'typeorm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -230,7 +230,7 @@ describe('RDBEntityService', () => {
         { id: 2, code: 'B', value: 200 }
       ];
       const result = compositeService['buildPrimaryKeyWhereClause'](testData);
-      expect(result.field).toBe(SelectOperator.Or);
+      expect(result.field).toBe(PersistanceSelectOperator.Or);
       expect(result.value.params).toEqual({
         id0: 1,
         code0: 'A',
@@ -556,7 +556,7 @@ describe('RDBEntityService', () => {
       });
       // Stub the find method to return a dummy find result.
       const findResult = { items: [{ id: 1, name: 'Test' }] };
-      const findSpy = vi.spyOn(service, 'find').mockResolvedValue(findResult as FindResults<TestEntity>);
+      const findSpy = vi.spyOn(service, 'find').mockResolvedValue(findResult as PersistanceFindResults<TestEntity>);
       vi.spyOn(qbMock, 'buildQuery').mockImplementation(() => {});
       (deleteQueryBuilderMock.execute as ReturnType<typeof vi.fn>).mockResolvedValue({ affected: 5 });
       // The expected where clause is produced by buildPrimaryKeyWhereClause.
@@ -1155,7 +1155,7 @@ describe('RDBEntityService', () => {
       });
       // Stub the find method to return a dummy result.
       const findResult = { items: [dummyEntity] };
-      vi.spyOn(service, 'find').mockResolvedValue(findResult as unknown as FindResults<TestEntity>);
+      vi.spyOn(service, 'find').mockResolvedValue(findResult as unknown as PersistanceFindResults<TestEntity>);
       vi.spyOn(qbMock, 'buildQuery').mockImplementation(() => {});
       (updateQueryBuilderMock.execute as ReturnType<typeof vi.fn>).mockResolvedValue({ affected: 3 });
       const options = {

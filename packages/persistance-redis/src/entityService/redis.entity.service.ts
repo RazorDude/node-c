@@ -1,4 +1,9 @@
-import { DeleteResult, FindResults, PersistanceEntityService, UpdateResult } from '@node-c/core';
+import {
+  PersistanceDeleteResult,
+  PersistanceEntityService,
+  PersistanceFindResults,
+  PersistanceUpdateResult
+} from '@node-c/core';
 
 import { mergeDeepRight as merge } from 'ramda';
 
@@ -58,7 +63,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return (await repository.find({ filters, findAll })).length;
   }
 
-  async delete(options: DeleteOptions): Promise<DeleteResult> {
+  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult> {
     const { repository, store } = this;
     const { filters, forceTransaction, transactionId } = options;
     if (!transactionId && forceTransaction) {
@@ -72,12 +77,12 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return { count: results.length };
   }
 
-  async find(options: FindOptions): Promise<FindResults<Entity>> {
+  async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
     const { filters, page: optPage, perPage: optPerPage, findAll: optFindAll } = options;
     const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
     const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10; // same as above - must be a number
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
-    const findResults: FindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
+    const findResults: PersistanceFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
     if (!findAll) {
       findResults.page = page;
       findResults.perPage = perPage;
@@ -99,7 +104,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return items[0] || null;
   }
 
-  async update(data: Entity, options: UpdateOptions): Promise<UpdateResult<Entity>> {
+  async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
     const { repository, store } = this;
     const { filters, forceTransaction, transactionId } = options;
     if (!transactionId && forceTransaction) {

@@ -1,11 +1,11 @@
 import {
-  DeleteOptions,
-  DeleteResult,
-  FindOneOptions,
-  FindOptions,
-  FindResults,
-  UpdateOptions,
-  UpdateResult
+  PersistanceDeleteOptions,
+  PersistanceDeleteResult,
+  PersistanceFindOneOptions,
+  PersistanceFindOptions,
+  PersistanceFindResults,
+  PersistanceUpdateOptions,
+  PersistanceUpdateResult
 } from './persistance.entity.service.definitions';
 
 import { ApplicationError } from '../../common/definitions';
@@ -26,27 +26,36 @@ export class PersistanceEntityService<Entity> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async count(_options: FindOptions): Promise<number | undefined> {
+  public async count(_options: PersistanceFindOptions): Promise<number | undefined> {
     throw new ApplicationError(`Method count not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public delete(_options: DeleteOptions): Promise<DeleteResult> {
+  public delete(_options: PersistanceDeleteOptions): Promise<PersistanceDeleteResult> {
     throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public find(_options: FindOptions): Promise<FindResults<Entity>> {
+  public find(_options: PersistanceFindOptions): Promise<PersistanceFindResults<Entity>> {
     throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public findOne(_options: FindOneOptions): Promise<Entity | null> {
+  public findOne(_options: PersistanceFindOneOptions): Promise<Entity | null> {
     throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async update(_data: Entity | unknown, _options: UpdateOptions): Promise<UpdateResult<Entity>> {
+  public getEntityName(): Promise<string> {
+    throw new ApplicationError(`Method getEntityName not implemented for class ${typeof this}.`);
+  }
+
+  public async update(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _data: Entity | unknown,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: PersistanceUpdateOptions
+  ): Promise<PersistanceUpdateResult<Entity>> {
     throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
   }
 }

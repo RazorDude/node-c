@@ -1,6 +1,6 @@
-import { GenericObject, UpdateOptions } from '@node-c/core';
+import { DomainUpdateOptions, GenericObject } from '@node-c/core';
 
-export interface UpdateBody extends UpdateOptions {
+export interface UpdateBody extends DomainUpdateOptions {
   data: GenericObject<unknown>;
   filters: GenericObject<unknown>;
 }

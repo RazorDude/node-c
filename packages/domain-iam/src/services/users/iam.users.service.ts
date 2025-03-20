@@ -2,10 +2,10 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
-  DomainPersistanceEntityService,
-  FindOneOptions,
+  DomainEntityService,
   GenericObject,
-  PersistanceEntityService
+  PersistanceEntityService,
+  PersistanceFindOneOptions
 } from '@node-c/core';
 
 import * as bcrypt from 'bcryptjs';
@@ -22,7 +22,7 @@ export class IAMUsersService<
   UserId,
   User extends BaseUser<UserId, unknown>,
   UserMFAEntity extends BaseUserMFAEntity<UserId> | undefined = undefined
-> extends DomainPersistanceEntityService<User, PersistanceEntityService<User>> {
+> extends DomainEntityService<User, PersistanceEntityService<User>> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
@@ -108,7 +108,7 @@ export class IAMUsersService<
 
   async getUserWithPermissionsData(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _options: FindOneOptions,
+    _options: PersistanceFindOneOptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: GetUserWithPermissionsDataOptions
   ): Promise<User | null> {

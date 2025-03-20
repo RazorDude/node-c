@@ -1,4 +1,4 @@
-import type { FindResults } from '@node-c/core';
+import type { PersistanceFindResults } from '@node-c/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -6,7 +6,6 @@ import {
   CreateOptions,
   DeleteOptions,
   FindOneOptions,
-  RedisEntity,
   RedisEntityService,
   UpdateOptions
 } from './index';
@@ -14,7 +13,10 @@ import {
 import type { RedisRepositoryService } from '../repository';
 import type { RedisStoreService } from '../store';
 
-interface DummyEntity extends RedisEntity<string> {
+interface DummyEntity {
+  createdAt?: Date;
+  id: string;
+  updatedAt?: Date;
   value?: number;
 }
 const entity1: DummyEntity = { createdAt: new Date(), id: '1', updatedAt: new Date(), value: 10 };
@@ -103,7 +105,7 @@ describe('RedisEntityService', () => {
   describe('delete', () => {
     it('wraps call in transaction when forceTransaction is true and no transactionId', async () => {
       (dummyStore.createTransaction as ReturnType<typeof vi.fn>).mockReturnValue('tx5');
-      vi.spyOn(service, 'find').mockResolvedValue({ items: [entity1] } as FindResults<DummyEntity>);
+      vi.spyOn(service, 'find').mockResolvedValue({ items: [entity1] } as PersistanceFindResults<DummyEntity>);
       (dummyRepository.save as ReturnType<typeof vi.fn>).mockResolvedValue(['key1']);
       const opts: DeleteOptions = { filters: {}, forceTransaction: true };
       const res = await service.delete(opts);
@@ -113,7 +115,7 @@ describe('RedisEntityService', () => {
       expect(res).toEqual({ count: 1 });
     });
     it('deletes normally when transactionId provided', async () => {
-      vi.spyOn(service, 'find').mockResolvedValue({ items: [entity1, entity2] } as FindResults<DummyEntity>);
+      vi.spyOn(service, 'find').mockResolvedValue({ items: [entity1, entity2] } as PersistanceFindResults<DummyEntity>);
       (dummyRepository.save as ReturnType<typeof vi.fn>).mockResolvedValue(['k1', 'k2']);
       const opts: DeleteOptions = { filters: {}, transactionId: 'tx6' };
       const res = await service.delete(opts);

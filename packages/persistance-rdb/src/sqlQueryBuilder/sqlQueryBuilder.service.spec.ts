@@ -1,4 +1,4 @@
-import { ConfigProviderService, RDBType, SelectOperator } from '@node-c/core';
+import { ConfigProviderService, PersistanceSelectOperator, RDBType } from '@node-c/core';
 import { SelectQueryBuilder } from 'typeorm';
 import { describe, expect, it } from 'vitest';
 
@@ -22,7 +22,7 @@ describe('SQLQueryBuilderService', () => {
       expect(service.dbType).toBe(RDBType.MySQL);
       expect(service.columnQuotesSymbol).toBe('`');
       expect(service.iLikeSupported).toBe(false);
-      expect(service.allowedStringOperators).toEqual(Object.values(SelectOperator));
+      expect(service.allowedStringOperators).toEqual(Object.values(PersistanceSelectOperator));
       expect(service.configProvider).toBe(configProvider);
       expect(service.dbConfigPath).toBe(dbConfigPath);
     });
@@ -180,7 +180,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.Contains
+        PersistanceSelectOperator.Contains
       );
       const expectedFieldString = `\`${entityName}\`.\`${fieldName}\``;
       expect(result).toEqual({
@@ -199,7 +199,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.Contains
+        PersistanceSelectOperator.Contains
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -218,7 +218,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.GreaterThan
+        PersistanceSelectOperator.GreaterThan
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -237,7 +237,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.GreaterThanOrEqual
+        PersistanceSelectOperator.GreaterThanOrEqual
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -256,7 +256,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.LessThan
+        PersistanceSelectOperator.LessThan
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -275,7 +275,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.LessThanOrEqual
+        PersistanceSelectOperator.LessThanOrEqual
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -294,7 +294,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.Like
+        PersistanceSelectOperator.Like
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -313,7 +313,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         true,
-        SelectOperator.Like
+        PersistanceSelectOperator.Like
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -334,7 +334,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.ILike
+        PersistanceSelectOperator.ILike
       );
       const expectedFieldString = `\`${entityName}\`.\`${fieldName}\``;
       expect(result).toEqual({
@@ -354,7 +354,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         false,
-        SelectOperator.ILike
+        PersistanceSelectOperator.ILike
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -374,7 +374,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         plainValue,
         true,
-        SelectOperator.ILike
+        PersistanceSelectOperator.ILike
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -417,7 +417,7 @@ describe('SQLQueryBuilderService', () => {
         fieldAlias,
         dateValue,
         false,
-        SelectOperator.GreaterThan
+        PersistanceSelectOperator.GreaterThan
       );
       const expectedFieldString = `"${entityName}"."${fieldName}"`;
       expect(result).toEqual({
@@ -547,7 +547,10 @@ describe('SQLQueryBuilderService', () => {
     });
     it('should handle a null filter value with operator Not', () => {
       const filters = { fieldNull: null };
-      const result = service.parseFilters(entityName, filters, { isTopLevel: true, operator: SelectOperator.Not });
+      const result = service.parseFilters(entityName, filters, {
+        isTopLevel: true,
+        operator: PersistanceSelectOperator.Not
+      });
       // The query should contain "is not null"
       expect(result.where.fieldNull.query).toContain(' is not ');
       expect(result.where.fieldNull.query).toContain('null');
@@ -584,7 +587,10 @@ describe('SQLQueryBuilderService', () => {
     });
     it('should handle an array of primitives with Between operator', () => {
       const filters = { arr: [10, 20] };
-      const result = service.parseFilters(entityName, filters, { isTopLevel: true, operator: SelectOperator.Between });
+      const result = service.parseFilters(entityName, filters, {
+        isTopLevel: true,
+        operator: PersistanceSelectOperator.Between
+      });
       // When using the Between operator, the query should include "between :arr_0 and :arr_1"
       expect(result.where.arr.query).toContain('between');
       expect(result.where.arr.params).toEqual({ arr_0: 10, arr_1: 20 });
@@ -612,23 +618,29 @@ describe('SQLQueryBuilderService', () => {
     });
     it('should handle operator Not for a primitive filter value', () => {
       const filters = { field1: 123 };
-      const result = service.parseFilters(entityName, filters, { isTopLevel: true, operator: SelectOperator.Not });
+      const result = service.parseFilters(entityName, filters, {
+        isTopLevel: true,
+        operator: PersistanceSelectOperator.Not
+      });
       // When operator is Not, getValueForFilter is called with isNot = true,
       // so the query should use "!=" instead of "=".
       expect(result.where.field1.query).toContain(' != ');
     });
-    it('should handle Or operator for an array when field name equals SelectOperator.Or', () => {
-      // When the top-level field name equals SelectOperator.Or (typically "or"),
+    it('should handle Or operator for an array when field name equals PersistanceSelectOperator.Or', () => {
+      // When the top-level field name equals PersistanceSelectOperator.Or (typically "or"),
       // the branch processes the array items specially.
-      const filters = { [SelectOperator.Or]: [{ a: 1 }, { a: 2 }] };
-      const result = service.parseFilters(entityName, filters, { isTopLevel: true, operator: SelectOperator.Or });
+      const filters = { [PersistanceSelectOperator.Or]: [{ a: 1 }, { a: 2 }] };
+      const result = service.parseFilters(entityName, filters, {
+        isTopLevel: true,
+        operator: PersistanceSelectOperator.Or
+      });
       // The resulting query is built by concatenating inner filter queries with " or " and wrapping in parentheses.
-      const orQuery = result.where[SelectOperator.Or].query.trim();
+      const orQuery = result.where[PersistanceSelectOperator.Or].query.trim();
       expect(orQuery.startsWith('(')).toBe(true);
       expect(orQuery.endsWith(')')).toBe(true);
       expect(orQuery).toContain(' or ');
       // Ensure that parameters from both inner filters are present.
-      expect(Object.keys(result.where[SelectOperator.Or].params!).length).toBeGreaterThanOrEqual(1);
+      expect(Object.keys(result.where[PersistanceSelectOperator.Or].params!).length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -652,7 +664,7 @@ describe('SQLQueryBuilderService', () => {
       expect(result.include).toEqual({});
     });
     it('should parse a multi-key filter object (non-OR) using "and" with brackets', () => {
-      // With multiple keys and fieldName not equal to SelectOperator.Or,
+      // With multiple keys and fieldName not equal to PersistanceSelectOperator.Or,
       // actualFieldName remains constant ("field") for each iteration.
       const filtersObject = { key1: 10, key2: 20 };
       const fieldName = 'field';
@@ -666,13 +678,19 @@ describe('SQLQueryBuilderService', () => {
       expect(result.parsedFilter.params).toEqual({ alias_0: 10, alias_1: 20 });
       expect(result.include).toEqual({});
     });
-    it('should parse a multi-key filter object with fieldName as SelectOperator.Or using "or"', () => {
-      // When fieldName equals SelectOperator.Or, the actual field name becomes the key.
+    it('should parse a multi-key filter object with fieldName as PersistanceSelectOperator.Or using "or"', () => {
+      // When fieldName equals PersistanceSelectOperator.Or, the actual field name becomes the key.
       const filtersObject = { a: 10, b: 20 };
-      const fieldName = SelectOperator.Or;
+      const fieldName = PersistanceSelectOperator.Or;
       const fieldAlias = 'alias';
       // Pass the operator as OR so that the conjunction becomes " or "
-      const result = service.parseInnerFilters(entityName, filtersObject, fieldName, fieldAlias, SelectOperator.Or);
+      const result = service.parseInnerFilters(
+        entityName,
+        filtersObject,
+        fieldName,
+        fieldAlias,
+        PersistanceSelectOperator.Or
+      );
       // For key "a": inner query becomes: ("entity"."a" = :alias_0)
       // For key "b": inner query becomes: or ("entity"."b" = :alias_1)
       const expectedQuery = '("entity"."a" = :alias_0) or ("entity"."b" = :alias_1)';
@@ -692,13 +710,13 @@ describe('SQLQueryBuilderService', () => {
       expect(result.include).toEqual({});
     });
     it('should detect allowed string operator keys and pass them as operator in inner parseFilters', () => {
-      // Assume that SelectOperator.Like is part of the allowedStringOperators.
+      // Assume that PersistanceSelectOperator.Like is part of the allowedStringOperators.
       // In this case the key itself ("like") should be used as the operator.
-      const filtersObject = { [SelectOperator.Like]: 50 };
+      const filtersObject = { [PersistanceSelectOperator.Like]: 50 };
       const fieldName = 'field';
       const fieldAlias = 'alias';
       const result = service.parseInnerFilters(entityName, filtersObject, fieldName, fieldAlias);
-      // Here, op becomes SelectOperator.Like.
+      // Here, op becomes PersistanceSelectOperator.Like.
       // The inner parseFilters is called with { field: 50 } using operator "like" and alias "alias_0".
       // Expected inner query: "entity"."field" like :alias_0
       expect(result.parsedFilter.query).toBe('"entity"."field" like :alias_0');

@@ -1,9 +1,9 @@
 import {
-  CountOptions as CommonCountOptions,
-  DeleteOptions as CommonDeleteOptions,
-  FindOneOptions as CommonFindOneOptions,
-  FindOptions as CommonFindOptions,
-  UpdateOptions as CommonUpdateOptions
+  PersistanceCountOptions,
+  PersistanceDeleteOptions,
+  PersistanceFindOneOptions,
+  PersistanceFindOptions,
+  PersistanceUpdateOptions
 } from '@node-c/core';
 
 export interface BaseOptions {
@@ -13,22 +13,22 @@ export interface BaseOptions {
 
 export type BulkCreateOptions = BaseOptions;
 
-export interface CountOptions extends BaseOptions, Omit<CommonCountOptions, 'withDeleted'> {}
+export interface CountOptions extends BaseOptions, Omit<PersistanceCountOptions, 'withDeleted'> {}
 
 export type CreateOptions = BaseOptions;
 
-export interface DeleteOptions extends BaseOptions, Omit<CommonDeleteOptions, 'softDelete'> {}
+export interface DeleteOptions extends BaseOptions, Omit<PersistanceDeleteOptions, 'softDelete'> {}
 
 export interface FindOneOptions
   extends BaseOptions,
-    Omit<CommonFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
+    Omit<PersistanceFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
   requirePrimaryKeys?: boolean;
 }
 
 export interface FindOptions
   extends BaseOptions,
-    Omit<CommonFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
+    Omit<PersistanceFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
   requirePrimaryKeys?: boolean;
 }
 
-export interface UpdateOptions extends BaseOptions, CommonUpdateOptions {}
+export interface UpdateOptions extends BaseOptions, PersistanceUpdateOptions {}

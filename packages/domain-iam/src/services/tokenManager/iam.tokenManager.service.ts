@@ -2,7 +2,7 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
-  DomainPersistanceEntityService,
+  DomainEntityService,
   PersistanceEntityService
 } from '@node-c/core';
 
@@ -21,11 +21,7 @@ import {
 
 // TODO: console.error -> logger
 // TODO: check whether the JWT library actually computes the hash of the content
-export class IAMTokenManagerService<
-  StoredTokenFields,
-  AccessTokenData,
-  RefreshTokenData
-> extends DomainPersistanceEntityService<
+export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData> extends DomainEntityService<
   StoredToken<StoredTokenFields>,
   PersistanceEntityService<StoredToken<StoredTokenFields>>
 > {

@@ -1,12 +1,12 @@
 import {
   ApplicationError,
-  DeleteResult,
-  FindResults,
   GenericObject,
-  NumberItem,
+  PersistanceDeleteResult,
   PersistanceEntityService,
-  SelectOperator,
-  UpdateResult
+  PersistanceFindResults,
+  PersistanceNumberItem,
+  PersistanceSelectOperator,
+  PersistanceUpdateResult
 } from '@node-c/core';
 
 import { DeepPartial, EntityManager, EntitySchema, EntityTarget, ObjectLiteral, Repository } from 'typeorm';
@@ -76,7 +76,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
       });
       query.push(`(${innerQuery.join(' and ')})`);
     });
-    return { field: SelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
+    return { field: PersistanceSelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
@@ -129,7 +129,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     return await queryBuilder.getCount();
   }
 
-  async delete(options: DeleteOptions): Promise<DeleteResult> {
+  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult> {
     const { filters, forceTransaction, transactionManager, softDelete = true } = options;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
@@ -154,7 +154,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     return { count: typeof result.affected === 'number' ? result.affected : undefined };
   }
 
-  async find(options: FindOptions): Promise<FindResults<Entity>> {
+  async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
     const {
       filters,
       forceTransaction,
@@ -174,7 +174,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
     const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10; // same as above - must be a number
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
-    const findResults: FindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
+    const findResults: PersistanceFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
@@ -228,7 +228,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters, {
-      operator: selectOperator as SelectOperator,
+      operator: selectOperator as PersistanceSelectOperator,
       isTopLevel: true
     });
     const include = this.qb.parseRelations(tableName, optRelations || [], includeFromFilters);
@@ -259,7 +259,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
       counterpartColumn: string;
       currentEntityColumn: string;
       id: number;
-      items: NumberItem[];
+      items: PersistanceNumberItem[];
       tableName: string;
     },
     options?: { transactionManager?: EntityManager }
@@ -314,7 +314,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     return this.repository.save(data as DeepPartial<Entity>) as ReturnData;
   }
 
-  async update(data: Entity, options: UpdateOptions): Promise<UpdateResult<Entity>> {
+  async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
     const { filters, forceTransaction, returnData, transactionManager } = options;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
