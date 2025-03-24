@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { ApplicationError, UpdateResult } from '@node-c/core';
+import { ApplicationError, PersistanceUpdateResult } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
 
 import * as bcrypt from 'bcryptjs';
@@ -22,7 +22,7 @@ export class UsersService extends RDBEntityService<User> {
     super(qb, repository, UserEntity);
   }
 
-  async update(data: UpdateUserData, options: UpdateOptions): Promise<UpdateResult<User>> {
+  async update(data: UpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
     const { transactionManager } = options || {};
     if (!transactionManager) {
       return this.repository.manager.transaction(tm => this.update(data, { ...options, transactionManager: tm }));

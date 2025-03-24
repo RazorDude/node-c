@@ -36,6 +36,31 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
     super(persistanceEntityService!);
   }
 
+  // async create(
+  //   data: StoredToken<StoredTokenFields>,
+  //   options?: CreateAccessTokenOptions
+  // ): Promise<StoredToken<StoredTokenFields>> {
+  //   const { configProvider, moduleName } = this;
+  //   const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+  //   const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options || {};
+  //   const signOptions = {} as jwt.SignOptions;
+  //   if (expiresInMinutes) {
+  //     signOptions.expiresIn = expiresInMinutes * 60;
+  //   } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
+  //     signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
+  //   }
+  //   return {
+  //     result: await this.createToken<AccessTokenData>(data, {
+  //       identifierDataField,
+  //       persist,
+  //       purgeOldFromPersistance,
+  //       secret: moduleConfig.jwtAccessSecret,
+  //       signOptions,
+  //       type: TokenType.Access
+  //     })
+  //   };
+  // }
+
   async createAccessToken(data: AccessTokenData, options?: CreateAccessTokenOptions): Promise<string> {
     const { configProvider, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;

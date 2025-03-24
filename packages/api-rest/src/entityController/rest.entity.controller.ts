@@ -134,6 +134,15 @@ export class RESTAPIEntityControlerWithoutDto<
   }
 }
 
+export interface DefaultDtos<Entity> {
+  BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
+  Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
+  Delete: BaseDeleteDto<DomainDeleteOptions>;
+  Find: BaseFindDto<DomainFindOptions>;
+  FindOne: BaseFindOneDto<DomainFindOneOptions>;
+  Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
+}
+
 /*
  * For reference on why the dto validation was done in this way - it's a limitation of Typescript itself:
  * the compiler doesn't emit generic type metadata, making it impossible to achieve a DRY OOP base class with schema validation.
@@ -142,21 +151,7 @@ export class RESTAPIEntityControlerWithoutDto<
 export class RESTAPIEntityControler<
   Entity,
   EntityDomainService extends DomainEntityService<Entity, PersistanceEntityService<Entity>>,
-  Dto extends {
-    BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-    Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
-    Delete: BaseDeleteDto<DomainDeleteOptions>;
-    Find: BaseFindDto<DomainFindOptions>;
-    FindOne: BaseFindOneDto<DomainFindOneOptions>;
-    Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
-  } = {
-    BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-    Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
-    Delete: BaseDeleteDto<DomainDeleteOptions>;
-    Find: BaseFindDto<DomainFindOptions>;
-    FindOne: BaseFindOneDto<DomainFindOneOptions>;
-    Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
-  }
+  Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRouteMethods: string[];
   protected validationPipe: ValidationPipe;

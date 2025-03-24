@@ -1,6 +1,8 @@
+import { DomainCreateOptions } from '@node-c/core';
+
 export type CreateAccessTokenOptions = CreateTokenOptions;
 
-export interface CreateTokenOptions {
+export interface CreateTokenOptions extends DomainCreateOptions {
   expiresInMinutes?: number;
   identifierDataField?: string;
   persist?: boolean;
