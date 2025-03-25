@@ -8,7 +8,7 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import { AccessControlData, AccessControlService, User as BaseUser } from '@node-c/domain-iam';
+import { AccessControlData, IAMAccessControlService, User as BaseUser } from '@node-c/domain-iam';
 
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
@@ -43,7 +43,7 @@ export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, 
         return next.handle();
       }
     }
-    const { hasAccess, inputDataToBeMutated } = AccessControlService.checkAccess(
+    const { hasAccess, inputDataToBeMutated } = IAMAccessControlService.checkAccess(
       handlerData,
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user

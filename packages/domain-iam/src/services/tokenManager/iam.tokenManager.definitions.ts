@@ -1,26 +1,26 @@
 import { DomainCreateOptions } from '@node-c/core';
 
-export type CreateAccessTokenOptions = CreateTokenOptions;
+export type DecodedTokenContent<TokenEntityFields> = {
+  exp?: number;
+  iat: number;
+  data?: TokenEntityFields;
+};
 
-export interface CreateTokenOptions extends DomainCreateOptions {
+export type TokenEntity<TokenEntityFields extends object> = {
+  token: string;
+  type: TokenType;
+} & TokenEntityFields;
+
+export type TokenManagerCreateData<TokenEntityFields extends object> = Partial<
+  Omit<TokenEntity<TokenEntityFields>, 'token'>
+>;
+
+export type TokenManagerCreateOptions = {
   expiresInMinutes?: number;
   identifierDataField?: string;
   persist?: boolean;
   purgeOldFromPersistance?: boolean;
-}
-
-export type CreateRefreshTokenOptions = CreateTokenOptions;
-
-export type DecodedTokenContent<TokenData> = {
-  exp?: number;
-  iat: number;
-  data?: TokenData;
-};
-
-export type StoredToken<StoredTokenFields> = {
-  token: string;
-  type: TokenType;
-} & StoredTokenFields;
+} & DomainCreateOptions;
 
 export enum TokenType {
   // eslint-disable-next-line no-unused-vars
@@ -39,7 +39,7 @@ export interface VerifyAccessTokenOptions {
   refreshTokenAccessTokenIdentifierDataField?: string;
 }
 
-export interface VerifyAccessTokenReturnData<TokenData> {
-  content?: DecodedTokenContent<TokenData>;
+export interface VerifyAccessTokenReturnData<TokenEntityFields> {
+  content?: DecodedTokenContent<TokenEntityFields>;
   newToken?: string;
 }

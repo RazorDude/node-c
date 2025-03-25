@@ -7,7 +7,7 @@ import { IAMTokenManagerService as BaseIAMTokenManagerService } from '@node-c/do
 import { CacheAuthToken, CacheAuthTokensEntityService } from '../../../../persistance/cacheAuth';
 
 @Injectable()
-export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuthToken, unknown, unknown> {
+export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuthToken> {
   static injectionToken = Constants.AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE;
 
   constructor(

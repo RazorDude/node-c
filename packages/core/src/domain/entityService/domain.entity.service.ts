@@ -11,6 +11,7 @@ import {
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
+  DomainMethod,
   DomainPersistanceEntityServiceType,
   DomainUpdateData,
   DomainUpdateOptions,
@@ -21,6 +22,7 @@ import { ApplicationError, GenericObject } from '../../common/definitions';
 
 import { PersistanceEntityService } from '../../persistance/entityService';
 
+// TODO: persist in the main sevice on main service miss & find/findOne additional service(s)
 export class DomainEntityService<
   Entity,
   EntityService extends PersistanceEntityService<Entity>,
@@ -39,7 +41,16 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     protected persistanceEntityService: EntityService,
     // eslint-disable-next-line no-unused-vars
-    protected additionalPersistanceEntityServices?: AdditionalEntityServices
+    protected additionalPersistanceEntityServices?: AdditionalEntityServices,
+    // eslint-disable-next-line no-unused-vars
+    protected defaultMethods: string[] = [
+      DomainMethod.BulkCreate,
+      DomainMethod.Create,
+      DomainMethod.Delete,
+      DomainMethod.Find,
+      DomainMethod.FindOne,
+      DomainMethod.Update
+    ]
   ) {}
 
   public bulkCreate(
@@ -52,6 +63,9 @@ export class DomainEntityService<
     data: Data['BulkCreate'],
     options?: DomainBulkCreateOptions
   ): Promise<DomainBulkCreateResult<Entity>> {
+    if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
+      throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main] } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).bulkCreate(data);
@@ -67,6 +81,9 @@ export class DomainEntityService<
   // eslint-disable-next-line no-unused-vars
   public create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>>;
   async create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>> {
+    if (!this.defaultMethods?.includes(DomainMethod.Create)) {
+      throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main] } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).create(data);
@@ -82,6 +99,9 @@ export class DomainEntityService<
   // eslint-disable-next-line no-unused-vars
   public delete(options: DomainDeleteOptions): Promise<DomainDeleteResult>;
   async delete(options: DomainDeleteOptions): Promise<DomainDeleteResult> {
+    if (!this.defaultMethods?.includes(DomainMethod.Delete)) {
+      throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main], ...otherOptions } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).delete(otherOptions);
@@ -97,6 +117,9 @@ export class DomainEntityService<
   // eslint-disable-next-line no-unused-vars
   public find(options: DomainFindOptions): Promise<DomainFindResult<Entity>>;
   async find(options: DomainFindOptions): Promise<DomainFindResult<Entity>> {
+    if (!this.defaultMethods?.includes(DomainMethod.Find)) {
+      throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main], ...otherOptions } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).find(otherOptions);
@@ -112,6 +135,9 @@ export class DomainEntityService<
   // eslint-disable-next-line no-unused-vars
   public findOne(options: DomainFindOneOptions): Promise<DomainFindOneResult<Entity>>;
   async findOne(options: DomainFindOneOptions): Promise<DomainFindOneResult<Entity>> {
+    if (!this.defaultMethods?.includes(DomainMethod.FindOne)) {
+      throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main], ...otherOptions } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).findOne(otherOptions);
@@ -173,6 +199,9 @@ export class DomainEntityService<
   // eslint-disable-next-line no-unused-vars
   public update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>>;
   async update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>> {
+    if (!this.defaultMethods?.includes(DomainMethod.Update)) {
+      throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
+    }
     const { persistanceServices = [DomainPersistanceEntityServiceType.Main], ...otherOptions } = options;
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).update(data, otherOptions);

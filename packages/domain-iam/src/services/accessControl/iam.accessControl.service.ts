@@ -11,7 +11,7 @@ import {
   AccessControlPoint as BaseAccessControlPoint
 } from './iam.accessControl.definitions';
 
-export class AccessControlService<AccessControlPoint extends BaseAccessControlPoint<unknown>> {
+export class IAMAccessControlService<AccessControlPoint extends BaseAccessControlPoint<unknown>> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected persistanceAccessControlPointsService: PersistanceEntityService<AccessControlPoint>
@@ -39,14 +39,14 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
       const innerMutatedInputData = immutable.fromJS(mutatedInputData).toJS();
       const innerInputDataToBeMutated: GenericObject = {};
       if (allowedInputData && Object.keys(allowedInputData).length) {
-        const values = AccessControlService.matchInputValues(innerMutatedInputData, allowedInputData);
+        const values = IAMAccessControlService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = values[key];
           setNested(innerMutatedInputData, key, values[key], { removeNestedFieldEscapeSign: true });
         }
       }
       if (forbiddenInputData && Object.keys(forbiddenInputData).length) {
-        const values = AccessControlService.matchInputValues(innerMutatedInputData, forbiddenInputData);
+        const values = IAMAccessControlService.matchInputValues(innerMutatedInputData, forbiddenInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = undefined;
           setNested(innerMutatedInputData, key, undefined, { removeNestedFieldEscapeSign: true });
@@ -55,7 +55,7 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
       if (hasStaticData) {
         for (const fieldName in requiredStaticData) {
           if (
-            !AccessControlService.testValue(
+            !IAMAccessControlService.testValue(
               getNested({ inputData: innerMutatedInputData, user }, fieldName, { removeNestedFieldEscapeSign: true }),
               requiredStaticData[fieldName]
             )
@@ -87,7 +87,7 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
           valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
         const allowedValues: unknown[] = [];
         valuesToTest.forEach((valueToTest: unknown) => {
-          const valueToTestVariants = AccessControlService.getValuesForTesting(valueToTest);
+          const valueToTestVariants = IAMAccessControlService.getValuesForTesting(valueToTest);
           for (const j in valuesToTestAgainst) {
             const valueToTestAgainst = valuesToTestAgainst[j];
             let matchFound = false;
@@ -185,12 +185,12 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
         valuesToCheck.push(value);
       }
       valuesToCheck.forEach(valueToCheck => {
-        const valueToCheckVariants = AccessControlService.getValuesForTesting(valueToCheck);
+        const valueToCheckVariants = IAMAccessControlService.getValuesForTesting(valueToCheck);
         for (const i in valueToCheckVariants) {
           const actualValueToCheck = valueToCheckVariants[i];
           let checkPassed = false;
           for (const j in allowedValues) {
-            if (AccessControlService.testValue(actualValueToCheck, allowedValues[j])) {
+            if (IAMAccessControlService.testValue(actualValueToCheck, allowedValues[j])) {
               valuesToSet.push(valueToCheck);
               checkPassed = true;
               break;
@@ -222,7 +222,7 @@ export class AccessControlService<AccessControlPoint extends BaseAccessControlPo
       const regex = new RegExp(valueToTest);
       return regex.test(valueToTestAgainst);
     }
-    const possibleValidValues = AccessControlService.getValuesForTesting(valueToTest);
+    const possibleValidValues = IAMAccessControlService.getValuesForTesting(valueToTest);
     for (const i in possibleValidValues) {
       if (possibleValidValues[i] === valueToTestAgainst) {
         return true;

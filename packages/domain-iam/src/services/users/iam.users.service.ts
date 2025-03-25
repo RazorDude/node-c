@@ -16,7 +16,7 @@ import {
   GetUserWithPermissionsDataOptions
 } from './iam.users.definitions';
 
-import { IAMTokenManagerService } from '../tokenManager';
+import { IAMTokenManagerService, TokenType } from '../tokenManager';
 
 export class IAMUsersService<
   UserId,
@@ -31,7 +31,7 @@ export class IAMUsersService<
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersService: PersistanceEntityService<User>,
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<unknown, unknown, unknown>,
+    protected tokenManager: IAMTokenManagerService<{ refreshToken?: string; userId: UserId }>,
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersMFAService?: PersistanceEntityService<UserMFAEntity>,
     // eslint-disable-next-line no-unused-vars
@@ -81,8 +81,10 @@ export class IAMUsersService<
       }
     }
     delete user.password;
-    const refreshToken = await this.tokenManager.createRefreshToken(
-      { userId: user.id },
+    const {
+      result: { token: refreshToken }
+    } = await this.tokenManager.create(
+      { type: TokenType.Refresh, userId: user.id },
       {
         expiresInMinutes: moduleConfig.refreshTokenExpiryTimeInMinutes,
         identifierDataField: 'userId',
@@ -90,8 +92,10 @@ export class IAMUsersService<
         purgeOldFromPersistance: true
       }
     );
-    const accessToken = await this.tokenManager.createAccessToken(
-      { refreshToken, userId: user.id },
+    const {
+      result: { token: accessToken }
+    } = await this.tokenManager.create(
+      { refreshToken, type: TokenType.Access, userId: user.id },
       {
         expiresInMinutes: rememberMe ? undefined : moduleConfig.accessTokenExpiryTimeInMinutes,
         identifierDataField: 'userId',

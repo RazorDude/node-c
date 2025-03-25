@@ -2,7 +2,9 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
+  DomainCreateResult,
   DomainEntityService,
+  GenericObject,
   PersistanceEntityService
 } from '@node-c/core';
 
@@ -10,20 +12,19 @@ import { getNested } from '@ramster/general-tools';
 import * as jwt from 'jsonwebtoken';
 
 import {
-  CreateAccessTokenOptions,
-  CreateRefreshTokenOptions,
   DecodedTokenContent,
-  StoredToken,
+  TokenEntity,
+  TokenManagerCreateData,
+  TokenManagerCreateOptions,
   TokenType,
   VerifyAccessTokenOptions,
   VerifyAccessTokenReturnData
 } from './iam.tokenManager.definitions';
 
 // TODO: console.error -> logger
-// TODO: check whether the JWT library actually computes the hash of the content
-export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData> extends DomainEntityService<
-  StoredToken<StoredTokenFields>,
-  PersistanceEntityService<StoredToken<StoredTokenFields>>
+export class IAMTokenManagerService<TokenEntityFields extends object> extends DomainEntityService<
+  TokenEntity<TokenEntityFields>,
+  PersistanceEntityService<TokenEntity<TokenEntityFields>>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -31,89 +32,38 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceEntityService: PersistanceEntityService<StoredToken<StoredTokenFields>>
+    protected persistanceEntityService: PersistanceEntityService<TokenEntity<TokenEntityFields>>
   ) {
-    super(persistanceEntityService!);
+    super(persistanceEntityService!, undefined, []);
   }
 
-  // async create(
-  //   data: StoredToken<StoredTokenFields>,
-  //   options?: CreateAccessTokenOptions
-  // ): Promise<StoredToken<StoredTokenFields>> {
-  //   const { configProvider, moduleName } = this;
-  //   const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-  //   const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options || {};
-  //   const signOptions = {} as jwt.SignOptions;
-  //   if (expiresInMinutes) {
-  //     signOptions.expiresIn = expiresInMinutes * 60;
-  //   } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
-  //     signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
-  //   }
-  //   return {
-  //     result: await this.createToken<AccessTokenData>(data, {
-  //       identifierDataField,
-  //       persist,
-  //       purgeOldFromPersistance,
-  //       secret: moduleConfig.jwtAccessSecret,
-  //       signOptions,
-  //       type: TokenType.Access
-  //     })
-  //   };
-  // }
-
-  async createAccessToken(data: AccessTokenData, options?: CreateAccessTokenOptions): Promise<string> {
-    const { configProvider, moduleName } = this;
+  async create(
+    data: TokenManagerCreateData<TokenEntityFields>,
+    options: TokenManagerCreateOptions
+  ): Promise<DomainCreateResult<TokenEntity<TokenEntityFields>>> {
+    const { configProvider, moduleName, persistanceEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options || {};
+    const { type, ...tokenData } = data;
+    const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options;
     const signOptions = {} as jwt.SignOptions;
-    if (expiresInMinutes) {
-      signOptions.expiresIn = expiresInMinutes * 60;
-    } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
-      signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
+    let secret: string;
+    // Leaving this ugly big if-statement as is, in case we need to expand it in the future.
+    if (type === TokenType.Access) {
+      secret = moduleConfig.jwtAccessSecret;
+      if (expiresInMinutes) {
+        signOptions.expiresIn = expiresInMinutes * 60;
+      } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
+        signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
+      }
+    } else if (type === TokenType.Refresh) {
+      if (expiresInMinutes) {
+        signOptions.expiresIn = expiresInMinutes * 60;
+      } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {
+        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInMinutes * 60;
+      }
+    } else {
+      throw new ApplicationError(`[TokenManager.create]: Invalid token type - "${type}".`);
     }
-    return await this.createToken<AccessTokenData>(data, {
-      identifierDataField,
-      persist,
-      purgeOldFromPersistance,
-      secret: moduleConfig.jwtAccessSecret,
-      signOptions,
-      type: TokenType.Access
-    });
-  }
-
-  async createRefreshToken(data: RefreshTokenData, options?: CreateRefreshTokenOptions): Promise<string> {
-    const { configProvider, moduleName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options || {};
-    const signOptions = {} as jwt.SignOptions;
-    if (expiresInMinutes) {
-      signOptions.expiresIn = expiresInMinutes * 60;
-    } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {
-      signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInMinutes * 60;
-    }
-    return await this.createToken<RefreshTokenData>(data, {
-      identifierDataField,
-      persist,
-      purgeOldFromPersistance,
-      secret: moduleConfig.jwtRefreshSecret,
-      signOptions,
-      type: TokenType.Refresh
-    });
-  }
-
-  protected async createToken<TokenData>(
-    data: TokenData,
-    options: {
-      identifierDataField?: string;
-      persist?: boolean;
-      purgeOldFromPersistance?: boolean;
-      secret: string;
-      signOptions: jwt.SignOptions;
-      type: TokenType;
-    }
-  ): Promise<string> {
-    const { persistanceEntityService } = this;
-    const { identifierDataField, persist, purgeOldFromPersistance, secret, signOptions, type } = options;
     const token = await new Promise<string>((resolve, reject) => {
       jwt.sign({ data }, secret, signOptions, (err, token) => {
         if (err) {
@@ -124,7 +74,9 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
         resolve(token as string);
       });
     });
+    const objectToSave = { ...tokenData, token, type } as TokenEntity<TokenEntityFields>;
     // save the token in the persistance system of choice
+    // TODO: multi-persistance isn't handled well here (or, actually, at all)
     if (persist && persistanceEntityService) {
       if (purgeOldFromPersistance && identifierDataField) {
         const identifierValue = getNested(data, identifierDataField);
@@ -134,15 +86,15 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
           });
         }
       }
-      await persistanceEntityService.create({ ...data, token, type } as unknown as StoredToken<StoredTokenFields>);
+      await super.create(objectToSave);
     }
-    return token;
+    return { result: objectToSave };
   }
 
   async verifyAccessToken(
     token: string,
     options?: VerifyAccessTokenOptions
-  ): Promise<VerifyAccessTokenReturnData<AccessTokenData>> {
+  ): Promise<VerifyAccessTokenReturnData<TokenEntityFields>> {
     const { configProvider, moduleName, persistanceEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
@@ -155,7 +107,7 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
       refreshTokenAccessTokenIdentifierDataField
     } = options || {};
     // decode the token
-    const { content, error } = await this.verifyToken<AccessTokenData>(token, moduleConfig.jwtAccessSecret);
+    const { content, error } = await this.verify(token, moduleConfig.jwtAccessSecret);
     let forceRenew = true;
     let newToken: string | undefined;
     // check for errors
@@ -164,7 +116,7 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
       let throwError = true;
       if (error === 'Token expired' && identifierDataField && content?.data && persistanceEntityService) {
         if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
-          const { content: refreshTokenContent, error: refreshTokenError } = await this.verifyToken(
+          const { content: refreshTokenContent, error: refreshTokenError } = await this.verify(
             refreshToken,
             moduleConfig.jwtRefreshSecret
           );
@@ -200,30 +152,31 @@ export class IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshT
     }
     // check the content for expiry and renewal
     if (content?.data && forceRenew) {
-      const tokenData: Record<string, unknown> = { ...content.data };
+      const tokenData: TokenManagerCreateData<GenericObject<unknown>> = { ...content.data, type: TokenType.Access };
       if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
         tokenData[refreshTokenAccessTokenIdentifierDataField] = refreshToken;
       }
-      newToken = await this.createAccessToken(tokenData as AccessTokenData, {
+      const { result } = await this.create(tokenData as TokenManagerCreateData<TokenEntityFields>, {
         expiresInMinutes: newTokenExpiresInMinutes,
         identifierDataField,
         persist: persistNewToken,
         purgeOldFromPersistance: purgeStoreOnRenew
       });
+      newToken = result.token;
     }
     return { content, newToken };
   }
 
-  protected async verifyToken<TokenData>(
+  protected async verify(
     token: string,
     secret: string
-  ): Promise<{ content?: DecodedTokenContent<TokenData>; error?: unknown }> {
-    const data = await new Promise<{ content?: DecodedTokenContent<TokenData>; error?: unknown }>(resolve => {
+  ): Promise<{ content?: DecodedTokenContent<TokenEntityFields>; error?: unknown }> {
+    const data = await new Promise<{ content?: DecodedTokenContent<TokenEntityFields>; error?: unknown }>(resolve => {
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
-          resolve({ content: decoded as DecodedTokenContent<TokenData>, error: err });
+          resolve({ content: decoded as DecodedTokenContent<TokenEntityFields>, error: err });
         }
-        resolve({ content: decoded as DecodedTokenContent<TokenData> });
+        resolve({ content: decoded as DecodedTokenContent<TokenEntityFields> });
       });
     });
     return data;

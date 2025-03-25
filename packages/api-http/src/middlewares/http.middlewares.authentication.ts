@@ -11,9 +11,7 @@ import { Constants, RequestWithLocals } from '../common/definitions';
 export class HTTPAuthenticationMiddleware<
   UserId,
   User extends BaseUser<UserId, unknown>,
-  StoredTokenFields,
-  AccessTokenData extends { userId: UserId },
-  RefreshTokenData extends { accessToken: string }
+  TokenEntityFields extends { refreshToken?: string; userId: UserId }
 > implements NestMiddleware
 {
   constructor(
@@ -24,7 +22,7 @@ export class HTTPAuthenticationMiddleware<
     protected moduleName: string,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<StoredTokenFields, AccessTokenData, RefreshTokenData>,
+    protected tokenManager: IAMTokenManagerService<TokenEntityFields>,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected usersService: IAMUsersService<UserId, User, undefined>
@@ -40,7 +38,7 @@ export class HTTPAuthenticationMiddleware<
       let authToken = req.headers.authorization;
       let authTokenIsNew = false;
       let refreshToken: string | undefined;
-      let tokenContent: DecodedTokenContent<AccessTokenData> | undefined;
+      let tokenContent: DecodedTokenContent<TokenEntityFields> | undefined;
       let useCookie = false;
       if (typeof authToken === 'string' && authToken.length) {
         tokens = authToken.replace('Bearer ', '').split('');
@@ -75,7 +73,7 @@ export class HTTPAuthenticationMiddleware<
           res.cookie('sid', authToken);
         }
       }
-      const userId = tokenContent.data?.userId;
+      const userId = tokenContent?.data?.userId;
       let userData = (await usersService.findOne({ filters: { id: userId } })).result;
       if (!userData) {
         userData = (await usersService.getUserWithPermissionsData({ filters: { id: userId } })) as User;

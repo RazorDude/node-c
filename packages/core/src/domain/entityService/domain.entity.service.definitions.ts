@@ -22,27 +22,42 @@ export interface DomainBaseResult<Result> {
 
 export type DomainBulkCreateData<Entity> = Partial<Entity>[];
 
-export type DomainBulkCreateOptions = Omit<DomainBaseOptions<object>, 'optionsOverridesByService'>;
+export type DomainBulkCreateOptions<Options = object> = Omit<DomainBaseOptions<Options>, 'optionsOverridesByService'>;
 
 export type DomainBulkCreateResult<Entity> = DomainBaseResult<Entity[]>;
 
 export type DomainCreateData<Entity> = Partial<Entity>;
 
-export type DomainCreateOptions = Omit<DomainBaseOptions<object>, 'optionsOverridesByService'>;
+export type DomainCreateOptions<Options = object> = Omit<DomainBaseOptions<Options>, 'optionsOverridesByService'>;
 
 export type DomainCreateResult<Entity> = DomainBaseResult<Entity>;
 
-export type DomainDeleteOptions = DomainBaseOptions<PersistanceDeleteOptions>;
+export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<PersistanceDeleteOptions>;
 
 export type DomainDeleteResult = DomainBaseResult<PersistanceDeleteResult>;
 
-export type DomainFindOneOptions = DomainBaseOptions<PersistanceFindOneOptions>;
+export type DomainFindOneOptions<Options = object> = Options & DomainBaseOptions<PersistanceFindOneOptions>;
 
 export type DomainFindOneResult<Entity> = DomainBaseResult<Entity | null>;
 
-export type DomainFindOptions = DomainBaseOptions<PersistanceFindOptions>;
+export type DomainFindOptions<Options = object> = Options & DomainBaseOptions<PersistanceFindOptions>;
 
 export type DomainFindResult<Entity> = DomainBaseResult<PersistanceFindResults<Entity>>;
+
+export enum DomainMethod {
+  // eslint-disable-next-line no-unused-vars
+  BulkCreate = 'bulkCreate',
+  // eslint-disable-next-line no-unused-vars
+  Create = 'create',
+  // eslint-disable-next-line no-unused-vars
+  Delete = 'delete',
+  // eslint-disable-next-line no-unused-vars
+  Find = 'find',
+  // eslint-disable-next-line no-unused-vars
+  FindOne = 'findOne',
+  // eslint-disable-next-line no-unused-vars
+  Update = 'update'
+}
 
 export enum DomainPersistanceEntityServiceType {
   // eslint-disable-next-line no-unused-vars
@@ -55,6 +70,6 @@ export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | 
 
 export type DomainUpdateData<Entity> = Partial<Entity>;
 
-export type DomainUpdateOptions = DomainBaseOptions<PersistanceUpdateOptions>;
+export type DomainUpdateOptions<Options = object> = Options & DomainBaseOptions<PersistanceUpdateOptions>;
 
 export type DomainUpdateResult<Entity> = DomainBaseResult<PersistanceUpdateResult<Entity>>;

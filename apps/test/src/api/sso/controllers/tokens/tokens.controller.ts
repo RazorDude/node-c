@@ -15,7 +15,7 @@ export class SSOTokensEntityController extends RESTAPIEntityControler<CacheAuthT
 
   // TODO: remove or rename this method
   @Post()
-  async createToken(
+  async Test(
     @Body()
     body: {
       test: boolean;
