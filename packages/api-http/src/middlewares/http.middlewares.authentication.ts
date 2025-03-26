@@ -1,18 +1,22 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
 import { ConfigProviderService } from '@node-c/core';
-import { User as BaseUser, DecodedTokenContent, IAMTokenManagerService, IAMUsersService } from '@node-c/domain-iam';
+import {
+  User as BaseUser,
+  DecodedTokenContent,
+  IAMTokenManagerService,
+  IAMUsersService,
+  UserIdentifierFieldObject,
+  UserTokenEnityFields
+} from '@node-c/domain-iam';
 
 import { NextFunction, Response } from 'express';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
-export class HTTPAuthenticationMiddleware<
-  UserId,
-  User extends BaseUser<UserId, unknown>,
-  TokenEntityFields extends { refreshToken?: string; userId: UserId }
-> implements NestMiddleware
+export class HTTPAuthenticationMiddleware<User extends BaseUser<UserIdentifierFieldObject, unknown>>
+  implements NestMiddleware
 {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -22,10 +26,10 @@ export class HTTPAuthenticationMiddleware<
     protected moduleName: string,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<TokenEntityFields>,
+    protected tokenManager: IAMTokenManagerService<UserTokenEnityFields>,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected usersService: IAMUsersService<UserId, User, undefined>
+    protected usersService: IAMUsersService<User>
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
@@ -38,7 +42,7 @@ export class HTTPAuthenticationMiddleware<
       let authToken = req.headers.authorization;
       let authTokenIsNew = false;
       let refreshToken: string | undefined;
-      let tokenContent: DecodedTokenContent<TokenEntityFields> | undefined;
+      let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
       let useCookie = false;
       if (typeof authToken === 'string' && authToken.length) {
         tokens = authToken.replace('Bearer ', '').split('');

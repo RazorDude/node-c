@@ -6,26 +6,26 @@ import immutable from 'immutable';
 import { mergeDeepRight as merge } from 'ramda';
 
 import {
-  AccessControlData,
-  AccessControlUser,
-  AccessControlPoint as BaseAccessControlPoint
-} from './iam.accessControl.definitions';
+  AuthorizationData,
+  AuthorizationUser,
+  AuthorizationPoint as BaseAuthorizationPoint
+} from './iam.authorization.definitions';
 
-export class IAMAccessControlService<AccessControlPoint extends BaseAccessControlPoint<unknown>> {
+export class IAMAuthorizationService<AuthorizationPoint extends BaseAuthorizationPoint<unknown>> {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected persistanceAccessControlPointsService: PersistanceEntityService<AccessControlPoint>
+    protected persistanceAuthorizationPointsService: PersistanceEntityService<AuthorizationPoint>
   ) {}
 
   static checkAccess(
-    accessPoints: { [id: number]: BaseAccessControlPoint<unknown> },
+    accessPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
     inputData: GenericObject,
-    user: AccessControlUser<unknown>
+    user: AuthorizationUser<unknown>
   ): {
     hasAccess: boolean;
     inputDataToBeMutated: GenericObject;
   } {
-    const userPermissionsData = user.currentAccessControlPoints!;
+    const userPermissionsData = user.currentAuthorizationPoints!;
     let hasAccess = false;
     const inputDataToBeMutated: GenericObject = {};
     const mutatedInputData = immutable.fromJS(inputData).toJS();
@@ -39,14 +39,14 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
       const innerMutatedInputData = immutable.fromJS(mutatedInputData).toJS();
       const innerInputDataToBeMutated: GenericObject = {};
       if (allowedInputData && Object.keys(allowedInputData).length) {
-        const values = IAMAccessControlService.matchInputValues(innerMutatedInputData, allowedInputData);
+        const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = values[key];
           setNested(innerMutatedInputData, key, values[key], { removeNestedFieldEscapeSign: true });
         }
       }
       if (forbiddenInputData && Object.keys(forbiddenInputData).length) {
-        const values = IAMAccessControlService.matchInputValues(innerMutatedInputData, forbiddenInputData);
+        const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, forbiddenInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = undefined;
           setNested(innerMutatedInputData, key, undefined, { removeNestedFieldEscapeSign: true });
@@ -55,7 +55,7 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
       if (hasStaticData) {
         for (const fieldName in requiredStaticData) {
           if (
-            !IAMAccessControlService.testValue(
+            !IAMAuthorizationService.testValue(
               getNested({ inputData: innerMutatedInputData, user }, fieldName, { removeNestedFieldEscapeSign: true }),
               requiredStaticData[fieldName]
             )
@@ -87,7 +87,7 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
           valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
         const allowedValues: unknown[] = [];
         valuesToTest.forEach((valueToTest: unknown) => {
-          const valueToTestVariants = IAMAccessControlService.getValuesForTesting(valueToTest);
+          const valueToTestVariants = IAMAuthorizationService.getValuesForTesting(valueToTest);
           for (const j in valuesToTestAgainst) {
             const valueToTestAgainst = valuesToTestAgainst[j];
             let matchFound = false;
@@ -134,23 +134,23 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
     return values;
   }
 
-  async mapAccessControlPoints(moduleName: string): Promise<AccessControlData<unknown>> {
-    const { items: acpList } = await this.persistanceAccessControlPointsService.find({
+  async mapAuthorizationPoints(moduleName: string): Promise<AuthorizationData<unknown>> {
+    const { items: acpList } = await this.persistanceAuthorizationPointsService.find({
       filters: { moduleNames: { [PersistanceSelectOperator.Contains]: moduleName } },
       findAll: true
     });
-    const accessControlData: AccessControlData<unknown> = { __all: { __all: {} } };
-    const moduleGlobalData = accessControlData.__all.__all;
+    const authorizationData: AuthorizationData<unknown> = { __all: { __all: {} } };
+    const moduleGlobalData = authorizationData.__all.__all;
     acpList.forEach(item => {
       if (!item.controllerNames) {
         moduleGlobalData[item.id as string] = item;
         return;
       }
       item.controllerNames.forEach(ctlName => {
-        let ctlData = accessControlData[ctlName];
+        let ctlData = authorizationData[ctlName];
         if (!ctlData) {
           ctlData = { __all: {} };
-          accessControlData[ctlName] = ctlData;
+          authorizationData[ctlName] = ctlData;
         }
         if (!item.handlerNames) {
           ctlData.__all[item.id as string] = item;
@@ -166,7 +166,7 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
         });
       });
     });
-    return accessControlData;
+    return authorizationData;
   }
 
   static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {
@@ -185,12 +185,12 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
         valuesToCheck.push(value);
       }
       valuesToCheck.forEach(valueToCheck => {
-        const valueToCheckVariants = IAMAccessControlService.getValuesForTesting(valueToCheck);
+        const valueToCheckVariants = IAMAuthorizationService.getValuesForTesting(valueToCheck);
         for (const i in valueToCheckVariants) {
           const actualValueToCheck = valueToCheckVariants[i];
           let checkPassed = false;
           for (const j in allowedValues) {
-            if (IAMAccessControlService.testValue(actualValueToCheck, allowedValues[j])) {
+            if (IAMAuthorizationService.testValue(actualValueToCheck, allowedValues[j])) {
               valuesToSet.push(valueToCheck);
               checkPassed = true;
               break;
@@ -222,7 +222,7 @@ export class IAMAccessControlService<AccessControlPoint extends BaseAccessContro
       const regex = new RegExp(valueToTest);
       return regex.test(valueToTestAgainst);
     }
-    const possibleValidValues = IAMAccessControlService.getValuesForTesting(valueToTest);
+    const possibleValidValues = IAMAuthorizationService.getValuesForTesting(valueToTest);
     for (const i in possibleValidValues) {
       if (possibleValidValues[i] === valueToTestAgainst) {
         return true;

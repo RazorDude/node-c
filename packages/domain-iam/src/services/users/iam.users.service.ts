@@ -3,26 +3,31 @@ import {
   ApplicationError,
   ConfigProviderService,
   DomainEntityService,
-  GenericObject,
   PersistanceEntityService,
   PersistanceFindOneOptions
 } from '@node-c/core';
 
-import * as bcrypt from 'bcryptjs';
-
 import {
   User as BaseUser,
-  UserMFAEntity as BaseUserMFAEntity,
-  GetUserWithPermissionsDataOptions
+  CreateAccessTokenOptions,
+  CreateAccessTokenReturnData,
+  GetUserWithPermissionsDataOptions,
+  UserIdentifierFieldObject,
+  UserTokenEnityFields,
+  UserTokenUserIdentifier
 } from './iam.users.definitions';
 
+import { IAMAuthenticationService, UserAuthType } from '../authentication';
 import { IAMTokenManagerService, TokenType } from '../tokenManager';
 
-export class IAMUsersService<
-  UserId,
-  User extends BaseUser<UserId, unknown>,
-  UserMFAEntity extends BaseUserMFAEntity<UserId> | undefined = undefined
-> extends DomainEntityService<User, PersistanceEntityService<User>> {
+// TODO: create user (signup); this should include password hashing
+// TODO: update password (incl. hashing)
+// TODO: reset password
+// TODO: console.info -> logger
+export class IAMUsersService<User extends BaseUser<UserIdentifierFieldObject, unknown>> extends DomainEntityService<
+  User,
+  PersistanceEntityService<User>
+> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
@@ -31,63 +36,45 @@ export class IAMUsersService<
     // eslint-disable-next-line no-unused-vars
     protected persistanceUsersService: PersistanceEntityService<User>,
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<{ refreshToken?: string; userId: UserId }>,
+    protected tokenManager: IAMTokenManagerService<UserTokenEnityFields>,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceUsersMFAService?: PersistanceEntityService<UserMFAEntity>,
-    // eslint-disable-next-line no-unused-vars
-    protected persistanceUsersWithActiveAccessService?: PersistanceEntityService<User>
+    protected userAuthServices: Record<UserAuthType, IAMAuthenticationService<User>>
   ) {
     super(persistanceUsersService);
   }
 
-  // TODO: console.info -> logger
-  async createAccessToken(data: {
-    email: string;
-    filters?: GenericObject;
-    mfaCode?: string;
-    password: string;
-    rememberMe?: boolean;
-  }): Promise<{ accessToken: string; refreshToken: string; user: User }> {
-    const { configProvider, moduleName, persistanceUsersMFAService, persistanceUsersWithActiveAccessService } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { email, filters, password, mfaCode, rememberMe } = data;
-    console.info(`[Domain.${moduleName}.Users info]: Login attempt for email ${email}...`);
+  async createAccessToken(options: CreateAccessTokenOptions): Promise<CreateAccessTokenReturnData<User>> {
+    const { configProvider, moduleName } = this;
+    const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =
+      configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const {
+      auth: { type: authType, ...authData },
+      email,
+      filters,
+      rememberMe
+    } = options;
+    console.info(`[Domain.${moduleName}.Users]: Login attempt for email ${email}...`);
     const user = await this.getUserWithPermissionsData(
       { filters: { ...(filters || {}), email } },
       { keepPassword: true }
     );
     if (!user) {
-      console.info(`[Domain.${moduleName}.Users info]: Login attempt failed for email ${email} - user not found.`);
+      console.info(`[Domain.${moduleName}.Users]: Login attempt failed for email ${email} - user not found.`);
       throw new ApplicationError('Invalid email or password.');
     }
-    if (!(await bcrypt.compare(password.toString(), user.password!))) {
-      console.info(`[Domain.${moduleName}.Users info]: Login attempt failed for email ${email} - wrong password.`);
-      throw new ApplicationError('Invalid email or password.');
+    const authService = this.userAuthServices[authType];
+    if (!authService) {
+      throw new ApplicationError('Invalid auth type.');
     }
-    if (mfaCode) {
-      let mfaCodeForCheck: string | undefined;
-      if (persistanceUsersMFAService) {
-        const storedCodeData = await persistanceUsersMFAService.findOne({ filters: { userId: user.id } });
-        mfaCodeForCheck = storedCodeData?.code;
-      }
-      if (!mfaCodeForCheck) {
-        mfaCodeForCheck = user.mfaCode;
-      }
-      if (!mfaCodeForCheck || mfaCode !== mfaCodeForCheck) {
-        console.info(
-          `[Domain.${moduleName}.Users info]: Login attempt failed for user id ${user.id} - missing or wrong mfa code.`
-        );
-        throw new ApplicationError('Invalid MFA code.');
-      }
-    }
+    await authService.authenticateUser(user, { ...authData, userIdentifierField: defaultUserIdentifierField });
     delete user.password;
     const {
       result: { token: refreshToken }
     } = await this.tokenManager.create(
-      { type: TokenType.Refresh, userId: user.id },
+      { type: TokenType.Refresh, [UserTokenUserIdentifier.FieldName]: user[defaultUserIdentifierField] },
       {
-        expiresInMinutes: moduleConfig.refreshTokenExpiryTimeInMinutes,
-        identifierDataField: 'userId',
+        expiresInMinutes: refreshTokenExpiryTimeInMinutes,
+        identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
         purgeOldFromPersistance: true
       }
@@ -95,18 +82,15 @@ export class IAMUsersService<
     const {
       result: { token: accessToken }
     } = await this.tokenManager.create(
-      { refreshToken, type: TokenType.Access, userId: user.id },
+      { refreshToken, type: TokenType.Access, [UserTokenUserIdentifier.FieldName]: user[defaultUserIdentifierField] },
       {
-        expiresInMinutes: rememberMe ? undefined : moduleConfig.accessTokenExpiryTimeInMinutes,
-        identifierDataField: 'userId',
+        expiresInMinutes: rememberMe ? undefined : accessTokenExpiryTimeInMinutes,
+        identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
         purgeOldFromPersistance: true
       }
     );
-    if (persistanceUsersWithActiveAccessService) {
-      await persistanceUsersWithActiveAccessService.delete({ filters: { id: user.id } });
-    }
-    console.info(`[Domain.${moduleName}.Users info]: Login attempt successful for email ${email}.`);
+    console.info(`[Domain.${moduleName}.Users]: Login attempt successful for email ${email}.`);
     return { accessToken, refreshToken, user };
   }
 

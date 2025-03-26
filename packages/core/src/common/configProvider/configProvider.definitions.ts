@@ -19,7 +19,8 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
   DOMAIN: {
     IAM: {
       JWT_ACCESS_SECRET: 'jwtAccessSecret',
-      JWT_REFRESH_SECRET: 'jwtRefreshSecret'
+      JWT_REFRESH_SECRET: 'jwtRefreshSecret',
+      USER_PASSWORD_SECRET: 'userPasswordSecret'
     }
   },
   PERSISTANCE: {
@@ -105,7 +106,9 @@ export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 
 export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
+  defaultUserIdentifierField: string;
   refreshTokenExpiryTimeInMinutes?: number;
+  userPasswordHMACAlgorithm?: string;
 }
 
 export interface AppConfigCommonPersistanceNoSQL {
@@ -136,6 +139,7 @@ export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
 export interface AppConfigFromEnvDomainIAM {
   jwtAccessSecret: string;
   jwtRefreshSecret: string;
+  userPasswordSecret?: string;
 }
 
 export interface AppConfigFromEnvKeys {

@@ -4,7 +4,7 @@ import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
-export interface AccessControlPoint<UserType extends DBEntity = DBEntity> extends DBEntity {
+export interface AuthorizationPoint<UserType extends DBEntity = DBEntity> extends DBEntity {
   allowedInputData?: GenericObject;
   controllerNames?: string[];
   forbiddenInputData?: GenericObject;
@@ -17,7 +17,7 @@ export interface AccessControlPoint<UserType extends DBEntity = DBEntity> extend
   userTypes?: UserType[];
 }
 
-export const AccessControlPointEntity = new EntitySchema<AccessControlPoint>({
+export const AuthorizationPointEntity = new EntitySchema<AuthorizationPoint>({
   columns: {
     ...DBEntitySchema.columns,
     allowedInputData: { type: 'json', nullable: true },
@@ -30,15 +30,15 @@ export const AccessControlPointEntity = new EntitySchema<AccessControlPoint>({
     requiredStaticData: { type: 'json', nullable: true },
     userFieldName: { type: 'varchar', nullable: true }
   },
-  name: 'accessControlPoint',
+  name: 'authorizationPoint',
   relations: {
     userTypes: {
       type: 'many-to-many',
       target: 'userType',
-      inverseSide: 'accessControlPoints'
+      inverseSide: 'authorizationPoints'
     } as EntitySchemaRelationOptions
   },
-  tableName: 'accessControlPoints'
+  tableName: 'authorizationPoints'
   // indices: [
   //   {
   //     spatial: true,

@@ -1,2 +1,2 @@
-export * from './accessControlPoints';
+export * from './authorizationPoints';
 export * from './users';

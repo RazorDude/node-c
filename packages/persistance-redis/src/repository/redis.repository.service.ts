@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AppConfigPersistanceNoSQL, ApplicationError, ConfigProviderService } from '@node-c/core';
 
 import { validate } from 'class-validator';
-import immutable from 'immutable';
+import immutable, { Collection } from 'immutable';
 import { mergeDeepRight } from 'ramda';
 import { v4 as uuid } from 'uuid';
 
@@ -108,7 +108,7 @@ export class RedisRepositoryService<Entity> {
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
     const onConflict = optOnConflict || SaveOptionsOnConflict.ThrowError;
     let allPKValuesExist = true;
-    let preparedData = immutable.fromJS(data!).toJS() as Record<string, unknown>;
+    let preparedData = (immutable.fromJS(data!) as Collection<unknown, unknown>).toJS() as Record<string, unknown>;
     let storeEntityKey = '';
     for (const columnName of primaryKeys) {
       const { generated, type } = columns[columnName];

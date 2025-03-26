@@ -8,7 +8,12 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import { AccessControlData, IAMAccessControlService, User as BaseUser } from '@node-c/domain-iam';
+import {
+  AuthorizationData,
+  User as BaseUser,
+  IAMAuthorizationService,
+  UserIdentifierFieldObject
+} from '@node-c/domain-iam';
 
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
@@ -16,11 +21,13 @@ import { Observable } from 'rxjs';
 import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
-export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, unknown>> implements NestInterceptor {
+export class HTTPAuthorizationInterceptor<User extends BaseUser<UserIdentifierFieldObject, unknown>>
+  implements NestInterceptor
+{
   constructor(
     @Inject(Constants.API_MODULE_ACP)
     // eslint-disable-next-line no-unused-vars
-    protected accessControlData: AccessControlData<unknown>
+    protected authorizationData: AuthorizationData<unknown>
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
@@ -31,9 +38,9 @@ export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, 
     if (!locals) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
-    let controllerData = this.accessControlData![controllerName];
+    let controllerData = this.authorizationData![controllerName];
     if (!controllerData) {
-      controllerData = this.accessControlData.__all;
+      controllerData = this.authorizationData.__all;
     }
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
     let handlerData = controllerData[handlerName];
@@ -43,7 +50,7 @@ export class HTTPAuthorizationInterceptor<UserId, User extends BaseUser<UserId, 
         return next.handle();
       }
     }
-    const { hasAccess, inputDataToBeMutated } = IAMAccessControlService.checkAccess(
+    const { hasAccess, inputDataToBeMutated } = IAMAuthorizationService.checkAccess(
       handlerData,
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user

@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ApplicationError, PersistanceUpdateResult } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
 
-import * as bcrypt from 'bcryptjs';
 import { omit } from 'ramda';
 import { EntityManager, Repository } from 'typeorm';
 
@@ -35,6 +34,7 @@ export class UsersService extends RDBEntityService<User> {
     return updateResult;
   }
 
+  // TODO: move the logic of this meethod to the domain-iam package
   async updatePassword(
     data: UpdatePasswordData,
     options?: { transactionManager?: EntityManager }
@@ -52,9 +52,9 @@ export class UsersService extends RDBEntityService<User> {
     if (!user) {
       throw new ApplicationError('User not found.');
     }
-    if (!(await bcrypt.compare(currentPassword.toString(), user.password!))) {
-      throw new ApplicationError('Invalid current password.');
-    }
+    // if (!(await bcrypt.compare(currentPassword.toString(), user.password!))) {
+    //   throw new ApplicationError('Invalid current password.');
+    // }
     if (currentPassword === newPassword) {
       throw new ApplicationError('The new password must be different than the current password.');
     }

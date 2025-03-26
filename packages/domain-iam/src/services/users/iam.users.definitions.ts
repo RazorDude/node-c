@@ -1,19 +1,44 @@
 import { GenericObject } from '@node-c/core';
 
-import { AccessControlPoint } from '../accessControl';
+import { UserAuthType, UserMFAType } from '../authentication';
+import { AuthorizationPoint } from '../authorization';
+
+export interface CreateAccessTokenLocalAuthData {
+  mfaCode?: string;
+  password: string;
+}
+
+export interface CreateAccessTokenOptions<AuthData = unknown> {
+  auth: { type: UserAuthType; mfaType?: UserMFAType } & AuthData;
+  email: string;
+  filters?: GenericObject;
+  rememberMe?: boolean;
+}
+
+export interface CreateAccessTokenReturnData<UserData> {
+  accessToken: string;
+  refreshToken: string;
+  user: UserData;
+}
 
 export interface GetUserWithPermissionsDataOptions {
   keepPassword?: boolean;
 }
 
-export interface User<UserId, AccessControlPointId> {
-  currentAccessControlPoints: GenericObject<AccessControlPoint<AccessControlPointId>>;
-  id: UserId;
+export type User<UserIdentifierData extends UserIdentifierFieldObject, AuthorizationPointId> = {
+  currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
   mfaCode?: string;
   password?: string;
+} & UserIdentifierData;
+
+export type UserIdentifierFieldObject = { [userIdentifierField: string]: unknown };
+
+export interface UserTokenEnityFields<UserId = unknown> {
+  refreshToken?: string;
+  userId: UserId;
 }
 
-export interface UserMFAEntity<UserId> {
-  code: string;
-  userId: UserId;
+export enum UserTokenUserIdentifier {
+  // eslint-disable-next-line no-unused-vars
+  FieldName = 'userId'
 }

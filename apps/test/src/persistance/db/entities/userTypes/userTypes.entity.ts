@@ -1,10 +1,10 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { AccessControlPoint } from '../accessControlPoints';
+import { AuthorizationPoint } from '../authorizationPoints';
 
 export interface UserType<User extends DBEntity = DBEntity> extends DBEntity {
-  accessControlPoints?: AccessControlPoint[];
+  authorizationPoints?: AuthorizationPoint[];
   assignedUsers?: User[];
   isActive: boolean;
   isEditable: boolean;
@@ -20,14 +20,14 @@ export const UserTypeEntity = new EntitySchema<UserType>({
   },
   name: 'userType',
   relations: {
-    accessControlPoints: {
+    authorizationPoints: {
       type: 'many-to-many',
-      target: 'accessControlPoint',
+      target: 'authorizationPoint',
       inverseSide: 'userTypes',
       joinTable: {
-        name: 'userTypeAccessControlPoints',
+        name: 'userTypeAuthorizationPoints',
         joinColumn: { name: 'userTypeId', referencedColumnName: 'id' },
-        inverseJoinColumn: { name: 'accessControlPointId', referencedColumnName: 'id' }
+        inverseJoinColumn: { name: 'authorizationPointId', referencedColumnName: 'id' }
       }
     } as EntitySchemaRelationOptions,
     assignedUsers: {

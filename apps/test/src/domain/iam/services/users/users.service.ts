@@ -9,7 +9,7 @@ import { CacheUser, CacheUsersEntityService } from '../../../../persistance/cach
 import { IAMTokenManagerService } from '../tokenManager';
 
 @Injectable()
-export class IAMUsersService extends BaseIAMUsersService<string, CacheUser> {
+export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
   static injectionToken = Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE;
 
   constructor(
@@ -19,6 +19,6 @@ export class IAMUsersService extends BaseIAMUsersService<string, CacheUser> {
     protected persistanceUsersService: CacheUsersEntityService,
     protected tokenManager: IAMTokenManagerService
   ) {
-    super(configProvider, moduleName, persistanceUsersService, tokenManager);
+    super(configProvider, moduleName, persistanceUsersService, tokenManager, {});
   }
 }

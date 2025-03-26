@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/persistance-redis';
 
-import { AccessControlPoint } from './accessControlPoints.entity';
+import { AuthorizationPoint } from './authorizationPoints.entity';
 
 @Injectable()
-export class AccessControlPointsEntityService extends RedisEntityService<AccessControlPoint> {
+export class AuthorizationPointsEntityService extends RedisEntityService<AuthorizationPoint> {
   constructor(
-    protected repository: RedisRepositoryService<AccessControlPoint>,
+    protected repository: RedisRepositoryService<AuthorizationPoint>,
     protected store: RedisStoreService
   ) {
     super(repository, store);

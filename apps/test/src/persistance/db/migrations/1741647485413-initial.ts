@@ -5,7 +5,7 @@ export class Initial1741647485413 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      'CREATE TABLE `accessControlPoints` (`createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `deletedAt` datetime(6) NULL, `id` int NOT NULL AUTO_INCREMENT, `updatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), `allowedInputData` json NULL, `controllerNames` json NULL, `forbiddenInputData` json NULL, `handlerNames` json NULL, `inputDataFieldName` varchar(255) NULL, `moduleNames` json NULL, `name` varchar(255) NOT NULL, `requiredStaticData` json NULL, `userFieldName` varchar(255) NULL, UNIQUE INDEX `IDX_bb43ed6a75a6c094375132f655` (`name`), PRIMARY KEY (`id`)) ENGINE=InnoDB'
+      'CREATE TABLE `authorizationPoints` (`createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `deletedAt` datetime(6) NULL, `id` int NOT NULL AUTO_INCREMENT, `updatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), `allowedInputData` json NULL, `controllerNames` json NULL, `forbiddenInputData` json NULL, `handlerNames` json NULL, `inputDataFieldName` varchar(255) NULL, `moduleNames` json NULL, `name` varchar(255) NOT NULL, `requiredStaticData` json NULL, `userFieldName` varchar(255) NULL, UNIQUE INDEX `IDX_bb43ed6a75a6c094375132f655` (`name`), PRIMARY KEY (`id`)) ENGINE=InnoDB'
     );
     await queryRunner.query(
       'CREATE TABLE `courses` (`createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `deletedAt` datetime(6) NULL, `id` int NOT NULL AUTO_INCREMENT, `updatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), `courseTypeId` int NOT NULL, `name` varchar(255) NOT NULL, UNIQUE INDEX `COURSES_UNIQUE_IDX_0` (`courseTypeId`, `name`), PRIMARY KEY (`id`)) ENGINE=InnoDB'
@@ -35,7 +35,7 @@ export class Initial1741647485413 implements MigrationInterface {
       'CREATE TABLE `userAssignedCourses` (`courseId` int NOT NULL, `userId` int NOT NULL, INDEX `IDX_a61b2044f9865e6f7dca2429bc` (`courseId`), INDEX `IDX_d6c37197a7453e42373c0a143b` (`userId`), PRIMARY KEY (`courseId`, `userId`)) ENGINE=InnoDB'
     );
     await queryRunner.query(
-      'CREATE TABLE `userTypeAccessControlPoints` (`userTypeId` int NOT NULL, `accessControlPointId` int NOT NULL, INDEX `IDX_6a440eb6859bd3ac63df1061e6` (`userTypeId`), INDEX `IDX_83510678c89098a99135feaa16` (`accessControlPointId`), PRIMARY KEY (`userTypeId`, `accessControlPointId`)) ENGINE=InnoDB'
+      'CREATE TABLE `userTypeAuthorizationPoints` (`userTypeId` int NOT NULL, `authorizationPointId` int NOT NULL, INDEX `IDX_6a440eb6859bd3ac63df1061e6` (`userTypeId`), INDEX `IDX_83510678c89098a99135feaa16` (`authorizationPointId`), PRIMARY KEY (`userTypeId`, `authorizationPointId`)) ENGINE=InnoDB'
     );
     await queryRunner.query(
       'CREATE TABLE `userTypeAssignedUsers` (`userTypeId` int NOT NULL, `userId` int NOT NULL, INDEX `IDX_1bc7728887ce7726fa46a7ea41` (`userTypeId`), INDEX `IDX_edf51db2850541f497e44dc035` (`userId`), PRIMARY KEY (`userTypeId`, `userId`)) ENGINE=InnoDB'
@@ -62,10 +62,10 @@ export class Initial1741647485413 implements MigrationInterface {
       'ALTER TABLE `userAssignedCourses` ADD CONSTRAINT `FK_d6c37197a7453e42373c0a143b8` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION'
     );
     await queryRunner.query(
-      'ALTER TABLE `userTypeAccessControlPoints` ADD CONSTRAINT `FK_6a440eb6859bd3ac63df1061e64` FOREIGN KEY (`userTypeId`) REFERENCES `userTypes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE'
+      'ALTER TABLE `userTypeAuthorizationPoints` ADD CONSTRAINT `FK_6a440eb6859bd3ac63df1061e64` FOREIGN KEY (`userTypeId`) REFERENCES `userTypes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE'
     );
     await queryRunner.query(
-      'ALTER TABLE `userTypeAccessControlPoints` ADD CONSTRAINT `FK_83510678c89098a99135feaa161` FOREIGN KEY (`accessControlPointId`) REFERENCES `accessControlPoints`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION'
+      'ALTER TABLE `userTypeAuthorizationPoints` ADD CONSTRAINT `FK_83510678c89098a99135feaa161` FOREIGN KEY (`authorizationPointId`) REFERENCES `authorizationPoints`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION'
     );
     await queryRunner.query(
       'ALTER TABLE `userTypeAssignedUsers` ADD CONSTRAINT `FK_1bc7728887ce7726fa46a7ea415` FOREIGN KEY (`userTypeId`) REFERENCES `userTypes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE'
@@ -79,10 +79,10 @@ export class Initial1741647485413 implements MigrationInterface {
     await queryRunner.query('ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_edf51db2850541f497e44dc0350`');
     await queryRunner.query('ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_1bc7728887ce7726fa46a7ea415`');
     await queryRunner.query(
-      'ALTER TABLE `userTypeAccessControlPoints` DROP FOREIGN KEY `FK_83510678c89098a99135feaa161`'
+      'ALTER TABLE `userTypeAuthorizationPoints` DROP FOREIGN KEY `FK_83510678c89098a99135feaa161`'
     );
     await queryRunner.query(
-      'ALTER TABLE `userTypeAccessControlPoints` DROP FOREIGN KEY `FK_6a440eb6859bd3ac63df1061e64`'
+      'ALTER TABLE `userTypeAuthorizationPoints` DROP FOREIGN KEY `FK_6a440eb6859bd3ac63df1061e64`'
     );
     await queryRunner.query('ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_d6c37197a7453e42373c0a143b8`');
     await queryRunner.query('ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_a61b2044f9865e6f7dca2429bc1`');
@@ -94,9 +94,9 @@ export class Initial1741647485413 implements MigrationInterface {
     await queryRunner.query('DROP INDEX `IDX_edf51db2850541f497e44dc035` ON `userTypeAssignedUsers`');
     await queryRunner.query('DROP INDEX `IDX_1bc7728887ce7726fa46a7ea41` ON `userTypeAssignedUsers`');
     await queryRunner.query('DROP TABLE `userTypeAssignedUsers`');
-    await queryRunner.query('DROP INDEX `IDX_83510678c89098a99135feaa16` ON `userTypeAccessControlPoints`');
-    await queryRunner.query('DROP INDEX `IDX_6a440eb6859bd3ac63df1061e6` ON `userTypeAccessControlPoints`');
-    await queryRunner.query('DROP TABLE `userTypeAccessControlPoints`');
+    await queryRunner.query('DROP INDEX `IDX_83510678c89098a99135feaa16` ON `userTypeAuthorizationPoints`');
+    await queryRunner.query('DROP INDEX `IDX_6a440eb6859bd3ac63df1061e6` ON `userTypeAuthorizationPoints`');
+    await queryRunner.query('DROP TABLE `userTypeAuthorizationPoints`');
     await queryRunner.query('DROP INDEX `IDX_d6c37197a7453e42373c0a143b` ON `userAssignedCourses`');
     await queryRunner.query('DROP INDEX `IDX_a61b2044f9865e6f7dca2429bc` ON `userAssignedCourses`');
     await queryRunner.query('DROP TABLE `userAssignedCourses`');
@@ -117,7 +117,7 @@ export class Initial1741647485413 implements MigrationInterface {
     await queryRunner.query('DROP TABLE `courseTypes`');
     await queryRunner.query('DROP INDEX `COURSES_UNIQUE_IDX_0` ON `courses`');
     await queryRunner.query('DROP TABLE `courses`');
-    await queryRunner.query('DROP INDEX `IDX_bb43ed6a75a6c094375132f655` ON `accessControlPoints`');
-    await queryRunner.query('DROP TABLE `accessControlPoints`');
+    await queryRunner.query('DROP INDEX `IDX_bb43ed6a75a6c094375132f655` ON `authorizationPoints`');
+    await queryRunner.query('DROP TABLE `authorizationPoints`');
   }
 }

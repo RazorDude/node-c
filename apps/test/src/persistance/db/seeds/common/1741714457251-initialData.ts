@@ -5,7 +5,7 @@ export class InitialData1741714457251 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      'INSERT INTO `accessControlPoints` (`id`, `allowedInputData`, `controllerNames`, `forbiddenInputData`, `handlerNames`, `inputDataFieldName`, `moduleNames`, `name`, `requiredStaticData`, `userFieldName`) VALUES ' +
+      'INSERT INTO `authorizationPoints` (`id`, `allowedInputData`, `controllerNames`, `forbiddenInputData`, `handlerNames`, `inputDataFieldName`, `moduleNames`, `name`, `requiredStaticData`, `userFieldName`) VALUES ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
@@ -141,7 +141,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         '(4, 5);'
     );
     await queryRunner.query(
-      'INSERT INTO `userTypeAccessControlPoints` (`userTypeId`, `accessControlPointId`) VALUES ' +
+      'INSERT INTO `userTypeAuthorizationPoints` (`userTypeId`, `authorizationPointId`) VALUES ' +
         '(1, 5), ' +
         '(2, 1), ' +
         '(2, 2), ' +

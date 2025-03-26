@@ -1,7 +1,7 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { AccessControlPoint } from '../accessControlPoints';
+import { AuthorizationPoint } from '../authorizationPoints';
 import { Course } from '../courses';
 import { UserAccountStatus } from '../userAccountStatuses';
 import { UserType } from '../userTypes';
@@ -11,7 +11,7 @@ export interface User extends DBEntity {
   accountStatusId: number;
   assignedCourses?: Course[];
   assignedUserTypes?: UserType[];
-  currentAccessControlPoints?: { [accessControlPointId: string]: AccessControlPoint };
+  currentAuthorizationPoints?: { [authorizationPointId: string]: AuthorizationPoint };
   email: string;
   firstName: string;
   hasTakenIntro: boolean;

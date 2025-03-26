@@ -1,4 +1,4 @@
-export * from './accessControlPoints';
+export * from './authorizationPoints';
 export * from './courses';
 export * from './courseTypes';
 export * from './lessons';
