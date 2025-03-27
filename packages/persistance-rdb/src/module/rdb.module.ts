@@ -8,8 +8,6 @@ import { RDBModuleOptions } from './rdb.module.definitions';
 
 import { SQLQueryBuilderModule } from '../sqlQueryBuilder';
 
-// Note: the services here do not have a wrapping module intentionally - because of how TypeORM imports them,
-// we want to have all of them in a single module, to be used as an array in TypeOrmModule.forRootAsync
 export class RDBModule {
   static register(options: RDBModuleOptions): DynamicModule {
     const { connectionName, folderData, imports: additionalImports, moduleClass, moduleName } = options;

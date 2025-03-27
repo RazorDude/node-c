@@ -1,13 +1,14 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-alpha3",
+  "version": "1.0.0-alpha4",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "test": "vitest --config test/vitest.config.ts",
-    "test:coverage": "vitest --config test/vitest.config.ts --coverage",
+    "start": "nest start src/main.ts",
+    "test": "NODE_ENV=test vitest --config test/vitest.config.ts",
+    "test:coverage": "NODE_ENV=test vitest --config test/vitest.config.ts --coverage",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
@@ -28,11 +29,11 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha3",
-    "@node-c/api-rest": "^1.0.0-alpha3",
-    "@node-c/core": "^1.0.0-alpha3",
-    "@node-c/domain-iam": "^1.0.0-alpha3",
-    "@node-c/persistance-rdb": "^1.0.0-alpha3",
-    "@node-c/persistance-redis": "^1.0.0-alpha3"
+    "@node-c/api-http": "^1.0.0-alpha4",
+    "@node-c/api-rest": "^1.0.0-alpha4",
+    "@node-c/core": "^1.0.0-alpha4",
+    "@node-c/domain-iam": "^1.0.0-alpha4",
+    "@node-c/persistance-rdb": "^1.0.0-alpha4",
+    "@node-c/persistance-redis": "^1.0.0-alpha4"
   }
 }

@@ -200,7 +200,9 @@ export enum AppEnvironment {
   // eslint-disable-next-line no-unused-vars
   Production = 'production',
   // eslint-disable-next-line no-unused-vars
-  Staging = 'staging'
+  Staging = 'staging',
+  // eslint-disable-next-line no-unused-vars
+  Test = 'test'
 }
 
 /*

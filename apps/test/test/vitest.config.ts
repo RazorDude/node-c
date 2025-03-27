@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     coverage: {
       exclude: ['src/index.ts', 'dist', 'test']
-    }
+    },
+    include: ['test/**/*.spec.ts']
   }
 });

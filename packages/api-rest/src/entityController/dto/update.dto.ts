@@ -2,7 +2,7 @@ import { GenericObject } from '@node-c/core';
 
 import { IsDefined, IsObject, ValidateNested } from 'class-validator';
 
-import { BaseDto } from './dto.base';
+import { BaseDto } from './base.dto';
 
 import { UpdateBody, UpdateOptions } from '../rest.entity.controller.definitions';
 

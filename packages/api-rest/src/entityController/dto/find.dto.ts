@@ -2,7 +2,7 @@ import { DomainFindOptions, GenericObject } from '@node-c/core';
 
 import { IsArray, IsBooleanString, IsNumberString, IsObject, IsOptional } from 'class-validator';
 
-import { BaseDto } from './dto.base';
+import { BaseDto } from './base.dto';
 
 export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options> implements DomainFindOptions {
   @IsObject()

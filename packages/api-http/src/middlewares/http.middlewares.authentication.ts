@@ -51,8 +51,12 @@ export class HTTPAuthenticationMiddleware<User extends BaseUser<unknown, unknown
         authToken = req.cookies['sid'];
         useCookie = true;
       }
+      if (!authToken) {
+        console.error('Missing access token.');
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
       try {
-        const tokenRes = await tokenManager.verifyAccessToken(authToken as string, {
+        const tokenRes = await tokenManager.verifyAccessToken(authToken, {
           deleteFromStoreIfExpired: true,
           identifierDataField: 'userId',
           persistNewToken: true,

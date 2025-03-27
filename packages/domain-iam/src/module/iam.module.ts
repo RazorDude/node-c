@@ -6,17 +6,15 @@ import { DomainIAMModuleOptions } from './iam.definitions';
 
 import { Constants } from '../common/definitions';
 
-// TODO: this shouldn't be IAM domain specific
-// TODO: rework this to support EITHER modules OR services
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
-    const { modules, services } = loadDynamicModules(folderData);
+    const { services } = loadDynamicModules(folderData);
     return {
       global: true,
       module: moduleClass as DynamicModule['module'],
-      imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
+      imports: [...(importsAtStart || []), ...(importsAtEnd || [])],
       providers: [
         {
           provide: Constants.DOMAIN_MODULE_NAME,

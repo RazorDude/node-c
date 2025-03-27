@@ -6,8 +6,6 @@ import {
   Constants as NodeCConstants
 } from '@node-c/api-http';
 
-import { AuthorizationData } from '@node-c/domain-iam';
-
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
@@ -21,12 +19,8 @@ export class SSOAPIModule extends BaseHTTPAPIModule {
     moduleName: Constants.API_SSO_MODULE_NAME,
     providers: [
       {
-        provide: NodeCConstants.API_MODULE_ACP,
-        useFactory: async (authorizationService: IAMAuthorizationService): Promise<AuthorizationData<unknown>> => {
-          const acps = await authorizationService!.mapAuthorizationPoints(Constants.API_SSO_MODULE_NAME);
-          return acps;
-        },
-        inject: [IAMAuthorizationService]
+        provide: NodeCConstants.API_MODULE_AUTHORIZATION_SERVICE,
+        useExisting: IAMAuthorizationService
       }
     ]
   };

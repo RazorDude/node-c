@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { RedisRepositoryModule } from '@node-c/persistance-redis';
 
 import { AuthorizationPoint, AuthorizationPointSchema } from './authorizationPoints.entity';
-import { AuthorizationPointsEntityService } from './authorizationPoints.service';
+import { CacheAuthorizationPointsEntityService } from './authorizationPoints.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -14,7 +14,7 @@ import { Constants } from '../../../../common/definitions';
       schema: AuthorizationPointSchema
     })
   ],
-  providers: [AuthorizationPointsEntityService],
-  exports: [AuthorizationPointsEntityService]
+  providers: [CacheAuthorizationPointsEntityService],
+  exports: [CacheAuthorizationPointsEntityService]
 })
-export class AuthorizationPointsEntityModule {}
+export class CacheAuthorizationPointsEntityModule {}

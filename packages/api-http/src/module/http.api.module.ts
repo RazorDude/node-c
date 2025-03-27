@@ -56,16 +56,15 @@ export class HTTPAPIModule {
   static register(options: HTTPAPIModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass } = options;
     const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
-    const { controllers, modules, services } = loadDynamicModules(folderData);
+    const { controllers, services } = loadDynamicModules(folderData);
     return {
       module: moduleClass as DynamicModule['module'],
-      imports: [...(importsAtStart || []), ...(modules || []), ...(importsAtEnd || [])],
+      imports: [...(importsAtStart || []), ...(importsAtEnd || [])],
       providers: [
         {
           provide: Constants.API_MODULE_NAME,
           useValue: options.moduleName
         },
-        { provide: Constants.API_MODULE_ACP, useValue: [] },
         {
           provide: Constants.API_MODULE_ALLOWED_ORIGINS,
           useFactory: async (configProviderService: ConfigProviderService) =>

@@ -5,11 +5,12 @@ import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@
 import { AuthorizationPoint } from './authorizationPoints.entity';
 
 @Injectable()
-export class AuthorizationPointsEntityService extends RedisEntityService<AuthorizationPoint> {
+export class CacheAuthorizationPointsEntityService extends RedisEntityService<AuthorizationPoint> {
   constructor(
     protected repository: RedisRepositoryService<AuthorizationPoint>,
     protected store: RedisStoreService
   ) {
     super(repository, store);
+    console.log('===> CacheAuthorizationPointsEntityService init');
   }
 }

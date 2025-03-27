@@ -1,6 +1,6 @@
 import { IsDefined, IsObject, ValidateNested } from 'class-validator';
 
-import { BaseDto } from './dto.base';
+import { BaseDto } from './base.dto';
 
 import { BulkCreateBody, BulkCreateOptions } from '../rest.entity.controller.definitions';
 
