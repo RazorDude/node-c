@@ -25,13 +25,11 @@ export interface GetUserWithPermissionsDataOptions {
   keepPassword?: boolean;
 }
 
-export type User<UserIdentifierData extends UserIdentifierFieldObject, AuthorizationPointId> = {
+export type User<UserIdentifierData, AuthorizationPointId> = {
   currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
   mfaCode?: string;
   password?: string;
 } & UserIdentifierData;
-
-export type UserIdentifierFieldObject = { [userIdentifierField: string]: unknown };
 
 export interface UserTokenEnityFields<UserId = unknown> {
   refreshToken?: string;

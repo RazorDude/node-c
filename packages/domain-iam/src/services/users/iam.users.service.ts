@@ -12,7 +12,6 @@ import {
   CreateAccessTokenOptions,
   CreateAccessTokenReturnData,
   GetUserWithPermissionsDataOptions,
-  UserIdentifierFieldObject,
   UserTokenEnityFields,
   UserTokenUserIdentifier
 } from './iam.users.definitions';
@@ -24,7 +23,7 @@ import { IAMTokenManagerService, TokenType } from '../tokenManager';
 // TODO: update password (incl. hashing)
 // TODO: reset password
 // TODO: console.info -> logger
-export class IAMUsersService<User extends BaseUser<UserIdentifierFieldObject, unknown>> extends DomainEntityService<
+export class IAMUsersService<User extends BaseUser<unknown, unknown>> extends DomainEntityService<
   User,
   PersistanceEntityService<User>
 > {
@@ -68,10 +67,11 @@ export class IAMUsersService<User extends BaseUser<UserIdentifierFieldObject, un
     }
     await authService.authenticateUser(user, { ...authData, userIdentifierField: defaultUserIdentifierField });
     delete user.password;
+    const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
     const {
       result: { token: refreshToken }
     } = await this.tokenManager.create(
-      { type: TokenType.Refresh, [UserTokenUserIdentifier.FieldName]: user[defaultUserIdentifierField] },
+      { type: TokenType.Refresh, [UserTokenUserIdentifier.FieldName]: userIdentifierValue },
       {
         expiresInMinutes: refreshTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,
@@ -82,7 +82,7 @@ export class IAMUsersService<User extends BaseUser<UserIdentifierFieldObject, un
     const {
       result: { token: accessToken }
     } = await this.tokenManager.create(
-      { refreshToken, type: TokenType.Access, [UserTokenUserIdentifier.FieldName]: user[defaultUserIdentifierField] },
+      { refreshToken, type: TokenType.Access, [UserTokenUserIdentifier.FieldName]: userIdentifierValue },
       {
         expiresInMinutes: rememberMe ? undefined : accessTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,

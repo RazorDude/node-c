@@ -11,8 +11,9 @@ export const appConfigCommon: AppConfigCommon = {
   domain: {
     administration: {},
     iam: {
-      refreshTokenExpiryTimeInHours: 24,
-      sessionTokenExpiryTimeInMinutes: 120
+      accessTokenExpiryTimeInMinutes: 120,
+      defaultUserIdentifierField: 'id',
+      refreshTokenExpiryTimeInHours: 24
     }
   },
   general: { projectName: 'node-c-app', projectRootPath: path.join(__dirname, '../../'), projectVersion: '1.0.0' },

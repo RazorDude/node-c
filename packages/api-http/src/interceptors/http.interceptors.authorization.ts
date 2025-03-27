@@ -8,12 +8,7 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import {
-  AuthorizationData,
-  User as BaseUser,
-  IAMAuthorizationService,
-  UserIdentifierFieldObject
-} from '@node-c/domain-iam';
+import { AuthorizationData, User as BaseUser, IAMAuthorizationService } from '@node-c/domain-iam';
 
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
@@ -21,9 +16,7 @@ import { Observable } from 'rxjs';
 import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
-export class HTTPAuthorizationInterceptor<User extends BaseUser<UserIdentifierFieldObject, unknown>>
-  implements NestInterceptor
-{
+export class HTTPAuthorizationInterceptor<User extends BaseUser<unknown, unknown>> implements NestInterceptor {
   constructor(
     @Inject(Constants.API_MODULE_ACP)
     // eslint-disable-next-line no-unused-vars

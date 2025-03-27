@@ -6,7 +6,6 @@ import {
   DecodedTokenContent,
   IAMTokenManagerService,
   IAMUsersService,
-  UserIdentifierFieldObject,
   UserTokenEnityFields
 } from '@node-c/domain-iam';
 
@@ -15,9 +14,7 @@ import { NextFunction, Response } from 'express';
 import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
-export class HTTPAuthenticationMiddleware<User extends BaseUser<UserIdentifierFieldObject, unknown>>
-  implements NestMiddleware
-{
+export class HTTPAuthenticationMiddleware<User extends BaseUser<unknown, unknown>> implements NestMiddleware {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,

@@ -124,11 +124,16 @@ export class InitialData1741714457251 implements MigrationInterface {
     );
     await queryRunner.query(
       'INSERT INTO `users` (`id`, `accountStatusId`, `email`, `firstName`, `hasTakenIntro`, `isVerified`, `lastName`, `mfaIsEnabled`, `password`, `phoneNumber`, `profileImageKey`) VALUES ' +
-        "(1, 1, 'admin@node-c.com', 'Node-C', 1, 1, 'Admin', 0, 'TestPassword', null, null), " +
-        "(2, 1, 'user0@node-c.com', 'User', 1, 1, 'Zero', 0, 'TestPassword', null, null), " +
-        "(3, 1, 'user1@node-c.com', 'User', 1, 0, 'One', 0, 'TestPassword', null, null), " +
-        "(4, 2, 'user2@node-c.com', 'User', 1, 1, 'Two', 0, 'TestPassword', null, null), " +
-        "(5, 1, 'user3@node-c.com', 'User', 1, 1, 'Three', 0, 'TestPassword', null, null);"
+        // AdminPassword
+        "(1, 1, 'admin@node-c.com', 'Node-C', 1, 1, 'Admin', 0, '3348a06a74c38793f89e239e4bd9f4fd39429be99bde7de7269776a22453bb3d', null, null), " +
+        // User0Password
+        "(2, 1, 'user0@node-c.com', 'User', 1, 1, 'Zero', 0, '3f6cdef9ab48a3765550fb4825d047aa1964b73ab37ff95eeff8842abc43fb91', null, null), " +
+        // User1Password
+        "(3, 1, 'user1@node-c.com', 'User', 1, 0, 'One', 0, 'f6ae69dd063e73f3b32220dc45d421840ef2768588d1f9beda5ed572829f66b3', null, null), " +
+        // User2Password
+        "(4, 2, 'user2@node-c.com', 'User', 1, 1, 'Two', 0, '6c596ce68919bf241e2ffe1b21fc7b4097f2b9a720935760ca746bcd295f34cb', null, null), " +
+        // User3Password
+        "(5, 1, 'user3@node-c.com', 'User', 1, 1, 'Three', 0, '5e96c512cf6a5774d8adb514c5f99fb8e4aefc3d297cc6aaf6f0e40d21b46aae', null, null);"
     );
     await queryRunner.query(
       'INSERT INTO `userAssignedCourses` (`courseId`, `userId`) VALUES ' +
