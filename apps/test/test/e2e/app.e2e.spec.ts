@@ -222,11 +222,13 @@ describe('NodeC.Apps.Test', () => {
     expect(response.status).toEqual(401);
   });
   // TODO: make this error 404 in the future
-  it('should return an error with status 404 when calling non-implemnted routes', async () => {
+  it('should return an error with status 401 when calling non-implemnted routes', async () => {
     const response = await fetch('http://localhost:3010/tokens');
     expect(response.status).toEqual(401);
   });
-  // TODO: issue an access token
+  // TODO: make sure query params are ignored in originalUrl
+  // TODO: issue an access token - bad request on invalid body vs dto
+  // TODO: issue an access token - invalid email & password
   // it('should return an error with status 404 when calling non-implemnted routes', async () => {
   //   const response = await fetch('http://localhost:3010/tokens');
   //   expect(response.status).toEqual(401);

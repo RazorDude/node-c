@@ -8,7 +8,7 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import { AuthorizationPoint, User as BaseUser, IAMAuthorizationService } from '@node-c/domain-iam';
+import { AuthorizationPoint, IAMAuthorizationService, UserWithPermissionsData } from '@node-c/domain-iam';
 
 import { setNested } from '@ramster/general-tools';
 import { Observable } from 'rxjs';
@@ -16,7 +16,9 @@ import { Observable } from 'rxjs';
 import { Constants, RequestWithLocals } from '../common/definitions';
 
 @Injectable()
-export class HTTPAuthorizationInterceptor<User extends BaseUser<unknown, unknown>> implements NestInterceptor {
+export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<unknown, unknown>>
+  implements NestInterceptor
+{
   constructor(
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
     // eslint-disable-next-line no-unused-vars

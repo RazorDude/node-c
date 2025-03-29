@@ -1,9 +1,10 @@
-import { User } from '@node-c/domain-iam';
+import { UserWithPermissionsData } from '@node-c/domain-iam';
 import { EntitySchemaColumnType } from '@node-c/persistance-redis';
 
 import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
+import { User as DBUser } from '../../../db';
 
-export type CacheUser = RedisEntity<string> & User<{ id: string }, string>;
+export type CacheUser = RedisEntity<number> & UserWithPermissionsData<DBUser, number>;
 export const CacheUserSchema = {
-  ...getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'id')
+  ...getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'id')
 };

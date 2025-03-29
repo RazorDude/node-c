@@ -20,6 +20,6 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<CacheUser, 
     @Body()
     body: SSOUsersCreateAccessTokenDto
   ): ReturnType<IAMUsersService['createAccessToken']> {
-    return this.domainEntityService.createAccessToken(body);
+    return this.domainEntityService.createAccessToken({ ...body, mainFilterField: 'email' });
   }
 }

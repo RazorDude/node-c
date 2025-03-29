@@ -21,6 +21,7 @@ import {
   DomainDeleteOptions,
   DomainDeleteResult,
   DomainEntityService,
+  DomainEntityServiceDefaultData,
   DomainFindOneOptions,
   DomainFindOneResult,
   DomainFindOptions,
@@ -46,11 +47,25 @@ import {
   UpdateOptions
 } from './rest.entity.controller.definitions';
 
-@UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
-export class RESTAPIEntityControlerWithoutDto<
+// These types and interfaces have to be here to avoid circular dependencies.
+export type DefaultDomainEntityService<Entity> = DomainEntityService<
   Entity,
-  EntityDomainService extends DomainEntityService<Entity, PersistanceEntityService<Entity>>
-> {
+  PersistanceEntityService<Entity>,
+  DomainEntityServiceDefaultData<Entity>,
+  Record<string, PersistanceEntityService<Partial<Entity>>>
+>;
+
+export interface DefaultDtos<Entity> {
+  BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
+  Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
+  Delete: BaseDeleteDto<DomainDeleteOptions>;
+  Find: BaseFindDto<DomainFindOptions>;
+  FindOne: BaseFindOneDto<DomainFindOneOptions>;
+  Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
+}
+
+@UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
+export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extends DefaultDomainEntityService<Entity>> {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
   constructor(
@@ -134,15 +149,6 @@ export class RESTAPIEntityControlerWithoutDto<
   }
 }
 
-export interface DefaultDtos<Entity> {
-  BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-  Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
-  Delete: BaseDeleteDto<DomainDeleteOptions>;
-  Find: BaseFindDto<DomainFindOptions>;
-  FindOne: BaseFindOneDto<DomainFindOneOptions>;
-  Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
-}
-
 /*
  * For reference on why the dto validation was done in this way - it's a limitation of Typescript itself:
  * the compiler doesn't emit generic type metadata, making it impossible to achieve a DRY OOP base class with schema validation.
@@ -150,7 +156,7 @@ export interface DefaultDtos<Entity> {
  */
 export class RESTAPIEntityControler<
   Entity,
-  EntityDomainService extends DomainEntityService<Entity, PersistanceEntityService<Entity>>,
+  EntityDomainService extends DefaultDomainEntityService<Entity>,
   Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRouteMethods: string[];

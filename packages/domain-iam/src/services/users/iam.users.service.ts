@@ -10,12 +10,12 @@ import {
 } from '@node-c/core';
 
 import {
-  User as BaseUser,
   CreateAccessTokenOptions,
   CreateAccessTokenReturnData,
   GetUserWithPermissionsDataOptions,
   UserTokenEnityFields,
-  UserTokenUserIdentifier
+  UserTokenUserIdentifier,
+  UserWithPermissionsData
 } from './iam.users.definitions';
 
 import { IAMAuthenticationService, UserAuthType } from '../authentication';
@@ -26,13 +26,13 @@ import { IAMTokenManagerService, TokenType } from '../tokenManager';
 // TODO: reset password
 // TODO: console.info -> logger
 export class IAMUsersService<
-  User extends BaseUser<unknown, unknown>,
+  User extends object,
   Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>
 > extends DomainEntityService<
   User,
   PersistanceEntityService<User>,
   Data,
-  Record<string, PersistanceEntityService<Partial<User>>>
+  Record<string, PersistanceEntityService<Partial<User>>> | undefined
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -64,17 +64,17 @@ export class IAMUsersService<
       configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       auth: { type: authType, ...authData },
-      email,
       filters,
-      rememberMe
+      mainFilterField,
+      rememberUser
     } = options;
-    console.info(`[Domain.${moduleName}.Users]: Login attempt for email ${email}...`);
-    const user = await this.getUserWithPermissionsData(
-      { filters: { ...(filters || {}), email } },
-      { keepPassword: true }
-    );
+    const mainFilterValue = filters[mainFilterField];
+    console.info(`[Domain.${moduleName}.Users]: Login attempt for ${mainFilterField} ${mainFilterValue}...`);
+    const user = await this.getUserWithPermissionsData({ filters: { ...(filters || {}) } }, { keepPassword: true });
     if (!user) {
-      console.info(`[Domain.${moduleName}.Users]: Login attempt failed for email ${email} - user not found.`);
+      console.info(
+        `[Domain.${moduleName}.Users]: Login attempt failed for ${mainFilterField} ${mainFilterValue} - user not found.`
+      );
       throw new ApplicationError('Invalid email or password.');
     }
     const authService = this.userAuthServices[authType];
@@ -91,7 +91,7 @@ export class IAMUsersService<
     } = await this.tokenManager.create(
       { type: TokenType.Refresh, [UserTokenUserIdentifier.FieldName]: userIdentifierValue },
       {
-        expiresInMinutes: refreshTokenExpiryTimeInMinutes,
+        expiresInMinutes: rememberUser ? undefined : refreshTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
         purgeOldFromPersistance: true
@@ -102,13 +102,13 @@ export class IAMUsersService<
     } = await this.tokenManager.create(
       { refreshToken, type: TokenType.Access, [UserTokenUserIdentifier.FieldName]: userIdentifierValue },
       {
-        expiresInMinutes: rememberMe ? undefined : accessTokenExpiryTimeInMinutes,
+        expiresInMinutes: accessTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
         purgeOldFromPersistance: true
       }
     );
-    console.info(`[Domain.${moduleName}.Users]: Login attempt successful for email ${email}.`);
+    console.info(`[Domain.${moduleName}.Users]: Login attempt successful for ${mainFilterField} ${mainFilterValue}.`);
     return { accessToken, refreshToken, user };
   }
 
@@ -117,7 +117,7 @@ export class IAMUsersService<
     _options: PersistanceFindOneOptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: GetUserWithPermissionsDataOptions
-  ): Promise<User | null> {
+  ): Promise<UserWithPermissionsData<User, unknown> | null> {
     throw new ApplicationError(`Method ${this.moduleName}.IAMUsersService.getUserWithPermissionsData not implemented.`);
   }
 }

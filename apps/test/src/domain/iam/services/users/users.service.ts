@@ -46,7 +46,7 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
     const currentAuthorizationPoints: { [id: string]: AuthorizationPoint } = {};
     if (assignedUserTypes) {
       assignedUserTypes.forEach(item => {
-        item.authorizationPoints.forEach(ap => (currentAuthorizationPoints[ap.id] = ap));
+        item.authorizationPoints?.forEach(ap => (currentAuthorizationPoints[ap.id] = ap as AuthorizationPoint));
       });
     }
     user.currentAuthorizationPoints = currentAuthorizationPoints;

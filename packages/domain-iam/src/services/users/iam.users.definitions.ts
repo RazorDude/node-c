@@ -3,16 +3,14 @@ import { GenericObject } from '@node-c/core';
 import { UserAuthType, UserMFAType } from '../authentication';
 import { AuthorizationPoint } from '../authorization';
 
-export interface CreateAccessTokenLocalAuthData {
-  mfaCode?: string;
-  password: string;
-}
-
 export interface CreateAccessTokenOptions<AuthData = unknown> {
-  auth: { mfaType?: UserMFAType; type: UserAuthType } & AuthData;
-  email: string;
-  filters?: GenericObject;
-  rememberMe?: boolean;
+  auth: {
+    mfaType?: UserMFAType;
+    type: UserAuthType;
+  } & AuthData;
+  filters: GenericObject;
+  mainFilterField: string;
+  rememberUser?: boolean;
 }
 
 export interface CreateAccessTokenReturnData<UserData> {
@@ -25,11 +23,9 @@ export interface GetUserWithPermissionsDataOptions {
   keepPassword?: boolean;
 }
 
-export type User<UserIdentifierData, AuthorizationPointId> = {
+export type UserWithPermissionsData<UserData, AuthorizationPointId> = {
   currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
-  mfaCode?: string;
-  password?: string;
-} & UserIdentifierData;
+} & UserData;
 
 export interface UserTokenEnityFields<UserId = unknown> {
   refreshToken?: string;
