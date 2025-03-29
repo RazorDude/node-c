@@ -34,7 +34,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     // eslint-disable-next-line no-unused-vars
     protected persistanceEntityService: PersistanceEntityService<TokenEntity<TokenEntityFields>>
   ) {
-    super(persistanceEntityService!, undefined, []);
+    super(persistanceEntityService!, ['create']);
   }
 
   async create(

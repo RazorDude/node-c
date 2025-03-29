@@ -11,6 +11,5 @@ export class CacheAuthorizationPointsEntityService extends RedisEntityService<Au
     protected store: RedisStoreService
   ) {
     super(repository, store);
-    console.log('===> CacheAuthorizationPointsEntityService init');
   }
 }

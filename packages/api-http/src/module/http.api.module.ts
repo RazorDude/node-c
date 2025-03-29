@@ -1,7 +1,6 @@
 import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
-import { RouteInfo } from '@nestjs/common/interfaces';
 
-import { AppConfigAPIHTTP, ConfigProviderService, loadDynamicModules } from '@node-c/core';
+import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
@@ -11,7 +10,7 @@ import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 import { Constants, RequestWithLocals } from '../common/definitions';
 import { HttpExceptionFilter } from '../exceptionFilters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
-import { HTTPAnonymousRoutesMiddleware, HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
+import { HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 
 export class HTTPAPIModule {
   constructor(
@@ -23,28 +22,11 @@ export class HTTPAPIModule {
   ) {}
 
   configure(consumer: MiddlewareConsumer): void {
-    const { anonymousAccessRoutes } = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
     consumer.apply(express.urlencoded({ verify: HTTPAPIModule.rawBodyBuffer, extended: true })).forRoutes('*');
     consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
-    if (anonymousAccessRoutes && anonymousAccessRoutes.length) {
-      const anonymousRoutes: RouteInfo[] = [];
-      for (const route in anonymousAccessRoutes) {
-        const anonymousMethodsMapForRoute: Record<string, true> = {};
-        anonymousAccessRoutes[route].forEach(method => {
-          anonymousMethodsMapForRoute[method] = true;
-          anonymousRoutes.push({ method, path: route });
-        });
-      }
-      consumer.apply(HTTPAnonymousRoutesMiddleware).forRoutes(...anonymousRoutes);
-      consumer
-        .apply(HTTPAuthenticationMiddleware)
-        .exclude(...anonymousRoutes)
-        .forRoutes('*');
-    } else {
-      consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
-    }
+    consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
   }
 
   static rawBodyBuffer(req: RequestWithLocals<unknown>, _res: Response, buffer: Buffer): void {
@@ -64,12 +46,6 @@ export class HTTPAPIModule {
         {
           provide: Constants.API_MODULE_NAME,
           useValue: options.moduleName
-        },
-        {
-          provide: Constants.API_MODULE_ALLOWED_ORIGINS,
-          useFactory: async (configProviderService: ConfigProviderService) =>
-            (configProviderService.config.api![options.moduleName] as AppConfigAPIHTTP).allowedOrigins,
-          inject: [ConfigProviderService]
         },
         {
           provide: Constants.AUTHORIZATION_INTERCEPTOR,

@@ -3,6 +3,8 @@ import {
   ApplicationError,
   ConfigProviderService,
   DomainEntityService,
+  DomainEntityServiceDefaultData,
+  DomainMethod,
   PersistanceEntityService,
   PersistanceFindOneOptions
 } from '@node-c/core';
@@ -23,9 +25,14 @@ import { IAMTokenManagerService, TokenType } from '../tokenManager';
 // TODO: update password (incl. hashing)
 // TODO: reset password
 // TODO: console.info -> logger
-export class IAMUsersService<User extends BaseUser<unknown, unknown>> extends DomainEntityService<
+export class IAMUsersService<
+  User extends BaseUser<unknown, unknown>,
+  Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>
+> extends DomainEntityService<
   User,
-  PersistanceEntityService<User>
+  PersistanceEntityService<User>,
+  Data,
+  Record<string, PersistanceEntityService<Partial<User>>>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -37,9 +44,18 @@ export class IAMUsersService<User extends BaseUser<unknown, unknown>> extends Do
     // eslint-disable-next-line no-unused-vars
     protected tokenManager: IAMTokenManagerService<UserTokenEnityFields>,
     // eslint-disable-next-line no-unused-vars
-    protected userAuthServices: Record<UserAuthType, IAMAuthenticationService<User>>
+    protected userAuthServices: Record<UserAuthType, IAMAuthenticationService<User>>,
+    protected defaultMethods: string[] = [
+      DomainMethod.BulkCreate,
+      DomainMethod.Create,
+      DomainMethod.Delete,
+      DomainMethod.Find,
+      DomainMethod.FindOne,
+      DomainMethod.Update
+    ],
+    protected additionalPersistanceEntityServices?: Record<string, PersistanceEntityService<Partial<User>>>
   ) {
-    super(persistanceUsersService);
+    super(persistanceUsersService, defaultMethods, additionalPersistanceEntityServices);
   }
 
   async createAccessToken(options: CreateAccessTokenOptions): Promise<CreateAccessTokenReturnData<User>> {
@@ -66,7 +82,9 @@ export class IAMUsersService<User extends BaseUser<unknown, unknown>> extends Do
       throw new ApplicationError('Invalid auth type.');
     }
     await authService.authenticateUser(user, { ...authData, userIdentifierField: defaultUserIdentifierField });
-    delete user.password;
+    if ('password' in user) {
+      delete user.password;
+    }
     const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
     const {
       result: { token: refreshToken }

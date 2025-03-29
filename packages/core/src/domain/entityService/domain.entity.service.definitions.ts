@@ -36,6 +36,12 @@ export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<
 
 export type DomainDeleteResult = DomainBaseResult<PersistanceDeleteResult>;
 
+export interface DomainEntityServiceDefaultData<Entity> {
+  BulkCreate: DomainBulkCreateData<Entity>;
+  Create: DomainCreateData<Entity>;
+  Update: DomainUpdateData<Entity>;
+}
+
 export type DomainFindOneOptions<Options = object> = Options & DomainBaseOptions<PersistanceFindOneOptions>;
 
 export type DomainFindOneResult<Entity> = DomainBaseResult<Entity | null>;

@@ -2,6 +2,8 @@ import { Body, Controller, Injectable, Post } from '@nestjs/common';
 
 import { RESTAPIEntityControler } from '@node-c/api-rest';
 
+import { SSOUsersCreateAccessTokenDto } from './dto';
+
 import { IAMUsersService } from '../../../../domain/iam';
 import { CacheUser } from '../../../../persistance/cache';
 
@@ -16,12 +18,8 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<CacheUser, 
   @Post('accessToken')
   async createAccessToken(
     @Body()
-    body: {
-      test: boolean;
-    }
+    body: SSOUsersCreateAccessTokenDto
   ): ReturnType<IAMUsersService['createAccessToken']> {
-    // ): Promise<void> {
     return this.domainEntityService.createAccessToken(body);
-    // console.log(body);
   }
 }

@@ -1,15 +1,14 @@
 import * as path from 'path';
 
-import { RequestMethod } from '@nestjs/common';
-import { AppConfigCommon, NoSQLType, RDBType } from '@node-c/core';
+import { AppConfigCommon, HttpMethod, NoSQLType, RDBType } from '@node-c/core';
 
 import { Constants } from '../common/definitions';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
-    admin: {
+    sso: {
       anonymousAccessRoutes: {
-        '/users/accesToken': [RequestMethod.POST]
+        '/users/accessToken': [HttpMethod.POST]
       }
     }
   },

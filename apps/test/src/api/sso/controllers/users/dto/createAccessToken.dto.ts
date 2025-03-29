@@ -1,8 +1,15 @@
-import { IsDefined, IsObject, ValidateNested } from 'class-validator';
+import { CreateAccessTokenOptions, UserAuthType, UserMFAType } from '@node-c/domain-iam';
 
-export class CreateAccessTokenDto extends CreateAccessTokenOptions {
+import { IsDefined, IsNotEmpty, IsObject, IsString, ValidateNested } from 'class-validator';
+
+export class SSOUsersCreateAccessTokenDto implements CreateAccessTokenOptions {
   @IsDefined()
   @IsObject()
   @ValidateNested()
-  data: Entity;
+  auth: { type: UserAuthType; mfaType?: UserMFAType };
+
+  @IsDefined()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
 }

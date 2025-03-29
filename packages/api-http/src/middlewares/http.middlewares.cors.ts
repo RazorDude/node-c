@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
+import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
 import { NextFunction, Response } from 'express';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
@@ -7,14 +8,17 @@ import { Constants, RequestWithLocals } from '../common/definitions';
 @Injectable()
 export class HTTPCORSMiddleware implements NestMiddleware {
   constructor(
-    @Inject(Constants.API_MODULE_ALLOWED_ORIGINS)
     // eslint-disable-next-line no-unused-vars
-    protected allowedOrigins?: string[]
+    protected configProvider: ConfigProviderService,
+    @Inject(Constants.API_MODULE_NAME)
+    // eslint-disable-next-line no-unused-vars
+    protected moduleName: string
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
+    const allowedOrigins = (this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP).allowedOrigins;
     const origin = req.headers.origin as string;
-    if (this.allowedOrigins?.includes(origin)) {
+    if (allowedOrigins?.includes(origin)) {
       res.set('Access-Control-Allow-Origin', origin);
     }
     res.set(

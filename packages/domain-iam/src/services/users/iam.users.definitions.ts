@@ -9,7 +9,7 @@ export interface CreateAccessTokenLocalAuthData {
 }
 
 export interface CreateAccessTokenOptions<AuthData = unknown> {
-  auth: { type: UserAuthType; mfaType?: UserMFAType } & AuthData;
+  auth: { mfaType?: UserMFAType; type: UserAuthType } & AuthData;
   email: string;
   filters?: GenericObject;
   rememberMe?: boolean;

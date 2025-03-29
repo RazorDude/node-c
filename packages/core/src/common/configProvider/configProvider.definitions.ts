@@ -1,6 +1,4 @@
-import { RequestMethod } from '@nestjs/common';
-
-import { GenericObject } from '../definitions';
+import { GenericObject, HttpMethod } from '../definitions';
 
 /*
  * This object contains the names of the fields within the modules, by module category.
@@ -98,7 +96,7 @@ export interface AppConfigCommon {
 
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
-  anonymousAccessRoutes?: Record<string, RequestMethod[]>;
+  anonymousAccessRoutes?: Record<string, HttpMethod[]>;
   hostname?: string;
   port?: number;
 }

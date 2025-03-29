@@ -1,19 +1,17 @@
 import {
-  DomainBulkCreateData,
   DomainBulkCreateOptions,
   DomainBulkCreateResult,
-  DomainCreateData,
   DomainCreateOptions,
   DomainCreateResult,
   DomainDeleteOptions,
   DomainDeleteResult,
+  DomainEntityServiceDefaultData,
   DomainFindOneOptions,
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
   DomainMethod,
   DomainPersistanceEntityServiceType,
-  DomainUpdateData,
   DomainUpdateOptions,
   DomainUpdateResult
 } from './domain.entity.service.definitions';
@@ -26,22 +24,12 @@ import { PersistanceEntityService } from '../../persistance/entityService';
 export class DomainEntityService<
   Entity,
   EntityService extends PersistanceEntityService<Entity>,
-  Data extends {
-    BulkCreate: DomainBulkCreateData<Entity>;
-    Create: DomainCreateData<Entity>;
-    Update: DomainUpdateData<Entity>;
-  } = {
-    BulkCreate: DomainBulkCreateData<Entity>;
-    Create: DomainCreateData<Entity>;
-    Update: DomainUpdateData<Entity>;
-  },
-  AdditionalEntityServices extends Record<string, PersistanceEntityService<Entity>> | undefined = undefined
+  Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  AdditionalEntityServices extends Record<string, PersistanceEntityService<Partial<Entity>>> | undefined = undefined
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected persistanceEntityService: EntityService,
-    // eslint-disable-next-line no-unused-vars
-    protected additionalPersistanceEntityServices?: AdditionalEntityServices,
     // eslint-disable-next-line no-unused-vars
     protected defaultMethods: string[] = [
       DomainMethod.BulkCreate,
@@ -50,7 +38,9 @@ export class DomainEntityService<
       DomainMethod.Find,
       DomainMethod.FindOne,
       DomainMethod.Update
-    ]
+    ],
+    // eslint-disable-next-line no-unused-vars
+    protected additionalPersistanceEntityServices?: AdditionalEntityServices
   ) {}
 
   public bulkCreate(
@@ -162,7 +152,7 @@ export class DomainEntityService<
         `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName()}.`
       );
     }
-    return service;
+    return service as PersistanceEntityService<Entity>;
   }
 
   protected async runMethodInAdditionalServices<ServiceReturnData>(

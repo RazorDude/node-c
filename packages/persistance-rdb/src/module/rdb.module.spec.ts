@@ -53,7 +53,6 @@ describe('RDBModule.register', () => {
       module: TypeOrmModule;
       providers: unknown[];
     };
-    // console.log('===>', dynamicModule.imports, typeOrmAsyncModule.imports);
     expect(typeOrmAsyncModule.module).toBe(TypeOrmModule);
     expect((dynamicModule.imports![1] as unknown as { module: string }).module).toEqual('SQLQueryBuilderModule');
     // Verify that SQLQueryBuilderModule.register was called with the proper argument.

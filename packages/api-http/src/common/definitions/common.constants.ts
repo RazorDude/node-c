@@ -4,8 +4,6 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   API_MODULE_NAME = 'API_MODULE_NAME',
   // eslint-disable-next-line no-unused-vars
-  API_MODULE_ALLOWED_ORIGINS = 'API_MODULE_ALLOWED_ORIGINS',
-  // eslint-disable-next-line no-unused-vars
   AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE = 'AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE',
   // eslint-disable-next-line no-unused-vars
   AUTHENTICATION_MIDDLEWARE_USERS_SERVICE = 'AUTHENTICATION_MIDDLEWARE_USERS_SERVICE',

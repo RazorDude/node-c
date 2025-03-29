@@ -27,13 +27,15 @@ export class HTTPAuthorizationInterceptor<User extends BaseUser<unknown, unknown
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
-    const controllerName = context.getClass().name;
-    const handlerName = context.getHandler().name;
     const [req]: [RequestWithLocals<User>, unknown] = context.getArgs();
     const locals = req.locals!;
     if (!locals) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    } else if (locals.isAnonymous) {
+      return next.handle();
     }
+    const controllerName = context.getClass().name;
+    const handlerName = context.getHandler().name;
     const authorizationData = await this.authorizationService.mapAuthorizationPoints(this.moduleName);
     let controllerData = authorizationData![controllerName];
     if (!controllerData) {

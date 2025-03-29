@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/core';
+import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
 import {
   User as BaseUser,
   DecodedTokenContent,
@@ -8,6 +8,8 @@ import {
   IAMUsersService,
   UserTokenEnityFields
 } from '@node-c/domain-iam';
+
+import { checkRoutes } from '@ramster/general-tools';
 
 import { NextFunction, Response } from 'express';
 
@@ -30,10 +32,29 @@ export class HTTPAuthenticationMiddleware<User extends BaseUser<unknown, unknown
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
-    if (!req.locals) {
-      req.locals = {};
-    }
     (async () => {
+      const { anonymousAccessRoutes } = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
+      if (!req.locals) {
+        req.locals = {};
+      }
+      if (anonymousAccessRoutes && Object.keys(anonymousAccessRoutes).length) {
+        const originalUrl = req.originalUrl.split('?')[0];
+        let isAnonymous = false;
+        for (const route in anonymousAccessRoutes) {
+          if (
+            checkRoutes(originalUrl, [route]) &&
+            anonymousAccessRoutes[route].find(method => method === req.method.toLowerCase())
+          ) {
+            isAnonymous = true;
+            break;
+          }
+        }
+        if (isAnonymous) {
+          req.locals.isAnonymous = true;
+          next();
+          return;
+        }
+      }
       const { tokenManager, usersService } = this;
       let tokens: string[] = [];
       let authToken = req.headers.authorization;
@@ -52,7 +73,7 @@ export class HTTPAuthenticationMiddleware<User extends BaseUser<unknown, unknown
         useCookie = true;
       }
       if (!authToken) {
-        console.error('Missing access token.');
+        console.error('Missing access token.', req.method);
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       try {
