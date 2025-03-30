@@ -1,4 +1,4 @@
-import { IsDefined, IsObject, ValidateNested } from 'class-validator';
+import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
@@ -10,6 +10,6 @@ export class BulkCreateDto<Entity, Options extends BulkCreateOptions<Entity>>
 {
   @IsDefined()
   @IsObject()
-  @ValidateNested()
+  @IsNotEmptyObject()
   data: Entity[];
 }

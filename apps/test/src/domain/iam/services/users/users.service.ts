@@ -1,7 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Constants } from '@node-c/api-http';
-import { ConfigProviderService, Constants as CoreConstants, PersistanceFindOneOptions } from '@node-c/core';
+import {
+  ConfigProviderService,
+  Constants as CoreConstants,
+  DomainMethod,
+  DomainPersistanceEntityServiceType,
+  PersistanceEntityService,
+  PersistanceFindOneOptions
+} from '@node-c/core';
 import {
   IAMUsersService as BaseIAMUsersService,
   GetUserWithPermissionsDataOptions,
@@ -9,6 +16,7 @@ import {
 } from '@node-c/domain-iam';
 
 import { AuthorizationPoint, CacheUser, CacheUsersEntityService } from '../../../../persistance/cache';
+import { UsersService as DBUsersService } from '../../../../persistance/db';
 
 import { IAMAuthenticationLocalService } from '../authenticationLocal';
 import { IAMTokenManagerService } from '../tokenManager';
@@ -18,16 +26,25 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
   static injectionToken = Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE;
 
   constructor(
+    protected authenticationLocalService: IAMAuthenticationLocalService,
     protected configProvider: ConfigProviderService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
+    protected persistanceDBUsersService: DBUsersService,
     protected persistanceUsersService: CacheUsersEntityService,
-    protected tokenManager: IAMTokenManagerService,
-    protected authenticationLocalService: IAMAuthenticationLocalService
+    protected tokenManager: IAMTokenManagerService
   ) {
-    super(configProvider, moduleName, persistanceUsersService, tokenManager, {
-      [UserAuthKnownType.Local]: authenticationLocalService
-    });
+    super(
+      configProvider,
+      moduleName,
+      persistanceUsersService,
+      tokenManager,
+      {
+        [UserAuthKnownType.Local]: authenticationLocalService
+      },
+      [DomainMethod.FindOne],
+      { db: persistanceDBUsersService as PersistanceEntityService<Partial<CacheUser>> }
+    );
   }
 
   async getUserWithPermissionsData(
@@ -36,9 +53,12 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
   ): Promise<CacheUser | null> {
     const { keepPassword } = privateOptions || {};
     const include = [...(options.include || []), 'accountStatus', 'assignedUserTypes.authorizationPoints'];
-    // const user = await this.persistanceUsersService.findOne({ ...options, include });
-    // const user = await this.persistanceUsersService.findOne(options);
-    const { result: user } = await this.findOne({ ...options, include });
+    const { result: user } = await this.findOne({
+      ...options,
+      include,
+      persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+      saveAdditionalResultsInMain: { serviceName: 'db', useResultsAsMain: true }
+    });
     if (!user) {
       return null;
     }

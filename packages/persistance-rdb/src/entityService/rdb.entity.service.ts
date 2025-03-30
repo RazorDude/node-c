@@ -79,7 +79,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     return { field: PersistanceSelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
   }
 
-  async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
+  async bulkCreate(data: Partial<Entity>[], options?: BulkCreateOptions): Promise<Entity[]> {
     const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
     const { forceTransaction, transactionManager } = actualOptions;
     if (!transactionManager && forceTransaction) {
@@ -90,7 +90,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     return await this.save(data, transactionManager);
   }
 
-  async create(data: Entity, options?: CreateOptions): Promise<Entity> {
+  async create(data: Partial<Entity>, options?: CreateOptions): Promise<Entity> {
     const actualOptions = Object.assign(options || {}) as CreateOptions;
     const { forceTransaction, transactionManager } = actualOptions;
     if (!transactionManager && forceTransaction) {

@@ -20,6 +20,7 @@ export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: s
         type: EntitySchemaColumnType.TimestampTz
       },
       id: {
+        generated: true,
         primary: true,
         primaryOrder: 0,
         type: idColumn

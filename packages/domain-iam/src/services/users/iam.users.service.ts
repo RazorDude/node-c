@@ -75,7 +75,7 @@ export class IAMUsersService<
       console.info(
         `[Domain.${moduleName}.Users]: Login attempt failed for ${mainFilterField} ${mainFilterValue} - user not found.`
       );
-      throw new ApplicationError('Invalid email or password.');
+      throw new ApplicationError('Invalid user identifier or password.');
     }
     const authService = this.userAuthServices[authType];
     if (!authService) {

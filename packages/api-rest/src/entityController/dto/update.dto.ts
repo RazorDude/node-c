@@ -1,6 +1,6 @@
 import { GenericObject } from '@node-c/core';
 
-import { IsDefined, IsObject, ValidateNested } from 'class-validator';
+import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
@@ -11,10 +11,12 @@ export class UpdateDto<Entity, Options extends UpdateOptions<Entity>>
   implements UpdateBody<Entity>
 {
   @IsDefined()
-  @ValidateNested()
+  @IsObject()
+  @IsNotEmptyObject()
   data: Entity;
 
   @IsDefined()
   @IsObject()
+  @IsNotEmptyObject()
   filters: GenericObject<unknown>;
 }

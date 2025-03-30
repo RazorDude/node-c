@@ -1,4 +1,4 @@
-import { IsDefined, IsObject, ValidateNested } from 'class-validator';
+import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
@@ -10,6 +10,6 @@ export class CreateDto<Entity, Options extends CreateOptions<Entity>>
 {
   @IsDefined()
   @IsObject()
-  @ValidateNested()
+  @IsNotEmptyObject()
   data: Entity;
 }

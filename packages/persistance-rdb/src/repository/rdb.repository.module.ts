@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ObjectLiteral, Repository } from 'typeorm';
 
+// import { RDBRepository } from './rdb.repository';
 import { RDBRepositoryModuleOptions } from './rdb.repository.definitions';
 
 import { Constants } from '../common/definitions';
@@ -21,9 +22,26 @@ export class RDBRepositoryModule {
           useFactory: (redisStoreService: SQLQueryBuilderService) => redisStoreService,
           inject: [`${persistanceModuleName}${Constants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`]
         },
+        // {
+        //   provide: 'RDB_REPOSITORY_ENTITY_CLASS',
+        //   useValue: entityClass
+        // },
+        // RDBRepository<Entity>,
+        // {
+        //   provide: 'RDB_ENTITY_REPOSITORY',
+        //   useExisting: RDBRepository<Entity>
+        // },
         Repository<Entity>
       ],
-      exports: [TypeOrmModule, Repository<Entity>, SQLQueryBuilderService]
+      exports: [
+        TypeOrmModule,
+        SQLQueryBuilderService,
+        // {
+        //   provide: 'RDB_ENTITY_REPOSITORY',
+        //   useExisting: RDBRepository<Entity>
+        // },
+        Repository<Entity>
+      ]
     };
   }
 }

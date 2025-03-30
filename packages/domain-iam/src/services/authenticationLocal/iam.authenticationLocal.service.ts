@@ -43,13 +43,16 @@ export class IAMAuthenticationLocalService<
       !userPasswordHMACAlgorithm ||
       !userPasswordSecret ||
       !userPassword ||
-      crypto.createHmac(userPasswordHMACAlgorithm, userPasswordSecret).update(`${authPassword}`).digest().toString() !==
-        userPassword
+      crypto
+        .createHmac(userPasswordHMACAlgorithm, userPasswordSecret)
+        .update(`${authPassword}`)
+        .digest('hex')
+        .toString() !== userPassword
     ) {
       console.info(
         `[IAMAuthenticationLocalService]: Login attempt failed for user ${userIdentifierValue} - wrong password.`
       );
-      throw new ApplicationError('Invalid identifier or password.');
+      throw new ApplicationError('Invalid user identifier or password.');
     }
     // TODO: MFA via userMFAServices
     if (mfaEnabled) {

@@ -228,7 +228,7 @@ describe('NodeC.Apps.Test', () => {
   });
   // TODO: make sure query params are ignored in originalUrl
   // TODO: issue an access token - bad request on invalid body vs dto
-  // TODO: issue an access token - invalid email & password
+  // TODO: issue an access token - invalid email & password (all cases)
   // it('should return an error with status 404 when calling non-implemnted routes', async () => {
   //   const response = await fetch('http://localhost:3010/tokens');
   //   expect(response.status).toEqual(401);

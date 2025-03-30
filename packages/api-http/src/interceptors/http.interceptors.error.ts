@@ -24,7 +24,11 @@ export class HTTPErrorInterceptor implements NestInterceptor {
               status = error.data.errorCode as number;
             } else if ('statusCode' in error.data) {
               status = error.data.statusCode as number;
+            } else {
+              status = 400;
             }
+          } else {
+            status = 400;
           }
         } else if (error.response) {
           const { response } = error;

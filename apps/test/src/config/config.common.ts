@@ -17,6 +17,7 @@ export const appConfigCommon: AppConfigCommon = {
     iam: {
       accessTokenExpiryTimeInMinutes: 120,
       defaultUserIdentifierField: 'id',
+      userPasswordHMACAlgorithm: 'sha256',
       refreshTokenExpiryTimeInHours: 24
     }
   },

@@ -98,7 +98,12 @@ export class RedisRepositoryService<Entity> {
           'Either filters or findAll is required when calling the find method.'
       );
     }
-    return await store.scan(`${entityName}${storeEntityKey}`, { ...paginationOptions, scanAll: findAll, withValues });
+    return await store.scan(`${entityName}${storeEntityKey}`, {
+      ...paginationOptions,
+      parseToJSON: true,
+      scanAll: findAll,
+      withValues
+    });
   }
 
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
@@ -214,7 +219,9 @@ export class RedisRepositoryService<Entity> {
       for (const i in actualData) {
         deleteKeys.push((await this.prepare(actualData[i], prepareOptions)).storeEntityKey);
       }
-      await store.delete(deleteKeys, { transactionId });
+      if (deleteKeys.length) {
+        await store.delete(deleteKeys, { transactionId });
+      }
       return deleteKeys as ResultItem[];
     }
     const prepareOptions: PrepareOptions = {

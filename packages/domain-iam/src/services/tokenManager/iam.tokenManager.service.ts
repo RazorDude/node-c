@@ -56,6 +56,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
         signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
       }
     } else if (type === TokenType.Refresh) {
+      secret = moduleConfig.jwtRefreshSecret;
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
       } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {

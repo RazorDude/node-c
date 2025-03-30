@@ -8,7 +8,7 @@ import { DomainIAMModule } from './domain/iam';
 import { PersistanceCacheModule } from './persistance/cache';
 import { PersistanceCacheAuthModule } from './persistance/cacheAuth';
 import { PersistanceDBModule } from './persistance/db';
-import { PersistanceDBConfigsModule } from './persistance/dbConfigs';
+// import { PersistanceDBConfigsModule } from './persistance/dbConfigs';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
@@ -43,7 +43,7 @@ export class AppModuleBase {
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
     PersistanceCacheAuthModule.register(),
     PersistanceCacheModule.register(),
-    PersistanceDBConfigsModule.register(),
+    // PersistanceDBConfigsModule.register(),
     PersistanceDBModule.register(),
     DomainIAMModule.register()
   ];

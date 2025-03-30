@@ -10,10 +10,24 @@ import {
   PersistanceUpdateResult
 } from '../../persistance/entityService';
 
+export interface DomainBaseAdditionalServiceOptionsOverrides {
+  runOnNoMainServiceResultOnly?: boolean;
+}
+
 export type DomainBaseOptions<Options> = Options & {
-  optionsOverridesByService?: GenericObject<Partial<Options>>;
+  optionsOverridesByService?: GenericObject<Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides>;
   persistanceServices?: DomainPersistanceServicesKey[];
 };
+
+export interface DomainBaseOptionsWithSearchPersistance<
+  SaveAdditionalResultsOptions extends object | undefined = undefined
+> {
+  saveAdditionalResultsInMain?: {
+    saveOptions?: SaveAdditionalResultsOptions;
+    serviceName: string;
+    useResultsAsMain?: boolean;
+  };
+}
 
 export interface DomainBaseResult<Result> {
   result: Result;
@@ -22,13 +36,13 @@ export interface DomainBaseResult<Result> {
 
 export type DomainBulkCreateData<Entity> = Partial<Entity>[];
 
-export type DomainBulkCreateOptions<Options = object> = Omit<DomainBaseOptions<Options>, 'optionsOverridesByService'>;
+export type DomainBulkCreateOptions<Options = object> = DomainBaseOptions<Options>;
 
 export type DomainBulkCreateResult<Entity> = DomainBaseResult<Entity[]>;
 
 export type DomainCreateData<Entity> = Partial<Entity>;
 
-export type DomainCreateOptions<Options = object> = Omit<DomainBaseOptions<Options>, 'optionsOverridesByService'>;
+export type DomainCreateOptions<Options = object> = DomainBaseOptions<Options>;
 
 export type DomainCreateResult<Entity> = DomainBaseResult<Entity>;
 
@@ -42,11 +56,15 @@ export interface DomainEntityServiceDefaultData<Entity> {
   Update: DomainUpdateData<Entity>;
 }
 
-export type DomainFindOneOptions<Options = object> = Options & DomainBaseOptions<PersistanceFindOneOptions>;
+export type DomainFindOneOptions<Options = object> = Options &
+  DomainBaseOptions<PersistanceFindOneOptions> &
+  DomainBaseOptionsWithSearchPersistance<DomainCreateOptions>;
 
 export type DomainFindOneResult<Entity> = DomainBaseResult<Entity | null>;
 
-export type DomainFindOptions<Options = object> = Options & DomainBaseOptions<PersistanceFindOptions>;
+export type DomainFindOptions<Options = object> = Options &
+  DomainBaseOptions<PersistanceFindOptions> &
+  DomainBaseOptionsWithSearchPersistance<DomainBulkCreateOptions>;
 
 export type DomainFindResult<Entity> = DomainBaseResult<PersistanceFindResults<Entity>>;
 
@@ -73,6 +91,14 @@ export enum DomainPersistanceEntityServiceType {
 }
 
 export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | string;
+
+export type DomainRunMethodInAdditionalServicesOptions<Options> = {
+  hasMainServiceResult: boolean;
+  methodArgs?: unknown[];
+  methodName: string;
+  optionsArgIndex?: number;
+  optionsOverridesByService?: GenericObject<Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides>;
+};
 
 export type DomainUpdateData<Entity> = Partial<Entity>;
 
