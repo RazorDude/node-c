@@ -110,9 +110,12 @@ export interface AppConfigCommonDomainIAM {
 }
 
 export interface AppConfigCommonPersistanceNoSQL {
-  type: NoSQLType;
+  defaultTTL?: number;
   storeDelimiter?: string;
   storeKey: string;
+  ttlPerEntity?: Record<string, number>;
+  type: NoSQLType;
+  useHashmap?: boolean;
 }
 
 export interface AppConfigCommonPersistanceRDB {

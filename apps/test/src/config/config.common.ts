@@ -23,8 +23,20 @@ export const appConfigCommon: AppConfigCommon = {
   },
   general: { projectName: 'node-c-app', projectRootPath: path.join(__dirname, '../../'), projectVersion: '1.0.0' },
   persistance: {
-    cache: { type: NoSQLType.Redis, storeKey: Constants.PERSISTANCE_CACHE_STORE_KEY },
-    cacheAuth: { type: NoSQLType.Redis, storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY },
+    cache: {
+      defaultTTL: 3600,
+      storeKey: Constants.PERSISTANCE_CACHE_STORE_KEY,
+      ttlPerEntity: { users: 60000 },
+      type: NoSQLType.Redis,
+      useHashmap: false
+    },
+    cacheAuth: {
+      defaultTTL: 600,
+      storeDelimiter: ':',
+      storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY,
+      type: NoSQLType.Redis,
+      useHashmap: true
+    },
     db: { type: RDBType.MySQL },
     dbConfigs: { type: RDBType.MySQL }
     // pgDB: { type: RDBType.PG }

@@ -26,6 +26,7 @@ export interface ScanOptions {
 
 export interface SetOptions {
   transactionId?: string;
+  ttl?: number;
 }
 
 export interface StoreDeleteOptions {

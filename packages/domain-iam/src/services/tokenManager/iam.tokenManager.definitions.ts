@@ -20,6 +20,7 @@ export type TokenManagerCreateOptions = {
   identifierDataField?: string;
   persist?: boolean;
   purgeOldFromPersistance?: boolean;
+  ttl?: number;
 } & DomainCreateOptions;
 
 export enum TokenType {

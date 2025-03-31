@@ -6,16 +6,20 @@ import {
   PersistanceUpdateOptions
 } from '@node-c/core';
 
+export interface BaseCreateOptions extends BaseOptions {
+  ttl?: number;
+}
+
 export interface BaseOptions {
   forceTransaction?: boolean;
   transactionId?: string;
 }
 
-export type BulkCreateOptions = BaseOptions;
+export type BulkCreateOptions = BaseCreateOptions;
 
 export interface CountOptions extends BaseOptions, Omit<PersistanceCountOptions, 'withDeleted'> {}
 
-export type CreateOptions = BaseOptions;
+export type CreateOptions = BaseCreateOptions;
 
 export interface DeleteOptions extends BaseOptions, Omit<PersistanceDeleteOptions, 'softDelete'> {}
 
@@ -31,4 +35,4 @@ export interface FindOptions
   requirePrimaryKeys?: boolean;
 }
 
-export interface UpdateOptions extends BaseOptions, PersistanceUpdateOptions {}
+export interface UpdateOptions extends BaseCreateOptions, PersistanceUpdateOptions {}

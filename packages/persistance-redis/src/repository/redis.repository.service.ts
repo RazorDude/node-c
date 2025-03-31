@@ -25,6 +25,7 @@ import { RedisStoreService } from '../store';
 // TODO: support defining the keys' delimiter symbol
 @Injectable()
 export class RedisRepositoryService<Entity> {
+  protected defaultTTL?: number;
   protected primaryKeys: string[];
   protected storeDelimiter: string;
 
@@ -38,9 +39,12 @@ export class RedisRepositoryService<Entity> {
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
-    const { storeDelimiter } = configProvider.config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
+    const { defaultTTL, storeDelimiter, ttlPerEntity } = configProvider.config.persistance[
+      persistanceModuleName
+    ] as AppConfigPersistanceNoSQL;
     const { columns, name: entityName } = schema;
     const primaryKeys: string[] = [];
+    this.defaultTTL = ttlPerEntity?.[entityName] || defaultTTL;
     for (const columnName in columns) {
       const { primary, primaryOrder } = columns[columnName];
       if (primary) {
@@ -206,9 +210,9 @@ export class RedisRepositoryService<Entity> {
     data: Entity | Entity[],
     options?: SaveOptions
   ): Promise<ResultItem[]> {
-    const { schema, store, storeDelimiter } = this;
+    const { defaultTTL, schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
-    const { delete: optDelete, onConflict, transactionId } = options || ({} as SaveOptions);
+    const { delete: optDelete, onConflict, transactionId, ttl } = options || ({} as SaveOptions);
     const actualData = data instanceof Array ? data : [data];
     if (optDelete) {
       const prepareOptions: PrepareOptions = {
@@ -232,7 +236,10 @@ export class RedisRepositoryService<Entity> {
     const results: Entity[] = [];
     for (const i in actualData) {
       const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData[i], prepareOptions);
-      await store.set(`${entityName}${storeDelimiter}${storeEntityKey}`, validatedEntity, { transactionId });
+      await store.set(`${entityName}${storeDelimiter}${storeEntityKey}`, validatedEntity, {
+        transactionId,
+        ttl: ttl || defaultTTL
+      });
       results.push(validatedEntity);
     }
     return results as ResultItem[];

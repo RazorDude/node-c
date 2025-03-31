@@ -51,6 +51,7 @@ export interface SaveOptions {
   delete?: boolean;
   onConflict?: SaveOptionsOnConflict;
   transactionId?: string;
+  ttl?: number;
 }
 
 export enum SaveOptionsOnConflict {

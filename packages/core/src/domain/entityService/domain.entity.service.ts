@@ -76,7 +76,10 @@ export class DomainEntityService<
 
   // eslint-disable-next-line no-unused-vars
   public create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>>;
-  async create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>> {
+  async create<Options extends object | undefined = undefined>(
+    data: Data['Create'],
+    options?: DomainCreateOptions<Options>
+  ): Promise<DomainCreateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Create)) {
       throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
     }

@@ -2,6 +2,7 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
+  DomainCreateOptions,
   DomainCreateResult,
   DomainEntityService,
   GenericObject,
@@ -87,7 +88,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           });
         }
       }
-      await super.create(objectToSave);
+      await super.create(objectToSave, { ttl: signOptions.expiresIn } as DomainCreateOptions);
     }
     return { result: objectToSave };
   }
