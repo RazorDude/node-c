@@ -233,6 +233,19 @@ describe('NodeC.Apps.Test', () => {
   //   const response = await fetch('http://localhost:3010/tokens');
   //   expect(response.status).toEqual(401);
   // });
+  // TODO: log in as admin
+  // TODO: non-enabled default routes
+  // TODO: find users (no options)
+  // TODO: find users (pagination, page 1 and 2)
+  // TODO: find users (sorting)
+  // TODO: find users (no sorting and pagination)
+  // TODO: log in as user 0
+  // TODO: find courses (no options)
+  // TODO: find courses (pagination, page 1 and 2)
+  // TODO: find courses (sorting)
+  // TODO: find courses (no sorting and pagination)
+  // TODO: error cases for authorization points
+  // TODO: check endpointSecurityMode: undefined vs Strict vs Lax
   // -
   // After all hook - kill the apps process.
   // -

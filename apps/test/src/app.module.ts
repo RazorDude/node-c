@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
 
+import { CoursePlatformAPIModule } from './api/coursePlatform';
 import { SSOAPIModule } from './api/sso';
 import * as AppConfigs from './config';
+import { DomainCoursePlatformModule } from './domain/coursePlatform';
 import { DomainIAMModule } from './domain/iam';
 import { PersistanceCacheModule } from './persistance/cache';
 import { PersistanceCacheAuthModule } from './persistance/cacheAuth';
@@ -50,6 +52,15 @@ export class AppModuleBase {
 }
 
 @Module({
+  imports: [
+    ...AppModuleBase.imports,
+    DomainCoursePlatformModule,
+    CoursePlatformAPIModule.register(CoursePlatformAPIModule.moduleOptions)
+  ]
+})
+export class AppModuleCoursePlatform extends AppModuleBase {}
+
+@Module({
   imports: [...AppModuleBase.imports, SSOAPIModule.register(SSOAPIModule.moduleOptions)]
 })
-export class AppModule extends AppModuleBase {}
+export class AppModuleSSO extends AppModuleBase {}

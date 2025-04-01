@@ -8,6 +8,7 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
+import { ConfigProviderService, EndpointSecurityMode } from '@node-c/core';
 import { AuthorizationPoint, IAMAuthorizationService, UserWithPermissionsData } from '@node-c/domain-iam';
 
 import { setNested } from '@ramster/general-tools';
@@ -23,6 +24,8 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
+    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
     @Inject(Constants.API_MODULE_NAME)
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string
@@ -36,10 +39,13 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
     } else if (locals.isAnonymous) {
       return next.handle();
     }
+    const { moduleName } = this;
     const controllerName = context.getClass().name;
     const handlerName = context.getHandler().name;
-    const authorizationData = await this.authorizationService.mapAuthorizationPoints(this.moduleName);
+    // TODO: cache this in-memory
+    const authorizationData = await this.authorizationService.mapAuthorizationPoints(moduleName);
     let controllerData = authorizationData![controllerName];
+    // console.log('===>', authorizationData);
     if (!controllerData) {
       controllerData = authorizationData.__all;
     }
@@ -48,6 +54,13 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
     if (!handlerData) {
       handlerData = controllerData.__all;
       if (!Object.keys(handlerData).length) {
+        const { endpointSecurityMode } = this.configProvider.config.api[moduleName];
+        if (!endpointSecurityMode || endpointSecurityMode === EndpointSecurityMode.Strict) {
+          console.info(
+            `[${moduleName}][HTTPAuthorizationInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
+          );
+          throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
         return next.handle();
       }
     }
@@ -57,6 +70,9 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
       user
     );
     if (!hasAccess) {
+      console.info(
+        `[${moduleName}][HTTPAuthorizationInterceptor]: No user access to handler ${controllerName}.${handlerName}.`
+      );
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     for (const key in inputDataToBeMutated) {

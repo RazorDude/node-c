@@ -1,11 +1,12 @@
 import * as path from 'path';
 
-import { AppConfigCommon, HttpMethod, NoSQLType, RDBType } from '@node-c/core';
+import { AppConfigCommon, EndpointSecurityMode, HttpMethod, NoSQLType, RDBType } from '@node-c/core';
 
 import { Constants } from '../common/definitions';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
+    coursePlatform: { endpointSecurityMode: EndpointSecurityMode.Strict },
     sso: {
       anonymousAccessRoutes: {
         '/users/accessToken': [HttpMethod.POST]
@@ -13,7 +14,7 @@ export const appConfigCommon: AppConfigCommon = {
     }
   },
   domain: {
-    administration: {},
+    coursePlatform: {},
     iam: {
       accessTokenExpiryTimeInMinutes: 120,
       defaultUserIdentifierField: 'id',

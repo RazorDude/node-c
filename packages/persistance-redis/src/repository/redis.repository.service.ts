@@ -20,7 +20,8 @@ import { Constants } from '../common/definitions';
 import { RedisStoreService } from '../store';
 
 // TODO: support "paranoid" mode
-// TODO: support filtering by keys AND values, and indexing
+// TODO: support complex filtering, not just equality
+// TODO: support indexing
 // TODO: support validations according to the rules in the schema
 // TODO: support defining the keys' delimiter symbol
 @Injectable()
@@ -68,8 +69,11 @@ export class RedisRepositoryService<Entity> {
     const { exactSearch, filters, findAll, page, perPage, withValues: optWithValues } = options;
     const paginationOptions: { count?: number; cursor?: number } = {};
     const withValues = typeof optWithValues === 'undefined' || optWithValues === true ? true : false;
+    let count: number = 0;
+    let hasNonPrimaryKeyFilters = false;
     let storeEntityKey = '';
-    if (filters) {
+    if (filters && Object.keys(filters).length) {
+      let primaryKeyFiltersCount = 0;
       storeEntityKey =
         storeDelimiter +
         primaryKeys
@@ -80,6 +84,7 @@ export class RedisRepositoryService<Entity> {
               typeof value !== 'object' &&
               (typeof value !== 'string' || value.length)
             ) {
+              primaryKeyFiltersCount++;
               return value;
             }
             if (exactSearch) {
@@ -91,8 +96,9 @@ export class RedisRepositoryService<Entity> {
             return '*';
           })
           .join(storeDelimiter);
+      hasNonPrimaryKeyFilters = primaryKeyFiltersCount === Object.keys(filters).length;
       if (!findAll) {
-        const count = perPage || 100;
+        count = perPage || 100;
         paginationOptions.count = count;
         paginationOptions.cursor = (page ? page - 1 : 0) * count;
       }
@@ -102,12 +108,62 @@ export class RedisRepositoryService<Entity> {
           'Either filters or findAll is required when calling the find method.'
       );
     }
-    return await store.scan(`${entityName}${storeEntityKey}`, {
-      ...paginationOptions,
-      parseToJSON: true,
-      scanAll: findAll,
-      withValues
-    });
+    if (findAll) {
+      const { values: initialResults } = await store.scan(`${entityName}${storeEntityKey}`, {
+        ...paginationOptions,
+        parseToJSON: true,
+        scanAll: findAll,
+        withValues
+      });
+      if (!hasNonPrimaryKeyFilters) {
+        return initialResults as ResultItem[];
+      }
+      return initialResults.filter(item => {
+        let filterResult = true;
+        for (const key in filters) {
+          if (primaryKeys.includes(key)) {
+            continue;
+          }
+          if ((item as Record<string, unknown>)[key] !== filters[key]) {
+            filterResult = false;
+            break;
+          }
+        }
+        return filterResult;
+      }) as ResultItem[];
+    }
+    let results: ResultItem[] = [];
+    while (results.length < count) {
+      const { cursor: newCursor, values: innerResults } = await store.scan(`${entityName}${storeEntityKey}`, {
+        ...paginationOptions,
+        parseToJSON: true,
+        scanAll: findAll,
+        withValues
+      });
+      results = results.concat(
+        innerResults.filter(item => {
+          let filterResult = true;
+          for (const key in filters) {
+            if (primaryKeys.includes(key)) {
+              continue;
+            }
+            if ((item as Record<string, unknown>)[key] !== filters[key]) {
+              filterResult = false;
+              break;
+            }
+          }
+          return filterResult;
+        }) as ResultItem[]
+      );
+      if (newCursor === 0) {
+        break;
+      }
+      paginationOptions.cursor = newCursor;
+    }
+    if (results.length > count) {
+      results = results.slice(0, count);
+    }
+    return results;
   }
 
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {

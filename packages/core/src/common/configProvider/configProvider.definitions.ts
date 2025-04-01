@@ -97,6 +97,7 @@ export interface AppConfigCommon {
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
   anonymousAccessRoutes?: Record<string, HttpMethod[]>;
+  endpointSecurityMode?: EndpointSecurityMode;
   hostname?: string;
   port?: number;
 }
@@ -177,7 +178,7 @@ export interface AppConfigFromEnvPersistanceRDB {
 
 export interface AppConfigProfile {
   api?: { [apiName: string]: GenericObject | AppConfigProfileAPIHTTP | AppConfigProfileAPIREST };
-  domain?: { [domainName: string]: GenericObject | AppConfingProfileDomainIAM };
+  domain?: { [domainName: string]: GenericObject | AppConfigProfileDomainIAM };
   general: {
     environment: AppEnvironment;
     projectName?: string;
@@ -188,7 +189,7 @@ export interface AppConfigProfile {
 export type AppConfigProfileAPIHTTP = AppConfigCommonAPIHTTP;
 export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 
-export interface AppConfingProfileDomainIAM {
+export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   refreshTokenExpiryTimeInMinutes?: number;
 }
@@ -214,6 +215,14 @@ export interface ConfigProviderModuleOptions {
   appConfigs: LoadConfigAppConfigs;
   envKeys: AppConfigFromEnvKeys;
   envKeysParentNames: AppConfigFromEnvKeysParentNames;
+}
+
+// TODO: figure out how to move this to the Domain-IAM package
+export enum EndpointSecurityMode {
+  // eslint-disable-next-line no-unused-vars
+  Lax = 'lax',
+  // eslint-disable-next-line no-unused-vars
+  Strict = 'strict'
 }
 
 export interface GenerateOrmconfigOptions {

@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 
 import {
+  DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainBulkCreateOptions,
   DomainBulkCreateResult,
   DomainCreateOptions,
@@ -23,6 +24,7 @@ import { ApplicationError, GenericObject } from '../../common/definitions';
 
 import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/entityService';
 
+// TODO: privateOptionsOverrides by service
 export class DomainEntityService<
   Entity,
   EntityService extends PersistanceEntityService<Entity>,
@@ -33,14 +35,7 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     protected persistanceEntityService: EntityService,
     // eslint-disable-next-line no-unused-vars
-    protected defaultMethods: string[] = [
-      DomainMethod.BulkCreate,
-      DomainMethod.Create,
-      DomainMethod.Delete,
-      DomainMethod.Find,
-      DomainMethod.FindOne,
-      DomainMethod.Update
-    ],
+    protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
     // eslint-disable-next-line no-unused-vars
     protected additionalPersistanceEntityServices?: AdditionalEntityServices
   ) {}
@@ -49,11 +44,14 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     data: Data['BulkCreate'],
     // eslint-disable-next-line no-unused-vars
-    options?: DomainBulkCreateOptions
+    options?: DomainBulkCreateOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: unknown
   ): Promise<DomainBulkCreateResult<Entity>>;
   async bulkCreate(
     data: Data['BulkCreate'],
-    options?: DomainBulkCreateOptions
+    options?: DomainBulkCreateOptions,
+    privateOptions?: unknown
   ): Promise<DomainBulkCreateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
       throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
@@ -61,12 +59,12 @@ export class DomainEntityService<
     const { optionsOverridesByService, persistanceServices = [DomainPersistanceEntityServiceType.Main] } =
       options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).bulkCreate(data);
+    const result = await this.getPersistanceService(firstServiceName).bulkCreate(data, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: result.length > 0,
-        methodArgs: [result],
+        methodArgs: [result, privateOptions],
         methodName: 'bulkCreate',
         optionsArgIndex: 1,
         optionsOverridesByService
@@ -74,11 +72,18 @@ export class DomainEntityService<
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
-  public create(data: Data['Create'], options?: DomainCreateOptions): Promise<DomainCreateResult<Entity>>;
+  public create(
+    // eslint-disable-next-line no-unused-vars
+    data: Data['Create'],
+    // eslint-disable-next-line no-unused-vars
+    options?: DomainCreateOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: unknown
+  ): Promise<DomainCreateResult<Entity>>;
   async create<Options extends object | undefined = undefined>(
     data: Data['Create'],
-    options?: DomainCreateOptions<Options>
+    options?: DomainCreateOptions<Options>,
+    privateOptions?: unknown
   ): Promise<DomainCreateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Create)) {
       throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
@@ -86,12 +91,12 @@ export class DomainEntityService<
     const { optionsOverridesByService, persistanceServices = [DomainPersistanceEntityServiceType.Main] } =
       options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).create(data);
+    const result = await this.getPersistanceService(firstServiceName).create(data, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: typeof result !== 'undefined' && result !== null,
-        methodArgs: [result],
+        methodArgs: [result, privateOptions],
         methodName: 'create',
         optionsArgIndex: 1,
         optionsOverridesByService
@@ -100,8 +105,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public delete(options: DomainDeleteOptions): Promise<DomainDeleteResult>;
-  async delete(options: DomainDeleteOptions): Promise<DomainDeleteResult> {
+  public delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult>;
+  async delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult> {
     if (!this.defaultMethods?.includes(DomainMethod.Delete)) {
       throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
     }
@@ -111,12 +116,12 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).delete(otherOptions);
+    const result = await this.getPersistanceService(firstServiceName).delete(otherOptions, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: !!result.count,
-        methodArgs: [otherOptions],
+        methodArgs: [otherOptions, privateOptions],
         methodName: 'delete',
         optionsArgIndex: 0,
         optionsOverridesByService
@@ -125,8 +130,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public find(options: DomainFindOptions): Promise<DomainFindResult<Entity>>;
-  async find(options: DomainFindOptions): Promise<DomainFindResult<Entity>> {
+  public find(options: DomainFindOptions, privateOptions?: unknown): Promise<DomainFindResult<Entity>>;
+  async find(options: DomainFindOptions, privateOptions?: unknown): Promise<DomainFindResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Find)) {
       throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
     }
@@ -137,13 +142,13 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    let result = await this.getPersistanceService(firstServiceName).find(otherOptions);
+    let result = await this.getPersistanceService(firstServiceName).find(otherOptions, privateOptions);
     const hasMainServiceResult = result.items.length > 0;
     const resultsByService = await this.runMethodInAdditionalServices<PersistanceFindResults<Entity>>(
       otherServiceNames || [],
       {
         hasMainServiceResult,
-        methodArgs: [otherOptions],
+        methodArgs: [otherOptions, privateOptions],
         methodName: 'find',
         optionsArgIndex: 0,
         optionsOverridesByService
@@ -166,8 +171,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public findOne(options: DomainFindOneOptions): Promise<DomainFindOneResult<Entity>>;
-  async findOne(options: DomainFindOneOptions): Promise<DomainFindOneResult<Entity>> {
+  public findOne(options: DomainFindOneOptions, privateOptions?: unknown): Promise<DomainFindOneResult<Entity>>;
+  async findOne(options: DomainFindOneOptions, privateOptions?: unknown): Promise<DomainFindOneResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.FindOne)) {
       throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
     }
@@ -178,11 +183,14 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    let result: Entity | null = await this.getPersistanceService(firstServiceName).findOne(otherOptions);
+    let result: Entity | null = await this.getPersistanceService(firstServiceName).findOne(
+      otherOptions,
+      privateOptions
+    );
     const hasMainServiceResult = typeof result !== 'undefined' && result !== null;
     const resultsByService = await this.runMethodInAdditionalServices<Entity | null>(otherServiceNames || [], {
       hasMainServiceResult,
-      methodArgs: [otherOptions],
+      methodArgs: [otherOptions, privateOptions],
       methodName: 'findOne',
       optionsArgIndex: 0,
       optionsOverridesByService
@@ -281,9 +289,19 @@ export class DomainEntityService<
     return returnDataByService;
   }
 
-  // eslint-disable-next-line no-unused-vars
-  public update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>>;
-  async update(data: Data['Update'], options: DomainUpdateOptions): Promise<DomainUpdateResult<Entity>> {
+  public update(
+    // eslint-disable-next-line no-unused-vars
+    data: Data['Update'],
+    // eslint-disable-next-line no-unused-vars
+    options: DomainUpdateOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: unknown
+  ): Promise<DomainUpdateResult<Entity>>;
+  async update(
+    data: Data['Update'],
+    options: DomainUpdateOptions,
+    privateOptions?: unknown
+  ): Promise<DomainUpdateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Update)) {
       throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
     }
@@ -293,12 +311,12 @@ export class DomainEntityService<
       ...otherOptions
     } = options;
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).update(data, otherOptions);
+    const result = await this.getPersistanceService(firstServiceName).update(data, otherOptions, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: !!result.count,
-        methodArgs: [data, otherOptions],
+        methodArgs: [data, otherOptions, privateOptions],
         methodName: 'update',
         optionsArgIndex: 1,
         optionsOverridesByService

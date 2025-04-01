@@ -56,8 +56,8 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
       let refreshToken: string | undefined;
       let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
       let useCookie = false;
-      if (typeof authToken === 'string' && authToken.length) {
-        tokens = authToken.replace('Bearer ', '').split('');
+      if (typeof authToken === 'string' && authToken.length && authToken.match(/^Bearer\s/)) {
+        tokens = authToken.split(' ');
         if (tokens.length) {
           authToken = tokens[1];
           refreshToken = tokens[2];
@@ -67,7 +67,6 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
         useCookie = true;
       }
       if (!authToken) {
-        console.error('Missing access token.', req.method);
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       try {

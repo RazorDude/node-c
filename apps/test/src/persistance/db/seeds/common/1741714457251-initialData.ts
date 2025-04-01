@@ -14,7 +14,7 @@ export class InitialData1741714457251 implements MigrationInterface {
       [
         // first item
         1,
-        '{ "inputData.query.include": ["/lessons(\\\\.type)?/", "type"] }',
+        '{ "query.include": ["/lessons(\\\\.type)?/", "type"] }',
         '["courses"]',
         null,
         '["find"]',
@@ -25,7 +25,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         // second item
         2,
-        '{ "inputData.query.include": ["/lessons(\\\\.type)?/", "type"] }',
+        '{ "query.include": ["/lessons(\\\\.type)?/", "type"] }',
         '["courses"]',
         null,
         '["findOne"]',
@@ -36,7 +36,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         // third item
         3,
-        '{ \"inputData.query.include\": [\"/lessons(\\\\.type)?/\", \"type\"] }',
+        '{ \"query.include\": [\"/lessons(\\\\.type)?/\", \"type\"] }',
         '["courses"]',
         null,
         '["find"]',
@@ -47,7 +47,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         'assignedCourses.id',
         // fourth item
         4,
-        '{ \"inputData.query.include\": [\"/lessons(\\\\.type)?/\", \"type\"] }',
+        '{ \"query.include\": [\"/lessons(\\\\.type)?/\", \"type\"] }',
         '["courses"]',
         null,
         '["findOne"]',
@@ -65,6 +65,17 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         '["coursePlatform"]',
         'AdminManageCourses',
+        null,
+        null,
+        // sixth item
+        6,
+        null,
+        '["users"]',
+        null,
+        '["bulkCreate", "count", "create", "delete", "find", "findOne", "update"]',
+        null,
+        '["CoursePlatformUsersEntityController"]',
+        'AdminManageUsers',
         null,
         null
       ]
@@ -148,6 +159,7 @@ export class InitialData1741714457251 implements MigrationInterface {
     await queryRunner.query(
       'INSERT INTO `userTypeAuthorizationPoints` (`userTypeId`, `authorizationPointId`) VALUES ' +
         '(1, 5), ' +
+        '(1, 6), ' +
         '(2, 1), ' +
         '(2, 2), ' +
         '(2, 3), ' +

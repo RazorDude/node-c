@@ -70,7 +70,11 @@ export class IAMUsersService<
     } = options;
     const mainFilterValue = filters[mainFilterField];
     console.info(`[Domain.${moduleName}.Users]: Login attempt for ${mainFilterField} ${mainFilterValue}...`);
-    const user = await this.getUserWithPermissionsData({ filters: { ...(filters || {}) } }, { keepPassword: true });
+    if (!Object.keys(filters).length) {
+      console.info(`[Domain.${moduleName}.Users]: No filters provided.`);
+      throw new ApplicationError('Invalid user identifier or password.');
+    }
+    const user = await this.getUserWithPermissionsData({ filters }, { keepPassword: true });
     if (!user) {
       console.info(
         `[Domain.${moduleName}.Users]: Login attempt failed for ${mainFilterField} ${mainFilterValue} - user not found.`

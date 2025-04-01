@@ -39,18 +39,22 @@ export class IAMAuthenticationLocalService<
     const userIdentifierField = authData.userIdentifierField || defaultUserIdentifierField;
     const userIdentifierValue = userData[userIdentifierField as keyof AuthenticationUserFields];
     const userMFAIdentifierField = authData.userMFAIdentifierField || userIdentifierField;
-    if (
-      !userPasswordHMACAlgorithm ||
-      !userPasswordSecret ||
-      !userPassword ||
-      crypto
+    let wrongPassword = false;
+    if (!userPasswordHMACAlgorithm || !userPasswordSecret || !userPassword) {
+      wrongPassword = true;
+    } else {
+      const computedPassword = crypto
         .createHmac(userPasswordHMACAlgorithm, userPasswordSecret)
         .update(`${authPassword}`)
         .digest('hex')
-        .toString() !== userPassword
-    ) {
+        .toString();
+      if (computedPassword !== userPassword) {
+        wrongPassword = true;
+      }
+    }
+    if (wrongPassword) {
       console.info(
-        `[IAMAuthenticationLocalService]: Login attempt failed for user ${userIdentifierValue} - wrong password.`
+        `[IAMAuthenticationLocalService]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
       );
       throw new ApplicationError('Invalid user identifier or password.');
     }

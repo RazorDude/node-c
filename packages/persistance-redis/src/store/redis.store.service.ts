@@ -108,18 +108,18 @@ export class RedisStoreService {
 
   // TODO: support scan from transaction data
   // TODO: optimize this method to reduce branches, ugly conidtional statements and repeatability
-  async scan<Values = unknown[]>(handle: string, options: ScanOptions): Promise<Values> {
+  async scan<Values = unknown[]>(handle: string, options: ScanOptions): Promise<{ cursor: number; values: Values }> {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
     const { count, cursor: optCursor, parseToJSON, scanAll, withValues } = options;
     const getValues = typeof withValues === 'undefined' || withValues === true;
     const hashmapMethod = (getValues
       ? client.hScan.bind(client)
       : client.hScanNoValues.bind(client)) as unknown as RedisClientScanMethod;
+    let cursor = 0;
     let keys: string[] = [];
     let parsedValues: unknown[] = [];
     let values: { field: string; value: string }[] = [];
     if (scanAll) {
-      let cursor = 0;
       if (useHashmap) {
         while (true) {
           const {
@@ -175,10 +175,11 @@ export class RedisStoreService {
           keys = keys.concat(newKeys!);
         }
       } else {
-        const { keys: newKeys } = await client.scan(optCursor || 0, {
+        const { cursor: newCursor, keys: newKeys } = await client.scan(optCursor || 0, {
           COUNT: count,
           MATCH: `${storeKey}${storeDelimiter}${handle}`
         });
+        cursor = newCursor;
         if (getValues) {
           for (const i in newKeys) {
             const key = newKeys[i];
@@ -205,7 +206,7 @@ export class RedisStoreService {
     } else {
       parsedValues = values.map(({ value }) => value);
     }
-    return parsedValues as Values;
+    return { cursor, values: parsedValues as Values };
   }
 
   // TODO: fix hExpire
@@ -238,7 +239,8 @@ export class RedisStoreService {
     if (useHashmap) {
       result = await client.hSet(storeKey, handle, valueToSet);
       // if (actualTTL) {
-      //   await client.hExpire(storeKey, handle, actualTTL, 'NX');
+      // await client.hExpire(storeKey, handle, actualTTL, 'NX');
+      // await client.expire(storeKey, actualTTL, 'NX');
       // }
     } else {
       const fullKey = `${storeKey}${storeDelimiter}${handle}`;

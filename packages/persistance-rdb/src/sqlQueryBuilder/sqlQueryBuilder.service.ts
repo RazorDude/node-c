@@ -114,6 +114,7 @@ export class SQLQueryBuilderService {
       let query = '';
       if (dbType === RDBType.MySQL) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
+        // console.log('=> [SQLQueryBuilderService]:', query);
       } else if (dbType === RDBType.PG) {
         query = `${fieldString} ? :${escapedFieldAlias}`;
       }

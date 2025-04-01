@@ -1,4 +1,12 @@
-import { GenericObject, PersistanceEntityService, PersistanceSelectOperator } from '@node-c/core';
+import {
+  DomainBaseOptionsForAdditionalServicesFull,
+  DomainEntityService,
+  DomainEntityServiceDefaultData,
+  DomainMethod,
+  GenericObject,
+  PersistanceEntityService,
+  PersistanceSelectOperator
+} from '@node-c/core';
 
 import { getNested, setNested } from '@ramster/general-tools';
 
@@ -11,11 +19,27 @@ import {
   AuthorizationPoint as BaseAuthorizationPoint
 } from './iam.authorization.definitions';
 
-export class IAMAuthorizationService<AuthorizationPoint extends BaseAuthorizationPoint<unknown>> {
+export class IAMAuthorizationService<
+  AuthorizationPoint extends BaseAuthorizationPoint<unknown>,
+  Data extends DomainEntityServiceDefaultData<Partial<AuthorizationPoint>> = DomainEntityServiceDefaultData<
+    Partial<AuthorizationPoint>
+  >
+> extends DomainEntityService<
+  AuthorizationPoint,
+  PersistanceEntityService<AuthorizationPoint>,
+  Data,
+  Record<string, PersistanceEntityService<Partial<AuthorizationPoint>>> | undefined
+> {
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    protected persistanceAuthorizationPointsService: PersistanceEntityService<AuthorizationPoint>
-  ) {}
+    protected persistanceAuthorizationPointsService: PersistanceEntityService<AuthorizationPoint>,
+    protected defaultMethods: string[] = [DomainMethod.Find],
+    protected additionalPersistanceEntityServices?: Record<
+      string,
+      PersistanceEntityService<Partial<AuthorizationPoint>>
+    >
+  ) {
+    super(persistanceAuthorizationPointsService, defaultMethods, additionalPersistanceEntityServices);
+  }
 
   static checkAccess(
     accessPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
@@ -134,8 +158,14 @@ export class IAMAuthorizationService<AuthorizationPoint extends BaseAuthorizatio
     return values;
   }
 
-  async mapAuthorizationPoints(moduleName: string): Promise<AuthorizationData<unknown>> {
-    const { items: acpList } = await this.persistanceAuthorizationPointsService.find({
+  async mapAuthorizationPoints(
+    moduleName: string,
+    additionalServicesOptions?: DomainBaseOptionsForAdditionalServicesFull
+  ): Promise<AuthorizationData<unknown>> {
+    const {
+      result: { items: acpList }
+    } = await this.find({
+      ...(additionalServicesOptions || {}),
       filters: { moduleNames: { [PersistanceSelectOperator.Contains]: moduleName } },
       findAll: true
     });

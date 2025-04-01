@@ -2,17 +2,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { ApplicationError, PersistanceUpdateResult } from '@node-c/core';
+import { ApplicationError, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
 // import { RDBEntityService, RDBRepository, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
-import { RDBEntityService, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
+import {
+  FindOneOptions,
+  FindOptions,
+  RDBEntityService,
+  SQLQueryBuilderService,
+  UpdateOptions
+} from '@node-c/persistance-rdb';
 
 import { omit } from 'ramda';
 import { EntityManager, Repository } from 'typeorm';
 
-import { UpdatePasswordData, UpdateUserData } from './users.definitions';
+import {
+  UsersFindOnePrivateOptions,
+  UsersFindPrivateOptions,
+  UsersUpdatePasswordData,
+  UsersUpdateUserData
+} from './users.definitions';
 
 import { User, UserEntity } from './users.entity';
 
+// TODO: move all of the "omit password" logic to a new UsersPersistanceEntityService in the core module
 @Injectable()
 export class UsersService extends RDBEntityService<User> {
   constructor(
@@ -25,22 +37,37 @@ export class UsersService extends RDBEntityService<User> {
     super(qb, repository, UserEntity);
   }
 
-  async update(data: UpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
-    const { transactionManager } = options || {};
-    if (!transactionManager) {
-      return this.repository.manager.transaction(tm => this.update(data, { ...options, transactionManager: tm }));
+  async find(options: FindOptions, privateOptions?: UsersFindPrivateOptions): Promise<PersistanceFindResults<User>> {
+    const findResults = await super.find(options);
+    if (privateOptions?.withPassword) {
+      return findResults;
     }
+    return {
+      ...findResults,
+      items: findResults.items.map(item => omit(['password'], item))
+    };
+  }
+
+  async findOne(options: FindOneOptions, privateOptions?: UsersFindOnePrivateOptions): Promise<User | null> {
+    const item = await super.findOne(options);
+    if (privateOptions?.withPassword) {
+      return item;
+    }
+    return item ? omit(['password'], item) : item;
+  }
+
+  async update(data: UsersUpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
     const updateResult = await RDBEntityService.prototype.update.call(
       this,
-      { ...omit(['password'] as unknown as (keyof UpdateUserData)[], data) },
+      { ...omit(['password'] as unknown as (keyof UsersUpdateUserData)[], data) },
       options
     );
     return updateResult;
   }
 
-  // TODO: move the logic of this meethod to the domain-iam package
+  // TODO: move the logic of this method to the domain-iam package
   async updatePassword(
-    data: UpdatePasswordData,
+    data: UsersUpdatePasswordData,
     options?: { transactionManager?: EntityManager }
   ): Promise<{ success: true }> {
     const { transactionManager } = options || {};

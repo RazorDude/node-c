@@ -53,12 +53,15 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
   ): Promise<CacheUser | null> {
     const { keepPassword } = privateOptions || {};
     const include = [...(options.include || []), 'accountStatus', 'assignedUserTypes.authorizationPoints'];
-    const { result: user } = await this.findOne({
-      ...options,
-      include,
-      persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
-      saveAdditionalResultsInMain: { serviceName: 'db', useResultsAsMain: true }
-    });
+    const { result: user } = await this.findOne(
+      {
+        ...options,
+        include,
+        persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+        saveAdditionalResultsInMain: { serviceName: 'db', useResultsAsMain: true }
+      },
+      { withPassword: true }
+    );
     if (!user) {
       return null;
     }

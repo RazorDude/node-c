@@ -8,6 +8,7 @@ import { IAMUsersService } from '../../../../domain/iam';
 import { CacheUser } from '../../../../persistance/cache';
 
 // TODO: create user (signup)
+// TODO: logout
 @Injectable()
 @Controller('users')
 export class SSOUsersEntityController extends RESTAPIEntityControler<CacheUser, IAMUsersService> {

@@ -247,6 +247,23 @@ export class RESTAPIEntityControler<
     ]);
   }
 
+  static getDefaultDtos<EntityForDtos>(): {
+    bulkCreate: DefaultDtos<EntityForDtos>['BulkCreate'];
+    find: DefaultDtos<EntityForDtos>['Find'];
+    findOne: DefaultDtos<EntityForDtos>['FindOne'];
+  } {
+    return {
+      bulkCreate: BaseBulkCreateDto as unknown as DefaultDtos<EntityForDtos>['BulkCreate'],
+      find: BaseFindDto as unknown as DefaultDtos<EntityForDtos>['Find'],
+      findOne: BaseFindDto as unknown as DefaultDtos<EntityForDtos>['FindOne']
+      // create: BaseCreateDto,
+      // delete: BaseDeleteDto,
+      // find: BaseFindDto,
+      // findOne: BaseFindOneDto,
+      // update: BaseUpdateDto
+    };
+  }
+
   @Patch()
   async update(@Body() body: Dto['Update'], ...args: unknown[]): Promise<DomainUpdateResult<Entity> | void> {
     return await super.update.apply(this, [

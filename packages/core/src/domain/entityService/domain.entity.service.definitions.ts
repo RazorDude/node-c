@@ -14,10 +14,18 @@ export interface DomainBaseAdditionalServiceOptionsOverrides {
   runOnNoMainServiceResultOnly?: boolean;
 }
 
-export type DomainBaseOptions<Options> = Options & {
+export type DomainBaseOptions<Options> = Options & DomainBaseOptionsForAdditionalServices<Options>;
+
+export interface DomainBaseOptionsForAdditionalServices<Options> {
   optionsOverridesByService?: GenericObject<Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides>;
   persistanceServices?: DomainPersistanceServicesKey[];
-};
+}
+
+export type DomainBaseOptionsForAdditionalServicesFull<
+  Options extends object | undefined = undefined,
+  SaveAdditionalResultsOptions extends object | undefined = undefined
+> = DomainBaseOptionsForAdditionalServices<Options> &
+  DomainBaseOptionsWithSearchPersistance<SaveAdditionalResultsOptions>;
 
 export interface DomainBaseOptionsWithSearchPersistance<
   SaveAdditionalResultsOptions extends object | undefined = undefined
@@ -82,6 +90,15 @@ export enum DomainMethod {
   // eslint-disable-next-line no-unused-vars
   Update = 'update'
 }
+
+export const DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS = [
+  DomainMethod.BulkCreate,
+  DomainMethod.Create,
+  DomainMethod.Delete,
+  DomainMethod.Find,
+  DomainMethod.FindOne,
+  DomainMethod.Update
+];
 
 export enum DomainPersistanceEntityServiceType {
   // eslint-disable-next-line no-unused-vars
