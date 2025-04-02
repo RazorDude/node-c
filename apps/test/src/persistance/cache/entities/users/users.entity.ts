@@ -6,5 +6,5 @@ import { User as DBUser } from '../../../db';
 
 export type CacheUser = RedisEntity<number> & UserWithPermissionsData<DBUser, number>;
 export const CacheUserSchema = {
-  ...getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'id')
+  ...getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'user')
 };

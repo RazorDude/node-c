@@ -10,8 +10,8 @@ export type AuthorizationPoint = RedisEntity<number> &
   BaseAuthorizationPoint<number> &
   Omit<DBAuthorizationPoint, 'userTypes'> & { userTypes: UserType[] };
 export const AuthorizationPointSchema = {
-  ...defaultSchema.columns,
   columns: {
+    ...defaultSchema.columns
     // allowedInputData?: GenericObject;
     // controllerNames?: string[];
     // forbiddenInputData?: GenericObject;

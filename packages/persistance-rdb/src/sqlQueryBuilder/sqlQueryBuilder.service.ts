@@ -109,12 +109,12 @@ export class SQLQueryBuilderService {
     const { columnQuotesSymbol: cqs, dbType } = this;
     const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}`;
-    const parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
+    let parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
       if (dbType === RDBType.MySQL) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
-        // console.log('=> [SQLQueryBuilderService]:', query);
+        parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
         query = `${fieldString} ? :${escapedFieldAlias}`;
       }

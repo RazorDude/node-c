@@ -67,6 +67,7 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
         useCookie = true;
       }
       if (!authToken) {
+        console.error('Missing auth token.');
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -93,11 +94,11 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
         }
       }
       const userId = tokenContent?.data?.userId;
-      let userData = (await usersService.findOne({ filters: { id: userId } })).result;
-      if (!userData) {
-        userData = (await usersService.getUserWithPermissionsData({ filters: { id: userId } })) as User;
+      if (!userId) {
+        console.error('Missing userId in the tokenContent data.');
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
-      req.locals!.user = userData as unknown;
+      req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
       next();
     })().then(
       () => true,

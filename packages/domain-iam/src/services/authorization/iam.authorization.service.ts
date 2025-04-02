@@ -42,26 +42,27 @@ export class IAMAuthorizationService<
   }
 
   static checkAccess(
-    accessPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
+    authorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
     inputData: GenericObject,
     user: AuthorizationUser<unknown>
   ): {
     hasAccess: boolean;
     inputDataToBeMutated: GenericObject;
   } {
+    const mutatedInputData = immutable.fromJS(inputData).toJS();
     const userPermissionsData = user.currentAuthorizationPoints!;
     let hasAccess = false;
-    const inputDataToBeMutated: GenericObject = {};
-    const mutatedInputData = immutable.fromJS(inputData).toJS();
-    for (const acpId in accessPoints) {
-      const acpData = userPermissionsData[acpId];
-      if (!acpData) {
+    let inputDataToBeMutated: GenericObject = {};
+    for (const apId in authorizationPoints) {
+      if (!userPermissionsData[apId]) {
         continue;
       }
-      const { allowedInputData, forbiddenInputData, inputDataFieldName, requiredStaticData, userFieldName } = acpData;
+      const apData = authorizationPoints[apId];
+      const { allowedInputData, forbiddenInputData, inputDataFieldName, requiredStaticData, userFieldName } = apData;
       const hasStaticData = requiredStaticData && Object.keys(requiredStaticData).length;
       const innerMutatedInputData = immutable.fromJS(mutatedInputData).toJS();
       const innerInputDataToBeMutated: GenericObject = {};
+      hasAccess = true;
       if (allowedInputData && Object.keys(allowedInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {
@@ -87,29 +88,24 @@ export class IAMAuthorizationService<
             hasAccess = false;
             break;
           }
-          if (!hasAccess) {
-            hasAccess = true;
-          }
         }
-        if (hasAccess) {
-          hasAccess = false;
-        } else {
+        if (!hasAccess) {
           continue;
         }
       }
-      if (userFieldName) {
-        if (!inputDataFieldName) {
-          continue;
-        }
-        const userFieldValue = getNested(user, userFieldName, { removeNestedFieldEscapeSign: true }),
-          inputFieldValue = getNested(innerMutatedInputData, inputDataFieldName, { removeNestedFieldEscapeSign: true });
+      if (userFieldName && inputDataFieldName) {
+        const inputFieldValue = getNested(innerMutatedInputData, inputDataFieldName, {
+          removeNestedFieldEscapeSign: true
+        });
+        const userFieldValue = getNested(user, userFieldName, { removeNestedFieldEscapeSign: true });
         if (typeof userFieldValue === 'undefined' || typeof inputFieldValue === 'undefined') {
+          hasAccess = false;
           continue;
         }
-        const inputValueIsArray = inputFieldValue instanceof Array,
-          valuesToTest = inputValueIsArray ? inputFieldValue : [inputFieldValue],
-          valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
         const allowedValues: unknown[] = [];
+        const inputValueIsArray = inputFieldValue instanceof Array;
+        const valuesToTest = inputValueIsArray ? inputFieldValue : [inputFieldValue];
+        const valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
         valuesToTest.forEach((valueToTest: unknown) => {
           const valueToTestVariants = IAMAuthorizationService.getValuesForTesting(valueToTest);
           for (const j in valuesToTestAgainst) {
@@ -129,16 +125,16 @@ export class IAMAuthorizationService<
           }
         });
         if (!allowedValues.length) {
+          hasAccess = false;
           continue;
         }
         if (inputValueIsArray) {
           innerInputDataToBeMutated[inputDataFieldName] = allowedValues;
           setNested(mutatedInputData, inputDataFieldName, allowedValues, { removeNestedFieldEscapeSign: true });
         }
-        hasAccess = true;
-        merge(innerInputDataToBeMutated, innerInputDataToBeMutated);
-        break;
       }
+      inputDataToBeMutated = merge(inputDataToBeMutated, innerInputDataToBeMutated);
+      break;
     }
     return { hasAccess, inputDataToBeMutated };
   }
@@ -163,7 +159,7 @@ export class IAMAuthorizationService<
     additionalServicesOptions?: DomainBaseOptionsForAdditionalServicesFull
   ): Promise<AuthorizationData<unknown>> {
     const {
-      result: { items: acpList }
+      result: { items: apList }
     } = await this.find({
       ...(additionalServicesOptions || {}),
       filters: { moduleNames: { [PersistanceSelectOperator.Contains]: moduleName } },
@@ -171,7 +167,7 @@ export class IAMAuthorizationService<
     });
     const authorizationData: AuthorizationData<unknown> = { __all: { __all: {} } };
     const moduleGlobalData = authorizationData.__all.__all;
-    acpList.forEach(item => {
+    apList.forEach(item => {
       if (!item.controllerNames) {
         moduleGlobalData[item.id as string] = item;
         return;
@@ -246,18 +242,20 @@ export class IAMAuthorizationService<
     if (
       typeof valueToTest === 'string' &&
       typeof valueToTestAgainst === 'string' &&
-      valueToTest.charAt(0) === '/' &&
-      valueToTest.charAt(valueToTest.length - 1) === '/'
+      valueToTestAgainst.charAt(0) === '/' &&
+      valueToTestAgainst.charAt(valueToTestAgainst.length - 1) === '/'
     ) {
-      const regex = new RegExp(valueToTest);
-      return regex.test(valueToTestAgainst);
+      const regex = new RegExp(valueToTestAgainst.substring(1, valueToTestAgainst.length - 2));
+      return regex.test(valueToTest);
     }
     const possibleValidValues = IAMAuthorizationService.getValuesForTesting(valueToTest);
+    let hasMatch = false;
     for (const i in possibleValidValues) {
       if (possibleValidValues[i] === valueToTestAgainst) {
-        return true;
+        hasMatch = true;
+        break;
       }
     }
-    return false;
+    return hasMatch;
   }
 }

@@ -235,17 +235,19 @@ describe('NodeC.Apps.Test', () => {
   // });
   // TODO: log in as admin
   // TODO: non-enabled default routes
+  // TODO: check endpointSecurityMode: undefined vs Strict vs Lax
   // TODO: find users (no options)
   // TODO: find users (pagination, page 1 and 2)
   // TODO: find users (sorting)
   // TODO: find users (no sorting and pagination)
+  // -- end of admin cases
   // TODO: log in as user 0
   // TODO: find courses (no options)
   // TODO: find courses (pagination, page 1 and 2)
   // TODO: find courses (sorting)
   // TODO: find courses (no sorting and pagination)
   // TODO: error cases for authorization points
-  // TODO: check endpointSecurityMode: undefined vs Strict vs Lax
+  // -- end of user 0 cases
   // -
   // After all hook - kill the apps process.
   // -
