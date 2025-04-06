@@ -1,12 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigProviderService, GenericObject, PersistanceSelectOperator, RDBType } from '@node-c/core';
+import {
+  ConfigProviderService,
+  GenericObject,
+  PersistanceOrderBy,
+  PersistanceOrderByDirection,
+  PersistanceSelectOperator,
+  RDBType
+} from '@node-c/core';
 
 import { getNested } from '@ramster/general-tools';
 
 import { DeleteQueryBuilder, ObjectLiteral, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
 import { SoftDeleteQueryBuilder } from 'typeorm/query-builder/SoftDeleteQueryBuilder';
 
-import { BuildQueryOptions, IncludeItems, OrderBy, ParsedFilter } from './sqlQueryBuilder.definitions';
+import { BuildQueryOptions, IncludeItems, ParsedFilter } from './sqlQueryBuilder.definitions';
 
 import { Constants } from '../common/definitions';
 
@@ -434,12 +441,18 @@ export class SQLQueryBuilderService {
     return resultInclude;
   }
 
-  parseOrderBy(entityName: string, orderByData: GenericObject<string>): { include: IncludeItems; orderBy: OrderBy[] } {
-    const orderBy: OrderBy[] = [];
+  parseOrderBy(
+    entityName: string,
+    orderByData: GenericObject<string>
+  ): { include: IncludeItems; orderBy: PersistanceOrderBy[] } {
+    const orderBy: PersistanceOrderBy[] = [];
     let include: IncludeItems = {};
     for (const fieldName in orderByData) {
-      const direction = orderByData[fieldName].toLowerCase() === 'desc' ? 'DESC' : 'ASC';
-      const item: OrderBy = { field: `${entityName}.${fieldName}`, direction };
+      const direction =
+        orderByData[fieldName].toLowerCase() === 'desc'
+          ? PersistanceOrderByDirection.Desc
+          : PersistanceOrderByDirection.Asc;
+      const item: PersistanceOrderBy = { field: `${entityName}.${fieldName}`, direction };
       // handle relation fields
       if (fieldName.match(/\./)) {
         const fieldData = fieldName.split('.');

@@ -1,4 +1,10 @@
-import { ApplicationError, GenericObject, PersistanceFindResults, PersistanceSelectOperator } from '@node-c/core';
+import {
+  ApplicationError,
+  GenericObject,
+  PersistanceFindResults,
+  PersistanceOrderBy,
+  PersistanceSelectOperator
+} from '@node-c/core';
 import { EntityManager, EntitySchema, Repository } from 'typeorm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,7 +18,7 @@ import {
   RDBEntityService
 } from './index';
 
-import { IncludeItems, OrderBy, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
+import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
 class PostgresError extends Error {
   code: string;
@@ -65,7 +71,7 @@ const createQBMock = (): SQLQueryBuilderService =>
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     parseOrderBy: vi.fn().mockImplementation((_tableName: string, _orderBy: unknown) => {
       // Return a dummy orderBy array.
-      return { orderBy: [{ column: 'id', order: 'ASC' }] as unknown as OrderBy[] };
+      return { orderBy: [{ column: 'id', order: 'ASC' }] as unknown as PersistanceOrderBy[] };
     }),
     parseRelations: vi
       .fn()
@@ -655,7 +661,7 @@ describe('RDBEntityService', () => {
       findQueryBuilderMock.getMany = vi.fn().mockResolvedValue(dummyItems);
       // Create a fake orderBy data to be returned by parseOrderBy.
       const orderByData = {
-        orderBy: [{ column: 'id', order: 'DESC' }] as unknown as OrderBy[],
+        orderBy: [{ column: 'id', order: 'DESC' }] as unknown as PersistanceOrderBy[],
         include: { extraOrder: true } as unknown as IncludeItems
       };
       const parseOrderBySpy = vi.spyOn(qbMock, 'parseOrderBy').mockReturnValue(orderByData);

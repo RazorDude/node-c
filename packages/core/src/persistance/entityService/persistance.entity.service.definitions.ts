@@ -18,7 +18,7 @@ export interface PersistanceDeleteResult {
 export interface PersistanceFindOneOptions {
   filters: GenericObject;
   include?: string[];
-  orderBy?: GenericObject<string>;
+  orderBy?: GenericObject<PersistanceOrderByDirection>;
   select?: string[];
   selectOperator?: PersistanceSelectOperator;
   withDeleted?: boolean;
@@ -28,7 +28,7 @@ export interface PersistanceFindOptions {
   filters?: GenericObject;
   findAll?: boolean;
   include?: string[];
-  orderBy?: GenericObject<string>;
+  orderBy?: GenericObject<PersistanceOrderByDirection>;
   page?: number;
   perPage?: number;
   select?: string[];
@@ -45,6 +45,18 @@ export interface PersistanceFindResults<Item> {
 export interface PersistanceNumberItem {
   deleted?: boolean;
   value: number;
+}
+
+export interface PersistanceOrderBy {
+  field: string;
+  direction: PersistanceOrderByDirection;
+}
+
+export enum PersistanceOrderByDirection {
+  // eslint-disable-next-line no-unused-vars
+  Asc = 'ASC',
+  // eslint-disable-next-line no-unused-vars
+  Desc = 'DESC'
 }
 
 export enum PersistanceSelectOperator {

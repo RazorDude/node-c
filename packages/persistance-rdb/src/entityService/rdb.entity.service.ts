@@ -5,6 +5,7 @@ import {
   PersistanceEntityService,
   PersistanceFindResults,
   PersistanceNumberItem,
+  PersistanceOrderBy,
   PersistanceSelectOperator,
   PersistanceUpdateResult
 } from '@node-c/core';
@@ -23,7 +24,7 @@ import {
   UpdateOptions
 } from './rdb.entity.service.definitions';
 
-import { IncludeItems, OrderBy, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
+import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
 // TODO: investigate whether it's worth it to make the create, bulkCreate and update methods more specific
 // with generic data objects for the data passed to them
@@ -180,7 +181,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     let where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
-    let orderBy: OrderBy[] = [];
+    let orderBy: PersistanceOrderBy[] = [];
     if (filters) {
       const parsedFiltersData = this.qb.parseFilters(tableName, filters);
       where = { ...parsedFiltersData.where };
@@ -232,7 +233,7 @@ export class RDBEntityService<Entity extends ObjectLiteral> extends PersistanceE
       isTopLevel: true
     });
     const include = this.qb.parseRelations(tableName, optRelations || [], includeFromFilters);
-    let orderBy: OrderBy[] = [];
+    let orderBy: PersistanceOrderBy[] = [];
     if (optOrderBy) {
       const parsedOrderByData = this.qb.parseOrderBy(tableName, optOrderBy);
       orderBy = [...parsedOrderByData.orderBy];

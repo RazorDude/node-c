@@ -1,9 +1,9 @@
-import { GenericObject } from '@node-c/core';
+import { GenericObject, PersistanceOrderBy } from '@node-c/core';
 
 export interface BuildQueryOptions {
   deletedColumnName?: string;
   include?: IncludeItems;
-  orderBy?: OrderBy[];
+  orderBy?: PersistanceOrderBy[];
   select?: string[];
   where?: { [fieldName: string]: ParsedFilter };
   withDeleted?: boolean;
@@ -11,11 +11,6 @@ export interface BuildQueryOptions {
 
 export interface IncludeItems {
   [relationProperty: string]: string;
-}
-
-export interface OrderBy {
-  field: string;
-  direction: 'ASC' | 'DESC';
 }
 
 export interface ParsedFilter {

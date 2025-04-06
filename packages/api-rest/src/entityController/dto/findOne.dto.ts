@@ -1,4 +1,4 @@
-import { DomainFindOneOptions, GenericObject } from '@node-c/core';
+import { DomainFindOneOptions, GenericObject, PersistanceOrderByDirection } from '@node-c/core';
 
 import { IsArray, IsObject, IsOptional } from 'class-validator';
 
@@ -14,7 +14,7 @@ export class FindOneDto<Options extends DomainFindOneOptions> extends BaseDto<Op
 
   @IsOptional()
   @IsObject()
-  orderBy?: GenericObject<string>;
+  orderBy?: GenericObject<PersistanceOrderByDirection>;
 
   @IsOptional()
   @IsArray()
