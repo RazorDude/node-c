@@ -1,19 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { GenericObject, GenericObjectType } from '@node-c/core';
 
-import { DataSource, ObjectLiteral, Repository } from 'typeorm';
+import { RDBEntityManager } from '../entityManager';
+import { OrmSelectQueryBuilder } from '../ormQueryBuilder';
 
-import { Constants } from '../common/definitions';
+export type RDBEntityTarget<Entity> = string | { name: string; type: Entity } | GenericObjectType<Entity>;
 
-@Injectable()
-export class RDBRepository<Entity extends ObjectLiteral> extends Repository<Entity> {
-  constructor(
-    @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
-    // eslint-disable-next-line prettier/prettier
-    protected dataSource: DataSource,
-    @Inject(Constants.RDB_REPOSITORY_ENTITY_CLASS)
-    protected entityClass: EntityClassOrSchema
-  ) {
-    super(entityClass, dataSource.createEntityManager());
-  }
+export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
+  manager: RDBEntityManager;
+  metadata: {
+    name: string;
+    tableName: string;
+  };
+  target: RDBEntityTarget<Entity>;
+
+  abstract createQueryBuilder(_entityName: string, _queryRunner?: unknown): OrmSelectQueryBuilder<Entity>;
+  abstract save(_data: Partial<Entity> | Partial<Entity[]>, _options?: unknown): Promise<unknown>;
 }

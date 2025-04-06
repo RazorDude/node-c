@@ -22,7 +22,7 @@ import {
 
 import { ApplicationError, GenericObject } from '../../common/definitions';
 
-import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/entityService';
+import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/common/entityService';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<

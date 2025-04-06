@@ -2,7 +2,13 @@ import { INestApplication, NestModule, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import morgan from 'morgan';
 
-import { AppConfig, ConfigProviderModuleOptions, ConfigProviderService, RDBType } from './common/configProvider';
+import {
+  AppConfig,
+  AppConfigPersistanceRDB,
+  ConfigProviderModuleOptions,
+  ConfigProviderService,
+  RDBType
+} from './common/configProvider';
 
 export interface NodeCAppStartOptions {
   apiModulesOptions?: { appModuleIndex: number; apiModuleName: string }[];
@@ -32,7 +38,7 @@ export class NodeCApp {
         const moduleOptionsPerName = generateOrmConfigModuleOptions || {};
         const { persistance } = config;
         for (const moduleName in persistance) {
-          const { type } = persistance[moduleName];
+          const { type } = persistance[moduleName] as AppConfigPersistanceRDB;
           if (!Object.values(RDBType).includes(type as RDBType)) {
             continue;
           }

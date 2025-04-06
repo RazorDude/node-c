@@ -8,7 +8,7 @@ import {
   PersistanceFindResults,
   PersistanceUpdateOptions,
   PersistanceUpdateResult
-} from '../../persistance/entityService';
+} from '../../persistance/common/entityService';
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
   runOnNoMainServiceResultOnly?: boolean;
