@@ -1,19 +1,18 @@
-// import { Inject, Injectable } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationError, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
-// import { RDBEntityService, RDBRepository, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
 import {
+  Constants,
   FindOneOptions,
   FindOptions,
   RDBEntityService,
+  RDBRepository,
   SQLQueryBuilderService,
   UpdateOptions
 } from '@node-c/persistance-rdb';
 
 import { omit } from 'ramda';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 
 import {
   UsersFindOnePrivateOptions,
@@ -28,11 +27,9 @@ import { User, UserEntity } from './users.entity';
 @Injectable()
 export class UsersService extends RDBEntityService<User> {
   constructor(
-    protected qb: SQLQueryBuilderService,
-    // @Inject('RDB_ENTITY_REPOSITORY')
-    // protected repository: RDBRepository<User>,
-    @InjectRepository(UserEntity)
-    protected repository: Repository<User>
+    qb: SQLQueryBuilderService,
+    @Inject(Constants.RDB_ENTITY_REPOSITORY)
+    repository: RDBRepository<User>
   ) {
     super(qb, repository, UserEntity);
   }

@@ -120,6 +120,7 @@ export interface AppConfigCommonPersistanceNoSQL {
 }
 
 export interface AppConfigCommonPersistanceRDB {
+  connectionName: string;
   type: RDBType;
 }
 

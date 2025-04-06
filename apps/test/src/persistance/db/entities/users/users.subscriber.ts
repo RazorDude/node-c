@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 
 import { ApplicationError, ConfigProviderService } from '@node-c/core';
 
+import { Constants } from '@node-c/persistance-rdb';
 import { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 
 import { User } from './users.entity';
@@ -15,7 +15,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     @Inject(ConfigProviderService)
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    @InjectDataSource()
+    @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
     protected readonly dataSource: DataSource,
     @Inject(UsersService)
     // eslint-disable-next-line no-unused-vars

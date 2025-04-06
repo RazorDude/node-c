@@ -42,6 +42,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     const entitiesDirData = await fs.readdir(entitiesDirPath);
     const entities: string[] = [];
     const migrationsPath = path.join(projectRootPath, modulePathInProject, migrationsPathInModule);
+    const moduleConfig = persistance[moduleName] as AppConfigPersistanceRDB;
     const subscribers: string[] = [];
     for (const i in entitiesDirData) {
       const entityName = entitiesDirData[i];
@@ -69,25 +70,24 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     // write the ORM Config file
     const ormconfigMigrations: string[] = [`${migrationsPath}/**/*.ts`];
     if (seedsPathInModule) {
-      const baseSeedsBath = path.join(projectRootPath, modulePathInProject, seedsPathInModule);
-      ormconfigMigrations.push(`${baseSeedsBath}/common/**/*.ts`);
-      // ormconfigMigrations.push(`${baseSeedsBath}/common/**/*.ts`);
+      const baseSeedsPath = path.join(projectRootPath, modulePathInProject, seedsPathInModule);
+      ormconfigMigrations.push(`${baseSeedsPath}/common/**/*.ts`);
     }
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}.json`),
       JSON.stringify(
         mergeDeepRight(persistance[moduleName], {
-          entities: [...entities],
-          subscribers: [...subscribers],
-          migrations: ormconfigMigrations,
           cli: {
             migrationsDir: migrationsPath
-          }
+          },
+          entities: [...entities],
+          migrations: ormconfigMigrations,
+          name: moduleConfig.connectionName,
+          subscribers: [...subscribers]
         })
       )
     );
     // write the Datasource file
-    const moduleConfig = persistance[moduleName] as AppConfigPersistanceRDB;
     const entitiesPathInProject = path.join(modulePathInProject, entitiesPathInModule);
     await fs.writeFile(
       path.join(projectRootPath, `datasource-${moduleName}.ts`),
@@ -105,6 +105,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         `  host: '${moduleConfig.host}',\n` +
         '  logging: false,\n' +
         `  migrations: [${ormconfigMigrations.map(item => `'${item.replace(projectRootPath.replace(/\/$/, ''), '.')}'`).join(', ')}],\n` +
+        `  name: '${moduleConfig.connectionName}',\n` +
         `  password: '${moduleConfig.password}',\n` +
         `  port: ${moduleConfig.port},\n` +
         '  subscribers: [],\n' +

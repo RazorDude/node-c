@@ -38,8 +38,8 @@ export const appConfigCommon: AppConfigCommon = {
       type: NoSQLType.Redis,
       useHashmap: true
     },
-    db: { type: RDBType.MySQL },
-    dbConfigs: { type: RDBType.MySQL }
+    db: { connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME, type: RDBType.MySQL },
+    dbConfigs: { connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME, type: RDBType.MySQL }
     // pgDB: { type: RDBType.PG }
   }
 };

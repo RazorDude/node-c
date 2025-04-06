@@ -1,9 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
-
-import { Repository } from 'typeorm';
+import { Constants, RDBEntityService, RDBRepository, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { UserType, UserTypeEntity } from './userTypes.entity';
 
@@ -11,9 +8,9 @@ import { UserType, UserTypeEntity } from './userTypes.entity';
 export class UserTypesService extends RDBEntityService<UserType> {
   constructor(
     qb: SQLQueryBuilderService,
-    @InjectRepository(UserTypeEntity)
-    entity: Repository<UserType>
+    @Inject(Constants.RDB_ENTITY_REPOSITORY)
+    repository: RDBRepository<UserType>
   ) {
-    super(qb, entity, UserTypeEntity);
+    super(qb, repository, UserTypeEntity);
   }
 }

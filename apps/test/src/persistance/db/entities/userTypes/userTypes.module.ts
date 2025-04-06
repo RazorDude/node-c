@@ -10,6 +10,7 @@ import { Constants } from '../../../../common/definitions';
 @Module({
   imports: [
     RDBRepositoryModule.register({
+      connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME,
       entityClass: UserTypeEntity,
       persistanceModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
     })

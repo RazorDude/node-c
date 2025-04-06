@@ -3,13 +3,16 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 
 import { DataSource, ObjectLiteral, Repository } from 'typeorm';
 
+import { Constants } from '../common/definitions';
+
 @Injectable()
 export class RDBRepository<Entity extends ObjectLiteral> extends Repository<Entity> {
   constructor(
-    @Inject('RDB_REPOSITORY_ENTITY_CLASS')
-    protected entityClass: EntityClassOrSchema,
+    @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
     // eslint-disable-next-line prettier/prettier
-    protected dataSource: DataSource
+    protected dataSource: DataSource,
+    @Inject(Constants.RDB_REPOSITORY_ENTITY_CLASS)
+    protected entityClass: EntityClassOrSchema
   ) {
     super(entityClass, dataSource.createEntityManager());
   }

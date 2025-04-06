@@ -19,6 +19,7 @@ export class RDBModule {
       imports: [
         ...(importsPreORM || []),
         TypeOrmModule.forRootAsync({
+          name: connectionName,
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
             // example : configProvider.config.persistance.db

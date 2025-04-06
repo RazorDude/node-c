@@ -1,9 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
-
-import { Repository } from 'typeorm';
+import { Constants, RDBEntityService, RDBRepository, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { GlobalConfigItem, GlobalConfigItemEntity } from './globalConfigItems.entity';
 
@@ -11,8 +8,8 @@ import { GlobalConfigItem, GlobalConfigItemEntity } from './globalConfigItems.en
 export class GlobalConfigItemsService extends RDBEntityService<GlobalConfigItem> {
   constructor(
     qb: SQLQueryBuilderService,
-    @InjectRepository(GlobalConfigItemEntity)
-    repository: Repository<GlobalConfigItem>
+    @Inject(Constants.RDB_ENTITY_REPOSITORY)
+    repository: RDBRepository<GlobalConfigItem>
   ) {
     super(qb, repository, GlobalConfigItemEntity);
   }
