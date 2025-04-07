@@ -5,10 +5,10 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 import { AppConfigPersistanceRDB, ConfigProviderService, loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/persistance-rdb';
 
-import { RDBModuleOptions } from './typeorm.module.definitions';
+import { TypeORMModuleOptions } from './typeorm.module.definitions';
 
-export class RDBModule {
-  static register(options: RDBModuleOptions): DynamicModule {
+export class TypeORMModule {
+  static register(options: TypeORMModuleOptions): DynamicModule {
     const { connectionName, folderData, imports: additionalImports, moduleClass, moduleName } = options;
     const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
     const { entities, modules } = loadDynamicModules(folderData);

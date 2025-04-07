@@ -34,6 +34,7 @@
     "@node-c/core": "^1.0.0-alpha6",
     "@node-c/domain-iam": "^1.0.0-alpha6",
     "@node-c/persistance-rdb": "^1.0.0-alpha6",
-    "@node-c/persistance-redis": "^1.0.0-alpha6"
+    "@node-c/persistance-redis": "^1.0.0-alpha6",
+    "@node-c/persistance-typeorm": "^1.0.0-alpha6"
   }
 }

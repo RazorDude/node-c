@@ -69,6 +69,15 @@
       "compilerOptions": {
         "tsConfigPath": "packages/persistance-redis/tsconfig.build.json"
       }
+    },
+    "@node-c/persistance-typeorm": {
+      "type": "library",
+      "root": "packages/persistance-typeorm",
+      "entryFile": "index",
+      "sourceRoot": "packages/persistance-typeorm/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/persistance-typeorm/tsconfig.build.json"
+      }
     }
   }
 }

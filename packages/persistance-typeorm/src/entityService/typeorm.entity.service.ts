@@ -1,4 +1,4 @@
-import { RDBEntityService, RDBRepository, SQLQueryBuilderService } from '@node-c/persistance-rdb';
+import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { EntitySchema, ObjectLiteral } from 'typeorm';
 

@@ -23,7 +23,7 @@ import {
 } from './rdb.entity.service.definitions';
 
 import { RDBEntityManager } from '../entityManager';
-import { RDBEntityTarget, RDBRepository } from '../repository';
+import { RDBRepository } from '../repository';
 import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
 // TODO: investigate whether it's worth it to make the create, bulkCreate and update methods more specific
@@ -123,7 +123,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       }) as Promise<number>;
     }
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.tableName;
+    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters!);
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
@@ -139,7 +139,8 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       }) as Promise<PersistanceDeleteResult>;
     }
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.tableName;
+    // TODO: check whether tableName is needed here instead of name
+    const tableName = this.repository.metadata.name;
     const deleteType = softDelete ? 'softDelete' : 'delete';
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
@@ -178,7 +179,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
     const findResults: PersistanceFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.tableName;
+    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     let where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
@@ -227,7 +228,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       }) as Promise<Entity | null>;
     }
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.tableName;
+    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters, {
       operator: selectOperator as PersistanceSelectOperator,
@@ -243,7 +244,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return await queryBuilder.getOne();
   }
 
-  getEntityTarget(): RDBEntityTarget<Entity> {
+  getEntityTarget(): unknown {
     return this.repository.target;
   }
 
@@ -324,7 +325,8 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       }) as Promise<PersistanceUpdateResult<Entity>>;
     }
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.tableName;
+    // TODO: check whether tableName is needed here instead of name
+    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName).update().set(data);
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
     let where: { [fieldName: string]: ParsedFilter } = {};

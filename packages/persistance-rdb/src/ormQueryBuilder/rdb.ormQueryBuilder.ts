@@ -20,12 +20,13 @@ export abstract class OrmSelectQueryBuilder<Entity> extends OrmBaseQueryBuilder<
   abstract getCount(): Promise<number>; // new
   abstract getMany(): Promise<Entity[]>; // new
   abstract getOne(): Promise<Entity | null>; // new
-  abstract leftJoinAndSelect(_relationProperty: string, _relationAlias: string): OrmSelectQueryBuilder<Entity>;
-  abstract leftJoinAndSelect(
-    _relationProperty: string,
-    _relationAlias: string,
-    _condition: string
-  ): OrmSelectQueryBuilder<Entity>;
+  // abstract leftJoinAndSelect(_relationProperty: string, _relationAlias: string): OrmSelectQueryBuilder<Entity>;
+  // abstract leftJoinAndSelect(
+  //   _relationProperty: string,
+  //   _relationAlias: string,
+  //   _condition: string
+  // ): OrmSelectQueryBuilder<Entity>;
+  abstract leftJoinAndSelect(..._args: unknown[]): OrmSelectQueryBuilder<Entity>;
   abstract orderBy(_field: string, _direction: PersistanceOrderByDirection): OrmSelectQueryBuilder<Entity>;
   abstract select(_selection: string[]): OrmSelectQueryBuilder<Entity>;
   abstract skip(_skipCount?: number): OrmSelectQueryBuilder<Entity>; // new
@@ -37,8 +38,9 @@ export abstract class OrmSelectQueryBuilder<Entity> extends OrmBaseQueryBuilder<
 
 export abstract class OrmUpdateQueryBuilder<Entity> extends OrmBaseQueryBuilder<Entity> {
   abstract execute(): Promise<OrmUpdateQueryBuilderUpdateResult>;
-  abstract returning(_selection: string): OrmUpdateQueryBuilder<Entity>;
-  abstract set(_data: Partial<Entity>): OrmUpdateQueryBuilder<Entity>;
+  abstract returning(_selection: string | string[]): OrmUpdateQueryBuilder<Entity>;
+  // abstract set(_data: Partial<Entity>): OrmUpdateQueryBuilder<Entity>;
+  abstract set(..._args: unknown[]): OrmUpdateQueryBuilder<Entity>;
 }
 
 export interface OrmUpdateQueryBuilderUpdateResult {

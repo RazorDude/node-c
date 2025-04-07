@@ -1,11 +1,12 @@
 import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 // import { ConfigProviderService } from '@node-c/core';
+import { SQLQueryBuilderModule } from '@node-c/persistance-rdb';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RDBModule } from './index';
-
-import { SQLQueryBuilderModule } from '../sqlQueryBuilder';
+import { TypeORMModule } from './index';
 
 // Dummy classes to use in tests.
 class AtEndModule {}
@@ -15,7 +16,7 @@ class LoadedModule {}
 class PostORMModule {}
 class PreORMModule {}
 
-describe('RDBModule.register', () => {
+describe('TypeORMModule.register', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -36,7 +37,7 @@ describe('RDBModule.register', () => {
       moduleClass: DummyModule,
       moduleName: 'testModule'
     };
-    const dynamicModule: DynamicModule = RDBModule.register(options);
+    const dynamicModule: DynamicModule = TypeORMModule.register(options);
     expect(dynamicModule.module).toBe(DummyModule);
     expect(dynamicModule.providers).toEqual([]);
     expect(dynamicModule.exports).toEqual(fakeLoadedModules);
@@ -91,7 +92,7 @@ describe('RDBModule.register', () => {
         atEnd: [AtEndModule]
       }
     };
-    const dynamicModule: DynamicModule = RDBModule.register(options);
+    const dynamicModule: DynamicModule = TypeORMModule.register(options);
     // Verify module and providers.
     expect(dynamicModule.module).toBe(DummyModule);
     expect(dynamicModule.providers).toEqual([dummyProvider]);

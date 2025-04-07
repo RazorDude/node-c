@@ -1,13 +1,13 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { RDBModule } from '@node-c/persistance-rdb';
+import { TypeORMModule } from '@node-c/persistance-typeorm';
 
 import * as FolderData from './entities';
 
 import { Constants } from '../../common/definitions';
 
 @Module({})
-export class PersistanceDBConfigsModule extends RDBModule {
+export class PersistanceDBConfigsModule extends TypeORMModule {
   static register(): DynamicModule {
     return super.register({
       connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME,

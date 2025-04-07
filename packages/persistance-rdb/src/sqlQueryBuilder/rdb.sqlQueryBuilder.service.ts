@@ -45,16 +45,17 @@ export class SQLQueryBuilderService {
     const { where, include, orderBy, select, withDeleted = false } = options;
     const cqs = this.columnQuotesSymbol;
     const deletedColumnName = options.deletedColumnName || 'deletedAt';
-    if (ormQueryBuilder instanceof OrmSelectQueryBuilder) {
+    if ('withDeleted' in ormQueryBuilder) {
+      const oqb = ormQueryBuilder as OrmSelectQueryBuilder<Entity>;
       if (withDeleted) {
-        ormQueryBuilder.withDeleted();
+        oqb.withDeleted();
       }
       if (include) {
         for (const relationProperty in include) {
           if (withDeleted) {
-            ormQueryBuilder.leftJoinAndSelect(relationProperty, include[relationProperty]);
+            oqb.leftJoinAndSelect(relationProperty, include[relationProperty]);
           } else {
-            ormQueryBuilder.leftJoinAndSelect(
+            oqb.leftJoinAndSelect(
               relationProperty,
               include[relationProperty],
               `${cqs}${include[relationProperty]}${cqs}.${cqs}${deletedColumnName}${cqs} IS NULL`
@@ -63,7 +64,7 @@ export class SQLQueryBuilderService {
         }
       }
       if (select && select.length) {
-        ormQueryBuilder.select(this.parseSelect(select, include));
+        oqb.select(this.parseSelect(select, include));
       }
     }
     if (where) {
@@ -85,7 +86,8 @@ export class SQLQueryBuilderService {
         );
       }
     }
-    if (orderBy && ormQueryBuilder instanceof OrmSelectQueryBuilder) {
+    if (orderBy && 'orderBy' in ormQueryBuilder) {
+      const oqb = ormQueryBuilder as OrmSelectQueryBuilder<Entity>;
       let isFirst = true;
       for (const item of orderBy) {
         let methodName: 'orderBy' | 'addOrderBy' = 'addOrderBy';
@@ -93,7 +95,7 @@ export class SQLQueryBuilderService {
           methodName = 'orderBy';
           isFirst = false;
         }
-        ormQueryBuilder[methodName](item.field, item.direction);
+        oqb[methodName](item.field, item.direction);
       }
     }
   }

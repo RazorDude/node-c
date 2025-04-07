@@ -11,7 +11,7 @@ export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
     name: string;
     tableName: string;
   };
-  target: RDBEntityTarget<Entity>;
+  target: unknown;
 
   abstract createQueryBuilder(_entityName: string, _queryRunner?: unknown): OrmSelectQueryBuilder<Entity>;
   abstract save(_data: Partial<Entity> | Partial<Entity[]>, _options?: unknown): Promise<unknown>;
