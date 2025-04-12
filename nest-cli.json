@@ -52,6 +52,15 @@
         "tsConfigPath": "packages/domain-iam/tsconfig.build.json"
       }
     },
+    "@node-c/persistance-clickhouse": {
+      "type": "library",
+      "root": "packages/persistance-clickhouse",
+      "entryFile": "index",
+      "sourceRoot": "packages/persistance-clickhouse/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/persistance-clickhouse/tsconfig.build.json"
+      }
+    },
     "@node-c/persistance-rdb": {
       "type": "library",
       "root": "packages/persistance-rdb",

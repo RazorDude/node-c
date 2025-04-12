@@ -6,7 +6,7 @@ import {
   PersistanceUpdateOptions
 } from '@node-c/core';
 
-import { RDBEntityManager } from '../entityManager';
+import { RDBEntityManager } from '../repository';
 
 export interface BaseOptions {
   forceTransaction?: boolean;

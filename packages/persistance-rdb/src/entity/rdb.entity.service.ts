@@ -22,12 +22,9 @@ import {
   UpdateOptions
 } from './rdb.entity.service.definitions';
 
-import { RDBEntityManager } from '../entityManager';
-import { RDBRepository } from '../repository';
+import { RDBEntityManager, RDBRepository } from '../repository';
 import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
-// TODO: investigate whether it's worth it to make the create, bulkCreate and update methods more specific
-// with generic data objects for the data passed to them
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method

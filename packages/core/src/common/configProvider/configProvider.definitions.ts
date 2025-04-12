@@ -90,7 +90,11 @@ export interface AppConfigCommon {
     projectVersion: string;
   };
   persistance: {
-    [moduleName: string]: GenericObject | AppConfigCommonPersistanceNoSQL | AppConfigCommonPersistanceRDB;
+    [moduleName: string]:
+      | GenericObject
+      | AppConfigCommonPersistanceClickHouse
+      | AppConfigCommonPersistanceNoSQL
+      | AppConfigCommonPersistanceRDB;
   };
 }
 
@@ -108,6 +112,10 @@ export interface AppConfigCommonDomainIAM {
   defaultUserIdentifierField: string;
   refreshTokenExpiryTimeInMinutes?: number;
   userPasswordHMACAlgorithm?: string;
+}
+
+export interface AppConfigCommonPersistanceClickHouse {
+  type: RDBType;
 }
 
 export interface AppConfigCommonPersistanceNoSQL {
@@ -243,7 +251,7 @@ export enum NoSQLType {
 // TODO: figure out how to move this to the RDB package
 export enum RDBType {
   // eslint-disable-next-line no-unused-vars
-  Clickhouse = 'clickhouse',
+  ClickHouse = 'clickhouse',
   // eslint-disable-next-line no-unused-vars
   MySQL = 'mysql',
   // eslint-disable-next-line no-unused-vars

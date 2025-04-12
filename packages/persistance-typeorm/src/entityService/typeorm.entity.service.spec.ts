@@ -19,7 +19,7 @@ import {
 import { EntityManager, EntitySchema, Repository } from 'typeorm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TypeORMEntityService } from './index';
+import { TypeORMDBEntityService } from './index';
 
 class PostgresError extends Error {
   code: string;
@@ -112,7 +112,7 @@ let queryBuilderMock: QueryBuilderMock;
 let repositoryMock: Repository<TestEntity>;
 let transactionManagerMock: EntityManager;
 
-describe('TypeORMEntityService', () => {
+describe('TypeORMDBEntityService', () => {
   describe('constructor', () => {
     let qbMock: SQLQueryBuilderService;
     beforeEach(() => {
@@ -127,7 +127,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      const service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      const service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       expect(service['primaryKeys']).toEqual(['id']);
     });
     it('should correctly set primaryKeys when multiple primary keys are defined', () => {
@@ -151,7 +151,7 @@ describe('TypeORMEntityService', () => {
         createQueryBuilder: vi.fn(),
         manager: { transaction: vi.fn() }
       } as unknown as Repository<CompositeEntity>;
-      const serviceMulti = new TypeORMEntityService<CompositeEntity>(qbMock, repositoryMulti, dummySchemaMulti);
+      const serviceMulti = new TypeORMDBEntityService<CompositeEntity>(qbMock, repositoryMulti, dummySchemaMulti);
       expect(serviceMulti['primaryKeys']).toEqual(['id', 'code']);
     });
     it('should set primaryKeys to an empty array when no primary key is defined', () => {
@@ -169,14 +169,14 @@ describe('TypeORMEntityService', () => {
         createQueryBuilder: vi.fn(),
         manager: { transaction: vi.fn() }
       } as unknown as Repository<TestEntity>;
-      const serviceNoPK = new TypeORMEntityService<TestEntity>(qbMock, repositoryNoPK, dummySchemaNoPK);
+      const serviceNoPK = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryNoPK, dummySchemaNoPK);
       expect(serviceNoPK['primaryKeys']).toEqual([]);
     });
   });
 
   describe('buildPrimaryKeyWhereClause', () => {
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       // Reset mocks before each test.
       qbMock = createQBMock();
@@ -195,7 +195,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       // Clear mock history.
       vi.clearAllMocks();
     });
@@ -231,7 +231,7 @@ describe('TypeORMEntityService', () => {
         createQueryBuilder: vi.fn(),
         manager: { transaction: vi.fn() }
       } as unknown as Repository<CompositeEntity>;
-      const compositeService = new TypeORMEntityService<CompositeEntity>(qbMock, compositeRepository, compositeSchema);
+      const compositeService = new TypeORMDBEntityService<CompositeEntity>(qbMock, compositeRepository, compositeSchema);
       const testData: CompositeEntity[] = [
         { id: 1, code: 'A', value: 100 },
         { id: 2, code: 'B', value: 200 }
@@ -253,7 +253,7 @@ describe('TypeORMEntityService', () => {
   describe('bulkCreate', () => {
     let dummyEntities: TestEntity[];
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       qbMock = createQBMock();
       queryBuilderMock = {
@@ -269,7 +269,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       dummyEntities = [
         { id: 1, name: 'Test1' },
         { id: 2, name: 'Test2' }
@@ -314,7 +314,7 @@ describe('TypeORMEntityService', () => {
   describe('create', () => {
     let dummyEntity: TestEntity;
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       qbMock = createQBMock();
       queryBuilderMock = {
@@ -327,7 +327,7 @@ describe('TypeORMEntityService', () => {
         name: 'TestEntity',
         columns: { id: { type: Number, primary: true }, name: { type: String } }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       dummyEntity = { id: 1, name: 'Test' };
     });
     it('should call save and return the entity when transactionManager is provided', async () => {
@@ -413,7 +413,7 @@ describe('TypeORMEntityService', () => {
   describe('count', () => {
     let qbMock: SQLQueryBuilderService;
     let queryBuilderCountMock: QueryBuilderMock;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       // Create a qbMock with our dummy implementations.
       qbMock = createQBMock();
@@ -433,7 +433,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
     });
     it('should return count when transactionManager is provided', async () => {
       const options: CountOptions = {
@@ -469,7 +469,7 @@ describe('TypeORMEntityService', () => {
     let qbMock: SQLQueryBuilderService;
     let deleteQueryBuilderMock: QueryBuilderMock;
     let dummySchema: EntitySchema<TestEntity>;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       qbMock = createQBMock();
       dummySchema = new EntitySchema<TestEntity>({
@@ -493,7 +493,7 @@ describe('TypeORMEntityService', () => {
       };
       repositoryMock = createRepositoryMock(deleteQueryBuilderMock);
       transactionManagerMock = (repositoryMock as unknown as TransactionManagerGetter).__getTransactionManager();
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
     });
     it('should use a transaction when forceTransaction is true and no transactionManager is provided', async () => {
       const options = { filters: dummyFilters, forceTransaction: true, softDelete: true };
@@ -581,7 +581,7 @@ describe('TypeORMEntityService', () => {
 
   describe('find', () => {
     let findQueryBuilderMock: QueryBuilderMock;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     let qbMock: SQLQueryBuilderService;
     beforeEach(() => {
       qbMock = createQBMock();
@@ -600,7 +600,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
     });
     it('should return paginated results with "more" flag true when items length equals perPage+1', async () => {
       // If perPage is 2, then perPage + 1 is 3.
@@ -763,7 +763,7 @@ describe('TypeORMEntityService', () => {
 
   describe('findOne', () => {
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       // Reset mocks before each test.
       qbMock = createQBMock();
@@ -778,7 +778,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       // Clear mock history.
       vi.clearAllMocks();
     });
@@ -880,7 +880,7 @@ describe('TypeORMEntityService', () => {
         manager: { transaction: vi.fn() }
       } as unknown as Repository<TestEntity>;
       // Instantiate the service with the dummy repository.
-      const service = new TypeORMEntityService<TestEntity>(qbMock, repositoryForTarget, dummySchema);
+      const service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryForTarget, dummySchema);
       // Verify that getEntityTarget returns the repository's target.
       expect(service.getEntityTarget()).toEqual(dummyTarget);
     });
@@ -889,7 +889,7 @@ describe('TypeORMEntityService', () => {
   describe('getRepository', () => {
     let qbMock: SQLQueryBuilderService;
     let repositoryForTest: Repository<TestEntity>;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       qbMock = createQBMock();
       // Create a dummy repository with a target.
@@ -907,7 +907,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryForTest, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryForTest, dummySchema);
     });
     it('should return the repository when no transactionManager is provided', () => {
       const result = service['getRepository']();
@@ -926,7 +926,7 @@ describe('TypeORMEntityService', () => {
 
   describe('processManyToMany', () => {
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     // Use a simple dummy schema; the entity type details are not important for this test.
     const dummySchema = new EntitySchema<TestEntity>({
       name: 'TestEntity',
@@ -944,7 +944,7 @@ describe('TypeORMEntityService', () => {
       repositoryMock = createRepositoryMock(queryBuilderMock);
       transactionManagerMock = (repositoryMock as unknown as TransactionManagerGetter).__getTransactionManager();
       // Instantiate the service.
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
     });
     it('should use a transaction when no transactionManager is provided', async () => {
       // Create a fake transaction manager with a spy on the query method.
@@ -1043,7 +1043,7 @@ describe('TypeORMEntityService', () => {
     let dummySchema: EntitySchema<TestEntity>;
     let qbMock: SQLQueryBuilderService;
     let repositoryForSave: Repository<TestEntity>;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     beforeEach(() => {
       qbMock = createQBMock();
       dummyData = { id: 1, name: 'Test' };
@@ -1063,7 +1063,7 @@ describe('TypeORMEntityService', () => {
           name: { type: String }
         }
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryForSave, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryForSave, dummySchema);
     });
     it('should call transactionManager.save when transactionManager is provided', async () => {
       // Create a dummy transaction manager with a save method.
@@ -1085,7 +1085,7 @@ describe('TypeORMEntityService', () => {
     let dummySchema: EntitySchema<TestEntity>;
     let dummyEntity: TestEntity;
     let qbMock: SQLQueryBuilderService;
-    let service: TypeORMEntityService<TestEntity>;
+    let service: TypeORMDBEntityService<TestEntity>;
     let updateQueryBuilderMock: QueryBuilderMock;
     beforeEach(() => {
       qbMock = createQBMock();
@@ -1108,7 +1108,7 @@ describe('TypeORMEntityService', () => {
         },
         name: 'TestEntity'
       });
-      service = new TypeORMEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
+      service = new TypeORMDBEntityService<TestEntity>(qbMock, repositoryMock, dummySchema);
       vi.clearAllMocks();
     });
     it('should use a transaction when forceTransaction is true and no transactionManager is provided', async () => {

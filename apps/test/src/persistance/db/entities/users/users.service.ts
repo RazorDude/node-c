@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationError, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
 import { Constants, FindOneOptions, FindOptions, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
-import { TypeORMEntityService, TypeORMRepository } from '@node-c/persistance-typeorm';
+import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/persistance-typeorm';
 
 import { omit } from 'ramda';
 import { EntityManager } from 'typeorm';
@@ -18,11 +18,11 @@ import { User, UserEntity } from './users.entity';
 
 // TODO: move all of the "omit password" logic to a new UsersPersistanceEntityService in the core module
 @Injectable()
-export class UsersService extends TypeORMEntityService<User> {
+export class UsersService extends TypeORMDBEntityService<User> {
   constructor(
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
-    repository: TypeORMRepository<User>
+    repository: TypeORMDBRepository<User>
   ) {
     super(qb, repository, UserEntity);
   }
@@ -47,7 +47,7 @@ export class UsersService extends TypeORMEntityService<User> {
   }
 
   async update(data: UsersUpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
-    const updateResult = await TypeORMEntityService.prototype.update.call(
+    const updateResult = await TypeORMDBEntityService.prototype.update.call(
       this,
       { ...omit(['password'] as unknown as (keyof UsersUpdateUserData)[], data) },
       options
@@ -79,7 +79,7 @@ export class UsersService extends TypeORMEntityService<User> {
     if (currentPassword === newPassword) {
       throw new ApplicationError('The new password must be different than the current password.');
     }
-    await TypeORMEntityService.prototype.update.call(
+    await TypeORMDBEntityService.prototype.update.call(
       this,
       { password: newPassword },
       { filters: { id: userId }, transactionManager }

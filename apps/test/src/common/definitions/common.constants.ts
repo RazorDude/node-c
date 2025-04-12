@@ -4,6 +4,10 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   API_SSO_MODULE_NAME = 'sso',
   // eslint-disable-next-line no-unused-vars
+  DOMAIN_IAM_MODULE_NAME = 'iam',
+  // eslint-disable-next-line no-unused-vars
+  PERSISTANCE_AUDIT_MODULE_NAME = 'audit',
+  // eslint-disable-next-line no-unused-vars
   PERSISTANCE_CACHE_AUTH_MODULE_NAME = 'cacheAuth',
   // eslint-disable-next-line no-unused-vars
   PERSISTANCE_CACHE_AUTH_STORE_KEY = 'store-cache-auth',
@@ -18,9 +22,7 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   PERSISTANCE_DB_MODULE_CONNECTION_NAME = 'db_connection',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_DB_MODULE_NAME = 'db',
-  // eslint-disable-next-line no-unused-vars
-  DOMAIN_IAM_MODULE_NAME = 'iam'
+  PERSISTANCE_DB_MODULE_NAME = 'db'
 }
 
 export const domainMap: {

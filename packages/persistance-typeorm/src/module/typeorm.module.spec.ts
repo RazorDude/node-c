@@ -6,7 +6,7 @@ import { SQLQueryBuilderModule } from '@node-c/persistance-rdb';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TypeORMModule } from './index';
+import { TypeORMDBModule } from './index';
 
 // Dummy classes to use in tests.
 class AtEndModule {}
@@ -16,7 +16,7 @@ class LoadedModule {}
 class PostORMModule {}
 class PreORMModule {}
 
-describe('TypeORMModule.register', () => {
+describe('TypeORMDBModule.register', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -37,7 +37,7 @@ describe('TypeORMModule.register', () => {
       moduleClass: DummyModule,
       moduleName: 'testModule'
     };
-    const dynamicModule: DynamicModule = TypeORMModule.register(options);
+    const dynamicModule: DynamicModule = TypeORMDBModule.register(options);
     expect(dynamicModule.module).toBe(DummyModule);
     expect(dynamicModule.providers).toEqual([]);
     expect(dynamicModule.exports).toEqual(fakeLoadedModules);
@@ -92,7 +92,7 @@ describe('TypeORMModule.register', () => {
         atEnd: [AtEndModule]
       }
     };
-    const dynamicModule: DynamicModule = TypeORMModule.register(options);
+    const dynamicModule: DynamicModule = TypeORMDBModule.register(options);
     // Verify module and providers.
     expect(dynamicModule.module).toBe(DummyModule);
     expect(dynamicModule.providers).toEqual([dummyProvider]);

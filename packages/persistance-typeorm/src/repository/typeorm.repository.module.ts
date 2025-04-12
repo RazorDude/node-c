@@ -4,15 +4,15 @@ import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm';
 import { Constants, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 import { DataSource, ObjectLiteral } from 'typeorm';
 
-import { TypeORMRepository } from './typeorm.repository';
-import { TypeORMRepositoryModuleOptions } from './typeorm.repository.definitions';
+import { TypeORMDBRepository } from './typeorm.repository';
+import { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions';
 
 @Module({})
-export class TypeORMRepositoryModule {
-  static register<Entity extends ObjectLiteral>(options: TypeORMRepositoryModuleOptions): DynamicModule {
+export class TypeORMDBRepositoryModule {
+  static register<Entity extends ObjectLiteral>(options: TypeORMDBRepositoryModuleOptions): DynamicModule {
     const { connectionName, entityClass, persistanceModuleName } = options;
     return {
-      module: TypeORMRepositoryModule,
+      module: TypeORMDBRepositoryModule,
       imports: [TypeOrmModule.forFeature([entityClass], connectionName)],
       providers: [
         {
@@ -33,10 +33,10 @@ export class TypeORMRepositoryModule {
           useFactory: (dataSource: DataSource) => dataSource,
           inject: [getDataSourceToken(connectionName)]
         },
-        TypeORMRepository<Entity>,
+        TypeORMDBRepository<Entity>,
         {
           provide: Constants.RDB_ENTITY_REPOSITORY,
-          useExisting: TypeORMRepository<Entity>
+          useExisting: TypeORMDBRepository<Entity>
         }
       ],
       exports: [
@@ -44,7 +44,7 @@ export class TypeORMRepositoryModule {
         SQLQueryBuilderService,
         {
           provide: Constants.RDB_ENTITY_REPOSITORY,
-          useExisting: TypeORMRepository<Entity>
+          useExisting: TypeORMDBRepository<Entity>
         },
         {
           provide: Constants.RDB_REPOSITORY_DATASOURCE,

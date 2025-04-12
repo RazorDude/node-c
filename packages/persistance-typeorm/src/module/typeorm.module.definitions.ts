@@ -2,7 +2,7 @@ import { ModuleMetadata } from '@nestjs/common';
 
 import { GenericObject } from '@node-c/core';
 
-export interface TypeORMModuleOptions {
+export interface TypeORMDBModuleOptions {
   connectionName: string;
   exports?: ModuleMetadata['exports'];
   folderData: GenericObject<unknown>;

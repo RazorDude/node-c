@@ -73,7 +73,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         '["CoursePlatformUsersEntityController"]',
         null,
-        '["bulkCreate", "count", "create", "delete", "find", "findOne", "update"]',
+        '["bulkCreate", "count", "create", "delete", "find", "findLoginLogs", "findOne", "update"]',
         null,
         '["coursePlatform"]',
         'AdminManageUsers',

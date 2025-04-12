@@ -1,54 +1,55 @@
+import { ClickHouseClient, ClickHouseModule } from '@depyronick/nestjs-clickhouse';
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { Constants, SQLQueryBuilderService } from '@node-c/persistance-rdb';
+import { GenericObject } from '@node-c/core';
+import { Constants as RDBConstants, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
-import { ObjectLiteral } from 'typeorm';
+import { ClickHouseDBRepository } from './clickhouse.repository';
+import { ClickHouseDBRepositoryModuleOptions } from './clickhouse.repository.definitions';
 
-import { ClickhouseRepository } from './clickhouse.repository';
-import { ClickhouseRepositoryModuleOptions } from './clickhouse.repository.definitions';
+import { Constants } from '../common/definitions';
+import { ClickHouseEntityManager } from '../entityManager';
 
 @Module({})
-export class ClickhouseRepositoryModule {
-  static register<Entity extends ObjectLiteral>(options: ClickhouseRepositoryModuleOptions): DynamicModule {
-    const { connectionName, entityClass, persistanceModuleName } = options;
+export class ClickHouseDBRepositoryModule {
+  static register<Entity extends GenericObject<unknown>>(options: ClickHouseDBRepositoryModuleOptions): DynamicModule {
+    const { entitySchema, persistanceModuleName } = options;
+    const clientName = `${Constants.CLICKHOUSE_CLIENT_PREFIX}${persistanceModuleName}`;
     return {
-      module: ClickhouseRepositoryModule,
-      imports: [],
+      module: ClickHouseDBRepositoryModule,
+      imports: [ClickHouseModule],
       providers: [
-        {
-          provide: Constants.RDB_REPOSITORY_CONNECTION_NAME,
-          useValue: connectionName
-        },
         {
           provide: SQLQueryBuilderService,
           useFactory: (sqlQueryBuilderService: SQLQueryBuilderService) => sqlQueryBuilderService,
-          inject: [`${persistanceModuleName}${Constants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`]
+          inject: [`${persistanceModuleName}${RDBConstants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`]
         },
         {
-          provide: Constants.RDB_REPOSITORY_ENTITY_CLASS,
-          useValue: entityClass
+          provide: Constants.CLICKHOUSE_CLIENT,
+          useFactory: (clickhouseClient: ClickHouseClient) => clickhouseClient,
+          inject: [clientName]
         },
         {
-          provide: Constants.RDB_REPOSITORY_DATASOURCE,
-          useValue: {}
-          // useFactory: (dataSource: DataSource) => dataSource,
-          // inject: [getDataSourceToken(connectionName)]
+          provide: RDBConstants.RDB_REPOSITORY_ENTITY_CLASS,
+          useValue: entitySchema
         },
-        ClickhouseRepository<Entity>,
+        ClickHouseEntityManager,
+        ClickHouseDBRepository<Entity>,
         {
-          provide: Constants.RDB_ENTITY_REPOSITORY,
-          useExisting: ClickhouseRepository<Entity>
+          provide: RDBConstants.RDB_ENTITY_REPOSITORY,
+          useExisting: ClickHouseDBRepository<Entity>
         }
       ],
       exports: [
         SQLQueryBuilderService,
         {
-          provide: Constants.RDB_ENTITY_REPOSITORY,
-          useExisting: ClickhouseRepository<Entity>
+          provide: RDBConstants.RDB_ENTITY_REPOSITORY,
+          useExisting: ClickHouseDBRepository<Entity>
         },
         {
-          provide: Constants.RDB_REPOSITORY_DATASOURCE,
-          useValue: {}
+          provide: Constants.CLICKHOUSE_CLIENT,
+          useFactory: (clickhouseClient: ClickHouseClient) => clickhouseClient,
+          inject: [clientName]
         }
       ]
     };

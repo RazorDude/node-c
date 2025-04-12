@@ -1,5 +1,6 @@
 import { INestApplication, NestModule, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
 import morgan from 'morgan';
 
 import {
@@ -39,7 +40,7 @@ export class NodeCApp {
         const { persistance } = config;
         for (const moduleName in persistance) {
           const { type } = persistance[moduleName] as AppConfigPersistanceRDB;
-          if (!Object.values(RDBType).includes(type as RDBType)) {
+          if (type === RDBType.ClickHouse || !Object.values(RDBType).includes(type as RDBType)) {
             continue;
           }
           await ConfigProviderService.generateOrmconfig(config, {
@@ -64,7 +65,7 @@ export class NodeCApp {
       const app = await NestFactory.create(appModules[i], { bodyParser: false });
       const apiModuleName = apiModulesOptionsMap.get(i);
       if (!apiModuleName) {
-        apps.push(app);
+        apps.push(app as INestApplication);
         continue;
       }
       if (!config) {
@@ -87,7 +88,7 @@ export class NodeCApp {
           console.info(`[API.${apiModuleName}] Server listening at ${hostname}:${port}.`);
         }
       }
-      apps.push(app);
+      apps.push(app as INestApplication);
     }
     return apps;
   }

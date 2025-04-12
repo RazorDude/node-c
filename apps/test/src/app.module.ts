@@ -7,6 +7,7 @@ import { SSOAPIModule } from './api/sso';
 import * as AppConfigs from './config';
 import { DomainCoursePlatformModule } from './domain/coursePlatform';
 import { DomainIAMModule } from './domain/iam';
+import { PersistanceAuditModule } from './persistance/audit';
 import { PersistanceCacheModule } from './persistance/cache';
 import { PersistanceCacheAuthModule } from './persistance/cacheAuth';
 import { PersistanceDBModule } from './persistance/db';
@@ -26,16 +27,17 @@ export class AppModuleBase {
       },
       DOMAIN: {
         children: {
-          IAM: 'iam' // add another key _MODULE_TYPE - IAM
+          IAM: 'iam' // add another key to the .env file _MODULE_TYPE - IAM
         },
         name: 'domain'
       },
       PERSISTANCE: {
         children: {
-          CACHE: 'cache', // add another key _MODULE_TYPE - NOSQL
-          CACHE_AUTH: 'cacheAuth', // add another key _MODULE_TYPE - NOSQL
-          DB: 'db', // add another key _MODULE_TYPE - RDB
-          DB_CONFIGS: 'dbConfigs' // add another key _MODULE_TYPE - RDB
+          AUDIT: 'audit', // add another key to the .env file _MODULE_TYPE - RDB
+          CACHE: 'cache', // add another key to the .env file _MODULE_TYPE - NOSQL
+          CACHE_AUTH: 'cacheAuth', // add another key to the .env file _MODULE_TYPE - NOSQL
+          DB: 'db', // add another key to the .env file _MODULE_TYPE - RDB
+          DB_CONFIGS: 'dbConfigs' // add another key to the .env file _MODULE_TYPE - RDB
         },
         name: 'persistance'
       }
@@ -43,6 +45,7 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
+    PersistanceAuditModule.register(),
     PersistanceCacheAuthModule.register(),
     PersistanceCacheModule.register(),
     PersistanceDBConfigsModule.register(),

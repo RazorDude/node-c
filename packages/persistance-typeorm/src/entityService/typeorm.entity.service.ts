@@ -2,16 +2,16 @@ import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rd
 
 import { EntitySchema, ObjectLiteral } from 'typeorm';
 
-import { TypeORMRepository } from '../repository';
+import { TypeORMDBRepository } from '../repository';
 
-export class TypeORMEntityService<Entity extends ObjectLiteral> extends RDBEntityService<Entity> {
+export class TypeORMDBEntityService<Entity extends ObjectLiteral> extends RDBEntityService<Entity> {
   protected primaryKeys: string[];
 
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected qb: SQLQueryBuilderService,
     // eslint-disable-next-line no-unused-vars
-    protected repository: TypeORMRepository<Entity>,
+    protected repository: TypeORMDBRepository<Entity>,
     protected schema: EntitySchema
   ) {
     super(qb, repository, schema);

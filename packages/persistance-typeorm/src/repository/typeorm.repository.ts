@@ -6,7 +6,7 @@ import { Constants } from '@node-c/persistance-rdb';
 import { DataSource, ObjectLiteral, Repository } from 'typeorm';
 
 @Injectable()
-export class TypeORMRepository<Entity extends ObjectLiteral> extends Repository<Entity> {
+export class TypeORMDBRepository<Entity extends ObjectLiteral> extends Repository<Entity> {
   constructor(
     @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
     protected dataSource: DataSource,

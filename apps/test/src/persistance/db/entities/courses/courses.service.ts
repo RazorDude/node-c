@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Constants, SQLQueryBuilderService } from '@node-c/persistance-rdb';
-import { TypeORMEntityService, TypeORMRepository } from '@node-c/persistance-typeorm';
+import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/persistance-typeorm';
 
 import { Course, CourseEntity } from './courses.entity';
 
 @Injectable()
-export class CoursesService extends TypeORMEntityService<Course> {
+export class CoursesService extends TypeORMDBEntityService<Course> {
   constructor(
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
-    repository: TypeORMRepository<Course>
+    repository: TypeORMDBRepository<Course>
   ) {
     super(qb, repository, CourseEntity);
   }

@@ -29,7 +29,7 @@ export class SQLQueryBuilderService {
   ) {
     const { type } = getNested(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;
-    if (type === RDBType.Clickhouse || type === RDBType.MySQL) {
+    if (type === RDBType.ClickHouse || type === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';
       this.iLikeSupported = false;
     } else if (type === RDBType.PG) {
@@ -114,8 +114,8 @@ export class SQLQueryBuilderService {
     let parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
-      // TODO: fix JSON_CONTAINS here for Clickhouse
-      if (dbType === RDBType.Clickhouse || dbType === RDBType.MySQL) {
+      // TODO: fix JSON_CONTAINS here for ClickHouse
+      if (dbType === RDBType.ClickHouse || dbType === RDBType.MySQL) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
