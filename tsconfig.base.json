@@ -25,6 +25,7 @@
       "@node-c/api-rest": ["packages/api-rest/dist/index"],
       "@node-c/core": ["packages/core/dist/index"],
       "@node-c/domain-iam": ["packages/domain-iam/dist/index"],
+      "@node-c/domain-iam-okta": ["packages/domain-iam-okta/dist/index"],
       "@node-c/persistance-clickhouse": ["packages/persistance-clickhouse/dist/index"],
       "@node-c/persistance-rdb": ["packages/persistance-rdb/dist/index"],
       "@node-c/persistance-redis": ["packages/persistance-redis/dist/index"],

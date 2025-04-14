@@ -1,13 +1,13 @@
 .DS_Store
-*.tsbuildinfo
 *.env
+*.tsbuildinfo
 .turbo
 .vscode
 assets
+coverage
+datasource*.ts
 dist
 docs
-ormconfig*
-datasource*.ts
 node_modules
+ormconfig*
 tmp
-coverage

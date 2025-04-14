@@ -52,6 +52,15 @@
         "tsConfigPath": "packages/domain-iam/tsconfig.build.json"
       }
     },
+    "@node-c/domain-iam-okta": {
+      "type": "library",
+      "root": "packages/domain-iam-okta",
+      "entryFile": "index",
+      "sourceRoot": "packages/domain-iam-okta/src",
+      "compilerOptions": {
+        "tsConfigPath": "packages/domain-iam-okta/tsconfig.build.json"
+      }
+    },
     "@node-c/persistance-clickhouse": {
       "type": "library",
       "root": "packages/persistance-clickhouse",
