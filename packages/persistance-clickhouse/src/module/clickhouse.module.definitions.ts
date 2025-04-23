@@ -3,6 +3,7 @@ import { ModuleMetadata } from '@nestjs/common';
 import { GenericObject } from '@node-c/core';
 
 export interface ClickHouseDBModuleOptions {
+  entityModuleRegisterOptions?: unknown;
   exports?: ModuleMetadata['exports'];
   folderData: GenericObject<unknown>;
   imports?: {
@@ -13,4 +14,5 @@ export interface ClickHouseDBModuleOptions {
   moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
+  registerOptionsPerEntityModule?: GenericObject;
 }

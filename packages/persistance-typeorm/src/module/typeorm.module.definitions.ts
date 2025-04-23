@@ -4,6 +4,7 @@ import { GenericObject } from '@node-c/core';
 
 export interface TypeORMDBModuleOptions {
   connectionName: string;
+  entityModuleRegisterOptions?: unknown;
   exports?: ModuleMetadata['exports'];
   folderData: GenericObject<unknown>;
   imports?: {
@@ -14,4 +15,5 @@ export interface TypeORMDBModuleOptions {
   moduleClass: unknown;
   moduleName: string;
   providers?: ModuleMetadata['providers'];
+  registerOptionsPerEntityModule?: GenericObject;
 }

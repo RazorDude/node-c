@@ -11,7 +11,10 @@ export class ClickHouseDBModule {
   static register(options: ClickHouseDBModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass, moduleName } = options;
     const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
-    const { modules } = loadDynamicModules(folderData);
+    const { modules } = loadDynamicModules(folderData, {
+      moduleRegisterOptions: options.entityModuleRegisterOptions,
+      registerOptionsPerModule: options.registerOptionsPerEntityModule
+    });
     return {
       global: true,
       module: moduleClass as DynamicModule['module'],

@@ -11,7 +11,10 @@ export class TypeORMDBModule {
   static register(options: TypeORMDBModuleOptions): DynamicModule {
     const { connectionName, folderData, imports: additionalImports, moduleClass, moduleName } = options;
     const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
-    const { entities, modules } = loadDynamicModules(folderData);
+    const { entities, modules } = loadDynamicModules(folderData, {
+      moduleRegisterOptions: options.entityModuleRegisterOptions,
+      registerOptionsPerModule: options.registerOptionsPerEntityModule
+    });
     return {
       global: true,
       module: moduleClass as DynamicModule['module'],

@@ -1,6 +1,6 @@
 {
   "name": "node-c-minimal-example",
-  "version": "1.0.0-alpha7",
+  "version": "1.0.0-alpha8",
   "license": "MIT",
   "scripts": {
     "start:debug": "NODE_ENV=local nest start --path=tsconfig.build.json --debug --watch",
@@ -20,9 +20,9 @@
     "@types/express": "^5.0.0"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha7",
-    "@node-c/api-rest": "^1.0.0-alpha7",
-    "@node-c/core": "^1.0.0-alpha7",
-    "@node-c/persistance-redis": "^1.0.0-alpha7"
+    "@node-c/api-http": "^1.0.0-alpha8",
+    "@node-c/api-rest": "^1.0.0-alpha8",
+    "@node-c/core": "^1.0.0-alpha8",
+    "@node-c/persistance-redis": "^1.0.0-alpha8"
   }
 }
