@@ -7,8 +7,10 @@ export type ProviderWithInjectionToken = Provider & {
 };
 
 export const loadDynamicModules = (
-  folderData: GenericObject<unknown>
+  folderData: GenericObject<unknown>,
+  options?: { moduleRegisterOptions?: unknown; registerOptionsPerModule?: GenericObject }
 ): { controllers?: Provider[]; entities?: unknown[]; modules?: DynamicModule[]; services?: Provider[] } => {
+  const { moduleRegisterOptions, registerOptionsPerModule } = options || {};
   const controllers: Provider[] = [];
   const entities: unknown[] = [];
   const modules: DynamicModule[] = [];
@@ -35,7 +37,14 @@ export const loadDynamicModules = (
       continue;
     }
     if (key.match(/[mM]odule$/)) {
-      modules.push(folderData[actualKey] as unknown as DynamicModule);
+      const moduleClass = folderData[actualKey] as DynamicModule & {
+        register?: (..._args: unknown[]) => DynamicModule;
+      };
+      modules.push(
+        moduleClass.register
+          ? moduleClass.register(registerOptionsPerModule?.[key] || moduleRegisterOptions)
+          : moduleClass
+      );
       continue;
     }
     if (key.match(/[sS]ervice$/)) {
