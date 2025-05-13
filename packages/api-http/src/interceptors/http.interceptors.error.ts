@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
 import { ApplicationError } from '@node-c/core';
 
@@ -9,11 +9,11 @@ import { ServerError } from '../common/definitions/common.errors';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       catchError(error => {
         console.error(error);
-        let message = 'An error has occurred.';
+        let message: string | string[] = 'An error has occurred.';
         let status = 500;
         if (error instanceof ApplicationError || error instanceof ServerError) {
           if (error.message) {
@@ -43,7 +43,16 @@ export class HTTPErrorInterceptor implements NestInterceptor {
             message = error.message;
           }
         }
-        throw new HttpException({ message, statusCode: status }, status);
+        // TODO: fix this, as we're still getting error 500 when throwing the exception
+        context
+          .switchToHttp()
+          .getResponse()
+          .status(status)
+          .json({ error: message instanceof Array ? message.join('\n') : message });
+        return [];
+        // return throwError(
+        //   () => new HttpException({ error: message instanceof Array ? message.join('\n') : message }, status)
+        // );
       })
     );
   }

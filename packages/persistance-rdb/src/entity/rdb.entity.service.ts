@@ -128,36 +128,39 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return await queryBuilder.getCount();
   }
 
-  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult> {
-    const { filters, forceTransaction, transactionManager, softDelete = true } = options;
+  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
+    const { filters, forceTransaction, returnOriginalItems, transactionManager, softDelete = true } = options;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
         return this.delete({ ...options, transactionManager: tm });
-      }) as Promise<PersistanceDeleteResult>;
+      }) as Promise<PersistanceDeleteResult<Entity>>;
     }
     const entityName = this.repository.metadata.name;
     // TODO: check whether tableName is needed here instead of name
     const tableName = this.repository.metadata.name;
+    const dataToReturn: PersistanceUpdateResult<Entity> = {};
     const deleteType = softDelete ? 'softDelete' : 'delete';
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
     let where: { [fieldName: string]: ParsedFilter } = {};
-    if (Object.keys(include).length) {
+    if (Object.keys(include).length || returnOriginalItems) {
       const findData = await this.find({ filters, transactionManager });
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       where[field] = value;
+      dataToReturn.originalItems = findData.items;
     } else {
       where = parsedWhere;
     }
     this.qb.buildQuery<Entity>(queryBuilder, { where });
     const result = await queryBuilder.execute();
-    return { count: typeof result.affected === 'number' ? result.affected : undefined };
+    return { ...dataToReturn, count: typeof result.affected === 'number' ? result.affected : undefined };
   }
 
   async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
     const {
       filters,
       forceTransaction,
+      getTotalCount = true,
       page: optPage,
       perPage: optPerPage,
       findAll: optFindAll,
@@ -201,9 +204,14 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const items: Entity[] = await queryBuilder.getMany();
     if (findAll) {
       findResults.perPage = items.length;
-    } else if (items.length === perPage + 1) {
-      items.pop();
-      findResults.more = true;
+    } else {
+      if (items.length === perPage + 1) {
+        items.pop();
+        findResults.more = true;
+      }
+      if (getTotalCount) {
+        findResults.totalCount = await this.count(options);
+      }
     }
     findResults.items = items;
     return findResults;
@@ -315,7 +323,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   }
 
   async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
-    const { filters, forceTransaction, returnData, transactionManager } = options;
+    const { filters, forceTransaction, returnData, returnOriginalItems, transactionManager } = options;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
         return this.update(data, { ...options, transactionManager: tm });
@@ -326,21 +334,30 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName).update().set(data);
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
+    let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};
-    if (Object.keys(include).length) {
+    if (Object.keys(include).length || returnOriginalItems) {
       const findData = await this.find({ filters, transactionManager });
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
+      originalItems = findData.items;
       where[field] = value;
     } else {
       where = parsedWhere;
     }
     this.qb.buildQuery<Entity>(queryBuilder, { where });
+    const dataToReturn: PersistanceUpdateResult<Entity> = {};
+    if (returnOriginalItems) {
+      dataToReturn.originalItems = originalItems;
+    }
     if (returnData) {
       const result = await queryBuilder.returning('*').execute();
       // TODO: consider using generatedMaps, instead of raw
-      return { items: result.raw as Entity[] };
+      dataToReturn.count = (result.raw as Entity[]).length;
+      dataToReturn.items = result.raw as Entity[];
+    } else {
+      const result = await queryBuilder.execute();
+      dataToReturn.count = typeof result.affected === 'number' ? result.affected : undefined;
     }
-    const result = await queryBuilder.execute();
-    return { count: typeof result.affected === 'number' ? result.affected : undefined };
+    return dataToReturn;
   }
 }

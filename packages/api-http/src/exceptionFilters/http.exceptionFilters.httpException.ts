@@ -8,11 +8,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
-    // else if (error instanceof BadRequestException) {
-    //   const { statusCode, message: errorText } = error.getResponse() as unknown
-    //   status = statusCode
-    //   message = errorText || message
-    // }
     response.status(status).json({
       statusCode: status,
       message: exception.message

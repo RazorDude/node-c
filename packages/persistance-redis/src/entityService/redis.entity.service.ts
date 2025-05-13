@@ -63,9 +63,9 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return (await repository.find({ filters, findAll })).length;
   }
 
-  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult> {
+  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
     const { repository, store } = this;
-    const { filters, forceTransaction, transactionId } = options;
+    const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
       const result = await this.delete({ ...options, transactionId: tId });
@@ -74,11 +74,15 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     }
     const { items: itemsToDelete } = await this.find({ filters, findAll: true, requirePrimaryKeys: true });
     const results: string[] = await repository.save(itemsToDelete, { delete: true, transactionId });
-    return { count: results.length };
+    const dataToReturn: PersistanceDeleteResult<Entity> = { count: results.length };
+    if (returnOriginalItems) {
+      dataToReturn.originalItems = itemsToDelete;
+    }
+    return dataToReturn;
   }
 
   async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
-    const { filters, page: optPage, perPage: optPerPage, findAll: optFindAll } = options;
+    const { filters, getTotalCount = true, page: optPage, perPage: optPerPage, findAll: optFindAll } = options;
     const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
     const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10; // same as above - must be a number
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
@@ -90,9 +94,14 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     const items: Entity[] = await this.repository.find({ filters, findAll, page, perPage });
     if (findAll) {
       findResults.perPage = items.length;
-    } else if (items.length === perPage + 1) {
-      items.pop();
-      findResults.more = true;
+    } else {
+      if (items.length === perPage + 1) {
+        items.pop();
+        findResults.more = true;
+      }
+      if (getTotalCount) {
+        findResults.totalCount = await this.count(options);
+      }
     }
     findResults.items = items;
     return findResults;
@@ -106,18 +115,33 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
     const { repository, store } = this;
-    const { filters, forceTransaction, transactionId } = options;
+    const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
       const result = await this.update(data, { ...options, transactionId: tId });
       await store.endTransaction(tId);
       return result;
     }
+    const dataToReturn: PersistanceUpdateResult<Entity> = {};
     const itemToUpdate = await this.findOne({ filters, requirePrimaryKeys: true });
     if (!itemToUpdate) {
-      return { count: 0, items: [] };
+      dataToReturn.count = 0;
+      if (returnData) {
+        dataToReturn.items = [];
+      }
+      if (returnOriginalItems) {
+        dataToReturn.originalItems = [];
+      }
+      return dataToReturn;
     }
     const updateResult = await repository.save(merge(itemToUpdate, data) as unknown as Entity, { transactionId });
-    return { count: updateResult.length, items: updateResult };
+    dataToReturn.count = updateResult.length;
+    if (returnData) {
+      dataToReturn.items = updateResult;
+    }
+    if (returnOriginalItems) {
+      dataToReturn.originalItems = [itemToUpdate];
+    }
+    return dataToReturn;
   }
 }

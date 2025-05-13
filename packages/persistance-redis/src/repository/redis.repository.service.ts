@@ -68,6 +68,7 @@ export class RedisRepositoryService<Entity> {
     const { name: entityName } = schema;
     const { exactSearch, filters, findAll, page, perPage, withValues: optWithValues } = options;
     const paginationOptions: { count?: number; cursor?: number } = {};
+    const primaryKeyFiltersToForceCheck: string[] = [];
     const withValues = typeof optWithValues === 'undefined' || optWithValues === true ? true : false;
     let count: number = 0;
     let hasNonPrimaryKeyFilters = false;
@@ -87,6 +88,34 @@ export class RedisRepositoryService<Entity> {
               primaryKeyFiltersCount++;
               return value;
             }
+            if (value instanceof Array) {
+              const finalValues: (string | number)[] = [];
+              value.forEach(valueItem => {
+                // unfortunately, a glob OR pattern doesn't exist
+                // if (typeof valueItem === 'string') {
+                //   finalValues.push(`[${valueItem.replace('*', '').replace(storeDelimiter, '')}]`);
+                //   return;
+                // }
+                // if (typeof valueItem === 'number') {
+                //   finalValues.push(`[${valueItem}]`);
+                //   return;
+                // }
+                if (
+                  (typeof valueItem === 'string' && !valueItem.length) ||
+                  (typeof valueItem !== 'string' && typeof valueItem !== 'number')
+                ) {
+                  return;
+                }
+                finalValues.push(valueItem);
+              });
+              if (finalValues.length) {
+                // primaryKeyFiltersCount++;
+                // return finalValues.join('');
+                hasNonPrimaryKeyFilters = true;
+                primaryKeyFiltersToForceCheck.push(field);
+                return '*';
+              }
+            }
             if (exactSearch) {
               throw new ApplicationError(
                 `[RedisRepositoryService ${entityName}][Find Error]: ` +
@@ -96,7 +125,9 @@ export class RedisRepositoryService<Entity> {
             return '*';
           })
           .join(storeDelimiter);
-      hasNonPrimaryKeyFilters = primaryKeyFiltersCount === Object.keys(filters).length;
+      if (!hasNonPrimaryKeyFilters) {
+        hasNonPrimaryKeyFilters = primaryKeyFiltersCount === Object.keys(filters).length;
+      }
       if (!findAll) {
         count = perPage || 100;
         paginationOptions.count = count;
@@ -121,10 +152,19 @@ export class RedisRepositoryService<Entity> {
       return initialResults.filter(item => {
         let filterResult = true;
         for (const key in filters) {
-          if (primaryKeys.includes(key)) {
+          if (primaryKeys.includes(key) && !primaryKeyFiltersToForceCheck.includes(key)) {
             continue;
           }
-          if ((item as Record<string, unknown>)[key] !== filters[key]) {
+          const filterValue = filters[key];
+          const itemValue = (item as Record<string, unknown>)[key];
+          if (filterValue instanceof Array) {
+            if (!filterValue.includes(itemValue)) {
+              filterResult = false;
+              break;
+            }
+            continue;
+          }
+          if (filterValue !== itemValue) {
             filterResult = false;
             break;
           }
@@ -137,7 +177,7 @@ export class RedisRepositoryService<Entity> {
       const { cursor: newCursor, values: innerResults } = await store.scan(`${entityName}${storeEntityKey}`, {
         ...paginationOptions,
         parseToJSON: true,
-        scanAll: findAll,
+        scanAll: false,
         withValues
       });
       results = results.concat(

@@ -64,6 +64,7 @@ export interface DefaultDtos<Entity> {
   Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
 }
 
+// TODO: a middleware for converting string booleans to booleans
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extends DefaultDomainEntityService<Entity>> {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
@@ -99,9 +100,9 @@ export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extend
     return await this.domainEntityService.create(data, options);
   }
 
-  public delete(_body: DomainDeleteOptions, ..._args: unknown[]): Promise<DomainDeleteResult | void>;
+  public delete(_body: DomainDeleteOptions, ..._args: unknown[]): Promise<DomainDeleteResult<Entity> | void>;
   @Delete()
-  async delete(@Body() body: DomainDeleteOptions): Promise<DomainDeleteResult> {
+  async delete(@Body() body: DomainDeleteOptions): Promise<DomainDeleteResult<Entity>> {
     this.checkRoute('delete');
     return await this.domainEntityService.delete(body);
   }
@@ -210,7 +211,7 @@ export class RESTAPIEntityControler<
   }
 
   @Delete()
-  async delete(@Body() body: Dto['Delete'], ...args: unknown[]): Promise<DomainDeleteResult | void> {
+  async delete(@Body() body: Dto['Delete'], ...args: unknown[]): Promise<DomainDeleteResult<Entity> | void> {
     return await super.delete.apply(this, [
       await this.validationPipe.transform(body, {
         metatype: this.dto.delete as unknown as Type,

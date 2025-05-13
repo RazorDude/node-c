@@ -8,7 +8,7 @@ import {
   PersistanceUpdateResult
 } from './persistance.entity.service.definitions';
 
-import { ApplicationError } from '../../../common/definitions';
+import { ApplicationError } from '../../common/definitions';
 
 /*
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
@@ -30,8 +30,12 @@ export class PersistanceEntityService<Entity> {
     throw new ApplicationError(`Method count not implemented for class ${typeof this}.`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public delete(_options: PersistanceDeleteOptions, _privateOptions?: unknown): Promise<PersistanceDeleteResult> {
+  public delete(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: PersistanceDeleteOptions,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _privateOptions?: unknown
+  ): Promise<PersistanceDeleteResult<Entity>> {
     throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
   }
 

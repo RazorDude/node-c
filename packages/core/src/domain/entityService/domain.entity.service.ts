@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { omit } from 'ramda';
 
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
@@ -22,7 +23,7 @@ import {
 
 import { ApplicationError, GenericObject } from '../../common/definitions';
 
-import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/common/entityService';
+import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/entityService';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<
@@ -64,6 +65,7 @@ export class DomainEntityService<
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: result.length > 0,
+        mainServiceResult: result,
         methodArgs: [result, privateOptions],
         methodName: 'bulkCreate',
         optionsArgIndex: 1,
@@ -96,6 +98,7 @@ export class DomainEntityService<
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: typeof result !== 'undefined' && result !== null,
+        mainServiceResult: result,
         methodArgs: [result, privateOptions],
         methodName: 'create',
         optionsArgIndex: 1,
@@ -105,8 +108,8 @@ export class DomainEntityService<
   }
 
   // eslint-disable-next-line no-unused-vars
-  public delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult>;
-  async delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult> {
+  public delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult<Entity>>;
+  async delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Delete)) {
       throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
     }
@@ -121,6 +124,7 @@ export class DomainEntityService<
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: !!result.count,
+        mainServiceResult: result,
         methodArgs: [otherOptions, privateOptions],
         methodName: 'delete',
         optionsArgIndex: 0,
@@ -148,6 +152,7 @@ export class DomainEntityService<
       otherServiceNames || [],
       {
         hasMainServiceResult,
+        mainServiceResult: result,
         methodArgs: [otherOptions, privateOptions],
         methodName: 'find',
         optionsArgIndex: 0,
@@ -190,6 +195,7 @@ export class DomainEntityService<
     const hasMainServiceResult = typeof result !== 'undefined' && result !== null;
     const resultsByService = await this.runMethodInAdditionalServices<Entity | null>(otherServiceNames || [], {
       hasMainServiceResult,
+      mainServiceResult: result,
       methodArgs: [otherOptions, privateOptions],
       methodName: 'findOne',
       optionsArgIndex: 0,
@@ -235,6 +241,7 @@ export class DomainEntityService<
     }
     const {
       hasMainServiceResult,
+      mainServiceResult,
       methodArgs = [],
       methodName,
       optionsArgIndex,
@@ -263,8 +270,12 @@ export class DomainEntityService<
         );
       }
       const serviceMethodOptionsOverrides = optionsOverridesByService[serviceName] || {};
-      const { runOnNoMainServiceResultOnly = true, ...actualMethodOptionsOverrides } = serviceMethodOptionsOverrides;
-      if (runOnNoMainServiceResultOnly && hasMainServiceResult) {
+      const {
+        filterByMainResultFields,
+        runOnNoMainServiceResultOnly = true,
+        ...actualMethodOptionsOverrides
+      } = serviceMethodOptionsOverrides;
+      if ((runOnNoMainServiceResultOnly === true || runOnNoMainServiceResultOnly === 'true') && hasMainServiceResult) {
         continue;
       }
       const serviceMethodArgs = Immutable.fromJS(methodArgs).toJS();
@@ -279,6 +290,41 @@ export class DomainEntityService<
           ...(serviceMethodArgs[optionsArgIndex!] as object),
           ...actualMethodOptionsOverrides
         };
+      }
+      if (filterByMainResultFields && Object.keys(filterByMainResultFields).length && hasMainServiceResult) {
+        const filters: GenericObject = {};
+        const resultItems: GenericObject[] = (mainServiceResult as { items?: GenericObject[] }).items || [
+          mainServiceResult as GenericObject
+        ];
+        resultItems.forEach(resultItem => {
+          if (!resultItem) {
+            return;
+          }
+          for (const sourceFieldName in filterByMainResultFields) {
+            const fieldValue = resultItem[sourceFieldName];
+            const targetFieldName = filterByMainResultFields[sourceFieldName];
+            if (typeof fieldValue === 'undefined') {
+              return;
+            }
+            if (!filters[targetFieldName]) {
+              filters[targetFieldName] = [];
+            }
+            (filters[targetFieldName] as unknown[]).push(fieldValue);
+          }
+        });
+        if (Object.keys(filters).length) {
+          const serviceMethodOptions = serviceMethodArgs[optionsArgIndex!] as GenericObject & {
+            filters?: GenericObject;
+          };
+          serviceMethodArgs[optionsArgIndex!] = {
+            ...serviceMethodOptions,
+            filters: {
+              ...omit(['page', 'perPage'], serviceMethodOptions.filters || {}),
+              ...filters
+            },
+            findAll: true
+          };
+        }
       }
       returnDataByService[serviceName] = (await (
         service[methodName as keyof PersistanceEntityService<Entity>] as unknown as (
@@ -316,6 +362,7 @@ export class DomainEntityService<
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         hasMainServiceResult: !!result.count,
+        mainServiceResult: result,
         methodArgs: [data, otherOptions, privateOptions],
         methodName: 'update',
         optionsArgIndex: 1,

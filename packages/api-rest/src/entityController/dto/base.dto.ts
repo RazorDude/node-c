@@ -1,6 +1,6 @@
-import { DomainPersistanceServicesKey, GenericObject } from '@node-c/core';
+import { DomainBaseAdditionalServiceOptionsOverrides, DomainPersistanceServicesKey, GenericObject } from '@node-c/core';
 
-import { IsObject, IsOptional } from 'class-validator';
+import { IsArray, IsObject, IsOptional } from 'class-validator';
 
 /*
  * We need the Options type here, so we can easily extend overriden classes' BaseDto
@@ -8,9 +8,9 @@ import { IsObject, IsOptional } from 'class-validator';
 export class BaseDto<Options> {
   @IsOptional()
   @IsObject()
-  optionsOverridesByService?: GenericObject<Partial<Options>>;
+  optionsOverridesByService?: GenericObject<Partial<Options>> & DomainBaseAdditionalServiceOptionsOverrides;
 
+  @IsArray()
   @IsOptional()
-  @IsObject()
   persistanceServices?: DomainPersistanceServicesKey[];
 }

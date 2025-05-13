@@ -1,4 +1,4 @@
-import { GenericObject } from '../../../common/definitions';
+import { GenericObject } from '../../common/definitions';
 
 export interface PersistanceCountOptions {
   filters?: GenericObject;
@@ -8,11 +8,13 @@ export interface PersistanceCountOptions {
 
 export interface PersistanceDeleteOptions {
   filters: GenericObject;
+  returnOriginalItems?: boolean;
   softDelete?: boolean;
 }
 
-export interface PersistanceDeleteResult {
+export interface PersistanceDeleteResult<Item> {
   count?: number;
+  originalItems?: Item[];
 }
 
 export interface PersistanceFindOneOptions {
@@ -27,6 +29,7 @@ export interface PersistanceFindOneOptions {
 export interface PersistanceFindOptions {
   filters?: GenericObject;
   findAll?: boolean;
+  getTotalCount?: boolean;
   include?: string[];
   orderBy?: GenericObject<PersistanceOrderByDirection>;
   page?: number;
@@ -40,6 +43,7 @@ export interface PersistanceFindResults<Item> {
   more: boolean;
   page: number;
   perPage: number;
+  totalCount?: number;
 }
 
 export interface PersistanceNumberItem {
@@ -87,9 +91,11 @@ export enum PersistanceSelectOperator {
 export interface PersistanceUpdateOptions {
   filters: GenericObject;
   returnData?: boolean;
+  returnOriginalItems?: boolean;
 }
 
 export interface PersistanceUpdateResult<Item> {
   count?: number;
   items?: Item[];
+  originalItems?: Item[];
 }

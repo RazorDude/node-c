@@ -8,10 +8,11 @@ import {
   PersistanceFindResults,
   PersistanceUpdateOptions,
   PersistanceUpdateResult
-} from '../../persistance/common/entityService';
+} from '../../persistance/entityService';
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
-  runOnNoMainServiceResultOnly?: boolean;
+  filterByMainResultFields?: GenericObject<string>;
+  runOnNoMainServiceResultOnly?: boolean | string;
 }
 
 export type DomainBaseOptions<Options> = Options & DomainBaseOptionsForAdditionalServices<Options>;
@@ -56,7 +57,7 @@ export type DomainCreateResult<Entity> = DomainBaseResult<Entity>;
 
 export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<PersistanceDeleteOptions>;
 
-export type DomainDeleteResult = DomainBaseResult<PersistanceDeleteResult>;
+export type DomainDeleteResult<Entity> = DomainBaseResult<PersistanceDeleteResult<Entity>>;
 
 export interface DomainEntityServiceDefaultData<Entity> {
   BulkCreate: DomainBulkCreateData<Entity>;
@@ -111,6 +112,7 @@ export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | 
 
 export type DomainRunMethodInAdditionalServicesOptions<Options> = {
   hasMainServiceResult: boolean;
+  mainServiceResult?: unknown;
   methodArgs?: unknown[];
   methodName: string;
   optionsArgIndex?: number;

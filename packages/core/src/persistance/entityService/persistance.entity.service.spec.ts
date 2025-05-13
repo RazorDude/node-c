@@ -8,7 +8,7 @@ import {
   PersistanceUpdateOptions
 } from './persistance.entity.service.definitions';
 
-import { ApplicationError } from '../../../common/definitions';
+import { ApplicationError } from '../../common/definitions';
 
 // Define a dummy entity interface for testing.
 interface DummyEntity {

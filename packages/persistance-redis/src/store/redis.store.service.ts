@@ -103,7 +103,7 @@ export class RedisStoreService {
     const value = useHashmap
       ? await client.hGet(storeKey, handle)
       : await client.get(`${storeKey}${storeDelimiter}${handle}`);
-    return parseToJSON && typeof value === 'string' ? JSON.parse(value) : value;
+    return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
   }
 
   // TODO: support scan from transaction data
@@ -144,9 +144,9 @@ export class RedisStoreService {
           });
           cursor = newCursor;
           if (getValues) {
-            for (const i in keys) {
-              const key = keys[i];
-              const value = await client.get(`${storeKey}${storeDelimiter}${key}`);
+            for (const i in newKeys) {
+              const key = newKeys[i];
+              const value = await client.get(key);
               if (value === null) {
                 continue;
               }
