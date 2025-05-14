@@ -50,7 +50,10 @@ export class PersistanceEntityService<Entity> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public getEntityName(): Promise<string> {
+  public getEntityName(noError?: boolean): string | null {
+    if (noError) {
+      return null;
+    }
     throw new ApplicationError(`Method getEntityName not implemented for class ${typeof this}.`);
   }
 

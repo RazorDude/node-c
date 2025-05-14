@@ -162,7 +162,7 @@ export class DomainEntityService<
     if (saveAdditionalResultsInMain && resultsByService) {
       const { saveOptions, serviceName, useResultsAsMain } = saveAdditionalResultsInMain;
       const dataFromAdditionalService = resultsByService[serviceName];
-      if (dataFromAdditionalService.items.length) {
+      if (dataFromAdditionalService && dataFromAdditionalService.items.length) {
         await this.persistanceEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
         if (useResultsAsMain && !hasMainServiceResult) {
           result = dataFromAdditionalService;
@@ -226,7 +226,7 @@ export class DomainEntityService<
     const service = this.additionalPersistanceEntityServices?.[serviceName];
     if (!service) {
       throw new ApplicationError(
-        `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName()}.`
+        `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
       );
     }
     return service as PersistanceEntityService<Entity>;
@@ -250,7 +250,7 @@ export class DomainEntityService<
     const returnDataByService: GenericObject<ServiceReturnData> = {};
     if (!this.additionalPersistanceEntityServices) {
       throw new ApplicationError(
-        `No additional PersistanceEntityServices exist for DomainEntityService ${this.persistanceEntityService.getEntityName()}.`
+        `No additional PersistanceEntityServices exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
       );
     }
     if (
@@ -258,7 +258,7 @@ export class DomainEntityService<
       (typeof optionsArgIndex === 'undefined' || optionsArgIndex < 0 || optionsArgIndex > methodArgs.length - 1)
     ) {
       throw new ApplicationError(
-        `Invalid optionsArgIndex value ${optionsArgIndex} provided for DomainEntityService ${this.persistanceEntityService.getEntityName()}.}.`
+        `Invalid optionsArgIndex value ${optionsArgIndex} provided for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.}.`
       );
     }
     for (const i in serviceNames) {
@@ -266,7 +266,7 @@ export class DomainEntityService<
       const service = this.additionalPersistanceEntityServices[serviceName];
       if (!service) {
         throw new ApplicationError(
-          `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName()}.`
+          `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
         );
       }
       const serviceMethodOptionsOverrides = optionsOverridesByService[serviceName] || {};
