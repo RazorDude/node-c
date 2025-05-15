@@ -291,7 +291,10 @@ export class DomainEntityService<
           ...actualMethodOptionsOverrides
         };
       }
-      if (filterByMainResultFields && Object.keys(filterByMainResultFields).length && hasMainServiceResult) {
+      if (filterByMainResultFields && Object.keys(filterByMainResultFields).length) {
+        if (!hasMainServiceResult) {
+          continue;
+        }
         const filters: GenericObject = {};
         const resultItems: GenericObject[] = (mainServiceResult as { items?: GenericObject[] }).items || [
           mainServiceResult as GenericObject
