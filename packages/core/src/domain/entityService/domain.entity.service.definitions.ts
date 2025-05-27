@@ -11,8 +11,8 @@ import {
 } from '../../persistance/entityService';
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
-  filterByMainResultFields?: GenericObject<string>;
-  runOnNoMainServiceResultOnly?: boolean | string;
+  filterByFirstServiceResultFields?: GenericObject<string>;
+  runOnNoFirstServiceResultOnly?: boolean | string;
 }
 
 export type DomainBaseOptions<Options> = Options & DomainBaseOptionsForAdditionalServices<Options>;
@@ -31,10 +31,10 @@ export type DomainBaseOptionsForAdditionalServicesFull<
 export interface DomainBaseOptionsWithSearchPersistance<
   SaveAdditionalResultsOptions extends object | undefined = undefined
 > {
-  saveAdditionalResultsInMain?: {
+  saveAdditionalResultsInFirstService?: {
     saveOptions?: SaveAdditionalResultsOptions;
     serviceName: string;
-    useResultsAsMain?: boolean;
+    useResultsForFirstService?: boolean;
   };
 }
 
@@ -111,8 +111,8 @@ export enum DomainPersistanceEntityServiceType {
 export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | string;
 
 export type DomainRunMethodInAdditionalServicesOptions<Options> = {
-  hasMainServiceResult: boolean;
-  mainServiceResult?: unknown;
+  firstServiceResult?: unknown;
+  hasFirstServiceResult: boolean;
   methodArgs?: unknown[];
   methodName: string;
   optionsArgIndex?: number;

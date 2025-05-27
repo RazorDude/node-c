@@ -58,7 +58,7 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
         ...options,
         include,
         persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
-        saveAdditionalResultsInMain: { serviceName: 'db', useResultsAsMain: true }
+        saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
       },
       { withPassword: true }
     );

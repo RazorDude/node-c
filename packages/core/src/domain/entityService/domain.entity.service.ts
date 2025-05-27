@@ -64,8 +64,8 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        hasMainServiceResult: result.length > 0,
-        mainServiceResult: result,
+        firstServiceResult: result,
+        hasFirstServiceResult: result.length > 0,
         methodArgs: [result, privateOptions],
         methodName: 'bulkCreate',
         optionsArgIndex: 1,
@@ -97,8 +97,8 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        hasMainServiceResult: typeof result !== 'undefined' && result !== null,
-        mainServiceResult: result,
+        firstServiceResult: result,
+        hasFirstServiceResult: typeof result !== 'undefined' && result !== null,
         methodArgs: [result, privateOptions],
         methodName: 'create',
         optionsArgIndex: 1,
@@ -123,8 +123,8 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        hasMainServiceResult: !!result.count,
-        mainServiceResult: result,
+        firstServiceResult: result,
+        hasFirstServiceResult: !!result.count,
         methodArgs: [otherOptions, privateOptions],
         methodName: 'delete',
         optionsArgIndex: 0,
@@ -142,29 +142,29 @@ export class DomainEntityService<
     const {
       optionsOverridesByService,
       persistanceServices = [DomainPersistanceEntityServiceType.Main],
-      saveAdditionalResultsInMain,
+      saveAdditionalResultsInFirstService,
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     let result = await this.getPersistanceService(firstServiceName).find(otherOptions, privateOptions);
-    const hasMainServiceResult = result.items.length > 0;
+    const hasFirstServiceResult = result.items.length > 0;
     const resultsByService = await this.runMethodInAdditionalServices<PersistanceFindResults<Entity>>(
       otherServiceNames || [],
       {
-        hasMainServiceResult,
-        mainServiceResult: result,
+        firstServiceResult: result,
+        hasFirstServiceResult,
         methodArgs: [otherOptions, privateOptions],
         methodName: 'find',
         optionsArgIndex: 0,
         optionsOverridesByService
       }
     );
-    if (saveAdditionalResultsInMain && resultsByService) {
-      const { saveOptions, serviceName, useResultsAsMain } = saveAdditionalResultsInMain;
+    if (saveAdditionalResultsInFirstService && resultsByService) {
+      const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
-      if (dataFromAdditionalService && dataFromAdditionalService.items.length) {
+      if (dataFromAdditionalService?.items?.length) {
         await this.persistanceEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
-        if (useResultsAsMain && !hasMainServiceResult) {
+        if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
       }
@@ -184,7 +184,7 @@ export class DomainEntityService<
     const {
       optionsOverridesByService,
       persistanceServices = [DomainPersistanceEntityServiceType.Main],
-      saveAdditionalResultsInMain,
+      saveAdditionalResultsInFirstService,
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
@@ -192,21 +192,21 @@ export class DomainEntityService<
       otherOptions,
       privateOptions
     );
-    const hasMainServiceResult = typeof result !== 'undefined' && result !== null;
+    const hasFirstServiceResult = typeof result !== 'undefined' && result !== null;
     const resultsByService = await this.runMethodInAdditionalServices<Entity | null>(otherServiceNames || [], {
-      hasMainServiceResult,
-      mainServiceResult: result,
+      firstServiceResult: result,
+      hasFirstServiceResult,
       methodArgs: [otherOptions, privateOptions],
       methodName: 'findOne',
       optionsArgIndex: 0,
       optionsOverridesByService
     });
-    if (saveAdditionalResultsInMain && resultsByService) {
-      const { saveOptions, serviceName, useResultsAsMain } = saveAdditionalResultsInMain;
+    if (saveAdditionalResultsInFirstService && resultsByService) {
+      const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService) {
         await this.persistanceEntityService.create(dataFromAdditionalService, saveOptions);
-        if (useResultsAsMain && !hasMainServiceResult) {
+        if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
       }
@@ -240,8 +240,8 @@ export class DomainEntityService<
       return undefined;
     }
     const {
-      hasMainServiceResult,
-      mainServiceResult,
+      firstServiceResult,
+      hasFirstServiceResult,
       methodArgs = [],
       methodName,
       optionsArgIndex,
@@ -263,7 +263,7 @@ export class DomainEntityService<
     }
     for (const i in serviceNames) {
       const serviceName = serviceNames[i];
-      const service = this.additionalPersistanceEntityServices[serviceName];
+      const service = this.getPersistanceService(serviceName);
       if (!service) {
         throw new ApplicationError(
           `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
@@ -271,11 +271,14 @@ export class DomainEntityService<
       }
       const serviceMethodOptionsOverrides = optionsOverridesByService[serviceName] || {};
       const {
-        filterByMainResultFields,
-        runOnNoMainServiceResultOnly = true,
+        filterByFirstServiceResultFields,
+        runOnNoFirstServiceResultOnly = true,
         ...actualMethodOptionsOverrides
       } = serviceMethodOptionsOverrides;
-      if ((runOnNoMainServiceResultOnly === true || runOnNoMainServiceResultOnly === 'true') && hasMainServiceResult) {
+      if (
+        (runOnNoFirstServiceResultOnly === true || runOnNoFirstServiceResultOnly === 'true') &&
+        hasFirstServiceResult
+      ) {
         continue;
       }
       const serviceMethodArgs = Immutable.fromJS(methodArgs).toJS();
@@ -291,21 +294,21 @@ export class DomainEntityService<
           ...actualMethodOptionsOverrides
         };
       }
-      if (filterByMainResultFields && Object.keys(filterByMainResultFields).length) {
-        if (!hasMainServiceResult) {
+      if (filterByFirstServiceResultFields && Object.keys(filterByFirstServiceResultFields).length) {
+        if (!hasFirstServiceResult) {
           continue;
         }
         const filters: GenericObject = {};
-        const resultItems: GenericObject[] = (mainServiceResult as { items?: GenericObject[] }).items || [
-          mainServiceResult as GenericObject
+        const resultItems: GenericObject[] = (firstServiceResult as { items?: GenericObject[] }).items || [
+          firstServiceResult as GenericObject
         ];
         resultItems.forEach(resultItem => {
           if (!resultItem) {
             return;
           }
-          for (const sourceFieldName in filterByMainResultFields) {
+          for (const sourceFieldName in filterByFirstServiceResultFields) {
             const fieldValue = resultItem[sourceFieldName];
-            const targetFieldName = filterByMainResultFields[sourceFieldName];
+            const targetFieldName = filterByFirstServiceResultFields[sourceFieldName];
             if (typeof fieldValue === 'undefined') {
               return;
             }
@@ -364,8 +367,8 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        hasMainServiceResult: !!result.count,
-        mainServiceResult: result,
+        firstServiceResult: result,
+        hasFirstServiceResult: !!result.count,
         methodArgs: [data, otherOptions, privateOptions],
         methodName: 'update',
         optionsArgIndex: 1,

@@ -43,16 +43,12 @@ export class HTTPErrorInterceptor implements NestInterceptor {
             message = error.message;
           }
         }
-        // TODO: fix this, as we're still getting error 500 when throwing the exception
         context
           .switchToHttp()
           .getResponse()
           .status(status)
           .json({ error: message instanceof Array ? message.join('\n') : message });
-        return [];
-        // return throwError(
-        //   () => new HttpException({ error: message instanceof Array ? message.join('\n') : message }, status)
-        // );
+        return new Observable();
       })
     );
   }
