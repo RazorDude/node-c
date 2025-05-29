@@ -317,17 +317,20 @@ export class RedisRepositoryService<Entity> {
       };
       const deleteKeys: string[] = [];
       for (const i in actualData) {
-        deleteKeys.push((await this.prepare(actualData[i], prepareOptions)).storeEntityKey);
+        deleteKeys.push(
+          `${entityName}${storeDelimiter}${(await this.prepare(actualData[i], prepareOptions)).storeEntityKey}`
+        );
       }
       if (deleteKeys.length) {
         await store.delete(deleteKeys, { transactionId });
       }
       return deleteKeys as ResultItem[];
     }
+    // TODO: fix the validation, as it causes errors when the object is not a class-validator-decorated class
     const prepareOptions: PrepareOptions = {
       generatePrimaryKeys: true,
-      onConflict,
-      validate: true
+      onConflict
+      // validate: true
     };
     const results: Entity[] = [];
     for (const i in actualData) {

@@ -71,6 +71,7 @@ export class RedisStoreService {
   async delete(handle: string | string[], options?: StoreDeleteOptions): Promise<number> {
     const { client, storeDelimiter, storeKey, transactions, useHashmap } = this;
     const { transactionId } = options || ({} as StoreDeleteOptions);
+    const handles = handle instanceof Array ? handle : [handle];
     if (transactionId) {
       const transaction = transactions[transactionId];
       if (!transaction) {
@@ -78,11 +79,13 @@ export class RedisStoreService {
       }
       transactions[transactionId] = useHashmap
         ? transaction.hDel(storeKey, handle)
-        : transaction.del(`${storeKey}${storeDelimiter}${handle}`);
+        : transaction.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
       // TODO: return the actual amount
       return 0;
     }
-    return useHashmap ? await client.hDel(storeKey, handle) : await client.del(`${storeKey}${storeDelimiter}${handle}`);
+    return useHashmap
+      ? await client.hDel(storeKey, handle)
+      : await client.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
   }
 
   async endTransaction(transactionId: string): Promise<void> {
