@@ -1,6 +1,6 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-alpha14",
+  "version": "1.0.0-alpha15",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
-    "@ramster/general-tools": "^2.3.0",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
     "mysql": "^2.18.1",
@@ -29,12 +28,12 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha14",
-    "@node-c/api-rest": "^1.0.0-alpha14",
-    "@node-c/core": "^1.0.0-alpha14",
-    "@node-c/domain-iam": "^1.0.0-alpha14",
-    "@node-c/persistance-clickhouse": "^1.0.0-alpha14",
-    "@node-c/persistance-redis": "^1.0.0-alpha14",
-    "@node-c/persistance-typeorm": "^1.0.0-alpha14"
+    "@node-c/api-http": "^1.0.0-alpha15",
+    "@node-c/api-rest": "^1.0.0-alpha15",
+    "@node-c/core": "^1.0.0-alpha15",
+    "@node-c/domain-iam": "^1.0.0-alpha15",
+    "@node-c/persistance-clickhouse": "^1.0.0-alpha15",
+    "@node-c/persistance-redis": "^1.0.0-alpha15",
+    "@node-c/persistance-typeorm": "^1.0.0-alpha15"
   }
 }

@@ -3,11 +3,10 @@ import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@
 import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
 import { DecodedTokenContent, IAMTokenManagerService, IAMUsersService, UserTokenEnityFields } from '@node-c/domain-iam';
 
-import { checkRoutes } from '@ramster/general-tools';
-
 import { NextFunction, Response } from 'express';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
+import { checkRoutes } from '../common/utils';
 
 @Injectable()
 export class HTTPAuthenticationMiddleware<User extends object> implements NestMiddleware {

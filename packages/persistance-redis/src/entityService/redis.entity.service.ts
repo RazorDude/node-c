@@ -26,13 +26,16 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     // eslint-disable-next-line no-unused-vars
     protected repository: RedisRepositoryService<Entity>,
     // eslint-disable-next-line no-unused-vars
-    protected store: RedisStoreService
+    protected store: RedisStoreService,
+    // eslint-disable-next-line no-unused-vars
+    protected settings?: { validationSupported?: boolean }
   ) {
     super();
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
-    const { repository, store } = this;
+    const { repository, settings, store } = this;
+    const { validationSupported = true } = settings || {};
     const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -41,11 +44,12 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       await store.endTransaction(tId);
       return result;
     }
-    return (await repository.save(data, { transactionId })) as Entity[];
+    return (await repository.save(data, { transactionId, validate: validationSupported })) as Entity[];
   }
 
   async create(data: Entity, options?: CreateOptions): Promise<Entity> {
-    const { repository, store } = this;
+    const { repository, settings, store } = this;
+    const { validationSupported = true } = settings || {};
     const actualOptions = Object.assign(options || {}) as CreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -54,7 +58,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       await store.endTransaction(tId);
       return result;
     }
-    return (await repository.save(data, { transactionId }))[0];
+    return (await repository.save(data, { transactionId, validate: validationSupported }))[0];
   }
 
   async count(options: FindOptions): Promise<number | undefined> {
@@ -64,7 +68,8 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
   }
 
   async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
-    const { repository, store } = this;
+    const { repository, settings, store } = this;
+    const { validationSupported = true } = settings || {};
     const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
@@ -73,7 +78,11 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       return result;
     }
     const { items: itemsToDelete } = await this.find({ filters, findAll: true, requirePrimaryKeys: true });
-    const results: string[] = await repository.save(itemsToDelete, { delete: true, transactionId });
+    const results: string[] = await repository.save(itemsToDelete, {
+      delete: true,
+      transactionId,
+      validate: validationSupported
+    });
     const dataToReturn: PersistanceDeleteResult<Entity> = { count: results.length };
     if (returnOriginalItems) {
       dataToReturn.originalItems = itemsToDelete;
@@ -114,7 +123,8 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
   }
 
   async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
-    const { repository, store } = this;
+    const { repository, settings, store } = this;
+    const { validationSupported = true } = settings || {};
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
@@ -134,7 +144,10 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       }
       return dataToReturn;
     }
-    const updateResult = await repository.save(merge(itemToUpdate, data) as unknown as Entity, { transactionId });
+    const updateResult = await repository.save(merge(itemToUpdate, data) as unknown as Entity, {
+      transactionId,
+      validate: validationSupported
+    });
     dataToReturn.count = updateResult.length;
     if (returnData) {
       dataToReturn.items = updateResult;

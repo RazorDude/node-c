@@ -8,7 +8,7 @@ import {
   RDBType
 } from '@node-c/core';
 
-import { getNested } from '@ramster/general-tools';
+import ld from 'lodash';
 
 import { BuildQueryOptions, IncludeItems, ParsedFilter } from './rdb.sqlQueryBuilder.definitions';
 
@@ -27,7 +27,7 @@ export class SQLQueryBuilderService {
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
     public dbConfigPath: string
   ) {
-    const { type } = getNested(configProvider, dbConfigPath) as { type: RDBType };
+    const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;
     if (type === RDBType.ClickHouse || type === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';

@@ -2,8 +2,8 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { Inject, Injectable } from '@nestjs/common';
-import { setNested } from '@ramster/general-tools';
 import dotenv from 'dotenv';
+import ld from 'lodash';
 import { mergeDeepRight } from 'ramda';
 
 import {
@@ -182,7 +182,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           for (const fieldName in moduleFieldsForType) {
             const configKey = `${categoryConfigKey}.${moduleConfigKey}.${moduleFieldsForType[fieldName]}`;
             const envKey = `${moduleCategory}_${moduleName}_${fieldName}`;
-            setNested(config, configKey, envVars[envKey]);
+            ld.set(config, configKey, envVars[envKey]);
           }
         });
       }

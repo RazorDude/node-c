@@ -9,8 +9,8 @@ import {
   PersistanceEntityService
 } from '@node-c/core';
 
-import { getNested } from '@ramster/general-tools';
 import * as jwt from 'jsonwebtoken';
+import ld from 'lodash';
 
 import {
   DecodedTokenContent,
@@ -81,7 +81,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     // TODO: multi-persistance isn't handled well here (or, actually, at all)
     if (persist && persistanceEntityService) {
       if (purgeOldFromPersistance && identifierDataField) {
-        const identifierValue = getNested(data, identifierDataField);
+        const identifierValue = ld.get(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
           await persistanceEntityService.delete({
             filters: { [identifierDataField]: identifierValue }
@@ -128,7 +128,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           if (!refreshTokenContent) {
             errorToThrow = new ApplicationError('Empty refresh token.');
           } else {
-            const refreshTokenCheckValue = getNested(content.data, refreshTokenAccessTokenIdentifierDataField);
+            const refreshTokenCheckValue = ld.get(content.data, refreshTokenAccessTokenIdentifierDataField);
             if (refreshTokenCheckValue !== refreshToken) {
               errorToThrow = new ApplicationError('Mismatched refresh token.');
             } else {
@@ -138,7 +138,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           }
         } else {
           if (deleteFromStoreIfExpired) {
-            const identifierValue = getNested(content.data, identifierDataField);
+            const identifierValue = ld.get(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
               await persistanceEntityService.delete({
                 filters: { [identifierDataField]: identifierValue }

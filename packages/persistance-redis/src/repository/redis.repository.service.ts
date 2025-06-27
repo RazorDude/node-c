@@ -206,6 +206,7 @@ export class RedisRepositoryService<Entity> {
     return results;
   }
 
+  // TODO: fix the validation, as it causes errors when the object is not a class-validator-decorated class
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
     const { columns, name: entityName } = schema;
@@ -326,11 +327,10 @@ export class RedisRepositoryService<Entity> {
       }
       return deleteKeys as ResultItem[];
     }
-    // TODO: fix the validation, as it causes errors when the object is not a class-validator-decorated class
     const prepareOptions: PrepareOptions = {
       generatePrimaryKeys: true,
-      onConflict
-      // validate: true
+      onConflict,
+      validate: true
     };
     const results: Entity[] = [];
     for (const i in actualData) {

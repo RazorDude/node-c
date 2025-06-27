@@ -11,7 +11,7 @@ import {
 import { ConfigProviderService, EndpointSecurityMode } from '@node-c/core';
 import { AuthorizationPoint, IAMAuthorizationService, UserWithPermissionsData } from '@node-c/domain-iam';
 
-import { setNested } from '@ramster/general-tools';
+import ld from 'lodash';
 import { Observable } from 'rxjs';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
@@ -75,7 +75,7 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     for (const key in inputDataToBeMutated) {
-      setNested(req, key, inputDataToBeMutated[key]);
+      ld.set(req, key, inputDataToBeMutated[key]);
     }
     return next.handle();
   }
