@@ -29,6 +29,7 @@ import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryB
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
 export class RDBEntityService<Entity extends GenericObject<unknown>> extends PersistanceEntityService<Entity> {
+  protected deletedColumnName?: string;
   protected primaryKeys: string[];
 
   constructor(
@@ -40,12 +41,18 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   ) {
     super();
     const { columns } = schema.options;
+    let deletedColumnName: string | undefined;
     const primaryKeys: string[] = [];
     for (const columnName in columns) {
-      if (columns[columnName]?.primary) {
+      const { deleteDate, primary } = columns[columnName] || {};
+      if (primary) {
         primaryKeys.push(columnName);
       }
+      if (!deletedColumnName && deleteDate) {
+        deletedColumnName = columnName;
+      }
     }
+    this.deletedColumnName = deletedColumnName;
     this.primaryKeys = primaryKeys;
   }
 
@@ -124,7 +131,12 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters!);
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
-    this.qb.buildQuery<Entity>(queryBuilder, { where, include, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, {
+      deletedColumnName: this.deletedColumnName,
+      include,
+      where,
+      withDeleted
+    });
     return await queryBuilder.getCount();
   }
 
@@ -151,7 +163,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { where });
+    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where });
     const result = await queryBuilder.execute();
     return { ...dataToReturn, count: typeof result.affected === 'number' ? result.affected : undefined };
   }
@@ -195,7 +207,13 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       include = { ...parsedOrderByData.include, ...include };
       orderBy = [...parsedOrderByData.orderBy];
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { where, include, orderBy, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, {
+      deletedColumnName: this.deletedColumnName,
+      where,
+      include,
+      orderBy,
+      withDeleted
+    });
     if (!findAll) {
       queryBuilder.skip((page - 1) * perPage).take(perPage + 1);
       findResults.page = page;
@@ -245,7 +263,13 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       const parsedOrderByData = this.qb.parseOrderBy(tableName, optOrderBy);
       orderBy = [...parsedOrderByData.orderBy];
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { where, include, orderBy, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, {
+      deletedColumnName: this.deletedColumnName,
+      where,
+      include,
+      orderBy,
+      withDeleted
+    });
     return await queryBuilder.getOne();
   }
 
@@ -344,7 +368,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { where });
+    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where });
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
     if (returnOriginalItems) {
       dataToReturn.originalItems = originalItems;

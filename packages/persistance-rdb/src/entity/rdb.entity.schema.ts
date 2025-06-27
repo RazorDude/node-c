@@ -1,7 +1,7 @@
 export interface RDBEntitySchema {
   options: {
     columns: {
-      [columnName: string]: { primary?: boolean } | undefined;
+      [columnName: string]: { deleteDate?: boolean; primary?: boolean } | undefined;
     };
   };
 }

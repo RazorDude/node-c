@@ -1,6 +1,6 @@
 {
   "name": "@node-c/persistance-redis",
-  "version": "1.0.0-alpha13",
+  "version": "1.0.0-alpha14",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.9",
-    "@node-c/core": "^1.0.0-alpha13",
+    "@node-c/core": "^1.0.0-alpha14",
     "class-validator": "^0.14.1",
     "immutable": "^5.1.0",
     "ramda": "^0.30.1",
