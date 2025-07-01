@@ -8,7 +8,7 @@ import {
   GenericObject
 } from '@node-c/core';
 
-import { RedisClientType, createClient } from 'redis';
+import { RedisClientType, createClient, createCluster } from 'redis';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -52,11 +52,32 @@ export class RedisStoreService {
 
   static async createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<RedisClientType> {
     const { persistanceModuleName } = options;
-    const { password, host, port, user } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
+    const { clusterMode, password, host, port, user } = config.persistance[
+      persistanceModuleName
+    ] as AppConfigPersistanceNoSQL;
+    const actualHost = host || '0.0.0.0';
+    const actualPassword = password || undefined;
+    const actualPort = port || 6379;
+    const actualUser = user || 'default';
+    if (clusterMode) {
+      const client = createCluster({
+        defaults: {
+          password: actualPassword,
+          username: actualUser
+        },
+        rootNodes: [
+          {
+            url: `redis://${actualHost}:${actualPort}`
+          }
+        ]
+      });
+      await client.connect();
+      return client as unknown as RedisClientType;
+    }
     const client = createClient({
-      password: password || undefined,
-      socket: { host: host || '0.0.0.0', port: port || 6379 },
-      username: user || 'default'
+      password: actualPassword,
+      socket: { host: actualHost, port: actualPort },
+      username: actualUser
     });
     await client.connect();
     return client as RedisClientType;

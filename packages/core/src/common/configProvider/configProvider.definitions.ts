@@ -125,6 +125,7 @@ export interface AppConfigCommonPersistanceClickHouse {
 }
 
 export interface AppConfigCommonPersistanceNoSQL {
+  clusterMode?: boolean;
   defaultTTL?: number;
   storeDelimiter?: string;
   storeKey: string;
