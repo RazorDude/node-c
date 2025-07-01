@@ -53,7 +53,7 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     throw new ApplicationError('Method ClickHouseSelectQueryBuilder.delete not implemented.');
   }
 
-  getCount(): Promise<number> {
+  async getCount(): Promise<number> {
     const {
       limitClause,
       offsetClause,
@@ -62,10 +62,11 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    return this.manager.query(
+    const result = (await this.manager.query(
       `select count() from \`${tableName}\` as \`${name}\` ` +
         `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
-    ) as Promise<number>;
+    )) as [{ 'count()': string }];
+    return parseInt(result[0]['count()'], 10);
   }
 
   getMany(): Promise<Entity[]> {

@@ -6,10 +6,16 @@ import { GenericObject, HttpMethod } from '../definitions';
 export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
   API: {
     HTTP: {
+      API_KEY: 'apiKey',
+      API_SECRET: 'apiSecret',
+      API_SECRET_ALGORITHM: 'apiSecretAlgorithm',
       HOSTNAME: 'hostname',
       PORT: 'port'
     },
     REST: {
+      API_KEY: 'apiKey',
+      API_SECRET: 'apiSecret',
+      API_SECRET_ALGORITHM: 'apiSecretAlgorithm',
       HOSTNAME: 'hostname',
       PORT: 'port'
     }
@@ -144,7 +150,12 @@ export interface AppConfigFromEnv {
   };
 }
 
-export type AppConfigFromEnvAPIHTTP = AppConfigCommonAPIHTTP;
+export interface AppConfigFromEnvAPIHTTP extends AppConfigCommonAPIHTTP {
+  apiKey?: string;
+  apiSecret?: string;
+  apiSecretAlgorithm?: string;
+}
+
 export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
 
 export interface AppConfigFromEnvDomainIAM {

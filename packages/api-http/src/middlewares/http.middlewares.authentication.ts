@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
 import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
@@ -18,15 +20,18 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
     protected moduleName: string,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<UserTokenEnityFields>,
+    protected tokenManager?: IAMTokenManagerService<UserTokenEnityFields>,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected usersService: IAMUsersService<User>
+    protected usersService?: IAMUsersService<User>
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
     (async () => {
-      const { anonymousAccessRoutes } = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
+      const { anonymousAccessRoutes, apiKey, apiSecret, apiSecretAlgorithm } = this.configProvider.config.api![
+        this.moduleName
+      ] as AppConfigAPIHTTP;
+      const requestMethod = req.method.toLowerCase();
       if (!req.locals) {
         req.locals = {};
       }
@@ -36,7 +41,7 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
         for (const route in anonymousAccessRoutes) {
           if (
             checkRoutes(originalUrl, [route]) &&
-            anonymousAccessRoutes[route].find(method => method === req.method.toLowerCase())
+            anonymousAccessRoutes[route].find(method => method === requestMethod)
           ) {
             isAnonymous = true;
             break;
@@ -49,6 +54,47 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
         }
       }
       const { tokenManager, usersService } = this;
+      if (apiKey) {
+        const [apiKeyFromHeader, requestSignature] =
+          req.headers.authorization?.replace(/^ApiKey\s/, '')?.split(' ') || [];
+        if (apiKey !== apiKeyFromHeader) {
+          console.error(`${apiKeyFromHeader?.length ? 'Invalid' : 'Missing'} api key in the authorization header.`);
+          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+        }
+        if (apiSecret && apiSecretAlgorithm) {
+          if (!requestSignature) {
+            console.error('Missing request signature in the authorization header.');
+            throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+          }
+          let signatureContent = '';
+          if (requestMethod === 'get' && req.query && Object.keys(req.query).length) {
+            signatureContent = JSON.stringify(req.query);
+          } else if (
+            (requestMethod === 'patch' || requestMethod === 'post' || requestMethod === 'put') &&
+            req.body &&
+            Object.keys(req.body).length
+          ) {
+            signatureContent = JSON.stringify(req.body);
+          } else {
+            signatureContent = req.originalUrl.split('?')[0];
+          }
+          const calcualtedSignature = crypto
+            .createHmac(apiSecretAlgorithm, apiSecret)
+            .update(signatureContent)
+            .digest('hex');
+          if (calcualtedSignature !== requestSignature) {
+            console.error(
+              `Invalid request signature in the authorization header. Expected: ${calcualtedSignature}. Provided: ${requestSignature}`
+            );
+            throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+          }
+        }
+        next();
+        return;
+      } else if (!tokenManager) {
+        console.error('Missing api key in the configuration and no tokenManager set up.');
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
       let tokens: string[] = [];
       let authToken = req.headers.authorization;
       let authTokenIsNew = false;
@@ -72,7 +118,7 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
       try {
         const tokenRes = await tokenManager.verifyAccessToken(authToken, {
           deleteFromStoreIfExpired: true,
-          identifierDataField: 'userId',
+          identifierDataField: usersService ? 'userId' : undefined,
           persistNewToken: true,
           purgeStoreOnRenew: true,
           refreshToken,
@@ -92,12 +138,14 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
           res.cookie('sid', authToken);
         }
       }
-      const userId = tokenContent?.data?.userId;
-      if (!userId) {
-        console.error('Missing userId in the tokenContent data.');
-        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      if (usersService) {
+        const userId = tokenContent?.data?.userId;
+        if (!userId) {
+          console.error('Missing userId in the tokenContent data.');
+          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+        }
+        req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
       }
-      req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
       next();
     })().then(
       () => true,
