@@ -8,27 +8,22 @@ import {
   GenericObject
 } from '@node-c/core';
 
-import { RedisClientType, createClient, createCluster } from 'redis';
+import Redis, { ChainableCommander, Cluster } from 'ioredis';
 import { v4 as uuid } from 'uuid';
 
-import {
-  GetOptions,
-  RedisClientScanMethod,
-  RedisTransaction,
-  ScanOptions,
-  SetOptions,
-  StoreDeleteOptions
-} from './redis.store.definitions';
+import { GetOptions, ScanOptions, SetOptions, StoreDeleteOptions } from './redis.store.definitions';
 
 import { Constants } from '../common/definitions';
 
-// TODO: support switching between hashmap and non-hashmap methods (e.g. hget/get)
+// TODO: support switching between hashmap and non-hashmap methods (e.g. hget/get) on the method basis, rather than
+// for the whole store
+// TODO: support sets
 @Injectable()
 export class RedisStoreService {
   protected defaultTTL?: number;
   protected storeDelimiter: string;
   protected storeKey: string;
-  protected transactions: GenericObject<RedisTransaction>;
+  protected transactions: GenericObject<ChainableCommander>;
   protected useHashmap: boolean;
 
   constructor(
@@ -36,7 +31,7 @@ export class RedisStoreService {
     protected configProvider: ConfigProviderService,
     @Inject(Constants.REDIS_CLIENT)
     // eslint-disable-next-line no-unused-vars
-    protected client: RedisClientType,
+    protected client: Redis | Cluster,
     @Inject(Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME)
     protected persistanceModuleName: string
   ) {
@@ -50,7 +45,7 @@ export class RedisStoreService {
     this.useHashmap = typeof useHashmap !== 'undefined' ? useHashmap : true;
   }
 
-  static async createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<RedisClientType> {
+  static async createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<Redis | Cluster> {
     const { persistanceModuleName } = options;
     const { clusterMode, password, host, port, user } = config.persistance[
       persistanceModuleName
@@ -60,27 +55,30 @@ export class RedisStoreService {
     const actualPort = port || 6379;
     const actualUser = user || 'default';
     if (clusterMode) {
-      const client = createCluster({
-        defaults: {
-          password: actualPassword,
-          username: actualUser
-        },
-        rootNodes: [
-          {
-            url: `redis://${actualHost}:${actualPort}`
-          }
-        ]
+      const hostList = actualHost.split(',');
+      const portList = `${actualPort}`.split(',');
+      const nodeList = hostList.map((hostAddress, hostIndex) => {
+        return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
       });
+      const client = new Cluster(nodeList, {
+        // enableOfflineQueue: false,
+        lazyConnect: true,
+        redisOptions: { password: actualPassword, username: actualUser }
+      });
+      // console.log('=> 0');
       await client.connect();
-      return client as unknown as RedisClientType;
+      // console.log('=> 1');
+      return client;
     }
-    const client = createClient({
+    const client = new Redis({
+      host: actualHost,
+      lazyConnect: true,
       password: actualPassword,
-      socket: { host: actualHost, port: actualPort },
+      port: actualPort,
       username: actualUser
     });
     await client.connect();
-    return client as RedisClientType;
+    return client;
   }
 
   createTransaction(): string {
@@ -99,13 +97,13 @@ export class RedisStoreService {
         throw new ApplicationError(`[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`);
       }
       transactions[transactionId] = useHashmap
-        ? transaction.hDel(storeKey, handle)
+        ? transaction.hdel(storeKey, ...handles)
         : transaction.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
       // TODO: return the actual amount
       return 0;
     }
     return useHashmap
-      ? await client.hDel(storeKey, handle)
+      ? await client.hdel(storeKey, ...handles)
       : await client.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
   }
 
@@ -125,7 +123,7 @@ export class RedisStoreService {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
     const { parseToJSON } = options || ({} as GetOptions);
     const value = useHashmap
-      ? await client.hGet(storeKey, handle)
+      ? await client.hget(storeKey, handle)
       : await client.get(`${storeKey}${storeDelimiter}${handle}`);
     return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
   }
@@ -136,24 +134,32 @@ export class RedisStoreService {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
     const { count, cursor: optCursor, parseToJSON, scanAll, withValues } = options;
     const getValues = typeof withValues === 'undefined' || withValues === true;
-    const hashmapMethod = (getValues
-      ? client.hScan.bind(client)
-      : client.hScanNoValues.bind(client)) as unknown as RedisClientScanMethod;
+    const values: { field: string; value: string }[] = [];
     let cursor = 0;
     let keys: string[] = [];
     let parsedValues: unknown[] = [];
-    let values: { field: string; value: string }[] = [];
     if (scanAll) {
       if (useHashmap) {
+        // TODO: remove repeating code
         while (true) {
-          const {
-            cursor: newCursor,
-            keys: newKeys,
-            tuples: newValues
-          } = await hashmapMethod(storeKey, cursor, { count, match: handle });
-          cursor = newCursor;
-          if (newValues) {
-            values = values.concat(newValues);
+          const [newCursor, newKeys] = await client.hscan(
+            storeKey,
+            cursor,
+            'MATCH',
+            handle,
+            ...((typeof count !== 'undefined' ? ['COUNT', count] : []) as ['COUNT', number])
+          );
+          cursor = parseInt(newCursor, 10);
+          if (getValues) {
+            // TODO: remove repeating code
+            for (const i in newKeys) {
+              const key = newKeys[i];
+              const value = await client.hget(storeKey, key);
+              if (value === null) {
+                continue;
+              }
+              values.push({ field: key, value });
+            }
           } else {
             keys = keys.concat(newKeys!);
           }
@@ -162,11 +168,10 @@ export class RedisStoreService {
           }
         }
       } else {
+        // TODO: remove repeating code
         while (true) {
-          const { cursor: newCursor, keys: newKeys } = await client.scan(cursor, {
-            MATCH: `${storeKey}${storeDelimiter}${handle}`
-          });
-          cursor = newCursor;
+          const [newCursor, newKeys] = await client.scan(cursor, 'MATCH', `${storeKey}${storeDelimiter}${handle}`);
+          cursor = parseInt(newCursor, 10);
           if (getValues) {
             for (const i in newKeys) {
               const key = newKeys[i];
@@ -188,22 +193,33 @@ export class RedisStoreService {
       if (typeof count === 'undefined') {
         throw new ApplicationError('The "count" options is required when the "findAll" options is not positive.');
       }
+      // TODO: remove repeating code
       if (useHashmap) {
-        const { keys: newKeys, tuples: newValues } = await hashmapMethod(storeKey, optCursor || 0, {
-          count,
-          match: handle
-        });
-        if (newValues) {
-          values = values.concat(newValues);
+        const [newCursor, newKeys] = await client.hscan(storeKey, optCursor || 0, 'MATCH', handle, 'COUNT', count);
+        cursor = parseInt(newCursor, 10);
+        // TODO: remove repeating code
+        if (getValues) {
+          for (const i in newKeys) {
+            const key = newKeys[i];
+            const value = await client.get(key);
+            if (value === null) {
+              continue;
+            }
+            values.push({ field: key, value });
+          }
         } else {
           keys = keys.concat(newKeys!);
         }
       } else {
-        const { cursor: newCursor, keys: newKeys } = await client.scan(optCursor || 0, {
-          COUNT: count,
-          MATCH: `${storeKey}${storeDelimiter}${handle}`
-        });
-        cursor = newCursor;
+        const [newCursor, newKeys] = await client.scan(
+          optCursor || 0,
+          'MATCH',
+          `${storeKey}${storeDelimiter}${handle}`,
+          'COUNT',
+          count
+        );
+        cursor = parseInt(newCursor, 10);
+        // TODO: remove repeating code
         if (getValues) {
           for (const i in newKeys) {
             const key = newKeys[i];
@@ -246,7 +262,7 @@ export class RedisStoreService {
         throw new ApplicationError(`[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`);
       }
       if (useHashmap) {
-        transactions[transactionId] = transaction.hSet(this.storeKey, handle, valueToSet);
+        transactions[transactionId] = transaction.hset(this.storeKey, handle, valueToSet);
         // if (actualTTL) {
         //   transactions[transactionId] = transactions[transactionId].hExpire(this.storeKey, handle, actualTTL, 'NX');
         // }
@@ -261,10 +277,10 @@ export class RedisStoreService {
     }
     let result: unknown;
     if (useHashmap) {
-      result = await client.hSet(storeKey, handle, valueToSet);
+      result = await client.hset(storeKey, handle, valueToSet);
       // if (actualTTL) {
-      // await client.hExpire(storeKey, handle, actualTTL, 'NX');
-      // await client.expire(storeKey, actualTTL, 'NX');
+      //   await client.hexpire(storeKey, handle, actualTTL, 'NX');
+      // // await client.expire(storeKey, actualTTL, 'NX');
       // }
     } else {
       const fullKey = `${storeKey}${storeDelimiter}${handle}`;
