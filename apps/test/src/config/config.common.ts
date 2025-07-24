@@ -37,7 +37,7 @@ export const appConfigCommon: AppConfigCommon = {
       defaultTTL: 600,
       storeDelimiter: ':',
       storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY,
-      type: NoSQLType.Redis,
+      type: NoSQLType.Valkey,
       useHashmap: true
     },
     db: { connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME, type: RDBType.MySQL },

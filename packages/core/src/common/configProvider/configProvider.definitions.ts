@@ -80,8 +80,15 @@ export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
   Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM;
-export type AppConfigPersistanceNoSQL = AppConfigCommonPersistanceNoSQL & AppConfigFromEnvPersistanceNoSQL;
-export type AppConfigPersistanceRDB = AppConfigCommonPersistanceRDB & AppConfigFromEnvPersistanceRDB;
+export type AppConfigPersistanceNoSQL = AppConfigCommonPersistanceNoSQL &
+  AppConfigFromEnvPersistanceNoSQL &
+  AppConfigProfilePersistanceNoSQL;
+export type AppConfigPersistanceRDB = AppConfigCommonPersistanceClickHouse &
+  AppConfigCommonPersistanceRDB &
+  AppConfigCommonPersistanceClickHouse &
+  AppConfigFromEnvPersistanceRDB &
+  AppConfigProfilePersistanceClickHouse &
+  AppConfigProfilePersistanceRDB;
 
 /*
  * Config data held in the common config file.
@@ -205,6 +212,13 @@ export interface AppConfigProfile {
     projectName?: string;
     projectVersion?: string;
   };
+  persistance?: {
+    [persistanceModuleName: string]:
+      | GenericObject
+      | AppConfigProfilePersistanceClickHouse
+      | AppConfigProfilePersistanceNoSQL
+      | AppConfigProfilePersistanceRDB;
+  };
 }
 
 export type AppConfigProfileAPIHTTP = AppConfigCommonAPIHTTP;
@@ -214,6 +228,12 @@ export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   refreshTokenExpiryTimeInMinutes?: number;
 }
+
+export type AppConfigProfilePersistanceClickHouse = AppConfigCommonPersistanceClickHouse;
+export type AppConfigProfilePersistanceNoSQL = AppConfigCommonPersistanceNoSQL;
+export type AppConfigProfilePersistanceRDB = AppConfigCommonPersistanceRDB & {
+  typeormExtraOptions?: GenericObject;
+};
 
 export enum AppEnvironment {
   // eslint-disable-next-line no-unused-vars
@@ -257,11 +277,15 @@ export interface GenerateOrmconfigOptions {
 // TODO: figure out how to move this to the Redis package
 export enum NoSQLType {
   // eslint-disable-next-line no-unused-vars
-  Redis = 'redis'
+  Redis = 'redis',
+  // eslint-disable-next-line no-unused-vars
+  Valkey = 'valkey'
 }
 
 // TODO: figure out how to move this to the RDB package
 export enum RDBType {
+  // eslint-disable-next-line no-unused-vars
+  Aurora = 'aurora',
   // eslint-disable-next-line no-unused-vars
   ClickHouse = 'clickhouse',
   // eslint-disable-next-line no-unused-vars

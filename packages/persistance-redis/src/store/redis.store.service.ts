@@ -5,10 +5,12 @@ import {
   AppConfigPersistanceNoSQL,
   ApplicationError,
   ConfigProviderService,
-  GenericObject
+  GenericObject,
+  NoSQLType
 } from '@node-c/core';
 
 import Redis, { ChainableCommander, Cluster } from 'ioredis';
+import Valkey from 'iovalkey';
 import { v4 as uuid } from 'uuid';
 
 import { GetOptions, ScanOptions, SetOptions, StoreDeleteOptions } from './redis.store.definitions';
@@ -47,7 +49,7 @@ export class RedisStoreService {
 
   static async createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<Redis | Cluster> {
     const { persistanceModuleName } = options;
-    const { clusterMode, password, host, port, user } = config.persistance[
+    const { clusterMode, password, host, port, type, user } = config.persistance[
       persistanceModuleName
     ] as AppConfigPersistanceNoSQL;
     const actualHost = host || '0.0.0.0';
@@ -60,7 +62,8 @@ export class RedisStoreService {
       const nodeList = hostList.map((hostAddress, hostIndex) => {
         return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
       });
-      const client = new Cluster(nodeList, {
+      const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
+      const client = new ClusterConstructor(nodeList, {
         // enableOfflineQueue: false,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
@@ -68,9 +71,10 @@ export class RedisStoreService {
       // console.log('=> 0');
       await client.connect();
       // console.log('=> 1');
-      return client;
+      return client as Cluster;
     }
-    const client = new Redis({
+    const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
+    const client = new ClientConstructor({
       host: actualHost,
       lazyConnect: true,
       password: actualPassword,
@@ -78,7 +82,7 @@ export class RedisStoreService {
       username: actualUser
     });
     await client.connect();
-    return client;
+    return client as Redis;
   }
 
   createTransaction(): string {

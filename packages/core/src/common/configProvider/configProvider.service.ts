@@ -14,7 +14,8 @@ import {
   AppEnvironment,
   GenerateOrmconfigOptions,
   LoadConfigAppConfigs,
-  LoadConfigOptions
+  LoadConfigOptions,
+  RDBType
 } from './configProvider.definitions';
 
 import { Constants } from '../definitions';
@@ -83,7 +84,10 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           entities: [...entities],
           migrations: ormconfigMigrations,
           name: moduleConfig.connectionName,
-          subscribers: [...subscribers]
+          synchronize: moduleConfig.type === RDBType.Aurora ? true : false,
+          subscribers: [...subscribers],
+          type: moduleConfig.type === RDBType.Aurora ? RDBType.MySQL : moduleConfig.type,
+          ...(moduleConfig.typeormExtraOptions || {})
         })
       )
     );
@@ -109,8 +113,8 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         `  password: '${moduleConfig.password}',\n` +
         `  port: ${moduleConfig.port},\n` +
         '  subscribers: [],\n' +
-        '  synchronize: false,\n' +
-        `  type: '${moduleConfig.type}',\n` +
+        `  synchronize: ${moduleConfig.type === RDBType.Aurora ? true : false},\n` +
+        `  type: '${moduleConfig.type === RDBType.Aurora ? RDBType.MySQL : moduleConfig.type}',\n` +
         `  username: '${moduleConfig.user}'\n` +
         '});\n'
     );

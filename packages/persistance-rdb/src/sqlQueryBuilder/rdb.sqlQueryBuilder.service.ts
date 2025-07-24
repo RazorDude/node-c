@@ -29,7 +29,7 @@ export class SQLQueryBuilderService {
   ) {
     const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;
-    if (type === RDBType.ClickHouse || type === RDBType.MySQL) {
+    if (type === RDBType.Aurora || type === RDBType.ClickHouse || type === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';
       this.iLikeSupported = false;
     } else if (type === RDBType.PG) {
@@ -115,7 +115,7 @@ export class SQLQueryBuilderService {
     if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
       // TODO: fix JSON_CONTAINS here for ClickHouse
-      if (dbType === RDBType.ClickHouse || dbType === RDBType.MySQL) {
+      if (dbType === RDBType.Aurora || dbType === RDBType.ClickHouse || dbType === RDBType.MySQL) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {

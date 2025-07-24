@@ -309,12 +309,12 @@ export class RedisRepositoryService<Entity> {
   ): Promise<ResultItem[]> {
     const { defaultTTL, schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
-    const { delete: optDelete, onConflict, transactionId, ttl } = options || ({} as SaveOptions);
+    const { delete: optDelete, onConflict, transactionId, ttl, validate } = options || ({} as SaveOptions);
     const actualData = data instanceof Array ? data : [data];
     if (optDelete) {
       const prepareOptions: PrepareOptions = {
         onConflict: SaveOptionsOnConflict.DoNothing,
-        validate: true
+        validate
       };
       const deleteKeys: string[] = [];
       for (const i in actualData) {
@@ -330,7 +330,7 @@ export class RedisRepositoryService<Entity> {
     const prepareOptions: PrepareOptions = {
       generatePrimaryKeys: true,
       onConflict,
-      validate: true
+      validate
     };
     const results: Entity[] = [];
     for (const i in actualData) {

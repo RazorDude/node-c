@@ -2,7 +2,7 @@ import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
-import { AppConfigPersistanceRDB, ConfigProviderService, loadDynamicModules } from '@node-c/core';
+import { AppConfigPersistanceRDB, ConfigProviderService, RDBType, loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/persistance-rdb';
 
 import { TypeORMDBModuleOptions } from './typeorm.module.definitions';
@@ -25,7 +25,7 @@ export class TypeORMDBModule {
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
             // example : configProvider.config.persistance.db
-            const { database, host, password, port, type, user } = persistanceConfig[
+            const { database, host, password, port, type, typeormExtraOptions, user } = persistanceConfig[
               moduleName as keyof typeof persistanceConfig
             ] as AppConfigPersistanceRDB;
             return {
@@ -35,8 +35,10 @@ export class TypeORMDBModule {
               name: connectionName,
               password,
               port,
-              type,
-              username: user
+              synchronize: type === RDBType.Aurora ? true : false,
+              type: type === RDBType.Aurora ? RDBType.MySQL : type,
+              username: user,
+              ...(typeormExtraOptions || {})
             } as TypeOrmModuleOptions;
           },
           inject: [ConfigProviderService]
