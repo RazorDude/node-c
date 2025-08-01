@@ -33,7 +33,7 @@ export const appConfigCommon: AppConfigCommon = {
       useHashmap: false
     },
     cacheAuth: {
-      clusterMode: true,
+      // clusterMode: true,
       defaultTTL: 600,
       storeDelimiter: ':',
       storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY,

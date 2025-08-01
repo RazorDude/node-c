@@ -35,7 +35,7 @@ export class TypeORMDBModule {
               name: connectionName,
               password,
               port,
-              synchronize: type === RDBType.Aurora ? true : false,
+              synchronize: false,
               type: type === RDBType.Aurora ? RDBType.MySQL : type,
               username: user,
               ...(typeormExtraOptions || {})

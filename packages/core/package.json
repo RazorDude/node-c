@@ -1,6 +1,6 @@
 {
   "name": "@node-c/core",
-  "version": "1.0.0-alpha17",
+  "version": "1.0.0-alpha18",
   "license": "MIT",
   "main": "./dist/index.js",
   "scripts": {

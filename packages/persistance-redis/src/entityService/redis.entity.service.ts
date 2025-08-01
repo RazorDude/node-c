@@ -35,7 +35,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
     const { repository, settings, store } = this;
-    const { validationSupported = true } = settings || {};
+    const { validationSupported = false } = settings || {};
     const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -49,7 +49,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async create(data: Entity, options?: CreateOptions): Promise<Entity> {
     const { repository, settings, store } = this;
-    const { validationSupported = true } = settings || {};
+    const { validationSupported = false } = settings || {};
     const actualOptions = Object.assign(options || {}) as CreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -69,7 +69,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
     const { repository, settings, store } = this;
-    const { validationSupported = true } = settings || {};
+    const { validationSupported = false } = settings || {};
     const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
@@ -124,7 +124,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
     const { repository, settings, store } = this;
-    const { validationSupported = true } = settings || {};
+    const { validationSupported = false } = settings || {};
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();

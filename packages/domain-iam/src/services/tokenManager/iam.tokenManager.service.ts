@@ -110,7 +110,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     } = options || {};
     // decode the token
     const { content, error } = await this.verify(token, moduleConfig.jwtAccessSecret);
-    let forceRenew = true;
+    let forceRenew = false;
     let newToken: string | undefined;
     // check for errors
     if (error) {
@@ -132,7 +132,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
             if (refreshTokenCheckValue !== refreshToken) {
               errorToThrow = new ApplicationError('Mismatched refresh token.');
             } else {
-              forceRenew = false;
+              forceRenew = true;
               throwError = false;
             }
           }
