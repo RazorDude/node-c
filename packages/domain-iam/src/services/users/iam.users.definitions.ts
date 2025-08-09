@@ -1,4 +1,4 @@
-import { GenericObject } from '@node-c/core';
+import { DomainFindOnePrivateOptions, GenericObject } from '@node-c/core';
 
 import { UserAuthType, UserMFAType } from '../authentication';
 import { AuthorizationPoint } from '../authorization';
@@ -19,7 +19,7 @@ export interface CreateAccessTokenReturnData<UserData> {
   user: UserData;
 }
 
-export interface GetUserWithPermissionsDataOptions {
+export interface GetUserWithPermissionsDataOptions extends DomainFindOnePrivateOptions {
   keepPassword?: boolean;
 }
 

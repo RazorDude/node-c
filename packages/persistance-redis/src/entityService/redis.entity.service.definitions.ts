@@ -1,6 +1,7 @@
 import {
   PersistanceCountOptions,
   PersistanceDeleteOptions,
+  PersistanceEntityServiceSettings,
   PersistanceFindOneOptions,
   PersistanceFindOptions,
   PersistanceUpdateOptions
@@ -33,6 +34,10 @@ export interface FindOptions
   extends BaseOptions,
     Omit<PersistanceFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {
   requirePrimaryKeys?: boolean;
+}
+
+export interface RedisEntityServiceSettings extends PersistanceEntityServiceSettings {
+  validationSupported?: boolean;
 }
 
 export interface UpdateOptions extends BaseCreateOptions, PersistanceUpdateOptions {}

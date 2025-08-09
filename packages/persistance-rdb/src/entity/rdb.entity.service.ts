@@ -7,19 +7,27 @@ import {
   PersistanceNumberItem,
   PersistanceOrderBy,
   PersistanceSelectOperator,
-  PersistanceUpdateResult
+  PersistanceUpdateResult,
+  ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
 import { RDBEntitySchema } from './rdb.entity.schema';
 import {
   BulkCreateOptions,
+  BulkCreatePrivateOptions,
   CountOptions,
+  CountPrivateOptions,
   CreateOptions,
+  CreatePrivateOptions,
   DeleteOptions,
+  DeletePrivateOptions,
   FindOneOptions,
+  FindOnePrivateOptions,
   FindOptions,
+  FindPrivateOptions,
   PostgresErrorCode,
-  UpdateOptions
+  UpdateOptions,
+  UpdatePrivateOptions
 } from './rdb.entity.service.definitions';
 
 import { RDBEntityManager, RDBRepository } from '../repository';
@@ -29,6 +37,7 @@ import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryB
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
 export class RDBEntityService<Entity extends GenericObject<unknown>> extends PersistanceEntityService<Entity> {
+  protected columNames: string[];
   protected deletedColumnName?: string;
   protected primaryKeys: string[];
 
@@ -41,10 +50,12 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   ) {
     super();
     const { columns } = schema.options;
-    let deletedColumnName: string | undefined;
     const primaryKeys: string[] = [];
+    let deletedColumnName: string | undefined;
+    this.columNames = [];
     for (const columnName in columns) {
       const { deleteDate, primary } = columns[columnName] || {};
+      this.columNames.push(columnName);
       if (primary) {
         primaryKeys.push(columnName);
       }
@@ -84,52 +95,45 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return { field: PersistanceSelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
   }
 
-  async bulkCreate(data: Partial<Entity>[], options?: BulkCreateOptions): Promise<Entity[]> {
-    const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
+  async bulkCreate(
+    data: Partial<Entity>[],
+    options?: BulkCreateOptions,
+    privateOptions?: BulkCreatePrivateOptions
+  ): Promise<Entity[]> {
+    const actualOptions = options || {};
+    const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionManager } = actualOptions;
+    const { processInputAllowedFieldsEnabled } = actualPrivateOptions;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
-        return this.bulkCreate(data, { ...actualOptions, transactionManager: tm });
+        return this.bulkCreate(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<Entity[]>;
     }
-    return await this.save(data, transactionManager);
+    return await this.save(data, transactionManager, {
+      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled
+    });
   }
 
-  async create(data: Partial<Entity>, options?: CreateOptions): Promise<Entity> {
-    const actualOptions = Object.assign(options || {}) as CreateOptions;
-    const { forceTransaction, transactionManager } = actualOptions;
-    if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.create(data, { ...actualOptions, transactionManager: tm });
-      }) as Promise<Entity>;
-    }
-    try {
-      return await this.save(data, transactionManager);
-    } catch (e) {
-      const error = e as Record<string, unknown>;
-      // TODO: move this functionality out of here and make this abstract
-      if (error.code === PostgresErrorCode.UniqueViolation) {
-        const extractVariableName = new RegExp(/^Key \((.*)\)\=(.*)$/g);
-        const result = extractVariableName.exec(error.detail as string);
-        throw new ApplicationError(
-          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`
-        );
-      }
-      throw e;
-    }
-  }
-
-  async count(options: CountOptions): Promise<number | undefined> {
+  async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
     const { filters, forceTransaction, transactionManager, withDeleted = false } = options;
+    const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
-        return this.count({ ...options, transactionManager: tm });
+        return this.count({ ...options, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<number>;
     }
+    const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters!);
+    const { where, include: includeFromFilters } = this.qb.parseFilters(
+      tableName,
+      (await this.processObjectAllowedFields<GenericObject>(filters!, {
+        allowedFields: this.columNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      })) as GenericObject
+    );
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
     this.qb.buildQuery<Entity>(queryBuilder, {
       deletedColumnName: this.deletedColumnName,
@@ -140,23 +144,46 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return await queryBuilder.getCount();
   }
 
-  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
-    const { filters, forceTransaction, returnOriginalItems, transactionManager, softDelete = true } = options;
+  async create(data: Partial<Entity>, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+    const actualOptions = options || {};
+    const actualPrivateOptions = privateOptions || {};
+    const { forceTransaction, transactionManager } = actualOptions;
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
-        return this.delete({ ...options, transactionManager: tm });
+        return this.create(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
+      }) as Promise<Entity>;
+    }
+    return await this.save(data, transactionManager, {
+      processObjectAllowedFieldsEnabled: actualPrivateOptions.processInputAllowedFieldsEnabled
+    });
+  }
+
+  async delete(
+    options: DeleteOptions,
+    privateOptions?: DeletePrivateOptions
+  ): Promise<PersistanceDeleteResult<Entity>> {
+    const { filters, forceTransaction, returnOriginalItems, transactionManager, softDelete = true } = options;
+    const actualPrivateOptions = privateOptions || {};
+    if (!transactionManager && forceTransaction) {
+      return this.repository.manager.transaction(tm => {
+        return this.delete({ ...options, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<PersistanceDeleteResult<Entity>>;
     }
+    const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
-    // TODO: check whether tableName is needed here instead of name
     const tableName = this.repository.metadata.name;
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
     const deleteType = softDelete ? 'softDelete' : 'delete';
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
+      allowedFields: this.columNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, parsedFilters);
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length || returnOriginalItems) {
-      const findData = await this.find({ filters, transactionManager });
+      const findData = await this.find({ filters: parsedFilters, transactionManager });
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       where[field] = value;
       dataToReturn.originalItems = findData.items;
@@ -168,7 +195,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return { ...dataToReturn, count: typeof result.affected === 'number' ? result.affected : undefined };
   }
 
-  async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
+  async find(options: FindOptions, privateOptions?: FindPrivateOptions): Promise<PersistanceFindResults<Entity>> {
     const {
       filters,
       forceTransaction,
@@ -181,9 +208,10 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       transactionManager,
       withDeleted = false
     } = options;
+    const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
-        return this.find({ ...options, transactionManager: tm });
+        return this.find({ ...options, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<PersistanceFindResults<Entity>>;
     }
     const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
@@ -197,7 +225,14 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     let include: IncludeItems = {};
     let orderBy: PersistanceOrderBy[] = [];
     if (filters) {
-      const parsedFiltersData = this.qb.parseFilters(tableName, filters);
+      const parsedFiltersData = this.qb.parseFilters(
+        tableName,
+        (await this.processObjectAllowedFields<GenericObject>(filters, {
+          allowedFields: this.columNames,
+          isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+          objectType: ProcessObjectAllowedFieldsType.Filters
+        })) as GenericObject
+      );
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
@@ -235,7 +270,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return findResults;
   }
 
-  async findOne(options: FindOneOptions): Promise<Entity | null> {
+  async findOne(options: FindOneOptions, privateOptions?: FindOnePrivateOptions): Promise<Entity | null> {
     const {
       filters,
       forceTransaction,
@@ -245,18 +280,27 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       orderBy: optOrderBy,
       withDeleted = false
     } = options;
+    const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
-        return this.findOne({ ...options, transactionManager: tm });
+        return this.findOne({ ...options, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<Entity | null>;
     }
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, filters, {
-      operator: selectOperator as PersistanceSelectOperator,
-      isTopLevel: true
-    });
+    const { where, include: includeFromFilters } = this.qb.parseFilters(
+      tableName,
+      (await this.processObjectAllowedFields<GenericObject>(filters, {
+        allowedFields: this.columNames,
+        isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      })) as GenericObject,
+      {
+        operator: selectOperator as PersistanceSelectOperator,
+        isTopLevel: true
+      }
+    );
     const include = this.qb.parseRelations(tableName, optRelations || [], includeFromFilters);
     let orderBy: PersistanceOrderBy[] = [];
     if (optOrderBy) {
@@ -338,30 +382,69 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
 
   protected async save<Data = unknown, ReturnData = unknown>(
     data: Data,
-    transactionManager?: RDBEntityManager
+    transactionManager?: RDBEntityManager,
+    options?: { processObjectAllowedFieldsEnabled?: boolean }
   ): Promise<ReturnData> {
-    if (transactionManager) {
-      return (await transactionManager.save(this.repository.target, data as Partial<Entity>)) as ReturnData;
+    const { columNames, repository } = this;
+    const { processObjectAllowedFieldsEnabled } = options || {};
+    const dataToSave: Data | Data[] = await this.processObjectAllowedFields<Data>(data, {
+      allowedFields: columNames,
+      isEnabled: processObjectAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Input
+    });
+    try {
+      if (transactionManager) {
+        return (await transactionManager.save(repository.target, dataToSave as Partial<Entity>)) as ReturnData;
+      }
+      return repository.save(dataToSave as Partial<Entity>) as ReturnData;
+    } catch (e) {
+      const error = e as Record<string, unknown>;
+      // TODO: move this functionality out of here and make this abstract
+      if (error.code === PostgresErrorCode.UniqueViolation) {
+        const extractVariableName = new RegExp(/^Key \((.*)\)\=(.*)$/g);
+        const result = extractVariableName.exec(error.detail as string);
+        throw new ApplicationError(
+          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`
+        );
+      }
+      throw e;
     }
-    return this.repository.save(data as Partial<Entity>) as ReturnData;
   }
 
-  async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
+  async update(
+    data: Entity,
+    options: UpdateOptions,
+    privateOptions?: UpdatePrivateOptions
+  ): Promise<PersistanceUpdateResult<Entity>> {
+    const { columNames, repository } = this;
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionManager } = options;
+    const { processFiltersAllowedFieldsEnabled, processInputAllowedFieldsEnabled } = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.update(data, { ...options, transactionManager: tm });
+      return repository.manager.transaction(tm => {
+        return this.update(data, { ...options, transactionManager: tm }, privateOptions);
       }) as Promise<PersistanceUpdateResult<Entity>>;
     }
-    const entityName = this.repository.metadata.name;
-    // TODO: check whether tableName is needed here instead of name
-    const tableName = this.repository.metadata.name;
-    const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName).update().set(data);
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, filters);
+    const dataToUpdate = this.processObjectAllowedFields(data, {
+      allowedFields: columNames,
+      isEnabled: processInputAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Input
+    });
+    const entityName = repository.metadata.name;
+    const tableName = repository.metadata.name;
+    const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
+      allowedFields: this.columNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    const queryBuilder = this.getRepository(transactionManager)
+      .createQueryBuilder(entityName)
+      .update()
+      .set(dataToUpdate);
+    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, processedFilters);
     let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length || returnOriginalItems) {
-      const findData = await this.find({ filters, transactionManager });
+      const findData = await this.find({ filters: processedFilters, transactionManager });
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       originalItems = findData.items;
       where[field] = value;

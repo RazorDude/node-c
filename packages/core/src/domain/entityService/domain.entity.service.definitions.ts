@@ -1,12 +1,18 @@
 import { GenericObject } from '../../common/definitions';
 
 import {
+  PersistanceBulkCreatePrivateOptions,
+  PersistanceCreatePrivateOptions,
   PersistanceDeleteOptions,
+  PersistanceDeletePrivateOptions,
   PersistanceDeleteResult,
   PersistanceFindOneOptions,
+  PersistanceFindOnePrivateOptions,
   PersistanceFindOptions,
+  PersistanceFindPrivateOptions,
   PersistanceFindResults,
   PersistanceUpdateOptions,
+  PersistanceUpdatePrivateOptions,
   PersistanceUpdateResult
 } from '../../persistance/entityService';
 
@@ -43,6 +49,8 @@ export interface DomainBaseResult<Result> {
   resultsByService?: GenericObject<Result>;
 }
 
+export type DomainBulkCreatePrivateOptions = PersistanceBulkCreatePrivateOptions;
+
 export type DomainBulkCreateData<Entity> = Partial<Entity>[];
 
 export type DomainBulkCreateOptions<Options = object> = DomainBaseOptions<Options>;
@@ -53,9 +61,13 @@ export type DomainCreateData<Entity> = Partial<Entity>;
 
 export type DomainCreateOptions<Options = object> = DomainBaseOptions<Options>;
 
+export type DomainCreatePrivateOptions = PersistanceCreatePrivateOptions;
+
 export type DomainCreateResult<Entity> = DomainBaseResult<Entity>;
 
 export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<PersistanceDeleteOptions>;
+
+export type DomainDeletePrivateOptions = PersistanceDeletePrivateOptions;
 
 export type DomainDeleteResult<Entity> = DomainBaseResult<PersistanceDeleteResult<Entity>>;
 
@@ -69,11 +81,15 @@ export type DomainFindOneOptions<Options = object> = Options &
   DomainBaseOptions<PersistanceFindOneOptions> &
   DomainBaseOptionsWithSearchPersistance<DomainCreateOptions>;
 
+export type DomainFindOnePrivateOptions = PersistanceFindOnePrivateOptions;
+
 export type DomainFindOneResult<Entity> = DomainBaseResult<Entity | null>;
 
 export type DomainFindOptions<Options = object> = Options &
   DomainBaseOptions<PersistanceFindOptions> &
   DomainBaseOptionsWithSearchPersistance<DomainBulkCreateOptions>;
+
+export type DomainFindPrivateOptions = PersistanceFindPrivateOptions;
 
 export type DomainFindResult<Entity> = DomainBaseResult<PersistanceFindResults<Entity>>;
 
@@ -122,5 +138,7 @@ export type DomainRunMethodInAdditionalServicesOptions<Options> = {
 export type DomainUpdateData<Entity> = Partial<Entity>;
 
 export type DomainUpdateOptions<Options = object> = Options & DomainBaseOptions<PersistanceUpdateOptions>;
+
+export type DomainUpdatePrivateOptions = PersistanceUpdatePrivateOptions;
 
 export type DomainUpdateResult<Entity> = DomainBaseResult<PersistanceUpdateResult<Entity>>;

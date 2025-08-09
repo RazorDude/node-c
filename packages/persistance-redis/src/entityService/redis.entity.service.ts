@@ -13,6 +13,7 @@ import {
   DeleteOptions,
   FindOneOptions,
   FindOptions,
+  RedisEntityServiceSettings,
   UpdateOptions
 } from './redis.entity.service.definitions';
 
@@ -22,20 +23,20 @@ import { RedisStoreService } from '../store';
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
 export class RedisEntityService<Entity extends object> extends PersistanceEntityService<Entity> {
+  protected settings: RedisEntityServiceSettings;
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected repository: RedisRepositoryService<Entity>,
     // eslint-disable-next-line no-unused-vars
-    protected store: RedisStoreService,
-    // eslint-disable-next-line no-unused-vars
-    protected settings?: { validationSupported?: boolean }
+    protected store: RedisStoreService
   ) {
     super();
   }
 
   async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
     const { repository, settings, store } = this;
-    const { validationSupported = false } = settings || {};
+    const { validationSupported = false } = settings;
     const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -49,7 +50,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async create(data: Entity, options?: CreateOptions): Promise<Entity> {
     const { repository, settings, store } = this;
-    const { validationSupported = false } = settings || {};
+    const { validationSupported = false } = settings;
     const actualOptions = Object.assign(options || {}) as CreateOptions;
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
@@ -69,7 +70,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
     const { repository, settings, store } = this;
-    const { validationSupported = false } = settings || {};
+    const { validationSupported = false } = settings;
     const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
@@ -124,7 +125,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
     const { repository, settings, store } = this;
-    const { validationSupported = false } = settings || {};
+    const { validationSupported = false } = settings;
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();

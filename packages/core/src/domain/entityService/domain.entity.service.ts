@@ -4,20 +4,26 @@ import { omit } from 'ramda';
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainBulkCreateOptions,
+  DomainBulkCreatePrivateOptions,
   DomainBulkCreateResult,
   DomainCreateOptions,
+  DomainCreatePrivateOptions,
   DomainCreateResult,
   DomainDeleteOptions,
+  DomainDeletePrivateOptions,
   DomainDeleteResult,
   DomainEntityServiceDefaultData,
   DomainFindOneOptions,
+  DomainFindOnePrivateOptions,
   DomainFindOneResult,
   DomainFindOptions,
+  DomainFindPrivateOptions,
   DomainFindResult,
   DomainMethod,
   DomainPersistanceEntityServiceType,
   DomainRunMethodInAdditionalServicesOptions,
   DomainUpdateOptions,
+  DomainUpdatePrivateOptions,
   DomainUpdateResult
 } from './domain.entity.service.definitions';
 
@@ -47,12 +53,12 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     options?: DomainBulkCreateOptions,
     // eslint-disable-next-line no-unused-vars
-    privateOptions?: unknown
+    privateOptions?: DomainBulkCreatePrivateOptions
   ): Promise<DomainBulkCreateResult<Entity>>;
   async bulkCreate(
     data: Data['BulkCreate'],
     options?: DomainBulkCreateOptions,
-    privateOptions?: unknown
+    privateOptions?: DomainBulkCreatePrivateOptions
   ): Promise<DomainBulkCreateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
       throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
@@ -80,12 +86,12 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     options?: DomainCreateOptions,
     // eslint-disable-next-line no-unused-vars
-    privateOptions?: unknown
+    privateOptions?: DomainCreatePrivateOptions
   ): Promise<DomainCreateResult<Entity>>;
   async create<Options extends object | undefined = undefined>(
     data: Data['Create'],
     options?: DomainCreateOptions<Options>,
-    privateOptions?: unknown
+    privateOptions?: DomainCreatePrivateOptions
   ): Promise<DomainCreateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Create)) {
       throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
@@ -107,9 +113,16 @@ export class DomainEntityService<
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
-  public delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult<Entity>>;
-  async delete(options: DomainDeleteOptions, privateOptions?: unknown): Promise<DomainDeleteResult<Entity>> {
+  public delete(
+    // eslint-disable-next-line no-unused-vars
+    options: DomainDeleteOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: DomainDeletePrivateOptions
+  ): Promise<DomainDeleteResult<Entity>>;
+  async delete(
+    options: DomainDeleteOptions,
+    privateOptions?: DomainDeletePrivateOptions
+  ): Promise<DomainDeleteResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Delete)) {
       throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
     }
@@ -133,9 +146,16 @@ export class DomainEntityService<
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
-  public find(options: DomainFindOptions, privateOptions?: unknown): Promise<DomainFindResult<Entity>>;
-  async find(options: DomainFindOptions, privateOptions?: unknown): Promise<DomainFindResult<Entity>> {
+  public find(
+    // eslint-disable-next-line no-unused-vars
+    options: DomainFindOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: DomainFindOnePrivateOptions
+  ): Promise<DomainFindResult<Entity>>;
+  async find(
+    options: DomainFindOptions,
+    privateOptions?: DomainFindOnePrivateOptions
+  ): Promise<DomainFindResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Find)) {
       throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
     }
@@ -175,9 +195,16 @@ export class DomainEntityService<
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
-  public findOne(options: DomainFindOneOptions, privateOptions?: unknown): Promise<DomainFindOneResult<Entity>>;
-  async findOne(options: DomainFindOneOptions, privateOptions?: unknown): Promise<DomainFindOneResult<Entity>> {
+  public findOne(
+    // eslint-disable-next-line no-unused-vars
+    options: DomainFindOneOptions,
+    // eslint-disable-next-line no-unused-vars
+    privateOptions?: DomainFindPrivateOptions
+  ): Promise<DomainFindOneResult<Entity>>;
+  async findOne(
+    options: DomainFindOneOptions,
+    privateOptions?: DomainFindPrivateOptions
+  ): Promise<DomainFindOneResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.FindOne)) {
       throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
     }
@@ -347,12 +374,12 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     options: DomainUpdateOptions,
     // eslint-disable-next-line no-unused-vars
-    privateOptions?: unknown
+    privateOptions?: DomainUpdatePrivateOptions
   ): Promise<DomainUpdateResult<Entity>>;
   async update(
     data: Data['Update'],
     options: DomainUpdateOptions,
-    privateOptions?: unknown
+    privateOptions?: DomainUpdatePrivateOptions
   ): Promise<DomainUpdateResult<Entity>> {
     if (!this.defaultMethods?.includes(DomainMethod.Update)) {
       throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);

@@ -1,10 +1,12 @@
+import { PersistanceFindOnePrivateOptions, PersistanceFindPrivateOptions } from '@node-c/core';
+
 export interface UsersBaseSerachPrivateOptions {
   withPassword?: boolean;
 }
 
-export type UsersFindPrivateOptions = UsersBaseSerachPrivateOptions;
+export type UsersFindOnePrivateOptions = UsersBaseSerachPrivateOptions & PersistanceFindPrivateOptions;
 
-export type UsersFindOnePrivateOptions = UsersBaseSerachPrivateOptions;
+export type UsersFindPrivateOptions = UsersBaseSerachPrivateOptions & PersistanceFindOnePrivateOptions;
 
 export interface UsersUpdatePasswordData {
   currentPassword: string;
