@@ -64,13 +64,10 @@ export class RedisStoreService {
       });
       const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
       const client = new ClusterConstructor(nodeList, {
-        // enableOfflineQueue: false,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
-      // console.log('=> 0');
       await client.connect();
-      // console.log('=> 1');
       return client as Cluster;
     }
     const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
