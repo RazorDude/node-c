@@ -18,7 +18,13 @@ export interface EntitySchema {
 
 export enum EntitySchemaColumnType {
   // eslint-disable-next-line no-unused-vars
+  Array = 'array',
+  // eslint-disable-next-line no-unused-vars
+  Boolean = 'boolean',
+  // eslint-disable-next-line no-unused-vars
   Integer = 'integer',
+  // eslint-disable-next-line no-unused-vars
+  Object = 'object',
   // eslint-disable-next-line no-unused-vars
   String = 'string',
   // eslint-disable-next-line no-unused-vars
@@ -39,12 +45,15 @@ export interface RedisRepositoryModuleOptions {
 }
 
 export interface RepositoryFindOptions {
-  exactSearch?: boolean;
   filters?: GenericObject<unknown>;
   findAll?: boolean;
   page?: number;
   perPage?: number;
   withValues?: boolean;
+}
+
+export interface RepositoryFindPrivateOptions {
+  requirePrimaryKeys?: boolean;
 }
 
 export interface SaveOptions {

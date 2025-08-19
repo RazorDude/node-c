@@ -15,13 +15,5 @@ export class TypeORMDBEntityService<Entity extends ObjectLiteral> extends RDBEnt
     protected schema: EntitySchema
   ) {
     super(qb, repository, schema);
-    const { columns } = schema.options;
-    const primaryKeys: string[] = [];
-    for (const columnName in columns) {
-      if (columns[columnName]?.primary) {
-        primaryKeys.push(columnName);
-      }
-    }
-    this.primaryKeys = primaryKeys;
   }
 }

@@ -26,6 +26,7 @@ export interface PersistanceDeleteOptions {
 
 export interface PersistanceDeletePrivateOptions extends GenericObject {
   processFiltersAllowedFieldsEnabled?: boolean;
+  requirePrimaryKeys?: boolean;
 }
 
 export interface PersistanceDeleteResult<Item> {
@@ -126,6 +127,7 @@ export interface PersistanceUpdateOptions {
 export interface PersistanceUpdatePrivateOptions extends GenericObject {
   processFiltersAllowedFieldsEnabled?: boolean;
   processInputAllowedFieldsEnabled?: boolean;
+  requirePrimaryKeys?: boolean;
 }
 
 export interface PersistanceUpdateResult<Item> {

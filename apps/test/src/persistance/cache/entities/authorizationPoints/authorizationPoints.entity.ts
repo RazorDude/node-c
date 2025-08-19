@@ -1,5 +1,5 @@
 import { AuthorizationPoint as BaseAuthorizationPoint } from '@node-c/domain-iam';
-import { EntitySchemaColumnType } from '@node-c/persistance-redis';
+import { EntitySchema, EntitySchemaColumnType } from '@node-c/persistance-redis';
 
 import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
 import { AuthorizationPoint as DBAuthorizationPoint, UserType } from '../../../db';
@@ -9,23 +9,39 @@ const defaultSchema = getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'au
 export type AuthorizationPoint = RedisEntity<number> &
   BaseAuthorizationPoint<number> &
   Omit<DBAuthorizationPoint, 'userTypes'> & { userTypes: UserType[] };
-export const AuthorizationPointSchema = {
+export const AuthorizationPointSchema: EntitySchema = {
+  ...defaultSchema,
   columns: {
-    ...defaultSchema.columns
-    // allowedInputData?: GenericObject;
-    // controllerNames?: string[];
-    // forbiddenInputData?: GenericObject;
-    // handlerNames?: string[];
-    // inputDataFieldName?: string;
-    // moduleNames?: string[];
-    // name: string;
-    // requiredStaticData?: GenericObject;
-    // userFieldName?: string;
-    // userTypes?: UserType[];
-    // createdAt: {
-    //   isCreationDate: true,
-    //   type: EntitySchemaColumnType.TimestampTz
-    // }
-  },
-  name: defaultSchema.name
+    ...defaultSchema.columns,
+    allowedInputData: {
+      type: EntitySchemaColumnType.Object
+    },
+    controllerNames: {
+      type: EntitySchemaColumnType.Array
+    },
+    forbiddenInputData: {
+      type: EntitySchemaColumnType.Object
+    },
+    handlerNames: {
+      type: EntitySchemaColumnType.Array
+    },
+    inputDataFieldName: {
+      type: EntitySchemaColumnType.String
+    },
+    moduleNames: {
+      type: EntitySchemaColumnType.Array
+    },
+    name: {
+      type: EntitySchemaColumnType.String
+    },
+    requiredStaticData: {
+      type: EntitySchemaColumnType.Object
+    },
+    userFieldName: {
+      type: EntitySchemaColumnType.String
+    },
+    userTypes: {
+      type: EntitySchemaColumnType.Array
+    }
+  }
 };

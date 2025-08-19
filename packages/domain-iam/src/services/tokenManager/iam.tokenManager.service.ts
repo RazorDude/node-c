@@ -83,9 +83,12 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
       if (purgeOldFromPersistance && identifierDataField) {
         const identifierValue = ld.get(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-          await persistanceEntityService.delete({
-            filters: { [identifierDataField]: identifierValue }
-          });
+          await persistanceEntityService.delete(
+            {
+              filters: { [identifierDataField]: identifierValue, type }
+            },
+            { requirePrimaryKeys: false }
+          );
         }
       }
       await super.create(objectToSave, { ttl: signOptions.expiresIn } as DomainCreateOptions);
@@ -140,9 +143,12 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           if (deleteFromStoreIfExpired) {
             const identifierValue = ld.get(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-              await persistanceEntityService.delete({
-                filters: { [identifierDataField]: identifierValue }
-              });
+              await persistanceEntityService.delete(
+                {
+                  filters: { [identifierDataField]: identifierValue, type: TokenType.Access }
+                },
+                { requirePrimaryKeys: false }
+              );
             }
           }
           errorToThrow = new ApplicationError('Expired access token.');

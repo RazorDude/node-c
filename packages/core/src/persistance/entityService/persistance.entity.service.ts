@@ -25,7 +25,7 @@ import { ApplicationError } from '../../common/definitions';
  */
 export abstract class PersistanceEntityService<Entity> {
   protected settings: PersistanceEntityServiceSettings = {
-    processFiltersAllowedFieldsEnabled: true,
+    processFiltersAllowedFieldsEnabled: false,
     processInputAllowedFieldsEnabled: true
   };
 

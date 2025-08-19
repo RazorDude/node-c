@@ -1,20 +1,31 @@
 import {
+  ApplicationError,
+  GenericObject,
   PersistanceDeleteResult,
   PersistanceEntityService,
   PersistanceFindResults,
-  PersistanceUpdateResult
+  PersistanceUpdateResult,
+  ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
 import { mergeDeepRight as merge } from 'ramda';
 
 import {
   BulkCreateOptions,
+  BulkCreatePrivateOptions,
+  CountOptions,
+  CountPrivateOptions,
   CreateOptions,
+  CreatePrivateOptions,
   DeleteOptions,
+  DeletePrivateOptions,
   FindOneOptions,
+  FindOnePrivateOptions,
   FindOptions,
+  FindPrivateOptions,
   RedisEntityServiceSettings,
-  UpdateOptions
+  UpdateOptions,
+  UpdatePrivateOptions
 } from './redis.entity.service.definitions';
 
 import { RedisRepositoryService } from '../repository';
@@ -34,55 +45,91 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     super();
   }
 
-  async bulkCreate(data: Entity[], options?: BulkCreateOptions): Promise<Entity[]> {
-    const { repository, settings, store } = this;
-    const { validationSupported = false } = settings;
-    const actualOptions = Object.assign(options || {}) as BulkCreateOptions;
+  async bulkCreate(
+    data: Entity[],
+    options?: BulkCreateOptions,
+    privateOptions?: BulkCreatePrivateOptions
+  ): Promise<Entity[]> {
+    const { store } = this;
+    const actualOptions = options || {};
+    const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.bulkCreate(data, { ...actualOptions, transactionId: tId });
+      const result = await this.bulkCreate(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
       await store.endTransaction(tId);
       return result;
     }
-    return (await repository.save(data, { transactionId, validate: validationSupported })) as Entity[];
+    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
+    return (await this.save(data, {
+      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
+      transactionId,
+      validate
+    })) as Entity[];
   }
 
-  async create(data: Entity, options?: CreateOptions): Promise<Entity> {
-    const { repository, settings, store } = this;
-    const { validationSupported = false } = settings;
-    const actualOptions = Object.assign(options || {}) as CreateOptions;
+  async create(data: Entity, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+    const { store } = this;
+    const actualOptions = options || {};
+    const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.create(data, { ...actualOptions, transactionId: tId });
+      const result = await this.create(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
       await store.endTransaction(tId);
       return result;
     }
-    return (await repository.save(data, { transactionId, validate: validationSupported }))[0];
+    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
+    return (
+      (await this.save(data, {
+        processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
+        transactionId,
+        validate
+      })) as Entity[]
+    )[0];
   }
 
-  async count(options: FindOptions): Promise<number | undefined> {
+  async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
     const { repository } = this;
     const { filters, findAll } = options;
-    return (await repository.find({ filters, findAll })).length;
+    const { processFiltersAllowedFieldsEnabled } = privateOptions || {};
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
+      allowedFields: repository.columnNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field for counting is required.');
+    }
+    return (await repository.find({ filters: parsedFilters, findAll })).length;
   }
 
-  async delete(options: DeleteOptions): Promise<PersistanceDeleteResult<Entity>> {
-    const { repository, settings, store } = this;
-    const { validationSupported = false } = settings;
+  async delete(
+    options: DeleteOptions,
+    privateOptions?: DeletePrivateOptions
+  ): Promise<PersistanceDeleteResult<Entity>> {
+    const { repository, store } = this;
     const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
+    const actualPrivateOptions = privateOptions || {};
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.delete({ ...options, transactionId: tId });
+      const result = await this.delete({ ...options, transactionId: tId }, actualPrivateOptions);
       await store.endTransaction(tId);
       return result;
     }
-    const { items: itemsToDelete } = await this.find({ filters, findAll: true, requirePrimaryKeys: true });
-    const results: string[] = await repository.save(itemsToDelete, {
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys = true } = actualPrivateOptions;
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
+      allowedFields: repository.columnNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field for deleting data is required.');
+    }
+    const { items: itemsToDelete } = await this.find({ filters, findAll: true }, { requirePrimaryKeys });
+    const results: string[] = await this.save(itemsToDelete, {
       delete: true,
-      transactionId,
-      validate: validationSupported
+      transactionId
     });
     const dataToReturn: PersistanceDeleteResult<Entity> = { count: results.length };
     if (returnOriginalItems) {
@@ -91,17 +138,29 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return dataToReturn;
   }
 
-  async find(options: FindOptions): Promise<PersistanceFindResults<Entity>> {
+  async find(options: FindOptions, privateOptions?: FindPrivateOptions): Promise<PersistanceFindResults<Entity>> {
+    const { repository } = this;
     const { filters, getTotalCount = true, page: optPage, perPage: optPerPage, findAll: optFindAll } = options;
-    const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
-    const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10; // same as above - must be a number
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } = privateOptions || {};
+    // make sure it's truly a number - it could come as string from GET requests
+    const page = optPage ? parseInt(optPage as unknown as string, 10) : 1;
+    // same as above - must be a number
+    const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10;
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
     const findResults: PersistanceFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
+      allowedFields: repository.columnNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
     if (!findAll) {
       findResults.page = page;
       findResults.perPage = perPage;
     }
-    const items: Entity[] = await this.repository.find({ filters, findAll, page, perPage });
+    const items: Entity[] = await repository.find(
+      { filters: parsedFilters, findAll, page, perPage },
+      { requirePrimaryKeys }
+    );
     if (findAll) {
       findResults.perPage = items.length;
     } else {
@@ -117,24 +176,70 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return findResults;
   }
 
-  async findOne(options: FindOneOptions): Promise<Entity | null> {
+  async findOne(options: FindOneOptions, privateOptions?: FindOnePrivateOptions): Promise<Entity | null> {
     const { filters } = options;
-    const items: Entity[] = await this.repository.find({ filters, page: 1, perPage: 1 });
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } = privateOptions || {};
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
+      allowedFields: this.repository.columnNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field is required for the findOne method.');
+    }
+    const items: Entity[] = await this.repository.find({ filters, page: 1, perPage: 1 }, { requirePrimaryKeys });
     return items[0] || null;
   }
 
-  async update(data: Entity, options: UpdateOptions): Promise<PersistanceUpdateResult<Entity>> {
-    const { repository, settings, store } = this;
-    const { validationSupported = false } = settings;
+  protected async save<Data = unknown, ReturnData = unknown>(
+    data: Data,
+    options?: {
+      delete?: boolean;
+      processObjectAllowedFieldsEnabled?: boolean;
+      transactionId?: string;
+      validate?: boolean;
+    }
+  ): Promise<ReturnData> {
+    const { repository } = this;
+    const { delete: optDelete, processObjectAllowedFieldsEnabled, transactionId, validate } = options || {};
+    if (optDelete) {
+      return (await repository.save(data as unknown as Entity, {
+        delete: true,
+        transactionId,
+        validate: false
+      })) as ReturnData;
+    }
+    const dataToSave: Data | Data[] = await this.processObjectAllowedFields<Data>(data, {
+      allowedFields: repository.columnNames,
+      isEnabled: processObjectAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Input
+    });
+    return (await repository.save(dataToSave as Entity, { transactionId, validate })) as ReturnData;
+  }
+
+  async update(
+    data: Entity,
+    options: UpdateOptions,
+    privateOptions?: UpdatePrivateOptions
+  ): Promise<PersistanceUpdateResult<Entity>> {
+    const { settings, store } = this;
+    const { validationEnabled = false } = settings;
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
+    const actualPrivateOptions = privateOptions || {};
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.update(data, { ...options, transactionId: tId });
+      const result = await this.update(data, { ...options, transactionId: tId }, actualPrivateOptions);
       await store.endTransaction(tId);
       return result;
     }
+    const {
+      processFiltersAllowedFieldsEnabled,
+      processInputAllowedFieldsEnabled,
+      requirePrimaryKeys = true,
+      validate
+    } = actualPrivateOptions;
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
-    const itemToUpdate = await this.findOne({ filters, requirePrimaryKeys: true });
+    const itemToUpdate = await this.findOne({ filters }, { processFiltersAllowedFieldsEnabled, requirePrimaryKeys });
     if (!itemToUpdate) {
       dataToReturn.count = 0;
       if (returnData) {
@@ -145,9 +250,10 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       }
       return dataToReturn;
     }
-    const updateResult = await repository.save(merge(itemToUpdate, data) as unknown as Entity, {
+    const updateResult = await this.save<Entity, Entity[]>(merge(itemToUpdate, data) as unknown as Entity, {
+      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
-      validate: validationSupported
+      validate: validate || validationEnabled
     });
     dataToReturn.count = updateResult.length;
     if (returnData) {

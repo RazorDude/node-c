@@ -12,6 +12,7 @@ import {
   EntitySchemaColumnType,
   PrepareOptions,
   RepositoryFindOptions,
+  RepositoryFindPrivateOptions,
   SaveOptions,
   SaveOptionsOnConflict
 } from './redis.repository.definitions';
@@ -26,9 +27,17 @@ import { RedisStoreService } from '../store';
 // TODO: support defining the keys' delimiter symbol
 @Injectable()
 export class RedisRepositoryService<Entity> {
+  protected _columnNames: string[];
+  protected _primaryKeys: string[];
   protected defaultTTL?: number;
-  protected primaryKeys: string[];
   protected storeDelimiter: string;
+
+  public get columnNames(): string[] {
+    return this._columnNames;
+  }
+  public get primaryKeys(): string[] {
+    return this._primaryKeys;
+  }
 
   constructor(
     protected configProvider: ConfigProviderService,
@@ -44,10 +53,12 @@ export class RedisRepositoryService<Entity> {
       persistanceModuleName
     ] as AppConfigPersistanceNoSQL;
     const { columns, name: entityName } = schema;
+    const columnNames: string[] = [];
     const primaryKeys: string[] = [];
     this.defaultTTL = ttlPerEntity?.[entityName] || defaultTTL;
     for (const columnName in columns) {
       const { primary, primaryOrder } = columns[columnName];
+      columnNames.push(columnName);
       if (primary) {
         if (typeof primaryOrder === 'undefined') {
           throw new ApplicationError(
@@ -57,16 +68,21 @@ export class RedisRepositoryService<Entity> {
         primaryKeys.push(columnName);
       }
     }
-    this.primaryKeys = primaryKeys.sort(
+    this._columnNames = columnNames;
+    this._primaryKeys = primaryKeys.sort(
       (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
     );
     this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
   }
 
-  async find<ResultItem extends Entity | string = Entity>(options: RepositoryFindOptions): Promise<ResultItem[]> {
+  async find<ResultItem extends Entity | string = Entity>(
+    options: RepositoryFindOptions,
+    privateOptions?: RepositoryFindPrivateOptions
+  ): Promise<ResultItem[]> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
-    const { exactSearch, filters, findAll, page, perPage, withValues: optWithValues } = options;
+    const { filters, findAll, page, perPage, withValues: optWithValues } = options;
+    const { requirePrimaryKeys } = privateOptions || {};
     const paginationOptions: { count?: number; cursor?: number } = {};
     const primaryKeyFiltersToForceCheck: string[] = [];
     const withValues = typeof optWithValues === 'undefined' || optWithValues === true ? true : false;
@@ -116,10 +132,10 @@ export class RedisRepositoryService<Entity> {
                 return '*';
               }
             }
-            if (exactSearch) {
+            if (requirePrimaryKeys) {
               throw new ApplicationError(
                 `[RedisRepositoryService ${entityName}][Find Error]: ` +
-                  `The primary key field ${field} is required when exactSearch is set to true.`
+                  `The primary key field ${field} is required when requirePrimaryKeys is set to true.`
               );
             }
             return '*';
@@ -206,7 +222,6 @@ export class RedisRepositoryService<Entity> {
     return results;
   }
 
-  // TODO: fix the validation, as it causes errors when the object is not a class-validator-decorated class
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
     const { columns, name: entityName } = schema;
@@ -272,6 +287,8 @@ export class RedisRepositoryService<Entity> {
       storeEntityKey += `${value}`;
     }
     if (optValidate) {
+      // TODO: fix the validation
+      // const validationErrors = await validate(data as Record<string, unknown>, { schema });
       const validationErrors = await validate(data as Record<string, unknown>);
       if (validationErrors.length) {
         throw new ApplicationError(
@@ -314,7 +331,7 @@ export class RedisRepositoryService<Entity> {
     if (optDelete) {
       const prepareOptions: PrepareOptions = {
         onConflict: SaveOptionsOnConflict.DoNothing,
-        validate
+        validate: false
       };
       const deleteKeys: string[] = [];
       for (const i in actualData) {

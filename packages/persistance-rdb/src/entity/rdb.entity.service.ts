@@ -126,14 +126,15 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const { where, include: includeFromFilters } = this.qb.parseFilters(
-      tableName,
-      (await this.processObjectAllowedFields<GenericObject>(filters!, {
-        allowedFields: this.columNames,
-        isEnabled: processFiltersAllowedFieldsEnabled,
-        objectType: ProcessObjectAllowedFieldsType.Filters
-      })) as GenericObject
-    );
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters!, {
+      allowedFields: this.columNames,
+      isEnabled: processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field for counting is required.');
+    }
+    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters);
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
     this.qb.buildQuery<Entity>(queryBuilder, {
       deletedColumnName: this.deletedColumnName,
@@ -180,6 +181,9 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       isEnabled: processFiltersAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Filters
     })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field for deletion is required.');
+    }
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, parsedFilters);
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length || returnOriginalItems) {
@@ -219,20 +223,18 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
     const findResults: PersistanceFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
     const entityName = this.repository.metadata.name;
+    const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
+      allowedFields: this.columNames,
+      isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     let where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
     let orderBy: PersistanceOrderBy[] = [];
-    if (filters) {
-      const parsedFiltersData = this.qb.parseFilters(
-        tableName,
-        (await this.processObjectAllowedFields<GenericObject>(filters, {
-          allowedFields: this.columNames,
-          isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
-          objectType: ProcessObjectAllowedFieldsType.Filters
-        })) as GenericObject
-      );
+    if (Object.keys(processedFilters).length) {
+      const parsedFiltersData = this.qb.parseFilters(tableName, processedFilters);
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
@@ -263,13 +265,14 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         findResults.more = true;
       }
       if (getTotalCount) {
-        findResults.totalCount = await this.count(options);
+        findResults.totalCount = await this.count({ ...options, filters: processedFilters });
       }
     }
     findResults.items = items;
     return findResults;
   }
 
+  // TODO: requirePrimaryKeys
   async findOne(options: FindOneOptions, privateOptions?: FindOnePrivateOptions): Promise<Entity | null> {
     const {
       filters,
@@ -289,18 +292,18 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const { where, include: includeFromFilters } = this.qb.parseFilters(
-      tableName,
-      (await this.processObjectAllowedFields<GenericObject>(filters, {
-        allowedFields: this.columNames,
-        isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
-        objectType: ProcessObjectAllowedFieldsType.Filters
-      })) as GenericObject,
-      {
-        operator: selectOperator as PersistanceSelectOperator,
-        isTopLevel: true
-      }
-    );
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
+      allowedFields: this.columNames,
+      isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+      objectType: ProcessObjectAllowedFieldsType.Filters
+    })) as GenericObject;
+    if (!Object.keys(parsedFilters).length) {
+      throw new ApplicationError('At least one filter field is required for the findOne method.');
+    }
+    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters, {
+      operator: selectOperator as PersistanceSelectOperator,
+      isTopLevel: true
+    });
     const include = this.qb.parseRelations(tableName, optRelations || [], includeFromFilters);
     let orderBy: PersistanceOrderBy[] = [];
     if (optOrderBy) {
@@ -424,11 +427,14 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.update(data, { ...options, transactionManager: tm }, privateOptions);
       }) as Promise<PersistanceUpdateResult<Entity>>;
     }
-    const dataToUpdate = this.processObjectAllowedFields(data, {
+    const dataToUpdate = (await this.processObjectAllowedFields(data, {
       allowedFields: columNames,
       isEnabled: processInputAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Input
-    });
+    })) as Partial<Entity>;
+    if (!Object.keys(dataToUpdate).length) {
+      throw new ApplicationError('At least one field for update is required.');
+    }
     const entityName = repository.metadata.name;
     const tableName = repository.metadata.name;
     const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
@@ -436,6 +442,9 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       isEnabled: processFiltersAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Filters
     })) as GenericObject;
+    if (!Object.keys(processedFilters).length) {
+      throw new ApplicationError('At least one filter field for update is required.');
+    }
     const queryBuilder = this.getRepository(transactionManager)
       .createQueryBuilder(entityName)
       .update()
