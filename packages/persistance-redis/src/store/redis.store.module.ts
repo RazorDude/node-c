@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/core';
+import { ConfigProviderService, Constants as CoreConstants } from '@node-c/core';
 
 import { RedisStoreModuleOptions } from './redis.store.definitions';
 import { RedisStoreService } from './redis.store.service';
@@ -23,7 +23,7 @@ export class RedisStoreModule {
           },
           inject: [ConfigProviderService]
         },
-        { provide: Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME, useValue: persistanceModuleName },
+        { provide: CoreConstants.PERSISTANCE_MODULE_NAME, useValue: persistanceModuleName },
         { provide: serviceToken, useClass: RedisStoreService }
       ],
       exports: [{ provide: serviceToken, useClass: RedisStoreService }]

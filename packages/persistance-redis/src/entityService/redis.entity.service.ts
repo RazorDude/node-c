@@ -1,5 +1,7 @@
 import {
+  AppConfigCommonPersistanceNoSQLEntityServiceSettings,
   ApplicationError,
+  ConfigProviderService,
   GenericObject,
   PersistanceDeleteResult,
   PersistanceEntityService,
@@ -23,7 +25,6 @@ import {
   FindOnePrivateOptions,
   FindOptions,
   FindPrivateOptions,
-  RedisEntityServiceSettings,
   UpdateOptions,
   UpdatePrivateOptions
 } from './redis.entity.service.definitions';
@@ -34,19 +35,21 @@ import { RedisStoreService } from '../store';
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
 export class RedisEntityService<Entity extends object> extends PersistanceEntityService<Entity> {
-  protected settings: RedisEntityServiceSettings;
+  protected settings: AppConfigCommonPersistanceNoSQLEntityServiceSettings;
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
     protected repository: RedisRepositoryService<Entity>,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
-    super();
+    super(configProvider, repository.persistanceModuleName);
   }
 
   async bulkCreate(
-    data: Entity[],
+    data: Partial<Entity>[],
     options?: BulkCreateOptions,
     privateOptions?: BulkCreatePrivateOptions
   ): Promise<Entity[]> {
@@ -61,32 +64,11 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       return result;
     }
     const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
-    return (await this.save(data, {
+    return await this.save(data instanceof Array ? data : [data], {
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
       validate
-    })) as Entity[];
-  }
-
-  async create(data: Entity, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
-    const { store } = this;
-    const actualOptions = options || {};
-    const actualPrivateOptions = privateOptions || {};
-    const { forceTransaction, transactionId } = actualOptions;
-    if (!transactionId && forceTransaction) {
-      const tId = store.createTransaction();
-      const result = await this.create(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
-      await store.endTransaction(tId);
-      return result;
-    }
-    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
-    return (
-      (await this.save(data, {
-        processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
-        transactionId,
-        validate
-      })) as Entity[]
-    )[0];
+    });
   }
 
   async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
@@ -102,6 +84,25 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       throw new ApplicationError('At least one filter field for counting is required.');
     }
     return (await repository.find({ filters: parsedFilters, findAll })).length;
+  }
+
+  async create(data: Partial<Entity>, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+    const { store } = this;
+    const actualOptions = options || {};
+    const actualPrivateOptions = privateOptions || {};
+    const { forceTransaction, transactionId } = actualOptions;
+    if (!transactionId && forceTransaction) {
+      const tId = store.createTransaction();
+      const result = await this.create(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
+      await store.endTransaction(tId);
+      return result;
+    }
+    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
+    return await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
+      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
+      transactionId,
+      validate
+    });
   }
 
   async delete(
@@ -191,7 +192,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     return items[0] || null;
   }
 
-  protected async save<Data = unknown, ReturnData = unknown>(
+  protected async save<Data extends Partial<Entity> | Partial<Entity>[], ReturnData = unknown>(
     data: Data,
     options?: {
       delete?: boolean;
@@ -200,7 +201,8 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       validate?: boolean;
     }
   ): Promise<ReturnData> {
-    const { repository } = this;
+    const { repository, settings } = this;
+    const { validationSettings } = settings;
     const { delete: optDelete, processObjectAllowedFieldsEnabled, transactionId, validate } = options || {};
     if (optDelete) {
       return (await repository.save(data as unknown as Entity, {
@@ -214,7 +216,10 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       isEnabled: processObjectAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Input
     });
-    return (await repository.save(dataToSave as Entity, { transactionId, validate })) as ReturnData;
+    return (await repository.save(dataToSave as Entity, {
+      transactionId,
+      validate: typeof validate !== 'undefined' ? validate : !!validationSettings?.isEnabled
+    })) as ReturnData;
   }
 
   async update(
@@ -222,8 +227,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     options: UpdateOptions,
     privateOptions?: UpdatePrivateOptions
   ): Promise<PersistanceUpdateResult<Entity>> {
-    const { settings, store } = this;
-    const { validationEnabled = false } = settings;
+    const { store } = this;
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionId && forceTransaction) {
@@ -250,11 +254,14 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       }
       return dataToReturn;
     }
-    const updateResult = await this.save<Entity, Entity[]>(merge(itemToUpdate, data) as unknown as Entity, {
-      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
-      transactionId,
-      validate: validate || validationEnabled
-    });
+    const updateResult = await this.save<Entity, Entity[]>(
+      merge(itemToUpdate, data instanceof Array ? data[0] : data),
+      {
+        processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
+        transactionId,
+        validate
+      }
+    );
     dataToReturn.count = updateResult.length;
     if (returnData) {
       dataToReturn.items = updateResult;

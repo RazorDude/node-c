@@ -34,11 +34,6 @@ export interface PersistanceDeleteResult<Item> {
   originalItems?: Item[];
 }
 
-export interface PersistanceEntityServiceSettings {
-  processFiltersAllowedFieldsEnabled?: boolean;
-  processInputAllowedFieldsEnabled?: boolean;
-}
-
 export interface PersistanceFindOneOptions {
   filters: GenericObject;
   include?: string[];

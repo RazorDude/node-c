@@ -1,5 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
+import { Constants as CoreConstants } from '@node-c/core';
+
 import { SQLQueryBuilderModuleOptions } from './rdb.sqlQueryBuilder.definitions';
 import { SQLQueryBuilderService } from './rdb.sqlQueryBuilder.service';
 
@@ -17,6 +19,10 @@ export class SQLQueryBuilderModule {
         {
           provide: Constants.SQL_BUILDER_DB_CONFIG_PATH,
           useValue: `config.persistance.${persistanceModuleName}`
+        },
+        {
+          provide: CoreConstants.PERSISTANCE_MODULE_NAME,
+          useValue: persistanceModuleName
         },
         { provide: serviceToken, useClass: SQLQueryBuilderService }
       ],

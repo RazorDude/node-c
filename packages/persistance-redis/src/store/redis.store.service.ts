@@ -5,6 +5,7 @@ import {
   AppConfigPersistanceNoSQL,
   ApplicationError,
   ConfigProviderService,
+  Constants as CoreConstants,
   GenericObject,
   NoSQLType
 } from '@node-c/core';
@@ -29,12 +30,11 @@ export class RedisStoreService {
   protected useHashmap: boolean;
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     @Inject(Constants.REDIS_CLIENT)
     // eslint-disable-next-line no-unused-vars
     protected client: Redis | Cluster,
-    @Inject(Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME)
+    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
     protected persistanceModuleName: string
   ) {
     const { defaultTTL, storeDelimiter, storeKey, useHashmap } = configProvider.config.persistance[

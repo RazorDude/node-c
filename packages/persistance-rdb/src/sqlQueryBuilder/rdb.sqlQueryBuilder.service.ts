@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ConfigProviderService,
+  Constants as CoreConstants,
   GenericObject,
   PersistanceOrderBy,
   PersistanceOrderByDirection,
@@ -25,7 +26,10 @@ export class SQLQueryBuilderService {
   constructor(
     public configProvider: ConfigProviderService,
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
-    public dbConfigPath: string
+    public dbConfigPath: string,
+    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
+    // eslint-disable-next-line no-unused-vars
+    public persistanceModuleName: string
   ) {
     const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;

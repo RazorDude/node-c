@@ -5,7 +5,6 @@ import {
   PersistanceDeleteOptions,
   PersistanceDeletePrivateOptions,
   PersistanceDeleteResult,
-  PersistanceEntityServiceSettings,
   PersistanceFindOneOptions,
   PersistanceFindOnePrivateOptions,
   PersistanceFindOptions,
@@ -17,6 +16,11 @@ import {
   ProcessObjectAllowedFieldsOptions
 } from './persistance.entity.service.definitions';
 
+import {
+  AppConfigCommonPersistance,
+  AppConfigCommonPersistanceEntityServiceSettings,
+  ConfigProviderService
+} from '../../common/configProvider';
 import { ApplicationError } from '../../common/definitions';
 
 /*
@@ -24,10 +28,17 @@ import { ApplicationError } from '../../common/definitions';
  * to define classes that are agnostic of the type of persitance.
  */
 export abstract class PersistanceEntityService<Entity> {
-  protected settings: PersistanceEntityServiceSettings = {
-    processFiltersAllowedFieldsEnabled: false,
-    processInputAllowedFieldsEnabled: true
-  };
+  protected settings: AppConfigCommonPersistanceEntityServiceSettings;
+
+  constructor(
+    protected configProvider: ConfigProviderService,
+    protected persistanceModuleName: string
+  ) {
+    const { settingsPerEntity } = configProvider.config.persistance[
+      persistanceModuleName
+    ] as AppConfigCommonPersistance;
+    this.settings = settingsPerEntity || {};
+  }
 
   public async bulkCreate(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

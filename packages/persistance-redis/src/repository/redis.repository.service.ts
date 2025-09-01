@@ -1,8 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AppConfigPersistanceNoSQL, ApplicationError, ConfigProviderService } from '@node-c/core';
+import {
+  AppConfigCommonPersistanceNoSQLValidationSettings,
+  AppConfigPersistanceNoSQL,
+  ApplicationError,
+  ConfigProviderService,
+  Constants as CoreConstants
+} from '@node-c/core';
 
-import { validate } from 'class-validator';
+import { ValidationSchema, registerSchema, validate } from 'class-validator';
 import immutable, { Collection } from 'immutable';
 import { mergeDeepRight } from 'ramda';
 import { v4 as uuid } from 'uuid';
@@ -31,9 +37,14 @@ export class RedisRepositoryService<Entity> {
   protected _primaryKeys: string[];
   protected defaultTTL?: number;
   protected storeDelimiter: string;
+  protected validationSchemaProperties: ValidationSchema['properties'];
+  protected validationSettings: AppConfigCommonPersistanceNoSQLValidationSettings;
 
   public get columnNames(): string[] {
     return this._columnNames;
+  }
+  public get persistanceModuleName(): string {
+    return this._persistanceModuleName;
   }
   public get primaryKeys(): string[] {
     return this._primaryKeys;
@@ -41,23 +52,23 @@ export class RedisRepositoryService<Entity> {
 
   constructor(
     protected configProvider: ConfigProviderService,
-    @Inject(Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME)
-    protected persistanceModuleName: string,
+    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
+    protected _persistanceModuleName: string,
     @Inject(Constants.REDIS_REPOSITORY_SCHEMA)
-    // eslint-disable-next-line no-unused-vars
     protected schema: EntitySchema,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
-    const { defaultTTL, storeDelimiter, ttlPerEntity } = configProvider.config.persistance[
-      persistanceModuleName
+    const { defaultTTL, storeDelimiter, settingsPerEntity } = configProvider.config.persistance[
+      _persistanceModuleName
     ] as AppConfigPersistanceNoSQL;
     const { columns, name: entityName } = schema;
     const columnNames: string[] = [];
     const primaryKeys: string[] = [];
-    this.defaultTTL = ttlPerEntity?.[entityName] || defaultTTL;
+    const validationSchemaProperties: ValidationSchema['properties'] = {};
+    this.defaultTTL = settingsPerEntity?.[entityName].ttl || defaultTTL;
     for (const columnName in columns) {
-      const { primary, primaryOrder } = columns[columnName];
+      const { primary, primaryOrder, validationProperties } = columns[columnName];
       columnNames.push(columnName);
       if (primary) {
         if (typeof primaryOrder === 'undefined') {
@@ -67,12 +78,17 @@ export class RedisRepositoryService<Entity> {
         }
         primaryKeys.push(columnName);
       }
+      if (validationProperties) {
+        validationSchemaProperties[columnName] = validationProperties;
+      }
     }
     this._columnNames = columnNames;
     this._primaryKeys = primaryKeys.sort(
       (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
     );
     this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
+    this.validationSchemaProperties = validationSchemaProperties;
+    registerSchema({ name: entityName, properties: validationSchemaProperties });
   }
 
   async find<ResultItem extends Entity | string = Entity>(
@@ -287,9 +303,7 @@ export class RedisRepositoryService<Entity> {
       storeEntityKey += `${value}`;
     }
     if (optValidate) {
-      // TODO: fix the validation
-      // const validationErrors = await validate(data as Record<string, unknown>, { schema });
-      const validationErrors = await validate(data as Record<string, unknown>);
+      const validationErrors = await validate(entityName, data as Record<string, unknown>);
       if (validationErrors.length) {
         throw new ApplicationError(
           `[RedisRepositoryService ${entityName}][Validation Error]: ${validationErrors.join('\n')}`

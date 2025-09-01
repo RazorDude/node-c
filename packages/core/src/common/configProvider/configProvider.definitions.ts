@@ -127,21 +127,43 @@ export interface AppConfigCommonDomainIAM {
   userPasswordHMACAlgorithm?: string;
 }
 
-export interface AppConfigCommonPersistanceClickHouse {
+export type AppConfigCommonPersistance = {
+  settingsPerEntity?: Record<string, AppConfigCommonPersistanceEntityServiceSettings>;
+} & AppConfigCommonPersistanceEntityServiceSettings;
+
+export interface AppConfigCommonPersistanceEntityServiceSettings {
+  processFiltersAllowedFieldsEnabled?: boolean;
+  processInputAllowedFieldsEnabled?: boolean;
+}
+
+export interface AppConfigCommonPersistanceClickHouse extends AppConfigCommonPersistance {
   type: RDBType;
 }
 
-export interface AppConfigCommonPersistanceNoSQL {
+export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersistance {
   clusterMode?: boolean;
   defaultTTL?: number;
   storeDelimiter?: string;
   storeKey: string;
-  ttlPerEntity?: Record<string, number>;
+  settingsPerEntity?: Record<string, AppConfigCommonPersistanceNoSQLEntityServiceSettings>;
   type: NoSQLType;
   useHashmap?: boolean;
+  validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
 }
 
-export interface AppConfigCommonPersistanceRDB {
+export interface AppConfigCommonPersistanceNoSQLEntityServiceSettings
+  extends AppConfigCommonPersistanceEntityServiceSettings {
+  ttl?: number;
+  validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
+}
+
+export interface AppConfigCommonPersistanceNoSQLValidationSettings {
+  throwErrorOnExtraProperies?: boolean;
+  isEnabled?: boolean;
+  whitelistProperties?: boolean;
+}
+
+export interface AppConfigCommonPersistanceRDB extends AppConfigCommonPersistance {
   connectionName: string;
   type: RDBType;
 }

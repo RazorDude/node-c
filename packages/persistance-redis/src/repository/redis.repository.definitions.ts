@@ -1,5 +1,7 @@
 import { GenericObject } from '@node-c/core';
 
+import { ValidationSchema } from 'class-validator';
+
 export interface EntitySchema {
   columns: {
     [columnName: string]: {
@@ -10,6 +12,8 @@ export interface EntitySchema {
       primary?: boolean;
       primaryOrder?: number;
       type?: EntitySchemaColumnType;
+      // https://www.npmjs.com/package/class-validator/v/0.6.0#defining-validation-schema-without-decorators
+      validationProperties?: ValidationSchema['properties'][''];
     };
   };
   name: string;

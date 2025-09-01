@@ -5,7 +5,6 @@ import {
   PersistanceCreatePrivateOptions,
   PersistanceDeleteOptions,
   PersistanceDeletePrivateOptions,
-  PersistanceEntityServiceSettings,
   PersistanceFindOneOptions,
   PersistanceFindOnePrivateOptions,
   PersistanceFindOptions,
@@ -57,10 +56,6 @@ export interface FindOptions
 
 export interface FindPrivateOptions extends PersistanceFindPrivateOptions {
   requirePrimaryKeys?: boolean;
-}
-
-export interface RedisEntityServiceSettings extends PersistanceEntityServiceSettings {
-  validationEnabled?: boolean;
 }
 
 export interface UpdateOptions extends BaseCreateOptions, PersistanceUpdateOptions {}

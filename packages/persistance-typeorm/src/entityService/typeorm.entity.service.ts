@@ -1,3 +1,4 @@
+import { ConfigProviderService } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { EntitySchema, ObjectLiteral } from 'typeorm';
@@ -8,12 +9,11 @@ export class TypeORMDBEntityService<Entity extends ObjectLiteral> extends RDBEnt
   protected primaryKeys: string[];
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
     protected qb: SQLQueryBuilderService,
-    // eslint-disable-next-line no-unused-vars
     protected repository: TypeORMDBRepository<Entity>,
     protected schema: EntitySchema
   ) {
-    super(qb, repository, schema);
+    super(configProvider, qb, repository, schema);
   }
 }

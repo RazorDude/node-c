@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ApplicationError, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
+import { ApplicationError, ConfigProviderService, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
 import { Constants, FindOneOptions, FindOptions, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/persistance-typeorm';
 
@@ -20,11 +20,12 @@ import { User, UserEntity } from './users.entity';
 @Injectable()
 export class UsersService extends TypeORMDBEntityService<User> {
   constructor(
+    configProvider: ConfigProviderService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
     repository: TypeORMDBRepository<User>
   ) {
-    super(qb, repository, UserEntity);
+    super(configProvider, qb, repository, UserEntity);
   }
 
   async find(options: FindOptions, privateOptions?: UsersFindPrivateOptions): Promise<PersistanceFindResults<User>> {

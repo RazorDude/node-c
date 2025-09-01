@@ -1,5 +1,6 @@
 import {
   ApplicationError,
+  ConfigProviderService,
   GenericObject,
   PersistanceDeleteResult,
   PersistanceEntityService,
@@ -42,13 +43,13 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   protected primaryKeys: string[];
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
     protected qb: SQLQueryBuilderService,
     // eslint-disable-next-line no-unused-vars
     protected repository: RDBRepository<Entity>,
     protected schema: RDBEntitySchema
   ) {
-    super();
+    super(configProvider, qb.persistanceModuleName);
     const { columns } = schema.options;
     const primaryKeys: string[] = [];
     let deletedColumnName: string | undefined;
@@ -109,7 +110,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.bulkCreate(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<Entity[]>;
     }
-    return await this.save(data, transactionManager, {
+    return await this.save(data instanceof Array ? data : [data], transactionManager, {
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled
     });
   }
@@ -154,7 +155,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.create(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<Entity>;
     }
-    return await this.save(data, transactionManager, {
+    return await this.save(data instanceof Array ? data[0] : data, transactionManager, {
       processObjectAllowedFieldsEnabled: actualPrivateOptions.processInputAllowedFieldsEnabled
     });
   }
@@ -427,7 +428,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.update(data, { ...options, transactionManager: tm }, privateOptions);
       }) as Promise<PersistanceUpdateResult<Entity>>;
     }
-    const dataToUpdate = (await this.processObjectAllowedFields(data, {
+    const dataToUpdate = (await this.processObjectAllowedFields(data instanceof Array ? data[0] : data, {
       allowedFields: columNames,
       isEnabled: processInputAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Input

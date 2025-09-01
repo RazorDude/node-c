@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { ConfigProviderService } from '@node-c/core';
 import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/persistance-redis';
 
 import { CacheUser } from './users.entity';
@@ -7,9 +8,10 @@ import { CacheUser } from './users.entity';
 @Injectable()
 export class CacheUsersEntityService extends RedisEntityService<CacheUser> {
   constructor(
+    protected configProvider: ConfigProviderService,
     protected repository: RedisRepositoryService<CacheUser>,
     protected store: RedisStoreService
   ) {
-    super(repository, store);
+    super(configProvider, repository, store);
   }
 }

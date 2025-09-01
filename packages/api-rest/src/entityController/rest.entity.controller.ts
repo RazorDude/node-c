@@ -161,6 +161,7 @@ export class RESTAPIEntityControler<
   Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRouteMethods: string[];
+  protected settings: { validationWhitelist?: boolean } = { validationWhitelist: true };
   protected validationPipe: ValidationPipe;
 
   constructor(
@@ -178,7 +179,8 @@ export class RESTAPIEntityControler<
     super(domainEntityService, Object.keys(dto || {}).concat(defaultRouteMethods || []));
     // const finalDto: typeof dto = {};
     // finalDto.bulkCreate = dto?.bulkCreate || BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-    this.validationPipe = new ValidationPipe({ whitelist: true });
+    const { validationWhitelist } = this.settings;
+    this.validationPipe = new ValidationPipe({ whitelist: validationWhitelist });
   }
 
   @Post('bulk')

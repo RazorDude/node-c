@@ -1,5 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
+import { Constants as CoreConstants } from '@node-c/core';
+
 import { RedisRepositoryModuleOptions } from './redis.repository.definitions';
 import { RedisRepositoryService } from './redis.repository.service';
 
@@ -18,7 +20,7 @@ export class RedisRepositoryModule {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
-        { provide: Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME, useValue: persistanceModuleName },
+        { provide: CoreConstants.PERSISTANCE_MODULE_NAME, useValue: persistanceModuleName },
         {
           provide: RedisStoreService,
           useFactory: (redisStoreService: RedisStoreService) => redisStoreService,
