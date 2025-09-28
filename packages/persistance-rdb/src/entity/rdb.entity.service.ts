@@ -123,7 +123,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.count({ ...options, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<number>;
     }
-    const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
+    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
@@ -132,7 +132,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       isEnabled: processFiltersAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Filters
     })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
+    if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field for counting is required.');
     }
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters);
@@ -173,7 +173,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     }
     const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.name;
+    const tableName = this.repository.metadata.tableName;
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
     const deleteType = softDelete ? 'softDelete' : 'delete';
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
@@ -266,7 +266,10 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         findResults.more = true;
       }
       if (getTotalCount) {
-        findResults.totalCount = await this.count({ ...options, filters: processedFilters });
+        findResults.totalCount = await this.count(
+          { ...options, filters: processedFilters },
+          { allowCountWithoutFilters: true }
+        );
       }
     }
     findResults.items = items;
@@ -437,7 +440,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       throw new ApplicationError('At least one field for update is required.');
     }
     const entityName = repository.metadata.name;
-    const tableName = repository.metadata.name;
+    const tableName = repository.metadata.tableName;
     const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
       allowedFields: this.columNames,
       isEnabled: processFiltersAllowedFieldsEnabled,

@@ -1,22 +1,24 @@
 import { DomainFindOneOptions, GenericObject, PersistanceOrderByDirection } from '@node-c/core';
 
-import { IsArray, IsObject, IsOptional } from 'class-validator';
+import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
 export class FindOneDto<Options extends DomainFindOneOptions> extends BaseDto<Options> implements DomainFindOneOptions {
+  @IsNotEmptyObject()
   @IsObject()
   filters: GenericObject<unknown>;
 
-  @IsOptional()
   @IsArray()
+  @IsOptional()
   include?: string[];
 
-  @IsOptional()
+  @IsNotEmptyObject()
   @IsObject()
+  @IsOptional()
   orderBy?: GenericObject<PersistanceOrderByDirection>;
 
-  @IsOptional()
   @IsArray()
+  @IsOptional()
   select?: string[];
 }

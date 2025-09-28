@@ -9,7 +9,7 @@ export class CreateDto<Entity, Options extends CreateOptions<Entity>>
   implements CreateBody<Entity>
 {
   @IsDefined()
-  @IsObject()
   @IsNotEmptyObject()
-  data: Entity;
+  @IsObject()
+  data: Partial<Entity>;
 }

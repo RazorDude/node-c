@@ -11,12 +11,12 @@ export class UpdateDto<Entity, Options extends UpdateOptions<Entity>>
   implements UpdateBody<Entity>
 {
   @IsDefined()
-  @IsObject()
   @IsNotEmptyObject()
-  data: Entity;
+  @IsObject()
+  data: Partial<Entity>;
 
   @IsDefined()
-  @IsObject()
   @IsNotEmptyObject()
+  @IsObject()
   filters: GenericObject<unknown>;
 }

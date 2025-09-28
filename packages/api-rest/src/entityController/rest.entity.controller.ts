@@ -252,18 +252,19 @@ export class RESTAPIEntityControler<
 
   static getDefaultDtos<EntityForDtos>(): {
     bulkCreate: DefaultDtos<EntityForDtos>['BulkCreate'];
+    create: DefaultDtos<EntityForDtos>['Create'];
+    delete: DefaultDtos<EntityForDtos>['Delete'];
     find: DefaultDtos<EntityForDtos>['Find'];
     findOne: DefaultDtos<EntityForDtos>['FindOne'];
+    update: DefaultDtos<EntityForDtos>['Update'];
   } {
     return {
       bulkCreate: BaseBulkCreateDto as unknown as DefaultDtos<EntityForDtos>['BulkCreate'],
+      create: BaseCreateDto as unknown as DefaultDtos<EntityForDtos>['Create'],
+      delete: BaseDeleteDto as unknown as DefaultDtos<EntityForDtos>['Delete'],
       find: BaseFindDto as unknown as DefaultDtos<EntityForDtos>['Find'],
-      findOne: BaseFindDto as unknown as DefaultDtos<EntityForDtos>['FindOne']
-      // create: BaseCreateDto,
-      // delete: BaseDeleteDto,
-      // find: BaseFindDto,
-      // findOne: BaseFindOneDto,
-      // update: BaseUpdateDto
+      findOne: BaseFindOneDto as unknown as DefaultDtos<EntityForDtos>['FindOne'],
+      update: BaseUpdateDto as unknown as DefaultDtos<EntityForDtos>['Update']
     };
   }
 

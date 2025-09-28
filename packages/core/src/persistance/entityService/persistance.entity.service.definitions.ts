@@ -11,6 +11,7 @@ export interface PersistanceCountOptions {
 }
 
 export interface PersistanceCountPrivateOptions extends GenericObject {
+  allowCountWithoutFilters?: boolean;
   processFiltersAllowedFieldsEnabled?: boolean;
 }
 

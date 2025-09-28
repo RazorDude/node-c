@@ -1,35 +1,37 @@
 import { DomainFindOptions, GenericObject, PersistanceOrderByDirection } from '@node-c/core';
 
-import { IsArray, IsBooleanString, IsNumberString, IsObject, IsOptional } from 'class-validator';
+import { IsArray, IsBooleanString, IsNotEmptyObject, IsNumberString, IsObject, IsOptional } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
 export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options> implements DomainFindOptions {
+  @IsNotEmptyObject()
   @IsObject()
   @IsOptional()
   filters?: GenericObject;
 
-  @IsOptional()
   @IsBooleanString()
+  @IsOptional()
   findAll?: boolean;
 
-  @IsOptional()
   @IsArray()
+  @IsOptional()
   include?: string[];
 
-  @IsOptional()
   @IsObject()
+  @IsOptional()
+  @IsNotEmptyObject()
   orderBy?: GenericObject<PersistanceOrderByDirection>;
 
-  @IsOptional()
   @IsNumberString()
+  @IsOptional()
   page?: number;
 
-  @IsOptional()
   @IsNumberString()
+  @IsOptional()
   perPage?: number;
 
-  @IsOptional()
   @IsArray()
+  @IsOptional()
   select?: string[];
 }

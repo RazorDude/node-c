@@ -74,13 +74,13 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
   async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
     const { repository } = this;
     const { filters, findAll } = options;
-    const { processFiltersAllowedFieldsEnabled } = privateOptions || {};
+    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } = privateOptions || {};
     const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
       allowedFields: repository.columnNames,
       isEnabled: processFiltersAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Filters
     })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
+    if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field for counting is required.');
     }
     return (await repository.find({ filters: parsedFilters, findAll })).length;
@@ -170,7 +170,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
         findResults.more = true;
       }
       if (getTotalCount) {
-        findResults.totalCount = await this.count(options);
+        findResults.totalCount = await this.count(options, { allowCountWithoutFilters: true });
       }
     }
     findResults.items = items;
