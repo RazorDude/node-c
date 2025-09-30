@@ -5,6 +5,7 @@ export default defineConfig({
     coverage: {
       exclude: ['src/index.ts', 'dist', 'test']
     },
+    globalSetup: 'test/vitest.globalSetup.ts',
     include: ['test/**/*.spec.ts']
   }
 });

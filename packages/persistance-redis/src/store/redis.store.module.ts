@@ -19,7 +19,9 @@ export class RedisStoreModule {
         {
           provide: Constants.REDIS_CLIENT,
           useFactory: async (configProvider: ConfigProviderService) => {
-            return await RedisStoreService.createClient(configProvider.config, { persistanceModuleName });
+            // this is purposfully split like this, so we can place debug logs in between when needed :D
+            const client = await RedisStoreService.createClient(configProvider.config, { persistanceModuleName });
+            return client;
           },
           inject: [ConfigProviderService]
         },
