@@ -274,10 +274,8 @@ export enum AppEnvironment {
  * Other config-related definitions.
  */
 
-export interface ConfigProviderModuleOptions {
+export interface ConfigProviderModuleOptions extends LoadConfigOptions {
   appConfigs: LoadConfigAppConfigs;
-  envKeys: AppConfigFromEnvKeys;
-  envKeysParentNames: AppConfigFromEnvKeysParentNames;
 }
 
 // TODO: figure out how to move this to the Domain-IAM package
@@ -328,4 +326,6 @@ export type LoadConfigAppConfigs<
 export interface LoadConfigOptions {
   envKeys?: AppConfigFromEnvKeys;
   envKeysParentNames?: AppConfigFromEnvKeysParentNames;
+  useEnvFile?: boolean;
+  useEnvFileWithPriority?: boolean;
 }

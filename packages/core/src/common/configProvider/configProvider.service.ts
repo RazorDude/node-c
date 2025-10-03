@@ -125,7 +125,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     appConfigs: LoadConfigAppConfigs,
     options?: LoadConfigOptions
   ): Promise<AppConfig> {
-    const { ...optionsData } = options || ({} as LoadConfigOptions);
+    const { useEnvFile, useEnvFileWithPriority, ...optionsData } = options || ({} as LoadConfigOptions);
     const envKeys = optionsData.envKeys || APP_CONFIG_FROM_ENV_KEYS_DEFAULT;
     const envKeysParentNames = optionsData.envKeysParentNames || APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT;
     const processEnv = process.env;
@@ -144,10 +144,18 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     } = {};
     const moduleTypesRegex = new RegExp(`^((${Object.keys(envKeys).join(')|(')}))_`);
     config.general.environment = envName;
-    // populate the data from the .env file into the config object
-    const envVars = dotenv.parse(
-      (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
-    );
+    let envVars: Record<string, unknown> = processEnv;
+    if (useEnvFile) {
+      // populate the data from the .env file into the config object
+      const envVarsFromFile = dotenv.parse(
+        (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
+      );
+      if (useEnvFileWithPriority) {
+        envVars = mergeDeepRight(envVars, envVarsFromFile);
+      } else {
+        envVars = mergeDeepRight(envVarsFromFile, envVars);
+      }
+    }
     // first pass - create a list of modules by name and map them by module type
     for (const envKey in envVars) {
       const [, moduleCategory] = envKey.match(moduleTypesRegex) || [];

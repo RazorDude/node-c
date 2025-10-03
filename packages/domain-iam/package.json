@@ -1,6 +1,6 @@
 {
   "name": "@node-c/domain-iam",
-  "version": "1.0.0-alpha22",
+  "version": "1.0.0-alpha23",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
-    "@node-c/core": "^1.0.0-alpha22",
+    "@node-c/core": "^1.0.0-alpha23",
     "immutable": "^5.0.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
