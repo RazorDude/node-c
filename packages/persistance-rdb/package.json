@@ -1,6 +1,6 @@
 {
   "name": "@node-c/persistance-rdb",
-  "version": "1.0.0-alpha23",
+  "version": "1.0.0-alpha24",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.12",
-    "@node-c/core": "^1.0.0-alpha23",
+    "@node-c/core": "^1.0.0-alpha24",
     "class-validator": "^0.14.1",
     "lodash": "^4.17.21",
     "uuid": "^11.0.5"

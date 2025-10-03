@@ -8,14 +8,14 @@ import { Constants } from '../definitions';
 @Module({})
 export class ConfigProviderModule {
   static register(options: ConfigProviderModuleOptions): DynamicModule {
-    const { appConfigs, envKeys, envKeysParentNames } = options;
+    const { appConfigs, ...otherOptions } = options;
     return {
       global: true,
       module: ConfigProviderModule,
       providers: [
         {
           provide: Constants.CONFIG,
-          useFactory: async () => await ConfigProviderService.loadConfig(appConfigs, { envKeys, envKeysParentNames })
+          useFactory: async () => await ConfigProviderService.loadConfig(appConfigs, { ...otherOptions })
         },
         ConfigProviderService
       ],
