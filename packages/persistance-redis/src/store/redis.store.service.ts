@@ -67,7 +67,12 @@ export class RedisStoreService {
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
-      await client.connect();
+      try {
+        await client.connect();
+      } catch (err) {
+        console.error(`[RedisStore][${persistanceModuleName}]: Error connecting to Redis:`, err);
+        throw err;
+      }
       return client as Cluster;
     }
     const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
@@ -78,7 +83,12 @@ export class RedisStoreService {
       port: actualPort,
       username: actualUser
     });
-    await client.connect();
+    try {
+      await client.connect();
+    } catch (err) {
+      console.error(`[RedisStore][${persistanceModuleName}]: Error connecting to Redis:`, err);
+      throw err;
+    }
     return client as Redis;
   }
 

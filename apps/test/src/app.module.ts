@@ -41,7 +41,9 @@ export class AppModuleBase {
         },
         name: 'persistance'
       }
-    }
+    },
+    useEnvFile: true,
+    useEnvFileWithPriority: true
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),

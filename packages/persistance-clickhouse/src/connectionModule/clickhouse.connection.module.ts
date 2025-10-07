@@ -23,14 +23,24 @@ export class ClickHouseConnectionModule {
             const { database, host, password, port, user } = persistanceConfig[
               persistanceModuleName as keyof typeof persistanceConfig
             ] as AppConfigPersistanceRDB;
-            return new ClickHouseClient({
-              database,
-              host,
-              name: clientName,
-              password,
-              port,
-              username: user
-            });
+            let client: ClickHouseClient;
+            try {
+              client = new ClickHouseClient({
+                database,
+                host,
+                name: clientName,
+                password,
+                port,
+                username: user
+              });
+            } catch (err) {
+              console.error(
+                `[ClickHouseConnectionModule][${persistanceModuleName}]: Error connecting to ClickHouse:`,
+                err
+              );
+              throw err;
+            }
+            return client;
           },
           inject: [ConfigProviderService]
         }

@@ -5,6 +5,8 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 import { AppConfigPersistanceRDB, ConfigProviderService, RDBType, loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/persistance-rdb';
 
+import { DataSource } from 'typeorm';
+
 import { TypeORMDBModuleOptions } from './typeorm.module.definitions';
 
 export class TypeORMDBModule {
@@ -21,6 +23,16 @@ export class TypeORMDBModule {
       imports: [
         ...(importsPreORM || []),
         TypeOrmModule.forRootAsync({
+          dataSourceFactory: async options => {
+            let dataSource: DataSource;
+            try {
+              dataSource = await new DataSource(options!).initialize();
+            } catch (err) {
+              console.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
+              throw err;
+            }
+            return dataSource;
+          },
           name: connectionName,
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
