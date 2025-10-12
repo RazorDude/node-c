@@ -53,9 +53,9 @@ export class RedisStoreService {
       persistanceModuleName
     ] as AppConfigPersistanceNoSQL;
     const actualHost = host || '0.0.0.0';
-    const actualPassword = password || undefined;
+    const actualPassword = password?.length ? password : undefined;
     const actualPort = port || 6379;
-    const actualUser = user || 'default';
+    const actualUser = user?.length ? user : undefined;
     if (clusterMode) {
       const hostList = actualHost.split(',');
       const portList = `${actualPort}`.split(',');
