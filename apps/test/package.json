@@ -1,12 +1,13 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-alpha26",
+  "version": "1.0.0-alpha27",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
     "start": "nest start src/main.ts --watch",
+    "start:test": "NODE_ENV=test nest start src/main.ts --watch",
     "test": "NODE_ENV=test vitest --config test/vitest.config.ts",
     "test:coverage": "NODE_ENV=test vitest --config test/vitest.config.ts --coverage",
     "typeorm": "typeorm-ts-node-commonjs"
@@ -26,12 +27,12 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha26",
-    "@node-c/api-rest": "^1.0.0-alpha26",
-    "@node-c/core": "^1.0.0-alpha26",
-    "@node-c/domain-iam": "^1.0.0-alpha26",
-    "@node-c/persistance-clickhouse": "^1.0.0-alpha26",
-    "@node-c/persistance-redis": "^1.0.0-alpha26",
-    "@node-c/persistance-typeorm": "^1.0.0-alpha26"
+    "@node-c/api-http": "^1.0.0-alpha27",
+    "@node-c/api-rest": "^1.0.0-alpha27",
+    "@node-c/core": "^1.0.0-alpha27",
+    "@node-c/domain-iam": "^1.0.0-alpha27",
+    "@node-c/persistance-clickhouse": "^1.0.0-alpha27",
+    "@node-c/persistance-redis": "^1.0.0-alpha27",
+    "@node-c/persistance-typeorm": "^1.0.0-alpha27"
   }
 }
