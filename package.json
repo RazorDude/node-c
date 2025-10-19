@@ -16,6 +16,7 @@
     "node": ">= 22"
   },
   "scripts": {
+    "build:clean:all": "npm run build:clean --workspace=packages/core && npm run build:clean --workspace=packages/persistance-rdb && npm run build:clean --workspace=packages/persistance-typeorm && npm run build:clean --workspace=packages/persistance-clickhouse && npm run build:clean --workspace=packages/persistance-redis && npm run build:clean --workspace=packages/domain-iam && npm run build:clean --workspace=packages/api-http && npm run build:clean --workspace=packages/api-rest",
     "publish-package:all": "npm run publish-package --workspace=packages/core && npm run publish-package --workspace=packages/persistance-rdb && npm run publish-package --workspace=packages/persistance-typeorm && npm run publish-package --workspace=packages/persistance-clickhouse && npm run publish-package --workspace=packages/persistance-redis && npm run publish-package --workspace=packages/domain-iam && npm run publish-package --workspace=packages/api-http && npm run publish-package --workspace=packages/api-rest",
     "start:apps-test:debug": "NODE_ENV=local nest start @node-c/app-test --debug --watch",
     "start:apps-test:local": "NODE_ENV=local nest start @node-c/app-test --watch",

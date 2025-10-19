@@ -124,6 +124,7 @@ export interface PersistanceUpdatePrivateOptions extends GenericObject {
   processFiltersAllowedFieldsEnabled?: boolean;
   processInputAllowedFieldsEnabled?: boolean;
   requirePrimaryKeys?: boolean;
+  withDeleted?: boolean;
 }
 
 export interface PersistanceUpdateResult<Item> {

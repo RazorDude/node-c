@@ -22,6 +22,7 @@ export class SQLQueryBuilderService {
   columnQuotesSymbol: string;
   dbType: RDBType | string;
   iLikeSupported: boolean;
+  returningSupported: boolean;
 
   constructor(
     public configProvider: ConfigProviderService,
@@ -36,9 +37,11 @@ export class SQLQueryBuilderService {
     if (type === RDBType.Aurora || type === RDBType.ClickHouse || type === RDBType.MySQL) {
       this.columnQuotesSymbol = '`';
       this.iLikeSupported = false;
+      this.returningSupported = false;
     } else if (type === RDBType.PG) {
       this.columnQuotesSymbol = '"';
       this.iLikeSupported = true;
+      this.returningSupported = false;
     }
   }
 
@@ -46,9 +49,10 @@ export class SQLQueryBuilderService {
     ormQueryBuilder: OrmBaseQueryBuilder<Entity> | OrmSelectQueryBuilder<Entity>,
     options: BuildQueryOptions
   ): void {
-    const { where, include, orderBy, select, withDeleted = false } = options;
+    const { where: optWhere, include, orderBy, select, withDeleted } = options;
     const cqs = this.columnQuotesSymbol;
     const deletedColumnName = options.deletedColumnName || 'deletedAt';
+    const where = { ...(optWhere || {}) };
     if ('withDeleted' in ormQueryBuilder) {
       const oqb = ormQueryBuilder as OrmSelectQueryBuilder<Entity>;
       if (withDeleted) {
@@ -70,8 +74,12 @@ export class SQLQueryBuilderService {
       if (select && select.length) {
         oqb.select(this.parseSelect(select, include));
       }
+    } else if (withDeleted === false) {
+      where[deletedColumnName] = {
+        query: `${cqs}${deletedColumnName}${cqs} IS NULL`
+      };
     }
-    if (where) {
+    if (Object.keys(where).length) {
       let isFirst = true;
       for (const fieldName in where) {
         const whereItem = where[fieldName];

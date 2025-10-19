@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "publish-package": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build && npm publish --access public",
+    "publish-package": "npm run build:clean && npm publish --access public",
     "test": "vitest --config src/vitest.config.ts",
     "test:coverage": "vitest --config src/vitest.config.ts --coverage"
   },

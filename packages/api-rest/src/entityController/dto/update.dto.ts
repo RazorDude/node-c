@@ -1,6 +1,6 @@
 import { GenericObject } from '@node-c/core';
 
-import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
+import { IsBoolean, IsDefined, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
@@ -19,4 +19,8 @@ export class UpdateDto<Entity, Options extends UpdateOptions<Entity>>
   @IsNotEmptyObject()
   @IsObject()
   filters: GenericObject<unknown>;
+
+  @IsOptional()
+  @IsBoolean()
+  returnData?: boolean;
 }

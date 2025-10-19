@@ -31,6 +31,7 @@ import {
   UpdatePrivateOptions
 } from './rdb.entity.service.definitions';
 
+import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder';
 import { RDBEntityManager, RDBRepository } from '../repository';
 import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
 
@@ -425,7 +426,11 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   ): Promise<PersistanceUpdateResult<Entity>> {
     const { columNames, repository } = this;
     const { filters, forceTransaction, returnData, returnOriginalItems, transactionManager } = options;
-    const { processFiltersAllowedFieldsEnabled, processInputAllowedFieldsEnabled } = privateOptions || {};
+    const {
+      processFiltersAllowedFieldsEnabled,
+      processInputAllowedFieldsEnabled,
+      withDeleted = false
+    } = privateOptions || {};
     if (!transactionManager && forceTransaction) {
       return repository.manager.transaction(tm => {
         return this.update(data, { ...options, transactionManager: tm }, privateOptions);
@@ -454,24 +459,58 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       .update()
       .set(dataToUpdate);
     const { where: parsedWhere, include } = this.qb.parseFilters(tableName, processedFilters);
+    const hasInclude = Object.keys(include).length;
     let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};
-    if (Object.keys(include).length || returnOriginalItems) {
-      const findData = await this.find({ filters: processedFilters, transactionManager });
+    if (hasInclude || returnOriginalItems) {
+      const findData = await this.find(
+        { filters: processedFilters, findAll: true, transactionManager },
+        { processFiltersAllowedFieldsEnabled: false }
+      );
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       originalItems = findData.items;
       where[field] = value;
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where });
+    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where, withDeleted });
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
     if (returnOriginalItems) {
       dataToReturn.originalItems = originalItems;
     }
+    // find the updated data
     if (returnData) {
-      const result = await queryBuilder.returning('*').execute();
-      // TODO: consider using generatedMaps, instead of raw
+      let result: OrmUpdateQueryBuilderUpdateResult;
+      // if returning is supported by the db, it's easy
+      if (this.qb.returningSupported) {
+        result = await queryBuilder.returning('*').execute();
+      }
+      // otherwise, run a find on the db to get all items by the originally provided filters
+      // that are already used for the update
+      else {
+        result = await queryBuilder.execute();
+        const { items: updatedItems } = await this.find(
+          {
+            filters: processedFilters,
+            findAll: true,
+            transactionManager
+          },
+          { processFiltersAllowedFieldsEnabled: false }
+        );
+        // remove any related entities that might have been joined for the search
+        if (hasInclude) {
+          const keysToDelete: string[] = [];
+          for (const entityName in include) {
+            keysToDelete.push(entityName.split('.')[0]);
+          }
+          updatedItems.forEach((updatedItem, updatedItemIndex) => {
+            keysToDelete.forEach(keyToDelete => delete updatedItem[keyToDelete]);
+            updatedItems[updatedItemIndex] = updatedItem;
+          });
+        }
+        result.raw = updatedItems;
+      }
+      // TODO: consider using generatedMaps, instead of raw (only applies to returningSupported=true)
       dataToReturn.count = (result.raw as Entity[]).length;
       dataToReturn.items = result.raw as Entity[];
     } else {

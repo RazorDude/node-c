@@ -18,6 +18,7 @@ import {
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
   filterByFirstServiceResultFields?: GenericObject<string>;
+  returnData?: boolean;
   runOnNoFirstServiceResultOnly?: boolean | string;
 }
 
