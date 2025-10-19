@@ -146,7 +146,8 @@ export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extend
   @Patch()
   async update(@Body() body: UpdateBody<Entity>): Promise<DomainUpdateResult<Entity>> {
     this.checkRoute('update');
-    return await this.domainEntityService.update(body.data, { filters: body.filters });
+    const { data, ...options } = body;
+    return await this.domainEntityService.update(data, options);
   }
 }
 
