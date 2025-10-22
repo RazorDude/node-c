@@ -112,7 +112,7 @@ export class SQLQueryBuilderService {
     }
   }
 
-  getValueForFilter(
+  protected getValueForFilter(
     entityName: string,
     _fieldName: string,
     fieldAlias: string,
@@ -183,7 +183,7 @@ export class SQLQueryBuilderService {
     };
   }
 
-  parseArrayOfFilters(
+  protected parseArrayOfFilters(
     filtersArray: unknown[],
     fieldAlias: string
   ): {
@@ -263,6 +263,7 @@ export class SQLQueryBuilderService {
       fieldAliases?: { [fieldName: string]: string };
       isTopLevel?: boolean;
       operator?: PersistanceSelectOperator;
+      parameterNamesToFieldAliasesMap?: { [fieldName: string]: string };
     } = { isTopLevel: true }
   ): {
     where: { [fieldName: string]: ParsedFilter };
@@ -271,6 +272,7 @@ export class SQLQueryBuilderService {
     const cqs = this.columnQuotesSymbol;
     const { isTopLevel, operator } = options;
     const fieldAliases = options.fieldAliases || {};
+    const parameterNamesToFieldAliasesMap = options.parameterNamesToFieldAliasesMap || {};
     const where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
     for (const fieldName in filters) {
@@ -296,11 +298,12 @@ export class SQLQueryBuilderService {
         if (!fieldAlias) {
           fieldAlias = actualFieldName;
         }
+        const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
         const itemData = this.parseFilters(
           entityAlias,
           { [actualFieldName]: fieldValue },
           {
-            fieldAliases: { [actualFieldName]: fieldAlias },
+            fieldAliases: { [actualFieldName]: actualFieldAlias },
             isTopLevel: false,
             operator
           }
@@ -308,23 +311,24 @@ export class SQLQueryBuilderService {
         where[fieldName] = itemData.where[actualFieldName];
         include = { ...include, ...itemData.include };
         continue;
-      } else {
-        if (!fieldAlias) {
-          fieldAlias = fieldName;
-        }
       }
+      if (!fieldAlias) {
+        fieldAlias = fieldName;
+      }
+      const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
       if (fieldValue === null) {
         where[fieldName] = {
-          query: `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
+          query: `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
         };
         continue;
       }
+      // console.log('====>', fieldValue);
       // handle array values
       if (fieldValue instanceof Array) {
         // if all values are primitive types and/or dates, then use 'between' (if provided) or 'in'
         const { hasValues, isSimple, paramsForQuery, queryTemplateParamNames } = this.parseArrayOfFilters(
           fieldValue,
-          fieldAlias
+          actualFieldAlias
         );
         if (!hasValues) {
           continue;
@@ -334,15 +338,15 @@ export class SQLQueryBuilderService {
             where[fieldName] = {
               params: paramsForQuery,
               query:
-                `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
-                `between :${fieldAlias}_0 and :${fieldAlias}_1`
+                `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
+                `between :${actualFieldAlias}_0 and :${actualFieldAlias}_1`
             };
             continue;
           }
           where[fieldName] = {
             params: paramsForQuery,
             query:
-              `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
+              `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
               `in (${queryTemplateParamNames.replace(/,\s$/, '')})`
           };
           continue;
@@ -355,9 +359,10 @@ export class SQLQueryBuilderService {
               entityName,
               orFieldValue,
               fieldName,
-              `${fieldAlias}_${orFieldIndex}_f`,
+              `${actualFieldAlias}_${orFieldIndex}_f`,
               operator
             );
+            // console.log('[0]:', itemData);
             finalWhereValue.params = { ...finalWhereValue.params, ...(itemData.parsedFilter.params || {}) };
             finalWhereValue.query += `${finalWhereValue.query.length ? ' or ' : '('}${itemData.parsedFilter.query}`;
             include = { ...include, ...itemData.include };
@@ -369,9 +374,10 @@ export class SQLQueryBuilderService {
             entityName,
             fieldValue as unknown as GenericObject,
             fieldName,
-            fieldAlias,
+            actualFieldAlias,
             operator
           );
+          // console.log('[1]:', itemData);
           if (itemData.parsedFilter.query === '()') {
             continue;
           }
@@ -386,20 +392,21 @@ export class SQLQueryBuilderService {
           entityName,
           fieldValue as unknown as GenericObject,
           fieldName,
-          fieldAlias,
+          actualFieldAlias,
           operator
         );
+        // console.log('[2]:', itemData);
         where[fieldName] = itemData.parsedFilter;
         include = { ...include, ...itemData.include };
         continue;
       }
       // handle the rest of the allowed operators and the $not operator, where applicable
-      where[fieldName] = this.getValueForFilter(entityName, fieldName, fieldAlias, fieldValue, isNot, operator);
+      where[fieldName] = this.getValueForFilter(entityName, fieldName, actualFieldAlias, fieldValue, isNot, operator);
     }
     return { where, include };
   }
 
-  parseInnerFilters(
+  protected parseInnerFilters(
     entityName: string,
     filtersObject: GenericObject,
     fieldName: string,
@@ -417,14 +424,16 @@ export class SQLQueryBuilderService {
         op = key;
       }
       const actualFieldName = fieldName === PersistanceSelectOperator.Or ? key : fieldName;
+      const fieldParameterName = `${fieldAlias}_${parsedValueCount}`;
       const innerValue = filtersObject[key];
       const itemData = this.parseFilters(
         entityName,
         { [actualFieldName]: innerValue },
         {
-          fieldAliases: { [actualFieldName]: `${fieldAlias}_${parsedValueCount}` },
+          fieldAliases: { [actualFieldName]: fieldParameterName },
           isTopLevel: false,
-          operator: op as PersistanceSelectOperator
+          operator: op as PersistanceSelectOperator,
+          parameterNamesToFieldAliasesMap: { [fieldParameterName]: fieldAlias }
         }
       );
       const fieldWhereData = itemData.where[actualFieldName];
