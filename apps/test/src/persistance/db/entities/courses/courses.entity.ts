@@ -1,9 +1,12 @@
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
+import { Category } from '../categories';
 import { CourseType } from '../courseTypes';
 
 export interface Course<Lesson extends DBEntity = DBEntity, User extends DBEntity = DBEntity> extends DBEntity {
+  category?: Category;
+  categoryId?: number;
   courseType?: CourseType;
   courseTypeId: number;
   lessons?: Lesson[];
@@ -14,6 +17,7 @@ export interface Course<Lesson extends DBEntity = DBEntity, User extends DBEntit
 export const CourseEntity = new EntitySchema<Course>({
   columns: {
     ...DBEntitySchema.columns,
+    categoryId: { name: 'category_id', nullable: true, type: 'integer' },
     courseTypeId: { type: 'integer' },
     name: { type: 'varchar' }
   },
@@ -26,11 +30,17 @@ export const CourseEntity = new EntitySchema<Course>({
     }
   ],
   relations: {
+    category: {
+      type: 'many-to-one',
+      target: 'category',
+      inverseSide: 'courses',
+      joinColumn: { name: 'category_id', referencedColumnName: 'id' }
+    },
     courseType: {
       type: 'many-to-one',
       target: 'courseType',
       inverseSide: 'courses'
-    } as EntitySchemaRelationOptions,
+    },
     lessons: {
       type: 'many-to-many',
       target: 'lesson',
@@ -40,7 +50,7 @@ export const CourseEntity = new EntitySchema<Course>({
         joinColumn: { name: 'courseId', referencedColumnName: 'id' },
         inverseJoinColumn: { name: 'lessonId', referencedColumnName: 'id' }
       }
-    } as EntitySchemaRelationOptions,
+    },
     users: {
       type: 'many-to-many',
       target: 'user',
@@ -50,7 +60,7 @@ export const CourseEntity = new EntitySchema<Course>({
         joinColumn: { name: 'courseId', referencedColumnName: 'id' },
         inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' }
       }
-    } as EntitySchemaRelationOptions
+    }
   },
   tableName: 'courses',
   name: 'course'

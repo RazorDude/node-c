@@ -39,6 +39,7 @@ import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryB
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
 export class RDBEntityService<Entity extends GenericObject<unknown>> extends PersistanceEntityService<Entity> {
+  protected columnAliases: Record<string, string>;
   protected columNames: string[];
   protected deletedColumnName?: string;
   protected primaryKeys: string[];
@@ -54,15 +55,19 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     const { columns } = schema.options;
     const primaryKeys: string[] = [];
     let deletedColumnName: string | undefined;
+    this.columnAliases = {};
     this.columNames = [];
     for (const columnName in columns) {
-      const { deleteDate, primary } = columns[columnName] || {};
+      const { deleteDate, name, primary } = columns[columnName] || {};
       this.columNames.push(columnName);
-      if (primary) {
-        primaryKeys.push(columnName);
-      }
       if (!deletedColumnName && deleteDate) {
         deletedColumnName = columnName;
+      }
+      if (name) {
+        this.columnAliases[columnName] = name;
+      }
+      if (primary) {
+        primaryKeys.push(columnName);
       }
     }
     this.deletedColumnName = deletedColumnName;
@@ -136,7 +141,9 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field for counting is required.');
     }
-    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters);
+    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters, {
+      fieldAliases: this.columnAliases
+    });
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
     this.qb.buildQuery<Entity>(queryBuilder, {
       deletedColumnName: this.deletedColumnName,
@@ -186,7 +193,9 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     if (!Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field for deletion is required.');
     }
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, parsedFilters);
+    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, parsedFilters, {
+      fieldAliases: this.columnAliases
+    });
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (Object.keys(include).length || returnOriginalItems) {
       const findData = await this.find({ filters: parsedFilters, transactionManager });
@@ -230,27 +239,29 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
       objectType: ProcessObjectAllowedFieldsType.Filters
     })) as GenericObject;
-    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     let where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
     let orderBy: PersistanceOrderBy[] = [];
     if (Object.keys(processedFilters).length) {
-      const parsedFiltersData = this.qb.parseFilters(tableName, processedFilters);
+      const parsedFiltersData = this.qb.parseFilters(entityName, processedFilters, {
+        fieldAliases: this.columnAliases
+      });
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
-    include = this.qb.parseRelations(tableName, optRelations || [], include);
+    include = this.qb.parseRelations(entityName, optRelations || [], include);
     if (optOrderBy) {
-      const parsedOrderByData = this.qb.parseOrderBy(tableName, optOrderBy);
+      const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
       include = { ...parsedOrderByData.include, ...include };
       orderBy = [...parsedOrderByData.orderBy];
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
       deletedColumnName: this.deletedColumnName,
-      where,
       include,
       orderBy,
+      select: options.select,
+      where,
       withDeleted
     });
     if (!findAll) {
@@ -295,7 +306,6 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       }) as Promise<Entity | null>;
     }
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.name;
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
     const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
       allowedFields: this.columNames,
@@ -305,21 +315,22 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     if (!Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field is required for the findOne method.');
     }
-    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters, {
-      operator: selectOperator as PersistanceSelectOperator,
-      isTopLevel: true
+    const { where, include: includeFromFilters } = this.qb.parseFilters(entityName, parsedFilters, {
+      fieldAliases: this.columnAliases,
+      operator: selectOperator as PersistanceSelectOperator
     });
-    const include = this.qb.parseRelations(tableName, optRelations || [], includeFromFilters);
+    const include = this.qb.parseRelations(entityName, optRelations || [], includeFromFilters);
     let orderBy: PersistanceOrderBy[] = [];
     if (optOrderBy) {
-      const parsedOrderByData = this.qb.parseOrderBy(tableName, optOrderBy);
+      const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
       orderBy = [...parsedOrderByData.orderBy];
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
       deletedColumnName: this.deletedColumnName,
-      where,
       include,
       orderBy,
+      select: options.select,
+      where,
       withDeleted
     });
     return await queryBuilder.getOne();
@@ -458,7 +469,9 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       .createQueryBuilder(entityName)
       .update()
       .set(dataToUpdate);
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, processedFilters);
+    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, processedFilters, {
+      fieldAliases: this.columnAliases
+    });
     const hasInclude = Object.keys(include).length;
     let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};

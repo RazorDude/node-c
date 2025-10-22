@@ -41,7 +41,7 @@ export class SQLQueryBuilderService {
     } else if (type === RDBType.PG) {
       this.columnQuotesSymbol = '"';
       this.iLikeSupported = true;
-      this.returningSupported = false;
+      this.returningSupported = true;
     }
   }
 
@@ -114,7 +114,7 @@ export class SQLQueryBuilderService {
 
   getValueForFilter(
     entityName: string,
-    fieldName: string,
+    _fieldName: string,
     fieldAlias: string,
     fieldValue: unknown,
     isNot: boolean,
@@ -122,7 +122,7 @@ export class SQLQueryBuilderService {
   ): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
     const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
-    const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}`;
+    const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs}`;
     let parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
@@ -231,6 +231,7 @@ export class SQLQueryBuilderService {
     return { hasValues, isSimple, paramsForQuery, queryTemplateParamNames };
   }
 
+  // TODO: fieldAliases for nested fields
   /*
    * This method is a tid bit complex, so it requires a proper explanation. The idea is that you can pass a deeply nested filters object (example below)
    * and receive back two objects - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder,
@@ -260,7 +261,7 @@ export class SQLQueryBuilderService {
     filters: GenericObject,
     options: {
       fieldAliases?: { [fieldName: string]: string };
-      isTopLevel: boolean;
+      isTopLevel?: boolean;
       operator?: PersistanceSelectOperator;
     } = { isTopLevel: true }
   ): {
@@ -277,8 +278,8 @@ export class SQLQueryBuilderService {
       if (typeof fieldValue === 'undefined') {
         continue;
       }
-      const fieldAlias = fieldAliases[fieldName] || fieldName;
       const isNot = operator === PersistanceSelectOperator.Not;
+      let fieldAlias = fieldAliases[fieldName];
       // handle relation fields
       if (fieldName.match(/\./)) {
         const fieldData = fieldName.split('.');
@@ -288,9 +289,12 @@ export class SQLQueryBuilderService {
         let previousEntityAlias = `${entityName}`;
         for (let i = 0; i < finalItemIndex; i++) {
           const currentEntityName = fieldData[i];
-          entityAlias += `_${currentEntityName}`;
+          entityAlias += `__${currentEntityName}`;
           include[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
           previousEntityAlias = `${entityAlias}`;
+        }
+        if (!fieldAlias) {
+          fieldAlias = actualFieldName;
         }
         const itemData = this.parseFilters(
           entityAlias,
@@ -304,10 +308,14 @@ export class SQLQueryBuilderService {
         where[fieldName] = itemData.where[actualFieldName];
         include = { ...include, ...itemData.include };
         continue;
+      } else {
+        if (!fieldAlias) {
+          fieldAlias = fieldName;
+        }
       }
       if (fieldValue === null) {
         where[fieldName] = {
-          query: `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs} is${isNot ? ' not ' : ' '}null`
+          query: `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
         };
         continue;
       }
@@ -326,7 +334,7 @@ export class SQLQueryBuilderService {
             where[fieldName] = {
               params: paramsForQuery,
               query:
-                `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
+                `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
                 `between :${fieldAlias}_0 and :${fieldAlias}_1`
             };
             continue;
@@ -441,7 +449,7 @@ export class SQLQueryBuilderService {
       let entityAlias = `${entityName}`;
       let previousEntityAlias = `${entityName}`;
       includeData.forEach(currentEntityName => {
-        entityAlias += `_${currentEntityName}`;
+        entityAlias += `__${currentEntityName}`;
         resultInclude[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
         previousEntityAlias = `${entityAlias}`;
       });

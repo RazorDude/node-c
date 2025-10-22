@@ -1,4 +1,5 @@
 export * from './authorizationPoints';
+export * from './categories';
 export * from './courses';
 export * from './courseTypes';
 export * from './lessons';

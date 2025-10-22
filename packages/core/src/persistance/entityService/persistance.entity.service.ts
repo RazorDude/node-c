@@ -106,6 +106,7 @@ export abstract class PersistanceEntityService<Entity> {
     throw new ApplicationError(`Method getEntityName not implemented for class ${typeof this}.`);
   }
 
+  // TODO: handle relations' fields
   protected async processObjectAllowedFields<Data = Partial<Entity>>(
     data: Data | Data[],
     options: ProcessObjectAllowedFieldsOptions
