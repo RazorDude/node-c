@@ -49,9 +49,15 @@ export class RedisStoreService {
 
   static async createClient(config: AppConfig, options: { persistanceModuleName: string }): Promise<Redis | Cluster> {
     const { persistanceModuleName } = options;
-    const { clusterMode, password, host, port, type, user } = config.persistance[
-      persistanceModuleName
-    ] as AppConfigPersistanceNoSQL;
+    const {
+      clusterMode,
+      failOnConnectionError = true,
+      password,
+      host,
+      port,
+      type,
+      user
+    } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
     const actualHost = host || '0.0.0.0';
     const actualPassword = password?.length ? password : undefined;
     const actualPort = port || 6379;
@@ -71,7 +77,9 @@ export class RedisStoreService {
         await client.connect();
       } catch (err) {
         console.error(`[RedisStore][${persistanceModuleName}]: Error connecting to Redis:`, err);
-        throw err;
+        if (failOnConnectionError) {
+          throw err;
+        }
       }
       return client as Cluster;
     }
@@ -87,7 +95,9 @@ export class RedisStoreService {
       await client.connect();
     } catch (err) {
       console.error(`[RedisStore][${persistanceModuleName}]: Error connecting to Redis:`, err);
-      throw err;
+      if (failOnConnectionError) {
+        throw err;
+      }
     }
     return client as Redis;
   }

@@ -29,20 +29,23 @@ export class TypeORMDBModule {
               dataSource = await new DataSource(options!).initialize();
             } catch (err) {
               console.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
-              throw err;
+              const { failOnConnectionError = true } = (options || {}) as { failOnConnectionError?: boolean };
+              if (failOnConnectionError) {
+                throw err;
+              }
             }
-            return dataSource;
+            return dataSource!;
           },
           name: connectionName,
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
             // example : configProvider.config.persistance.db
-            const { database, host, password, port, type, typeormExtraOptions, user } = persistanceConfig[
-              moduleName as keyof typeof persistanceConfig
-            ] as AppConfigPersistanceRDB;
+            const { database, failOnConnectionError, host, password, port, type, typeormExtraOptions, user } =
+              persistanceConfig[moduleName as keyof typeof persistanceConfig] as AppConfigPersistanceRDB;
             return {
               database,
               entities: entities as EntityClassOrSchema[],
+              failOnConnectionError,
               host,
               name: connectionName,
               password,

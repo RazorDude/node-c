@@ -18,11 +18,17 @@ export class ClickHouseConnectionModule {
       providers: [
         {
           provide: clientName,
-          useFactory: (configProvider: ConfigProviderService) => {
+          useFactory: async (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
-            const { database, host, password, port, protocol, user } = persistanceConfig[
-              persistanceModuleName as keyof typeof persistanceConfig
-            ] as AppConfigPersistanceRDB;
+            const {
+              database,
+              failOnConnectionError = true,
+              host,
+              password,
+              port,
+              protocol,
+              user
+            } = persistanceConfig[persistanceModuleName as keyof typeof persistanceConfig] as AppConfigPersistanceRDB;
             let client: ClickHouseClient;
             try {
               client = createClient({
@@ -31,14 +37,20 @@ export class ClickHouseConnectionModule {
                 url: `${protocol || 'http'}://${host}:${port}`,
                 username: user
               });
+              const pingResult = await client.ping({ select: true });
+              if (!pingResult.success) {
+                throw new Error(JSON.stringify(pingResult));
+              }
             } catch (err) {
               console.error(
                 `[ClickHouseConnectionModule][${persistanceModuleName}]: Error connecting to ClickHouse:`,
                 err
               );
-              throw err;
+              if (failOnConnectionError) {
+                throw err;
+              }
             }
-            return client;
+            return client!;
           },
           inject: [ConfigProviderService]
         }

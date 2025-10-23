@@ -128,6 +128,7 @@ export interface AppConfigCommonDomainIAM {
 }
 
 export type AppConfigCommonPersistance = {
+  failOnConnectionError?: boolean;
   settingsPerEntity?: Record<string, AppConfigCommonPersistanceEntityServiceSettings>;
 } & AppConfigCommonPersistanceEntityServiceSettings;
 
