@@ -1,4 +1,4 @@
-import { ClickHouseClient } from '@depyronick/nestjs-clickhouse';
+import { ClickHouseClient, createClient } from '@clickhouse/client';
 import { DynamicModule } from '@nestjs/common';
 
 import { AppConfigPersistanceRDB, ConfigProviderService } from '@node-c/core';
@@ -20,17 +20,15 @@ export class ClickHouseConnectionModule {
           provide: clientName,
           useFactory: (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
-            const { database, host, password, port, user } = persistanceConfig[
+            const { database, host, password, port, protocol, user } = persistanceConfig[
               persistanceModuleName as keyof typeof persistanceConfig
             ] as AppConfigPersistanceRDB;
             let client: ClickHouseClient;
             try {
-              client = new ClickHouseClient({
+              client = createClient({
                 database,
-                host,
-                name: clientName,
                 password,
-                port,
+                url: `${protocol || 'http'}://${host}:${port}`,
                 username: user
               });
             } catch (err) {

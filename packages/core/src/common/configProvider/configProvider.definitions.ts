@@ -251,7 +251,9 @@ export interface AppConfigProfileDomainIAM {
   refreshTokenExpiryTimeInMinutes?: number;
 }
 
-export type AppConfigProfilePersistanceClickHouse = AppConfigCommonPersistanceClickHouse;
+export type AppConfigProfilePersistanceClickHouse = AppConfigCommonPersistanceClickHouse & {
+  protocol?: string;
+};
 export type AppConfigProfilePersistanceNoSQL = AppConfigCommonPersistanceNoSQL;
 export type AppConfigProfilePersistanceRDB = AppConfigCommonPersistanceRDB & {
   typeormExtraOptions?: GenericObject;

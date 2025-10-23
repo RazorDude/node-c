@@ -1,4 +1,4 @@
-import { ClickHouseClient, ClickHouseModule } from '@depyronick/nestjs-clickhouse';
+import { ClickHouseClient } from '@clickhouse/client';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { GenericObject } from '@node-c/core';
@@ -17,7 +17,6 @@ export class ClickHouseDBRepositoryModule {
     const clientName = `${Constants.CLICKHOUSE_CLIENT_PREFIX}${persistanceModuleName}`;
     return {
       module: ClickHouseDBRepositoryModule,
-      imports: [ClickHouseModule],
       providers: [
         {
           provide: SQLQueryBuilderService,
