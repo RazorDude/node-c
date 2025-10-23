@@ -62,14 +62,14 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    const result = (await this.manager.query(
+    const result = await this.manager.query<{ data: [{ 'count()': string }] }>(
       `select count() from \`${tableName}\` as \`${name}\` ` +
         `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
-    )) as [{ 'count()': string }];
-    return parseInt(result[0]['count()'], 10);
+    );
+    return parseInt(result.data[0]?.['count()'], 10);
   }
 
-  getMany(): Promise<Entity[]> {
+  async getMany(): Promise<Entity[]> {
     const {
       limitClause,
       offsetClause,
@@ -78,10 +78,11 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    return this.manager.query(
+    const result = await this.manager.query<{ data: Entity[] }>(
       `select * from \`${tableName}\` as \`${name}\` ` +
         `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
-    ) as Promise<Entity[]>;
+    );
+    return result.data;
   }
 
   async getOne(): Promise<Entity | null> {
@@ -91,10 +92,10 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    const result = this.manager.query(
+    const result = await this.manager.query<{ data: Entity }>(
       `select * from \`${tableName}\` as \`${name}\` ${this.addDeletedToWhereClause()} ${orderByClause} limit 1`
-    ) as Promise<Entity>;
-    return result || null;
+    );
+    return result.data || null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -31,13 +31,18 @@ export class ClickHouseEntityManager implements RDBEntityManager {
     });
   }
 
-  query(query: string, params?: { field: string; value: string | number }[]): Promise<unknown> {
+  async query<ReturnData = unknown>(
+    query: string,
+    params?: { field: string; value: string | number }[]
+  ): Promise<ReturnData> {
     let queryParams: Record<string, string | number> | undefined = undefined;
     if (params?.length) {
       queryParams = {};
       params.forEach(item => (queryParams![item.field] = item.value));
     }
-    return this.client.query({ query, query_params: queryParams });
+    const results = await this.client.query({ format: 'JSON', query, query_params: queryParams });
+    const jsonData = await results.json();
+    return jsonData as ReturnData;
   }
 
   // TODO: figure out how to de-circularize this
