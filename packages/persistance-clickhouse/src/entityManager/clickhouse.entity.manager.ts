@@ -24,32 +24,9 @@ export class ClickHouseEntityManager implements RDBEntityManager {
 
   // TODO: column aliases
   insert(data: Record<string, unknown>[]): Promise<unknown> {
-    // const columnsMap: Record<string, number> = {};
-    // const values: unknown[] = [];
-    // let currentColumnsCount = 0;
-    // data.forEach(dataItem => {
-    //   for (const fieldName in dataItem) {
-    //     if (typeof columnsMap[fieldName] === 'undefined') {
-    //       currentColumnsCount++;
-    //       columnsMap[fieldName] = currentColumnsCount;
-    //     }
-    //   }
-    //   Object.keys(columnsMap)
-    //     .sort((a, b) => columnsMap[a] - columnsMap[b])
-    //     .forEach(columnName => {
-    //       const columnValue = dataItem[columnName];
-    //       if (typeof columnValue === 'undefined') {
-    //         values.push('DEFAULT');
-    //         return;
-    //       }
-    //       values.push(columnValue);
-    //     });
-    // });
     return this.client.insert({
-      // columns: Object.keys(columnsMap).sort((a, b) => columnsMap[a] - columnsMap[b]) as InsertParams['columns'],
       format: 'JSONEachRow',
       table: this.repository.metadata.tableName,
-      // values
       values: data
     });
   }
