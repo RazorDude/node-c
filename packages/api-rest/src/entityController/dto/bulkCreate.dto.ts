@@ -1,4 +1,4 @@
-import { IsArray, IsDefined, IsNotEmptyObject } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsDefined } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
@@ -8,8 +8,8 @@ export class BulkCreateDto<Entity, Options extends BulkCreateOptions<Entity>>
   extends BaseDto<Options>
   implements BulkCreateBody<Entity>
 {
+  @ArrayNotEmpty()
   @IsArray()
   @IsDefined()
-  @IsNotEmptyObject()
   data: Partial<Entity>[];
 }

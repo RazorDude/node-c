@@ -1,9 +1,11 @@
-import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
+import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 
 import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
+import morgan from 'morgan';
 
 import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
@@ -25,6 +27,8 @@ export class HTTPAPIModule {
     consumer.apply(express.urlencoded({ verify: HTTPAPIModule.rawBodyBuffer, extended: true })).forRoutes('*');
     consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
+    // configure logging
+    consumer.apply(morgan(`[${this.moduleName}]: :method :url :status :res[content-length] - :response-time ms`));
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
     consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
   }
@@ -43,6 +47,14 @@ export class HTTPAPIModule {
       module: moduleClass as DynamicModule['module'],
       imports: [...(importsAtStart || []), ...(importsAtEnd || [])],
       providers: [
+        // configure DTO validation
+        {
+          provide: APP_PIPE,
+          // useClass: ValidationPipe
+          useValue: new ValidationPipe({
+            whitelist: true
+          })
+        },
         {
           provide: Constants.API_MODULE_NAME,
           useValue: options.moduleName

@@ -1,7 +1,5 @@
-import { INestApplication, NestModule, ValidationPipe } from '@nestjs/common';
+import { INestApplication, NestModule } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-
-import morgan from 'morgan';
 
 import {
   AppConfig,
@@ -85,14 +83,6 @@ export class NodeCApp {
       const apiConfig = apiConfigs[apiModuleName];
       // start an API server, if requested in the options
       if (apiConfig) {
-        console.info(`[Node-C][${i}/${apiModuleName}]: Preparing middlewares...`);
-        // configure logging
-        app.use(morgan('tiny'));
-        app.useGlobalPipes(
-          new ValidationPipe({
-            whitelist: true
-          })
-        );
         const { hostname, port } = apiConfig;
         if (hostname && port) {
           console.info(`[Node-C][${i}/${apiModuleName}]: Starting listeners...`);

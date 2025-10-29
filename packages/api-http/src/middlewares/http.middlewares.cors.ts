@@ -25,9 +25,9 @@ export class HTTPCORSMiddleware implements NestMiddleware {
       'Access-Control-Allow-Headers',
       'accept,accept-encoding,accept-language,authorization,connection,content-type,host,origin,referer,user-agent'
     );
-    res.set('Access-Control-Expose-Headers', 'Authorization');
     res.set('Access-Control-Allow-Methods', 'OPTIONS,GET,POST,PUT,PATCH,DELETE');
     res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Access-Control-Expose-Headers', 'Authorization');
     if (req.method.toLowerCase() === 'options') {
       res.status(HttpStatus.OK).end();
       return;
