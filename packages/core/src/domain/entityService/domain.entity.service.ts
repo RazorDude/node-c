@@ -302,6 +302,8 @@ export class DomainEntityService<
         runOnNoFirstServiceResultOnly = true,
         ...actualMethodOptionsOverrides
       } = serviceMethodOptionsOverrides;
+      // be extra careful when working with persistance that has TTL as the main service,
+      // since there is no way to check for limited results here.
       if (
         (runOnNoFirstServiceResultOnly === true || runOnNoFirstServiceResultOnly === 'true') &&
         hasFirstServiceResult

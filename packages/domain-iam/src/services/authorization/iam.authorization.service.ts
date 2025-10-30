@@ -4,8 +4,7 @@ import {
   DomainEntityServiceDefaultData,
   DomainMethod,
   GenericObject,
-  PersistanceEntityService,
-  PersistanceSelectOperator
+  PersistanceEntityService
 } from '@node-c/core';
 
 import immutable from 'immutable';
@@ -157,16 +156,20 @@ export class IAMAuthorizationService<
     moduleName: string,
     additionalServicesOptions?: DomainBaseOptionsForAdditionalServicesFull
   ): Promise<AuthorizationData<unknown>> {
+    // Get all APs in order to avoid the situation where some of the TTLs have expired,
+    // so we only get partial cache results, which leads to us not loading the rest from the DB
     const {
       result: { items: apList }
     } = await this.find({
       ...(additionalServicesOptions || {}),
-      filters: { moduleNames: { [PersistanceSelectOperator.Contains]: moduleName } },
       findAll: true
     });
     const authorizationData: AuthorizationData<unknown> = { __all: { __all: {} } };
     const moduleGlobalData = authorizationData.__all.__all;
     apList.forEach(item => {
+      if (item.moduleNames && !item.moduleNames?.includes(moduleName)) {
+        return;
+      }
       if (!item.controllerNames) {
         moduleGlobalData[item.id as string] = item;
         return;
