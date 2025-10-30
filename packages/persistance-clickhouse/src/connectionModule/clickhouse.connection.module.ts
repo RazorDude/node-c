@@ -1,4 +1,5 @@
 import { ClickHouseClient, createClient } from '@clickhouse/client';
+import { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config';
 import { DynamicModule } from '@nestjs/common';
 
 import { AppConfigPersistanceRDB, ConfigProviderService } from '@node-c/core';
@@ -21,22 +22,37 @@ export class ClickHouseConnectionModule {
           useFactory: async (configProvider: ConfigProviderService) => {
             const persistanceConfig = configProvider.config.persistance;
             const {
+              application,
               database,
               failOnConnectionError = true,
               host,
               password,
               port,
               protocol,
+              requestTimeout,
+              useHostParam,
               user
             } = persistanceConfig[persistanceModuleName as keyof typeof persistanceConfig] as AppConfigPersistanceRDB;
+            const connectionOptions: NodeClickHouseClientConfigOptions = {
+              database,
+              password,
+              username: user
+            };
+            const url = `${protocol || 'http'}://${host}:${port}`;
             let client: ClickHouseClient;
+            if (application) {
+              connectionOptions.application = application;
+            }
+            if (requestTimeout) {
+              connectionOptions.request_timeout = requestTimeout;
+            }
+            if (useHostParam) {
+              connectionOptions.host = url;
+            } else {
+              connectionOptions.url = url;
+            }
             try {
-              client = createClient({
-                database,
-                password,
-                url: `${protocol || 'http'}://${host}:${port}`,
-                username: user
-              });
+              client = createClient(connectionOptions);
               const pingResult = await client.ping({ select: true });
               if (!pingResult.success) {
                 throw new Error(JSON.stringify(pingResult));

@@ -66,7 +66,7 @@ export class RedisRepositoryService<Entity> {
     const columnNames: string[] = [];
     const primaryKeys: string[] = [];
     const validationSchemaProperties: ValidationSchema['properties'] = {};
-    this.defaultTTL = settingsPerEntity?.[entityName].ttl || defaultTTL;
+    this.defaultTTL = settingsPerEntity?.[entityName]?.ttl || defaultTTL;
     for (const columnName in columns) {
       const { primary, primaryOrder, validationProperties } = columns[columnName];
       columnNames.push(columnName);

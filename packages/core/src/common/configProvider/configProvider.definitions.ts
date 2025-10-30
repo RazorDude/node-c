@@ -138,7 +138,10 @@ export interface AppConfigCommonPersistanceEntityServiceSettings {
 }
 
 export interface AppConfigCommonPersistanceClickHouse extends AppConfigCommonPersistance {
+  application?: string;
+  requestTimeout?: number;
   type: RDBType;
+  useHostParam?: boolean;
 }
 
 export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersistance {
