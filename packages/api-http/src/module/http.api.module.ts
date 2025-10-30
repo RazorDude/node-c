@@ -28,7 +28,9 @@ export class HTTPAPIModule {
     consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
     // configure logging
-    consumer.apply(morgan(`[${this.moduleName}]: :method :url :status :res[content-length] - :response-time ms`));
+    consumer
+      .apply(morgan(`[${this.moduleName}]: :method :url :status :res[content-length] - :response-time ms`))
+      .forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
     consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
   }
