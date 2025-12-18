@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ProviderWithInjectionToken, loadDynamicModules } from './utils.loadDynamicModules';
 
-import { GenericObject } from '../definitions';
+import { GenericObject } from '../../definitions';
 
 describe('loadDynamicModules', () => {
   it('should return undefined for all arrays if folderData is empty', () => {

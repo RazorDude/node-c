@@ -1,6 +1,6 @@
 import { ClassProvider, DynamicModule, Provider } from '@nestjs/common';
 
-import { GenericObject } from '../definitions';
+import { GenericObject } from '../../definitions';
 
 export type ProviderWithInjectionToken = Provider & {
   injectionToken?: string;

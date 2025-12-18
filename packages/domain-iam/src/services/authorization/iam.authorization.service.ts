@@ -4,7 +4,8 @@ import {
   DomainEntityServiceDefaultData,
   DomainMethod,
   GenericObject,
-  PersistanceEntityService
+  PersistanceEntityService,
+  getNested
 } from '@node-c/core';
 
 import immutable from 'immutable';
@@ -79,7 +80,7 @@ export class IAMAuthorizationService<
         for (const fieldName in requiredStaticData) {
           if (
             !IAMAuthorizationService.testValue(
-              ld.get({ inputData: innerMutatedInputData, user }, fieldName),
+              getNested({ inputData: innerMutatedInputData, user }, fieldName),
               requiredStaticData[fieldName]
             )
           ) {
@@ -92,12 +93,16 @@ export class IAMAuthorizationService<
         }
       }
       if (userFieldName && inputDataFieldName) {
-        const inputFieldValue = ld.get(innerMutatedInputData, inputDataFieldName, {
+        const inputFieldValue = getNested(innerMutatedInputData, inputDataFieldName, {
           removeNestedFieldEscapeSign: true
         });
-        const userFieldValue = ld.get(user, userFieldName);
-        if (typeof userFieldValue === 'undefined' || typeof inputFieldValue === 'undefined') {
+        const userFieldValue = getNested(user, userFieldName);
+        if (typeof userFieldValue === 'undefined') {
           hasAccess = false;
+          continue;
+        }
+        if (typeof inputFieldValue === 'undefined') {
+          ld.set(mutatedInputData, inputDataFieldName, userFieldValue);
           continue;
         }
         const allowedValues: unknown[] = [];
@@ -200,7 +205,7 @@ export class IAMAuthorizationService<
   static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {
     const mutatedInput = immutable.fromJS(input).toJS();
     for (const fieldName in values) {
-      const value = ld.get(input, fieldName);
+      const value = getNested(input, fieldName);
       const allowedValue = values[fieldName];
       const allowedValues = allowedValue instanceof Array ? allowedValue : [allowedValue];
       let valueIsArray = false;

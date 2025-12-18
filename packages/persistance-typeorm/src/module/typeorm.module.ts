@@ -26,7 +26,8 @@ export class TypeORMDBModule {
           dataSourceFactory: async options => {
             let dataSource: DataSource;
             try {
-              dataSource = await new DataSource(options!).initialize();
+              dataSource = new DataSource(options!);
+              await dataSource.initialize();
             } catch (err) {
               console.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
               const { failOnConnectionError = true } = (options || {}) as { failOnConnectionError?: boolean };

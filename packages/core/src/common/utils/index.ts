@@ -1,1 +1,2 @@
-export * from './utils.loadDynamicModules';
+export * from './getNested';
+export * from './loadDynamicModules';
