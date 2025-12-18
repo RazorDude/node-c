@@ -102,38 +102,39 @@ export class IAMAuthorizationService<
           continue;
         }
         if (typeof inputFieldValue === 'undefined') {
-          ld.set(mutatedInputData, inputDataFieldName, userFieldValue);
-          continue;
-        }
-        const allowedValues: unknown[] = [];
-        const inputValueIsArray = inputFieldValue instanceof Array;
-        const valuesToTest = inputValueIsArray ? inputFieldValue : [inputFieldValue];
-        const valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
-        valuesToTest.forEach((valueToTest: unknown) => {
-          const valueToTestVariants = IAMAuthorizationService.getValuesForTesting(valueToTest);
-          for (const j in valuesToTestAgainst) {
-            const valueToTestAgainst = valuesToTestAgainst[j];
-            let matchFound = false;
-            for (const k in valueToTestVariants) {
-              const variant = valueToTestVariants[k];
-              if (valueToTestAgainst === variant) {
-                allowedValues.push(variant);
-                matchFound = true;
+          innerInputDataToBeMutated[inputDataFieldName] = userFieldValue;
+          ld.set(innerMutatedInputData, inputDataFieldName, userFieldValue);
+        } else {
+          const allowedValues: unknown[] = [];
+          const inputValueIsArray = inputFieldValue instanceof Array;
+          const valuesToTest = inputValueIsArray ? inputFieldValue : [inputFieldValue];
+          const valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
+          valuesToTest.forEach((valueToTest: unknown) => {
+            const valueToTestVariants = IAMAuthorizationService.getValuesForTesting(valueToTest);
+            for (const j in valuesToTestAgainst) {
+              const valueToTestAgainst = valuesToTestAgainst[j];
+              let matchFound = false;
+              for (const k in valueToTestVariants) {
+                const variant = valueToTestVariants[k];
+                if (valueToTestAgainst === variant) {
+                  allowedValues.push(variant);
+                  matchFound = true;
+                  break;
+                }
+              }
+              if (matchFound) {
                 break;
               }
             }
-            if (matchFound) {
-              break;
-            }
+          });
+          if (!allowedValues.length) {
+            hasAccess = false;
+            continue;
           }
-        });
-        if (!allowedValues.length) {
-          hasAccess = false;
-          continue;
-        }
-        if (inputValueIsArray) {
-          innerInputDataToBeMutated[inputDataFieldName] = allowedValues;
-          ld.set(mutatedInputData, inputDataFieldName, allowedValues);
+          if (inputValueIsArray) {
+            innerInputDataToBeMutated[inputDataFieldName] = allowedValues;
+            ld.set(innerMutatedInputData, inputDataFieldName, allowedValues);
+          }
         }
       }
       inputDataToBeMutated = merge(inputDataToBeMutated, innerInputDataToBeMutated);
