@@ -1,4 +1,4 @@
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
@@ -22,7 +22,7 @@ export const UserAccountStatusEntity = new EntitySchema<UserAccountStatus>({
       type: 'one-to-many',
       target: 'user',
       inverseSide: 'accountStatus'
-    } as EntitySchemaRelationOptions
+    }
   },
   tableName: 'userAccountStatuses'
 });

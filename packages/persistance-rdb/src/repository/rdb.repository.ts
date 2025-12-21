@@ -19,6 +19,7 @@ export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
   manager: RDBEntityManager;
   metadata: {
     name: string;
+    relations?: { joinTableName?: string; relationType: string; target: string | unknown }[];
     tableName: string;
   };
   target: unknown;

@@ -1,4 +1,4 @@
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
@@ -20,7 +20,7 @@ export const CourseTypeEntity = new EntitySchema<CourseType<DBEntity>>({
       type: 'one-to-many',
       target: 'course',
       inverseSide: 'courseType'
-    } as EntitySchemaRelationOptions
+    }
   },
   tableName: 'courseTypes'
 });

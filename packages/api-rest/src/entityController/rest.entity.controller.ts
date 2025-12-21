@@ -20,14 +20,11 @@ import {
   DomainCreateResult,
   DomainDeleteOptions,
   DomainDeleteResult,
-  DomainEntityService,
-  DomainEntityServiceDefaultData,
   DomainFindOneOptions,
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult,
-  PersistanceEntityService
+  DomainUpdateResult
 } from '@node-c/core';
 
 import {
@@ -40,29 +37,11 @@ import {
 } from './dto';
 import {
   BulkCreateBody,
-  BulkCreateOptions,
   CreateBody,
-  CreateOptions,
-  UpdateBody,
-  UpdateOptions
+  DefaultDomainEntityService,
+  DefaultDtos,
+  UpdateBody
 } from './rest.entity.controller.definitions';
-
-// These types and interfaces have to be here to avoid circular dependencies.
-export type DefaultDomainEntityService<Entity> = DomainEntityService<
-  Entity,
-  PersistanceEntityService<Entity>,
-  DomainEntityServiceDefaultData<Entity>,
-  Record<string, PersistanceEntityService<Partial<Entity>>>
->;
-
-export interface DefaultDtos<Entity> {
-  BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-  Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
-  Delete: BaseDeleteDto<DomainDeleteOptions>;
-  Find: BaseFindDto<DomainFindOptions>;
-  FindOne: BaseFindOneDto<DomainFindOneOptions>;
-  Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
-}
 
 // TODO: a middleware for converting string booleans to booleans
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)

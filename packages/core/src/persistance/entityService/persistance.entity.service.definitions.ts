@@ -72,10 +72,9 @@ export interface PersistanceFindResults<Item> {
   totalCount?: number;
 }
 
-export interface PersistanceNumberItem {
+export type PersistanceRelationItem<Data> = {
   deleted?: boolean;
-  value: number;
-}
+} & Data;
 
 export interface PersistanceOrderBy {
   field: string;

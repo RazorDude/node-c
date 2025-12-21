@@ -1,4 +1,4 @@
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 import { AuthorizationPoint } from '../authorizationPoints';
@@ -53,17 +53,17 @@ export const UserEntity = new EntitySchema<User>({
       type: 'many-to-one',
       target: 'userAccountStatus',
       inverseSide: 'users'
-    } as EntitySchemaRelationOptions,
+    },
     assignedCourses: {
       type: 'many-to-many',
       target: 'course',
       inverseSide: 'users'
-    } as EntitySchemaRelationOptions,
+    },
     assignedUserTypes: {
       type: 'many-to-many',
       target: 'userType',
       inverseSide: 'assignedUsers'
-    } as EntitySchemaRelationOptions
+    }
   },
   tableName: 'users'
 });

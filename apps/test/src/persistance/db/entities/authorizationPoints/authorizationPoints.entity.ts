@@ -1,6 +1,6 @@
 import { GenericObject } from '@node-c/core';
 
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
@@ -36,9 +36,10 @@ export const AuthorizationPointEntity = new EntitySchema<AuthorizationPoint>({
       type: 'many-to-many',
       target: 'userType',
       inverseSide: 'authorizationPoints'
-    } as EntitySchemaRelationOptions
+    }
   },
   tableName: 'authorizationPoints'
+  // indices with "where", unfortunately, don't work in mysql
   // indices: [
   //   {
   //     spatial: true,

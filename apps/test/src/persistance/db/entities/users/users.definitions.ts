@@ -1,4 +1,4 @@
-import { PersistanceFindOnePrivateOptions, PersistanceFindPrivateOptions } from '@node-c/core';
+import { PersistanceFindOnePrivateOptions, PersistanceFindPrivateOptions, PersistanceRelationItem } from '@node-c/core';
 
 export interface UsersBaseSerachPrivateOptions {
   withPassword?: boolean;
@@ -15,6 +15,7 @@ export interface UsersUpdatePasswordData {
 }
 
 export interface UsersUpdateUserData {
+  assignedUserTypes?: PersistanceRelationItem<{ id: number }>[];
   firstName?: string;
   hasTakenIntro?: boolean;
   lastName?: string;

@@ -1,11 +1,14 @@
 import { ConfigProviderService } from '@node-c/core';
-import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
+import { DefaultData, RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { EntitySchema, ObjectLiteral } from 'typeorm';
 
 import { TypeORMDBRepository } from '../repository';
 
-export class TypeORMDBEntityService<Entity extends ObjectLiteral> extends RDBEntityService<Entity> {
+export class TypeORMDBEntityService<
+  Entity extends ObjectLiteral,
+  Data extends DefaultData<Entity> = DefaultData<Entity>
+> extends RDBEntityService<Entity, Data> {
   protected primaryKeys: string[];
 
   constructor(

@@ -5,8 +5,8 @@ import {
   PersistanceDeleteResult,
   PersistanceEntityService,
   PersistanceFindResults,
-  PersistanceNumberItem,
   PersistanceOrderBy,
+  PersistanceRelationItem,
   PersistanceSelectOperator,
   PersistanceUpdateResult,
   ProcessObjectAllowedFieldsType
@@ -20,6 +20,7 @@ import {
   CountPrivateOptions,
   CreateOptions,
   CreatePrivateOptions,
+  DefaultData,
   DeleteOptions,
   DeletePrivateOptions,
   FindOneOptions,
@@ -27,6 +28,8 @@ import {
   FindOptions,
   FindPrivateOptions,
   PostgresErrorCode,
+  ProcessManyToManyColumnSettingsItem,
+  // ProcessRelationsDataOptions,
   UpdateOptions,
   UpdatePrivateOptions
 } from './rdb.entity.service.definitions';
@@ -38,7 +41,10 @@ import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryB
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
-export class RDBEntityService<Entity extends GenericObject<unknown>> extends PersistanceEntityService<Entity> {
+export class RDBEntityService<
+  Entity extends GenericObject<unknown>,
+  Data extends DefaultData<Entity> = DefaultData<Entity>
+> extends PersistanceEntityService<Entity> {
   protected columnAliases: Record<string, string>;
   protected columNames: string[];
   protected deletedColumnName?: string;
@@ -72,6 +78,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     }
     this.deletedColumnName = deletedColumnName;
     this.primaryKeys = primaryKeys;
+    // console.log('====>', this.repository.metadata?.relations);
   }
 
   protected buildPrimaryKeyWhereClause(data: Entity[]): { field: string; value: ParsedFilter } {
@@ -103,7 +110,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   }
 
   async bulkCreate(
-    data: Partial<Entity>[],
+    data: Data['BulkCreate'],
     options?: BulkCreateOptions,
     privateOptions?: BulkCreatePrivateOptions
   ): Promise<Entity[]> {
@@ -154,7 +161,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return await queryBuilder.getCount();
   }
 
-  async create(data: Partial<Entity>, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+  async create(data: Data['Create'], options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
     const actualOptions = options || {};
     const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionManager } = actualOptions;
@@ -163,9 +170,11 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.create(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
       }) as Promise<Entity>;
     }
-    return await this.save(data instanceof Array ? data[0] : data, transactionManager, {
+    const saveResult = (await this.save(data instanceof Array ? data[0] : data, transactionManager, {
       processObjectAllowedFieldsEnabled: actualPrivateOptions.processInputAllowedFieldsEnabled
-    });
+    })) as Entity;
+    // TODO: automatic processManyToMany
+    return saveResult;
   }
 
   async delete(
@@ -347,19 +356,17 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
     return this.repository;
   }
 
-  // TODO: introduce this in the bulkCreate, create, update and delete methods
-  // TODO: support a primary key that's not "id", as well as multiple primary keys
-  protected async processManyToMany(
+  protected async processManyToMany<RelationItemsData>(
     data: {
-      counterpartColumn: string;
-      currentEntityColumn: string;
-      id: number;
-      items: PersistanceNumberItem[];
+      counterpartColumns: ProcessManyToManyColumnSettingsItem[];
+      currentEntityColumns: ProcessManyToManyColumnSettingsItem[];
+      currentEntityItems: Entity[];
+      extraColumns?: ProcessManyToManyColumnSettingsItem[];
+      items: PersistanceRelationItem<RelationItemsData>[];
       tableName: string;
     },
     options?: { transactionManager?: RDBEntityManager }
   ): Promise<void> {
-    const { currentEntityColumn, id, counterpartColumn, items, tableName } = data;
     const actualOptions = options || {};
     const { transactionManager } = actualOptions;
     // the transaction here is mandatory
@@ -368,20 +375,58 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
         return this.processManyToMany(data, { ...actualOptions, transactionManager: tm });
       }) as Promise<void>;
     }
+    const { counterpartColumns, currentEntityColumns, currentEntityItems, extraColumns, items, tableName } = data;
     const { columnQuotesSymbol: cqs } = this.qb;
     let deleteQuery = `delete from ${cqs}${tableName}${cqs} where `;
+    let deleteQueryItem = '(';
+    let deleteQueryValues: unknown[] = [];
+    let insertQuery = `insert into ${cqs}${tableName}${cqs} (`;
+    let insertQueryItem = '(';
+    let insertQueryValues: unknown[] = [];
     let runDeleteQuery = false;
-    let insertQuery = `insert into ${cqs}${tableName}${cqs} (${cqs}${currentEntityColumn}${cqs}, ${cqs}${counterpartColumn}${cqs}) values `;
     let runInsertQuery = false;
+    currentEntityColumns.forEach(columnNameData => {
+      const targetColumnName = columnNameData.targetColumnName || columnNameData.sourceColumnName;
+      insertQuery += `${cqs}${targetColumnName}${cqs}, `;
+      insertQueryItem += '?, ';
+      deleteQueryItem += `${cqs}${targetColumnName}${cqs} = ? and `;
+    });
+    counterpartColumns.forEach(columnNameData => {
+      const targetColumnName = columnNameData.targetColumnName || columnNameData.sourceColumnName;
+      insertQuery += `${cqs}${targetColumnName}${cqs}, `;
+      insertQueryItem += '?, ';
+      deleteQueryItem += `${cqs}${targetColumnName}${cqs} = ? and `;
+    });
+    if (extraColumns?.length) {
+      extraColumns.forEach(columnNameData => {
+        insertQuery += `${cqs}${columnNameData.targetColumnName || columnNameData.sourceColumnName}${cqs}, `;
+        insertQueryItem += '?, ';
+      });
+    }
+    insertQuery = `${insertQuery.substring(0, insertQuery.length - 2)}) values `;
+    insertQueryItem = `${insertQueryItem.substring(0, insertQueryItem.length - 2)})`;
+    deleteQueryItem = `${deleteQueryItem.substring(0, deleteQueryItem.length - 4)})`;
     items.forEach(item => {
-      const { deleted, value } = item;
+      const { deleted, ...itemData } = item;
+      const itemColumnValues = [
+        ...counterpartColumns.map(columnNameData => itemData[columnNameData.sourceColumnName as keyof typeof itemData]),
+        ...(extraColumns?.map(columnNameData => itemData[columnNameData.sourceColumnName as keyof typeof itemData]) ||
+          [])
+      ];
       if (deleted) {
         if (runDeleteQuery) {
           deleteQuery += ' or ';
         } else {
           runDeleteQuery = true;
         }
-        deleteQuery += `(${cqs}${currentEntityColumn}${cqs} = ${id} and ${cqs}${counterpartColumn}${cqs} = ${value})`;
+        deleteQuery += deleteQueryItem;
+        currentEntityItems.forEach(currentEntityItem => {
+          deleteQueryValues = [
+            ...deleteQueryValues,
+            ...currentEntityColumns.map(columnNameData => currentEntityItem[columnNameData.sourceColumnName]),
+            ...itemColumnValues
+          ];
+        });
         return;
       }
       if (runInsertQuery) {
@@ -389,15 +434,65 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       } else {
         runInsertQuery = true;
       }
-      insertQuery += `(${id}, ${value})`;
+      insertQuery += insertQueryItem;
+      currentEntityItems.forEach(currentEntityItem => {
+        insertQueryValues = [
+          ...insertQueryValues,
+          ...currentEntityColumns.map(columnNameData => currentEntityItem[columnNameData.sourceColumnName]),
+          ...itemColumnValues
+        ];
+      });
     });
     if (runDeleteQuery) {
-      await transactionManager.query(deleteQuery);
+      await transactionManager.query(deleteQuery, deleteQueryValues);
     }
     if (runInsertQuery) {
-      await transactionManager.query(`${insertQuery} on conflict do nothing`);
+      // await transactionManager.query(`${insertQuery} on conflict do nothing`, queryValues);
+      await transactionManager.query(`${insertQuery}`, insertQueryValues);
     }
   }
+
+  // protected async processOneToMany<RelationItemsData>(
+  //   data: {
+  //     counterpartPrimaryKeys?: string[];
+  //     currentEntityForeignKeys: string[];
+  //     currentEntityItems: Entity[];
+  //     relatedEntityItems: PersistanceRelationItem<RelationItemsData>[];
+  //   },
+  //   options?: { transactionManager?: RDBEntityManager }
+  // ): Promise<void> {
+  //   const actualOptions = options || {};
+  //   const { transactionManager } = actualOptions;
+  //   // the transaction here is also mandatory
+  //   if (!transactionManager) {
+  //     return this.repository.manager.transaction(tm => {
+  //       return this.processOneToMany(data, { ...actualOptions, transactionManager: tm });
+  //     }) as Promise<void>;
+  //   }
+  //   const { primaryKeys } = this;
+  //   const { columnQuotesSymbol: cqs } = this.qb;
+  //   const { counterpartPrimaryKeys, currentEntityForeignKeys, currentEntityItems, relatedEntityItems } = data;
+  // }
+
+  // // TODO: functionality for the delete method
+  // protected async processRelationsData(
+  //   data: Data['Create'] | Data['Update'],
+  //   options?: ProcessRelationsDataOptions<Entity>
+  // ): Promise<void> {
+  //   const actualOptions = options || ({} as ProcessRelationsDataOptions<Entity>);
+  //   const { transactionManager } = actualOptions;
+  //   // the transaction here is mandatory too
+  //   if (!transactionManager) {
+  //     return this.repository.manager.transaction(tm => {
+  //       return this.processRelationsData(data, { ...actualOptions, transactionManager: tm });
+  //     }) as Promise<void>;
+  //   }
+  //   const {  } = this;
+  //   for (const fieldName in data) {
+  //     // if ()
+  //     this.repository.manager.getRepository()
+  //   }
+  // }
 
   protected async save<Data = unknown, ReturnData = unknown>(
     data: Data,
@@ -431,7 +526,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
   }
 
   async update(
-    data: Entity,
+    data: Data['Update'],
     options: UpdateOptions,
     privateOptions?: UpdatePrivateOptions
   ): Promise<PersistanceUpdateResult<Entity>> {
@@ -526,6 +621,7 @@ export class RDBEntityService<Entity extends GenericObject<unknown>> extends Per
       // TODO: consider using generatedMaps, instead of raw (only applies to returningSupported=true)
       dataToReturn.count = (result.raw as Entity[]).length;
       dataToReturn.items = result.raw as Entity[];
+      // TODO: automatic processManyToMany
     } else {
       const result = await queryBuilder.execute();
       dataToReturn.count = typeof result.affected === 'number' ? result.affected : undefined;

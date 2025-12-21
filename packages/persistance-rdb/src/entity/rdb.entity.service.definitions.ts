@@ -32,6 +32,12 @@ export type CreateOptions = BaseOptions;
 
 export type CreatePrivateOptions = PersistanceCreatePrivateOptions;
 
+export interface DefaultData<Entity> {
+  BulkCreate: Partial<Entity>[];
+  Create: Partial<Entity>;
+  Update: Partial<Entity>;
+}
+
 export interface DeleteOptions extends BaseOptions, PersistanceDeleteOptions {}
 
 export type DeletePrivateOptions = PersistanceDeletePrivateOptions;
@@ -47,6 +53,16 @@ export type FindPrivateOptions = PersistanceFindPrivateOptions;
 export enum PostgresErrorCode {
   // eslint-disable-next-line no-unused-vars
   UniqueViolation = '23505'
+}
+
+export interface ProcessManyToManyColumnSettingsItem {
+  sourceColumnName: string;
+  targetColumnName?: string;
+}
+
+export interface ProcessRelationsDataOptions<Entity> {
+  currentEntityItem: Entity;
+  transactionManager?: RDBEntityManager;
 }
 
 export interface UpdateOptions extends BaseOptions, PersistanceUpdateOptions {}

@@ -4,10 +4,17 @@ import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator
 
 import { BaseDto } from './base.dto';
 
-export class FindOneDto<Options extends DomainFindOneOptions> extends BaseDto<Options> implements DomainFindOneOptions {
+type DomainFindOneOptionsWithOptionalFilters = Omit<DomainFindOneOptions, 'filters'> &
+  Partial<Pick<DomainFindOneOptions, 'filters'>>;
+
+export class FindOneDto<Options extends DomainFindOneOptionsWithOptionalFilters>
+  extends BaseDto<Options>
+  implements DomainFindOneOptionsWithOptionalFilters
+{
   @IsNotEmptyObject()
   @IsObject()
-  filters: GenericObject<unknown>;
+  @IsOptional()
+  filters?: GenericObject<unknown>;
 
   @IsArray()
   @IsOptional()

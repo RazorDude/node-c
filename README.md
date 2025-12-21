@@ -14,11 +14,14 @@ Node-C divides your application code in 3 distinct layers:
 
 
 ## Getting Started
-**Note**: this example assumes you have redis installed and running on localhost:6379
+**Note**: this example assumes you have:
+- redis or valkey installed and running on localhost:6379 and localhost:6380
+- mysql installed and running on localhost:3306
+- clickhouse installed and running on localhost:8123
 
-Install the minimal Node-C example repo:
+Install the Node-C example test app:
 ```bash
-npx @node-c/apps-minimal install
+npx @node-c/apps-test install
 ```
 
 You should now have a server running at http://localhost:3000. Try calling the /test endpoint:

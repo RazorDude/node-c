@@ -11,7 +11,7 @@ import { User as DBUser } from '../../../../persistance/db';
 @Controller('users')
 export class CoursePlatformUsersEntityController extends RESTAPIEntityControler<DBUser, CoursePlatformUsersService> {
   constructor(protected domainEntityService: CoursePlatformUsersService) {
-    super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DBUser>(), ['find', 'findOne']);
+    super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DBUser>(), ['find', 'findOne', 'update']);
   }
 
   @Get('loginLogs')

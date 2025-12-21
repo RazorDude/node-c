@@ -1,7 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationError, ConfigProviderService, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
-import { Constants, FindOneOptions, FindOptions, SQLQueryBuilderService, UpdateOptions } from '@node-c/persistance-rdb';
+import {
+  Constants,
+  DefaultData,
+  FindOneOptions,
+  FindOptions,
+  SQLQueryBuilderService,
+  UpdateOptions
+} from '@node-c/persistance-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/persistance-typeorm';
 
 import { omit } from 'ramda';
@@ -18,7 +25,7 @@ import { User, UserEntity } from './users.entity';
 
 // TODO: move all of the "omit password" logic to a new UsersPersistanceEntityService in the core module
 @Injectable()
-export class UsersService extends TypeORMDBEntityService<User> {
+export class UsersService extends TypeORMDBEntityService<User, DefaultData<User> & { Update: UsersUpdateUserData }> {
   constructor(
     configProvider: ConfigProviderService,
     qb: SQLQueryBuilderService,
@@ -48,11 +55,29 @@ export class UsersService extends TypeORMDBEntityService<User> {
   }
 
   async update(data: UsersUpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
+    const { transactionManager } = options || {};
+    if (!transactionManager) {
+      return this.repository.manager.transaction(tm =>
+        this.update(data, { ...(options || {}), transactionManager: tm })
+      );
+    }
     const updateResult = await TypeORMDBEntityService.prototype.update.call(
       this,
-      { ...omit(['password'] as unknown as (keyof UsersUpdateUserData)[], data) },
+      { ...omit(['assignedUserTypes', 'password'] as unknown as (keyof UsersUpdateUserData)[], data) },
       options
     );
+    if (updateResult.items?.length === 1 && data.assignedUserTypes?.length) {
+      await this.processManyToMany(
+        {
+          counterpartColumns: [{ sourceColumnName: 'id', targetColumnName: 'userTypeId' }],
+          currentEntityColumns: [{ sourceColumnName: 'id', targetColumnName: 'userId' }],
+          currentEntityItems: updateResult.items,
+          items: data.assignedUserTypes,
+          tableName: 'userTypeAssignedUsers'
+        },
+        { transactionManager }
+      );
+    }
     return updateResult;
   }
 

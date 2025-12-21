@@ -4,6 +4,5 @@ export * from './create.dto';
 export * from './delete.dto';
 export * from './find.dto';
 export * from './findOne.dto';
-export * from './numberItem.dto';
 export * from './update.dto';
 export * from './uploadFile.dto';
