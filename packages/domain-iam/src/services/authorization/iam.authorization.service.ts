@@ -204,7 +204,7 @@ export class IAMAuthorizationService<
   }
 
   static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {
-    const mutatedInput = immutable.fromJS(input).toJS();
+    const matchedValues: GenericObject = {};
     for (const fieldName in values) {
       const value = getNested(input, fieldName);
       const allowedValue = values[fieldName];
@@ -219,40 +219,33 @@ export class IAMAuthorizationService<
         valuesToCheck.push(value);
       }
       valuesToCheck.forEach(valueToCheck => {
-        const valueToCheckVariants = IAMAuthorizationService.getValuesForTesting(valueToCheck);
-        for (const i in valueToCheckVariants) {
-          const actualValueToCheck = valueToCheckVariants[i];
-          let checkPassed = false;
-          for (const j in allowedValues) {
-            if (IAMAuthorizationService.testValue(actualValueToCheck, allowedValues[j])) {
-              valuesToSet.push(valueToCheck);
-              checkPassed = true;
-              break;
-            }
-          }
-          if (checkPassed) {
+        for (const j in allowedValues) {
+          if (IAMAuthorizationService.testValue(valueToCheck, allowedValues[j])) {
+            valuesToSet.push(valueToCheck);
             break;
           }
         }
       });
       if (!valuesToSet.length) {
-        ld.set(mutatedInput, fieldName, undefined);
+        matchedValues[fieldName] = undefined;
         continue;
       }
-      ld.set(mutatedInput, fieldName, valueIsArray ? valuesToSet : valuesToSet[0]);
+      matchedValues[fieldName] = valueIsArray ? valuesToSet : valuesToSet[0];
     }
-    return mutatedInput;
+    return matchedValues;
   }
 
   static testValue(valueToTest: unknown, valueToTestAgainst: unknown): boolean {
     if (
-      typeof valueToTest === 'string' &&
       typeof valueToTestAgainst === 'string' &&
       valueToTestAgainst.charAt(0) === '/' &&
       valueToTestAgainst.charAt(valueToTestAgainst.length - 1) === '/'
     ) {
       const regex = new RegExp(valueToTestAgainst.substring(1, valueToTestAgainst.length - 2));
-      return regex.test(valueToTest);
+      if (typeof valueToTest === 'undefined') {
+        return false;
+      }
+      return regex.test(typeof valueToTest === 'string' ? valueToTest : JSON.stringify(valueToTest));
     }
     const possibleValidValues = IAMAuthorizationService.getValuesForTesting(valueToTest);
     let hasMatch = false;
