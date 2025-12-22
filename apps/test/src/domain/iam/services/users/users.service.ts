@@ -43,7 +43,7 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
         [UserAuthKnownType.Local]: authenticationLocalService
       },
       [DomainMethod.FindOne],
-      { db: persistanceDBUsersService as PersistanceEntityService<Partial<CacheUser>> }
+      { db: persistanceDBUsersService as unknown as PersistanceEntityService<Partial<CacheUser>> }
     );
   }
 

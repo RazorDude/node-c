@@ -1,11 +1,11 @@
-import { ConfigProviderService, GenericObject } from '@node-c/core';
-import { DefaultData, RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
+import { ConfigProviderService, GenericObject, PersistanceDefaultData } from '@node-c/core';
+import { RDBEntityService, SQLQueryBuilderService } from '@node-c/persistance-rdb';
 
 import { ClickHouseDBEntitySchema, ClickHouseDBRepository } from '../repository';
 
 export class ClickHouseDBEntityService<
   Entity extends GenericObject,
-  Data extends DefaultData<Entity> = DefaultData<Entity>
+  Data extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
 > extends RDBEntityService<Entity, Data> {
   protected primaryKeys: string[];
 

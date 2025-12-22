@@ -20,11 +20,13 @@ import {
   DomainCreateResult,
   DomainDeleteOptions,
   DomainDeleteResult,
+  DomainEntityServiceDefaultData,
   DomainFindOneOptions,
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult
+  DomainUpdateResult,
+  PersistanceDefaultData
 } from '@node-c/core';
 
 import {
@@ -45,7 +47,12 @@ import {
 
 // TODO: a middleware for converting string booleans to booleans
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
-export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extends DefaultDomainEntityService<Entity>> {
+export class RESTAPIEntityControlerWithoutDto<
+  Entity,
+  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, PersistanceEntityServiceData>,
+  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+> {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
   constructor(
@@ -137,8 +144,10 @@ export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extend
  */
 export class RESTAPIEntityControler<
   Entity,
-  EntityDomainService extends DefaultDomainEntityService<Entity>,
-  Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>
+  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, PersistanceEntityServiceData>,
+  Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>,
+  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRouteMethods: string[];
   protected settings: { validationWhitelist?: boolean } = { validationWhitelist: true };

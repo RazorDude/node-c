@@ -5,19 +5,26 @@ import {
   DomainEntityService,
   DomainEntityServiceDefaultData,
   DomainFindOptions,
-  DomainFindResult
+  DomainFindResult,
+  PersistanceDefaultData
 } from '@node-c/core';
 
 import { AuditUserLoginLogsService, UserLoginLog } from '../../../../persistance/audit';
 import { CacheUsersEntityService } from '../../../../persistance/cache';
-import { User as DBUser, UsersService as DBUsersService } from '../../../../persistance/db';
+import {
+  User as DBUser,
+  UsersService as DBUsersService,
+  UsersCreateUserData,
+  UsersUpdateUserData
+} from '../../../../persistance/db';
 
 @Injectable()
 export class CoursePlatformUsersService extends DomainEntityService<
   DBUser,
   DBUsersService,
   DomainEntityServiceDefaultData<DBUser>,
-  { cache: CacheUsersEntityService }
+  { cache: CacheUsersEntityService },
+  PersistanceDefaultData<DBUser> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars

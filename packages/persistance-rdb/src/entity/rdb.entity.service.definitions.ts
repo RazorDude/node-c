@@ -32,12 +32,6 @@ export type CreateOptions = BaseOptions;
 
 export type CreatePrivateOptions = PersistanceCreatePrivateOptions;
 
-export interface DefaultData<Entity> {
-  BulkCreate: Partial<Entity>[];
-  Create: Partial<Entity>;
-  Update: Partial<Entity>;
-}
-
 export interface DeleteOptions extends BaseOptions, PersistanceDeleteOptions {}
 
 export type DeletePrivateOptions = PersistanceDeletePrivateOptions;

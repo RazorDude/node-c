@@ -1,9 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ApplicationError, ConfigProviderService, PersistanceFindResults, PersistanceUpdateResult } from '@node-c/core';
+import {
+  ApplicationError,
+  ConfigProviderService,
+  PersistanceDefaultData,
+  PersistanceFindResults,
+  PersistanceUpdateResult
+} from '@node-c/core';
 import {
   Constants,
-  DefaultData,
+  CreateOptions,
+  CreatePrivateOptions,
   FindOneOptions,
   FindOptions,
   SQLQueryBuilderService,
@@ -15,6 +22,7 @@ import { omit } from 'ramda';
 import { EntityManager } from 'typeorm';
 
 import {
+  UsersCreateUserData,
   UsersFindOnePrivateOptions,
   UsersFindPrivateOptions,
   UsersUpdatePasswordData,
@@ -25,7 +33,10 @@ import { User, UserEntity } from './users.entity';
 
 // TODO: move all of the "omit password" logic to a new UsersPersistanceEntityService in the core module
 @Injectable()
-export class UsersService extends TypeORMDBEntityService<User, DefaultData<User> & { Update: UsersUpdateUserData }> {
+export class UsersService extends TypeORMDBEntityService<
+  User,
+  PersistanceDefaultData<User> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
+> {
   constructor(
     configProvider: ConfigProviderService,
     qb: SQLQueryBuilderService,
@@ -33,6 +44,11 @@ export class UsersService extends TypeORMDBEntityService<User, DefaultData<User>
     repository: TypeORMDBRepository<User>
   ) {
     super(configProvider, qb, repository, UserEntity);
+  }
+
+  async create(data: UsersCreateUserData, options: CreateOptions, privateOptions: CreatePrivateOptions): Promise<User> {
+    const createResult = await TypeORMDBEntityService.prototype.create.call(this, { ...data }, options, privateOptions);
+    return createResult;
   }
 
   async find(options: FindOptions, privateOptions?: UsersFindPrivateOptions): Promise<PersistanceFindResults<User>> {

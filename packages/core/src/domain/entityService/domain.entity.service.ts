@@ -29,14 +29,19 @@ import {
 
 import { ApplicationError, GenericObject } from '../../common/definitions';
 
-import { PersistanceEntityService, PersistanceFindResults } from '../../persistance/entityService';
+import {
+  PersistanceDefaultData,
+  PersistanceEntityService,
+  PersistanceFindResults
+} from '../../persistance/entityService';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<
   Entity,
-  EntityService extends PersistanceEntityService<Entity>,
+  EntityService extends PersistanceEntityService<Entity, PersistanceEntityServiceData>,
   Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  AdditionalEntityServices extends Record<string, PersistanceEntityService<Partial<Entity>>> | undefined = undefined
+  AdditionalEntityServices extends Record<string, PersistanceEntityService<Partial<Entity>>> | undefined = undefined,
+  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars

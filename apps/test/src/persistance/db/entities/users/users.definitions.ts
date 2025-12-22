@@ -4,6 +4,15 @@ export interface UsersBaseSerachPrivateOptions {
   withPassword?: boolean;
 }
 
+export interface UsersCreateUserData {
+  assignedUserTypes: PersistanceRelationItem<{ id: number }>[];
+  email: string;
+  firstName: string;
+  initialPassword: string;
+  lastName: string;
+  phoneNumber?: string;
+}
+
 export type UsersFindOnePrivateOptions = UsersBaseSerachPrivateOptions & PersistanceFindPrivateOptions;
 
 export type UsersFindPrivateOptions = UsersBaseSerachPrivateOptions & PersistanceFindOnePrivateOptions;

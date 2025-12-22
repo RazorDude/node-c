@@ -19,6 +19,12 @@ export interface PersistanceCreatePrivateOptions {
   processInputAllowedFieldsEnabled?: boolean;
 }
 
+export interface PersistanceDefaultData<Entity> {
+  BulkCreate: Partial<Entity>[];
+  Create: Partial<Entity>;
+  Update: Partial<Entity>;
+}
+
 export interface PersistanceDeleteOptions {
   filters: GenericObject;
   returnOriginalItems?: boolean;

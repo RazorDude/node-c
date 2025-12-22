@@ -55,6 +55,7 @@ export class RedisStoreService {
       password,
       host,
       port,
+      sentinelMode,
       type,
       user
     } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
@@ -63,13 +64,9 @@ export class RedisStoreService {
     const actualPort = port || 6379;
     const actualUser = user?.length ? user : undefined;
     if (clusterMode) {
-      const hostList = actualHost.split(',');
-      const portList = `${actualPort}`.split(',');
-      const nodeList = hostList.map((hostAddress, hostIndex) => {
-        return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
-      });
       const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
-      const client = new ClusterConstructor(nodeList, {
+      const client = new ClusterConstructor(RedisStoreService.getNodeList(actualHost, actualPort), {
+        clusterRetryStrategy: RedisStoreService.retryStrategy,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
@@ -83,12 +80,31 @@ export class RedisStoreService {
       }
       return client as Cluster;
     }
+    if (sentinelMode) {
+      const SentinelConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
+      const client = new SentinelConstructor({
+        lazyConnect: true,
+        password: actualPassword,
+        sentinels: RedisStoreService.getNodeList(actualHost, actualPort),
+        sentinelRetryStrategy: RedisStoreService.retryStrategy,
+        username: actualUser
+      });
+      try {
+        await client.connect();
+      } catch (err) {
+        console.error(`[RedisStore][${persistanceModuleName}]: Error connecting to Redis:`, err);
+        if (failOnConnectionError) {
+          throw err;
+        }
+      }
+    }
     const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
     const client = new ClientConstructor({
       host: actualHost,
       lazyConnect: true,
       password: actualPassword,
       port: actualPort,
+      retryStrategy: RedisStoreService.retryStrategy,
       username: actualUser
     });
     try {
@@ -147,6 +163,21 @@ export class RedisStoreService {
       ? await client.hget(storeKey, handle)
       : await client.get(`${storeKey}${storeDelimiter}${handle}`);
     return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
+  }
+
+  static getNodeList(host: string, port: number): { host: string; port: number }[] {
+    const hostList = host.split(',');
+    const portList = `${port}`.split(',');
+    return hostList.map((hostAddress, hostIndex) => {
+      return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
+    });
+  }
+
+  static retryStrategy(times: number): number | null {
+    if (times > 10) {
+      return null;
+    }
+    return 500;
   }
 
   // TODO: support scan from transaction data

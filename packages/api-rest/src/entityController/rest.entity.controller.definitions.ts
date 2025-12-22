@@ -11,6 +11,7 @@ import {
   DomainUpdateData,
   DomainUpdateOptions,
   GenericObject,
+  PersistanceDefaultData,
   PersistanceEntityService
 } from '@node-c/core';
 
@@ -36,11 +37,16 @@ export interface CreateBody<Entity> extends DomainCreateOptions {
 export type CreateOptions<Entity> = Omit<CreateBody<Entity>, 'data'>;
 
 // These types and interfaces have to be here to avoid circular dependencies.
-export type DefaultDomainEntityService<Entity> = DomainEntityService<
+export type DefaultDomainEntityService<
   Entity,
-  PersistanceEntityService<Entity>,
-  DomainEntityServiceDefaultData<Entity>,
-  Record<string, PersistanceEntityService<Partial<Entity>>>
+  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+> = DomainEntityService<
+  Entity,
+  PersistanceEntityService<Entity, PersistanceEntityServiceData>,
+  DomainEntityServiceData,
+  Record<string, PersistanceEntityService<Partial<Entity>>>,
+  PersistanceEntityServiceData
 >;
 
 export interface DefaultDtos<Entity> {

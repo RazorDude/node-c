@@ -26,6 +26,7 @@ export class TypeORMDBModule {
           dataSourceFactory: async options => {
             let dataSource: DataSource;
             try {
+              // console.log('===========>', options);
               dataSource = new DataSource(options!);
               await dataSource.initialize();
             } catch (err) {

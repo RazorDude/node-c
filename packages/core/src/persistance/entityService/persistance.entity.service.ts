@@ -2,6 +2,7 @@ import {
   PersistanceBulkCreatePrivateOptions,
   PersistanceCountPrivateOptions,
   PersistanceCreatePrivateOptions,
+  PersistanceDefaultData,
   PersistanceDeleteOptions,
   PersistanceDeletePrivateOptions,
   PersistanceDeleteResult,
@@ -27,7 +28,10 @@ import { ApplicationError } from '../../common/definitions';
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
  * to define classes that are agnostic of the type of persitance.
  */
-export abstract class PersistanceEntityService<Entity> {
+export abstract class PersistanceEntityService<
+  Entity,
+  Data extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+> {
   protected settings: AppConfigCommonPersistanceEntityServiceSettings;
 
   constructor(
@@ -42,7 +46,7 @@ export abstract class PersistanceEntityService<Entity> {
 
   public async bulkCreate(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: Partial<Entity>[],
+    _data: Data['BulkCreate'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options?: unknown,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -62,7 +66,7 @@ export abstract class PersistanceEntityService<Entity> {
 
   public async create(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: Partial<Entity>,
+    _data: Data['Create'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options?: unknown,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -134,7 +138,7 @@ export abstract class PersistanceEntityService<Entity> {
 
   public async update(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: Partial<Entity>,
+    _data: Data['Update'],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: PersistanceUpdateOptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

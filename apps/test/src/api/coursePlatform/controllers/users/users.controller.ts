@@ -1,15 +1,21 @@
 import { Controller, Get, Injectable, Req } from '@nestjs/common';
 
 import { RequestWithLocals } from '@node-c/api-http';
-import { RESTAPIEntityControler } from '@node-c/api-rest';
-import { GenericObject } from '@node-c/core';
+import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { DomainEntityServiceDefaultData, GenericObject, PersistanceDefaultData } from '@node-c/core';
 
 import { CoursePlatformUsersService } from '../../../../domain/coursePlatform';
-import { User as DBUser } from '../../../../persistance/db';
+import { User as DBUser, UsersCreateUserData, UsersUpdateUserData } from '../../../../persistance/db';
 
 @Injectable()
 @Controller('users')
-export class CoursePlatformUsersEntityController extends RESTAPIEntityControler<DBUser, CoursePlatformUsersService> {
+export class CoursePlatformUsersEntityController extends RESTAPIEntityControler<
+  DBUser,
+  CoursePlatformUsersService,
+  DefaultDtos<DBUser>,
+  DomainEntityServiceDefaultData<DBUser>,
+  PersistanceDefaultData<DBUser> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
+> {
   constructor(protected domainEntityService: CoursePlatformUsersService) {
     super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DBUser>(), ['find', 'findOne', 'update']);
   }

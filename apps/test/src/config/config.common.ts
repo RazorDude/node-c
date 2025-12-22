@@ -35,13 +35,23 @@ export const appConfigCommon: AppConfigCommon = {
     cacheAuth: {
       // clusterMode: true,
       defaultTTL: 600,
+      // failOnConnectionError: false,
+      // sentinelMode: true,
       storeDelimiter: ':',
       storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY,
       type: NoSQLType.Valkey,
       useHashmap: true
     },
-    db: { connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME, type: RDBType.MySQL },
-    dbConfigs: { connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME, type: RDBType.MySQL }
+    db: {
+      connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME,
+      // failOnConnectionError: false,
+      type: RDBType.MySQL
+    },
+    dbConfigs: {
+      connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME,
+      // failOnConnectionError: false,
+      type: RDBType.MySQL
+    }
     // pgDB: { type: RDBType.PG }
   }
 };

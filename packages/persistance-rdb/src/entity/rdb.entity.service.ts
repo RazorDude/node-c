@@ -2,6 +2,7 @@ import {
   ApplicationError,
   ConfigProviderService,
   GenericObject,
+  PersistanceDefaultData,
   PersistanceDeleteResult,
   PersistanceEntityService,
   PersistanceFindResults,
@@ -20,7 +21,6 @@ import {
   CountPrivateOptions,
   CreateOptions,
   CreatePrivateOptions,
-  DefaultData,
   DeleteOptions,
   DeletePrivateOptions,
   FindOneOptions,
@@ -43,7 +43,7 @@ import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryB
 // TODO: support update of multiple items in the update method
 export class RDBEntityService<
   Entity extends GenericObject<unknown>,
-  Data extends DefaultData<Entity> = DefaultData<Entity>
+  Data extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
 > extends PersistanceEntityService<Entity> {
   protected columnAliases: Record<string, string>;
   protected columNames: string[];
