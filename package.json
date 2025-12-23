@@ -1,7 +1,7 @@
 {
   "name": "node-c",
   "private": true,
-  "version": "1.0.0-alpha43",
+  "version": "1.0.0-alpha44",
   "description": "An end-to-end NodeJS framework for building DDD apps on top of NestJS.",
   "license": "MIT",
   "repository": {

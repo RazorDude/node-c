@@ -55,7 +55,9 @@ export class RedisStoreService {
       password,
       host,
       port,
+      sentinelMasterName,
       sentinelMode,
+      sentinelRole,
       type,
       user
     } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
@@ -84,7 +86,9 @@ export class RedisStoreService {
       const SentinelConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
       const client = new SentinelConstructor({
         lazyConnect: true,
+        name: sentinelMasterName || 'mymaster',
         password: actualPassword,
+        role: sentinelRole || 'master',
         sentinels: RedisStoreService.getNodeList(actualHost, actualPort),
         sentinelRetryStrategy: RedisStoreService.retryStrategy,
         username: actualUser

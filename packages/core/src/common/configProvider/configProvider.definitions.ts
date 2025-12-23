@@ -147,7 +147,9 @@ export interface AppConfigCommonPersistanceClickHouse extends AppConfigCommonPer
 export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersistance {
   clusterMode?: boolean;
   defaultTTL?: number;
+  sentinelMasterName?: string;
   sentinelMode?: boolean;
+  sentinelRole?: 'master' | 'slave';
   storeDelimiter?: string;
   storeKey: string;
   settingsPerEntity?: Record<string, AppConfigCommonPersistanceNoSQLEntityServiceSettings>;
