@@ -78,7 +78,8 @@ export class RDBEntityService<
     }
     this.deletedColumnName = deletedColumnName;
     this.primaryKeys = primaryKeys;
-    // console.log('====>', this.repository.metadata?.relations);
+    // TODO: find out how to get the primary keys data for the related items
+    // console.log('====>', this.repository.metadata?.deleteDateColumn);
   }
 
   protected buildPrimaryKeyWhereClause(data: Entity[]): { field: string; value: ParsedFilter } {
@@ -153,7 +154,9 @@ export class RDBEntityService<
     });
     const include = this.qb.parseRelations(tableName, [], includeFromFilters);
     this.qb.buildQuery<Entity>(queryBuilder, {
+      currentEntityName: this.getEntityTarget() as string,
       deletedColumnName: this.deletedColumnName,
+      entityManager: this.repository.manager,
       include,
       where,
       withDeleted
@@ -214,7 +217,12 @@ export class RDBEntityService<
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where });
+    this.qb.buildQuery<Entity>(queryBuilder, {
+      currentEntityName: this.getEntityTarget() as string,
+      deletedColumnName: this.deletedColumnName,
+      entityManager: this.repository.manager,
+      where
+    });
     const result = await queryBuilder.execute();
     return { ...dataToReturn, count: typeof result.affected === 'number' ? result.affected : undefined };
   }
@@ -266,7 +274,9 @@ export class RDBEntityService<
       orderBy = [...parsedOrderByData.orderBy];
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
+      currentEntityName: this.getEntityTarget() as string,
       deletedColumnName: this.deletedColumnName,
+      entityManager: this.repository.manager,
       include,
       orderBy,
       select: options.select,
@@ -335,7 +345,9 @@ export class RDBEntityService<
       orderBy = [...parsedOrderByData.orderBy];
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
+      currentEntityName: this.getEntityTarget() as string,
       deletedColumnName: this.deletedColumnName,
+      entityManager: this.repository.manager,
       include,
       orderBy,
       select: options.select,
@@ -447,7 +459,6 @@ export class RDBEntityService<
       await transactionManager.query(deleteQuery, deleteQueryValues);
     }
     if (runInsertQuery) {
-      // await transactionManager.query(`${insertQuery} on conflict do nothing`, queryValues);
       await transactionManager.query(`${insertQuery}`, insertQueryValues);
     }
   }
@@ -581,7 +592,13 @@ export class RDBEntityService<
     } else {
       where = parsedWhere;
     }
-    this.qb.buildQuery<Entity>(queryBuilder, { deletedColumnName: this.deletedColumnName, where, withDeleted });
+    this.qb.buildQuery<Entity>(queryBuilder, {
+      currentEntityName: this.getEntityTarget() as string,
+      deletedColumnName: this.deletedColumnName,
+      entityManager: this.repository.manager,
+      where,
+      withDeleted
+    });
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
     if (returnOriginalItems) {
       dataToReturn.originalItems = originalItems;

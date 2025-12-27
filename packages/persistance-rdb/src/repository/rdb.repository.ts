@@ -18,8 +18,18 @@ export type RDBEntityTarget<Entity> = string | { name: string; type: Entity } | 
 export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
   manager: RDBEntityManager;
   metadata: {
+    deleteDateColumn?: { databaseName: string; propertyName: string };
     name: string;
-    relations?: { joinTableName?: string; relationType: string; target: string | unknown }[];
+    relations?: {
+      joinTableName?: string;
+      propertyName: string;
+      propertyPath: string;
+      relationType: string;
+      target: string | unknown;
+      // unfortunately, we need to use this type definition here, otherwise it won't match the one in TypeOrm
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      type: string | Function;
+    }[];
     tableName: string;
   };
   target: unknown;

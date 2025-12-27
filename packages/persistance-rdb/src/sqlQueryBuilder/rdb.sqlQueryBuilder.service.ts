@@ -15,6 +15,7 @@ import { BuildQueryOptions, IncludeItems, ParsedFilter } from './rdb.sqlQueryBui
 
 import { Constants } from '../common/definitions';
 import { OrmBaseQueryBuilder, OrmSelectQueryBuilder } from '../ormQueryBuilder';
+import { RDBEntityManager } from '../repository';
 
 @Injectable()
 export class SQLQueryBuilderService {
@@ -45,13 +46,24 @@ export class SQLQueryBuilderService {
     }
   }
 
+  // TODO: relation crawling functionality for deletedAt
+  // TODO: relation crawling functionality for primary & join keys for related data
   buildQuery<Entity>(
     ormQueryBuilder: OrmBaseQueryBuilder<Entity> | OrmSelectQueryBuilder<Entity>,
     options: BuildQueryOptions
   ): void {
-    const { where: optWhere, include, orderBy, select, withDeleted } = options;
+    const {
+      currentEntityName,
+      deletedColumnName,
+      entityManager,
+      where: optWhere,
+      include,
+      orderBy,
+      select,
+      withDeleted,
+      withDeletedPerRelation
+    } = options;
     const cqs = this.columnQuotesSymbol;
-    const deletedColumnName = options.deletedColumnName || 'deletedAt';
     const where = { ...(optWhere || {}) };
     if ('withDeleted' in ormQueryBuilder) {
       const oqb = ormQueryBuilder as OrmSelectQueryBuilder<Entity>;
@@ -60,13 +72,18 @@ export class SQLQueryBuilderService {
       }
       if (include) {
         for (const relationProperty in include) {
-          if (withDeleted) {
+          if (ld.get(withDeletedPerRelation || {}, relationProperty)) {
             oqb.leftJoinAndSelect(relationProperty, include[relationProperty]);
           } else {
+            const relationDeletedColumnName = this.getDeletedAtColumnForEntity({
+              currentEntityName,
+              entityManager,
+              entityPath: include[relationProperty]
+            });
             oqb.leftJoinAndSelect(
               relationProperty,
               include[relationProperty],
-              `${cqs}${include[relationProperty]}${cqs}.${cqs}${deletedColumnName}${cqs} IS NULL`
+              `${cqs}${include[relationProperty]}${cqs}.${cqs}${relationDeletedColumnName}${cqs} IS NULL`
             );
           }
         }
@@ -74,7 +91,7 @@ export class SQLQueryBuilderService {
       if (select && select.length) {
         oqb.select(this.parseSelect(select, include));
       }
-    } else if (withDeleted === false) {
+    } else if (withDeleted === false && deletedColumnName) {
       where[deletedColumnName] = {
         query: `${cqs}${deletedColumnName}${cqs} IS NULL`
       };
@@ -110,6 +127,33 @@ export class SQLQueryBuilderService {
         oqb[methodName](item.field, item.direction);
       }
     }
+  }
+
+  getDeletedAtColumnForEntity(options: {
+    currentEntityName: string;
+    entityManager: RDBEntityManager;
+    entityPath: string;
+  }): string | undefined {
+    const { currentEntityName, entityManager } = options;
+    const entityPath = options.entityPath.split('.');
+    let currentEntity = entityManager.getRepository(currentEntityName);
+    let deletedAtColumnName: string | undefined;
+    for (const i in entityPath) {
+      const { relations } = currentEntity.metadata;
+      if (!relations) {
+        break;
+      }
+      const entityPathItem = entityPath[i];
+      const relationPathItem = relations.find(relationItem => relationItem.propertyName === entityPathItem);
+      if (!relationPathItem) {
+        break;
+      }
+      currentEntity = entityManager.getRepository(relationPathItem.type);
+    }
+    if (currentEntity.target !== currentEntityName && currentEntity.metadata.deleteDateColumn) {
+      deletedAtColumnName = currentEntity.metadata.deleteDateColumn.databaseName;
+    }
+    return deletedAtColumnName;
   }
 
   protected getValueForFilter(
