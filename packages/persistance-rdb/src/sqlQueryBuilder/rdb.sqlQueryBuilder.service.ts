@@ -80,11 +80,15 @@ export class SQLQueryBuilderService {
               entityManager,
               entityPath: include[relationProperty]
             });
-            oqb.leftJoinAndSelect(
-              relationProperty,
-              include[relationProperty],
-              `${cqs}${include[relationProperty]}${cqs}.${cqs}${relationDeletedColumnName}${cqs} IS NULL`
-            );
+            if (relationDeletedColumnName) {
+              oqb.leftJoinAndSelect(
+                relationProperty,
+                include[relationProperty],
+                `${cqs}${include[relationProperty]}${cqs}.${cqs}${relationDeletedColumnName}${cqs} IS NULL`
+              );
+            } else {
+              oqb.leftJoinAndSelect(relationProperty, include[relationProperty]);
+            }
           }
         }
       }
