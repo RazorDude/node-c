@@ -5,12 +5,11 @@ import {
   DomainMethod,
   GenericObject,
   PersistanceEntityService,
-  getNested
+  getNested,
+  setNested
 } from '@node-c/core';
 
-import immutable from 'immutable';
 import ld from 'lodash';
-import { mergeDeepRight as merge } from 'ramda';
 
 import {
   AuthorizationData,
@@ -48,7 +47,7 @@ export class IAMAuthorizationService<
     hasAccess: boolean;
     inputDataToBeMutated: GenericObject;
   } {
-    const mutatedInputData = immutable.fromJS(inputData).toJS();
+    const mutatedInputData = ld.cloneDeep(inputData);
     const userPermissionsData = user.currentAuthorizationPoints!;
     let hasAccess = false;
     let inputDataToBeMutated: GenericObject = {};
@@ -59,28 +58,28 @@ export class IAMAuthorizationService<
       const apData = authorizationPoints[apId];
       const { allowedInputData, forbiddenInputData, inputDataFieldName, requiredStaticData, userFieldName } = apData;
       const hasStaticData = requiredStaticData && Object.keys(requiredStaticData).length;
-      const innerMutatedInputData = immutable.fromJS(mutatedInputData).toJS();
+      const innerMutatedInputData = ld.cloneDeep(mutatedInputData);
       const innerInputDataToBeMutated: GenericObject = {};
       hasAccess = true;
       if (allowedInputData && Object.keys(allowedInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = values[key];
-          ld.set(innerMutatedInputData, key, values[key]);
+          setNested(innerMutatedInputData, key, values[key], { removeNestedFieldEscapeSign: true });
         }
       }
       if (forbiddenInputData && Object.keys(forbiddenInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, forbiddenInputData);
         for (const key in values) {
           innerInputDataToBeMutated[key] = undefined;
-          ld.set(innerMutatedInputData, key, undefined);
+          setNested(innerMutatedInputData, key, undefined, { removeNestedFieldEscapeSign: true });
         }
       }
       if (hasStaticData) {
         for (const fieldName in requiredStaticData) {
           if (
             !IAMAuthorizationService.testValue(
-              getNested({ inputData: innerMutatedInputData, user }, fieldName),
+              getNested({ inputData: innerMutatedInputData, user }, fieldName, { removeNestedFieldEscapeSign: true }),
               requiredStaticData[fieldName]
             )
           ) {
@@ -96,48 +95,30 @@ export class IAMAuthorizationService<
         const inputFieldValue = getNested(innerMutatedInputData, inputDataFieldName, {
           removeNestedFieldEscapeSign: true
         });
-        const userFieldValue = getNested(user, userFieldName);
+        const userFieldValue = getNested(user, userFieldName, { removeNestedFieldEscapeSign: true });
         if (typeof userFieldValue === 'undefined') {
           hasAccess = false;
           continue;
         }
         if (typeof inputFieldValue === 'undefined') {
           innerInputDataToBeMutated[inputDataFieldName] = userFieldValue;
-          ld.set(innerMutatedInputData, inputDataFieldName, userFieldValue);
+          setNested(innerMutatedInputData, inputDataFieldName, userFieldValue, { removeNestedFieldEscapeSign: true });
         } else {
-          const allowedValues: unknown[] = [];
-          const inputValueIsArray = inputFieldValue instanceof Array;
-          const valuesToTest = inputValueIsArray ? inputFieldValue : [inputFieldValue];
-          const valuesToTestAgainst = userFieldValue instanceof Array ? userFieldValue : [userFieldValue];
-          valuesToTest.forEach((valueToTest: unknown) => {
-            const valueToTestVariants = IAMAuthorizationService.getValuesForTesting(valueToTest);
-            for (const j in valuesToTestAgainst) {
-              const valueToTestAgainst = valuesToTestAgainst[j];
-              let matchFound = false;
-              for (const k in valueToTestVariants) {
-                const variant = valueToTestVariants[k];
-                if (valueToTestAgainst === variant) {
-                  allowedValues.push(variant);
-                  matchFound = true;
-                  break;
-                }
-              }
-              if (matchFound) {
-                break;
-              }
-            }
+          const allowedValues = IAMAuthorizationService.matchInputValues(innerMutatedInputData, {
+            [userFieldName]: userFieldValue
           });
+          const inputValueIsArray = inputFieldValue instanceof Array;
           if (!allowedValues.length) {
             hasAccess = false;
             continue;
           }
           if (inputValueIsArray) {
             innerInputDataToBeMutated[inputDataFieldName] = allowedValues;
-            ld.set(innerMutatedInputData, inputDataFieldName, allowedValues);
+            setNested(innerMutatedInputData, inputDataFieldName, allowedValues, { removeNestedFieldEscapeSign: true });
           }
         }
       }
-      inputDataToBeMutated = merge(inputDataToBeMutated, innerInputDataToBeMutated);
+      inputDataToBeMutated = ld.merge(inputDataToBeMutated, innerInputDataToBeMutated);
       break;
     }
     return { hasAccess, inputDataToBeMutated };
@@ -206,7 +187,7 @@ export class IAMAuthorizationService<
   static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {
     const matchedValues: GenericObject = {};
     for (const fieldName in values) {
-      const value = getNested(input, fieldName);
+      const value = getNested(input, fieldName, { removeNestedFieldEscapeSign: true });
       const allowedValue = values[fieldName];
       const allowedValues = allowedValue instanceof Array ? allowedValue : [allowedValue];
       let valueIsArray = false;

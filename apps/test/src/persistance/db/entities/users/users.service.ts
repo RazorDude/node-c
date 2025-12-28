@@ -18,7 +18,7 @@ import {
 } from '@node-c/persistance-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/persistance-typeorm';
 
-import { omit } from 'ramda';
+import ld from 'lodash';
 import { EntityManager } from 'typeorm';
 
 import {
@@ -58,7 +58,7 @@ export class UsersService extends TypeORMDBEntityService<
     }
     return {
       ...findResults,
-      items: findResults.items.map(item => omit(['password'], item))
+      items: findResults.items.map(item => ld.omit(item, ['password']))
     };
   }
 
@@ -67,7 +67,7 @@ export class UsersService extends TypeORMDBEntityService<
     if (privateOptions?.withPassword) {
       return item;
     }
-    return item ? omit(['password'], item) : item;
+    return item ? ld.omit(item, ['password']) : item;
   }
 
   async update(data: UsersUpdateUserData, options: UpdateOptions): Promise<PersistanceUpdateResult<User>> {
@@ -79,7 +79,7 @@ export class UsersService extends TypeORMDBEntityService<
     }
     const updateResult = await TypeORMDBEntityService.prototype.update.call(
       this,
-      { ...omit(['assignedUserTypes', 'password'] as unknown as (keyof UsersUpdateUserData)[], data) },
+      { ...ld.omit(data, ['assignedUserTypes', 'password'] as unknown as (keyof UsersUpdateUserData)[]) },
       options
     );
     if (updateResult.items?.length === 1 && data.assignedUserTypes?.length) {

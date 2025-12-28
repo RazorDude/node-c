@@ -1,4 +1,4 @@
-import { GetNestedOptions } from './getNested.interfaces';
+import { GetNestedOptions } from './getNested.definitions';
 
 import { GenericObject } from '../../definitions';
 

@@ -1,2 +1,2 @@
-export * from './getNested.interfaces'
-export * from './getNested.method'
+export * from './getNested.definitions';
+export * from './getNested.method';

@@ -4,7 +4,6 @@ import * as path from 'path';
 import { Inject, Injectable } from '@nestjs/common';
 import dotenv from 'dotenv';
 import ld from 'lodash';
-import { mergeDeepRight } from 'ramda';
 
 import {
   APP_CONFIG_FROM_ENV_KEYS as APP_CONFIG_FROM_ENV_KEYS_DEFAULT,
@@ -77,7 +76,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}.json`),
       JSON.stringify(
-        mergeDeepRight(persistance[moduleName], {
+        ld.merge(persistance[moduleName], {
           cli: {
             migrationsDir: migrationsPath
           },
@@ -130,7 +129,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     const envKeysParentNames = optionsData.envKeysParentNames || APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT;
     const processEnv = process.env;
     const envName = (processEnv['NODE_ENV'] as AppEnvironment) || AppEnvironment.Local;
-    const config = mergeDeepRight(
+    const config = ld.merge(
       appConfigs.appConfigCommon,
       appConfigs[
         `appConfigProfile${envName.charAt(0).toUpperCase()}${envName.substring(
@@ -151,9 +150,9 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
       );
       if (useEnvFileWithPriority) {
-        envVars = mergeDeepRight(envVars, envVarsFromFile);
+        envVars = ld.merge(envVars, envVarsFromFile);
       } else {
-        envVars = mergeDeepRight(envVarsFromFile, envVars);
+        envVars = ld.merge(envVarsFromFile, envVars);
       }
     }
     // first pass - create a list of modules by name and map them by module type

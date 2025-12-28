@@ -1,5 +1,4 @@
-import Immutable from 'immutable';
-import { omit } from 'ramda';
+import ld from 'lodash';
 
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
@@ -315,7 +314,7 @@ export class DomainEntityService<
       ) {
         continue;
       }
-      const serviceMethodArgs = Immutable.fromJS(methodArgs).toJS();
+      const serviceMethodArgs = ld.cloneDeep(methodArgs);
       if (typeof serviceMethodArgs[optionsArgIndex!] === 'undefined') {
         if (optionsArgIndex! > serviceMethodArgs.length - 1) {
           serviceMethodArgs.push(actualMethodOptionsOverrides);
@@ -359,7 +358,7 @@ export class DomainEntityService<
           serviceMethodArgs[optionsArgIndex!] = {
             ...serviceMethodOptions,
             filters: {
-              ...omit(['page', 'perPage'], serviceMethodOptions.filters || {}),
+              ...ld.omit(serviceMethodOptions.filters || {}, ['page', 'perPage']),
               ...filters
             },
             findAll: true

@@ -10,7 +10,7 @@ import {
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
-import { mergeDeepRight as merge } from 'ramda';
+import ld from 'lodash';
 
 import {
   BulkCreateOptions,
@@ -255,7 +255,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       return dataToReturn;
     }
     const updateResult = await this.save<Entity, Entity[]>(
-      merge(itemToUpdate, data instanceof Array ? data[0] : data),
+      ld.merge(itemToUpdate, data instanceof Array ? data[0] : data),
       {
         processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
         transactionId,

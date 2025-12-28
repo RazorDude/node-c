@@ -9,8 +9,7 @@ import {
 } from '@node-c/core';
 
 import { ValidationSchema, registerSchema, validate } from 'class-validator';
-import immutable, { Collection } from 'immutable';
-import { mergeDeepRight } from 'ramda';
+import ld from 'lodash';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -245,7 +244,7 @@ export class RedisRepositoryService<Entity> {
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
     const onConflict = optOnConflict || SaveOptionsOnConflict.ThrowError;
     let allPKValuesExist = true;
-    let preparedData = (immutable.fromJS(data!) as Collection<unknown, unknown>).toJS() as Record<string, unknown>;
+    let preparedData = ld.cloneDeep(data) as Record<string, unknown>;
     let storeEntityKey = '';
     for (const columnName of primaryKeys) {
       const { generated, type } = columns[columnName];
@@ -322,7 +321,7 @@ export class RedisRepositoryService<Entity> {
         }
         if (onConflict === SaveOptionsOnConflict.Update) {
           const existingData = JSON.parse(existingValue) as Record<string, unknown>;
-          preparedData = mergeDeepRight(existingData, preparedData);
+          preparedData = ld.merge(existingData, preparedData);
         } else {
           throw new ApplicationError(
             `[RedisRepositoryService ${entityName}][Execution Error]: ` +
