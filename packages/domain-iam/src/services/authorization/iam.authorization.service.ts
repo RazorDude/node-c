@@ -228,6 +228,14 @@ export class IAMAuthorizationService<
       }
       return regex.test(typeof valueToTest === 'string' ? valueToTest : JSON.stringify(valueToTest));
     }
+    if (
+      typeof valueToTest === 'object' &&
+      valueToTest !== null &&
+      typeof valueToTestAgainst === 'object' &&
+      valueToTestAgainst !== null
+    ) {
+      return JSON.stringify(valueToTest) === JSON.stringify(valueToTestAgainst);
+    }
     const possibleValidValues = IAMAuthorizationService.getValuesForTesting(valueToTest);
     let hasMatch = false;
     for (const i in possibleValidValues) {
