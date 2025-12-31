@@ -70,7 +70,8 @@ export class RedisStoreService {
     if (clusterMode) {
       const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
       const client = new ClusterConstructor(RedisStoreService.getNodeList(actualHost, actualPort), {
-        clusterRetryStrategy: RedisStoreService.retryStrategy,
+        // clusterRetryStrategy: RedisStoreService.retryStrategy,
+        clusterRetryStrategy: () => null,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
@@ -81,6 +82,7 @@ export class RedisStoreService {
         if (failOnConnectionError) {
           throw err;
         }
+        client.disconnect();
       }
       return client as Cluster;
     }
@@ -88,6 +90,7 @@ export class RedisStoreService {
       const SentinelConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
       const client = new SentinelConstructor({
         lazyConnect: true,
+        maxRetriesPerRequest: 0,
         name: sentinelMasterName || 'mymaster',
         password: actualPassword,
         role: sentinelRole || 'master',
@@ -97,7 +100,8 @@ export class RedisStoreService {
           : usePasswordForSentinelPassword
             ? actualPassword
             : undefined,
-        sentinelRetryStrategy: RedisStoreService.retryStrategy,
+        // sentinelRetryStrategy: RedisStoreService.retryStrategy,
+        sentinelRetryStrategy: () => null,
         username: actualUser
       });
       try {
@@ -107,15 +111,19 @@ export class RedisStoreService {
         if (failOnConnectionError) {
           throw err;
         }
+        client.disconnect();
       }
+      return client as Redis;
     }
     const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
     const client = new ClientConstructor({
       host: actualHost,
       lazyConnect: true,
+      maxRetriesPerRequest: 0,
       password: actualPassword,
       port: actualPort,
-      retryStrategy: RedisStoreService.retryStrategy,
+      // retryStrategy: RedisStoreService.retryStrategy,
+      retryStrategy: () => null,
       username: actualUser
     });
     try {
@@ -125,6 +133,7 @@ export class RedisStoreService {
       if (failOnConnectionError) {
         throw err;
       }
+      client.disconnect();
     }
     return client as Redis;
   }
