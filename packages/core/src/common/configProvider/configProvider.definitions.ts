@@ -31,6 +31,7 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
     NOSQL: {
       HOST: 'host',
       PASSWORD: 'password',
+      SENTINEL_PASSWORD: 'sentinelPassword',
       PORT: 'port',
       USER: 'user'
     },
@@ -67,7 +68,8 @@ export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNa
   PERSISTANCE: {
     children: {
       DB: 'db',
-      REDIS: 'redis'
+      REDIS: 'redis',
+      VALKEY: 'valkey'
     },
     name: 'persistance'
   }
@@ -155,6 +157,7 @@ export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersista
   settingsPerEntity?: Record<string, AppConfigCommonPersistanceNoSQLEntityServiceSettings>;
   type: NoSQLType;
   useHashmap?: boolean;
+  usePasswordForSentinelPassword?: boolean;
   validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
 }
 
@@ -218,6 +221,7 @@ export interface AppConfigFromEnvPersistanceNoSQL {
   host: string;
   password: string;
   port: number;
+  sentinelPassword?: string;
   user?: string;
 }
 

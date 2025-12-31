@@ -57,8 +57,10 @@ export class RedisStoreService {
       port,
       sentinelMasterName,
       sentinelMode,
+      sentinelPassword,
       sentinelRole,
       type,
+      usePasswordForSentinelPassword,
       user
     } = config.persistance[persistanceModuleName] as AppConfigPersistanceNoSQL;
     const actualHost = host || '0.0.0.0';
@@ -90,6 +92,11 @@ export class RedisStoreService {
         password: actualPassword,
         role: sentinelRole || 'master',
         sentinels: RedisStoreService.getNodeList(actualHost, actualPort),
+        sentinelPassword: sentinelPassword?.length
+          ? sentinelPassword
+          : usePasswordForSentinelPassword
+            ? actualPassword
+            : undefined,
         sentinelRetryStrategy: RedisStoreService.retryStrategy,
         username: actualUser
       });

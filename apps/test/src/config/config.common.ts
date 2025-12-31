@@ -34,6 +34,7 @@ export const appConfigCommon: AppConfigCommon = {
     },
     cacheAuth: {
       // clusterMode: true,
+      sentinelMode: true,
       defaultTTL: 600,
       // failOnConnectionError: false,
       // sentinelMode: true,
