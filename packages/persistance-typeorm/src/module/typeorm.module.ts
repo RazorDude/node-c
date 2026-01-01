@@ -26,7 +26,6 @@ export class TypeORMDBModule {
           dataSourceFactory: async options => {
             let dataSource: DataSource;
             try {
-              // console.log('===========>', options);
               dataSource = new DataSource(options!);
               await dataSource.initialize();
             } catch (err) {
@@ -49,10 +48,12 @@ export class TypeORMDBModule {
               entities: entities as EntityClassOrSchema[],
               failOnConnectionError,
               host,
+              manualInitialization: true,
               name: connectionName,
               password,
               port,
               synchronize: false,
+              toRetry: () => false,
               type: type === RDBType.Aurora ? RDBType.MySQL : type,
               username: user,
               ...(typeormExtraOptions || {})

@@ -104,6 +104,9 @@ export class RedisStoreService {
         sentinelRetryStrategy: () => null,
         username: actualUser
       });
+      client.on('error', (error: unknown) => {
+        console.error(`[RedisStore][${persistanceModuleName}]: Error:`, error);
+      });
       try {
         await client.connect();
       } catch (err) {
