@@ -36,7 +36,7 @@ export const appConfigCommon: AppConfigCommon = {
       // clusterMode: true,
       defaultTTL: 600,
       // failOnConnectionError: false,
-      sentinelMode: true,
+      // sentinelMode: true,
       storeDelimiter: ':',
       storeKey: Constants.PERSISTANCE_CACHE_AUTH_STORE_KEY,
       type: NoSQLType.Valkey,

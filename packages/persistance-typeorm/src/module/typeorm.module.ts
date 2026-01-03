@@ -17,6 +17,7 @@ export class TypeORMDBModule {
       moduleRegisterOptions: options.entityModuleRegisterOptions,
       registerOptionsPerModule: options.registerOptionsPerEntityModule
     });
+    let lastRetryAt = new Date().valueOf();
     return {
       global: true,
       module: moduleClass as DynamicModule['module'],
@@ -53,7 +54,15 @@ export class TypeORMDBModule {
               password,
               port,
               synchronize: false,
-              toRetry: () => false,
+              toRetry: () => {
+                const now = new Date().valueOf();
+                // 1 minute retry interval
+                if (Math.abs(lastRetryAt - now) > 60000) {
+                  lastRetryAt = now;
+                  return true;
+                }
+                return false;
+              },
               type: type === RDBType.Aurora ? RDBType.MySQL : type,
               username: user,
               ...(typeormExtraOptions || {})

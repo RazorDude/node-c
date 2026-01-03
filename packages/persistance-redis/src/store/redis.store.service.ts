@@ -67,11 +67,20 @@ export class RedisStoreService {
     const actualPassword = password?.length ? password : undefined;
     const actualPort = port || 6379;
     const actualUser = user?.length ? user : undefined;
+    let lastRetryAt = new Date().valueOf();
+    const retryMethod = () => {
+      const now = new Date().valueOf();
+      // 1 minute retry interval
+      if (Math.abs(lastRetryAt - now) > 60000) {
+        lastRetryAt = now;
+        return 500;
+      }
+      return null;
+    };
     if (clusterMode) {
       const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
       const client = new ClusterConstructor(RedisStoreService.getNodeList(actualHost, actualPort), {
-        // clusterRetryStrategy: RedisStoreService.retryStrategy,
-        clusterRetryStrategy: () => null,
+        clusterRetryStrategy: retryMethod,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
@@ -100,8 +109,7 @@ export class RedisStoreService {
           : usePasswordForSentinelPassword
             ? actualPassword
             : undefined,
-        // sentinelRetryStrategy: RedisStoreService.retryStrategy,
-        sentinelRetryStrategy: () => null,
+        sentinelRetryStrategy: retryMethod,
         username: actualUser
       });
       client.on('error', (error: unknown) => {
@@ -125,8 +133,7 @@ export class RedisStoreService {
       maxRetriesPerRequest: 0,
       password: actualPassword,
       port: actualPort,
-      // retryStrategy: RedisStoreService.retryStrategy,
-      retryStrategy: () => null,
+      retryStrategy: retryMethod,
       username: actualUser
     });
     try {
@@ -194,13 +201,6 @@ export class RedisStoreService {
     return hostList.map((hostAddress, hostIndex) => {
       return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
     });
-  }
-
-  static retryStrategy(times: number): number | null {
-    if (times > 10) {
-      return null;
-    }
-    return 500;
   }
 
   // TODO: support scan from transaction data
