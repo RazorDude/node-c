@@ -21,6 +21,7 @@ export function setNested(parent: unknown, field: string, value: unknown, option
       return false;
     }
     let fieldName = fieldNames[i];
+    // TODO: setNested for specific indexes
     // if the current parent is an array and the next field path item is not an index - set the value in all of the array's sub-items
     if (currentParent instanceof Array && isNaN(parseInt(fieldName, 10))) {
       let atLeastOnItemSet = false,

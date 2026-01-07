@@ -2,6 +2,7 @@ import ld from 'lodash';
 
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
+  DomainBaseAdditionalServiceOptionsOverrides,
   DomainBulkCreateOptions,
   DomainBulkCreatePrivateOptions,
   DomainBulkCreateResult,
@@ -48,7 +49,16 @@ export class DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
     // eslint-disable-next-line no-unused-vars
-    protected additionalPersistanceEntityServices?: AdditionalEntityServices
+    protected additionalPersistanceEntityServices?: AdditionalEntityServices,
+    // eslint-disable-next-line no-unused-vars
+    protected defaultAdditionalPersistanceEntityServicesOptions?: {
+      [methodName: string]: {
+        [serviceName: string]: {
+          allowIncoming?: boolean;
+          serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides & GenericObject<unknown>;
+        };
+      };
+    }
   ) {}
 
   public bulkCreate(
@@ -67,19 +77,31 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
       throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
     }
+    // const defaultAdditionalPersistanceEntityServicesOptions =
+    //   this.defaultAdditionalPersistanceEntityServicesOptions?.bulkCreate;
     const { optionsOverridesByService, persistanceServices = [DomainPersistanceEntityServiceType.Main] } =
       options || {};
     const [firstServiceName, ...otherServiceNames] = persistanceServices;
     const result = await this.getPersistanceService(firstServiceName).bulkCreate(data, privateOptions);
+    let actualOtherServiceNames: string[] = [];
+    let actualOptionsOverridesByService: typeof optionsOverridesByService = {};
+    // if (defaultAdditionalPersistanceEntityServicesOptions) {
+    //   for (const serviceName in defaultAdditionalPersistanceEntityServicesOptions) {
+    //     const { allowIncoming = true, serviceOptions } = defaultAdditionalPersistanceEntityServicesOptions[serviceName];
+    //   }
+    // } else {
+    actualOtherServiceNames = otherServiceNames || [];
+    actualOptionsOverridesByService = optionsOverridesByService;
+    // }
     return {
       result,
-      resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
+      resultsByService: await this.runMethodInAdditionalServices(actualOtherServiceNames, {
         firstServiceResult: result,
         hasFirstServiceResult: result.length > 0,
         methodArgs: [result, privateOptions],
         methodName: 'bulkCreate',
         optionsArgIndex: 1,
-        optionsOverridesByService
+        optionsOverridesByService: actualOptionsOverridesByService
       })
     };
   }

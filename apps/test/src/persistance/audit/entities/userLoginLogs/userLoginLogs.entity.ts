@@ -6,7 +6,7 @@ export interface UserLoginLog extends GenericObject {
   userId: number;
 }
 
-export const UserLoginLogEntity: ClickHouseDBEntitySchema = {
+export const UserLoginLogEntity: ClickHouseDBEntitySchema<UserLoginLog> = {
   options: {
     columns: {
       datetime: { type: ClickHouseDBEntitySchemaColumnType.DateTime },

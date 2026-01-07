@@ -17,7 +17,7 @@ export class ClickHouseDBRepository<Entity extends GenericObject<unknown>> imple
 
   constructor(
     @Inject(RDBConstants.RDB_REPOSITORY_ENTITY_CLASS)
-    protected entitySchema: ClickHouseDBEntitySchema,
+    protected entitySchema: ClickHouseDBEntitySchema<Entity>,
     @Inject(forwardRef(() => ClickHouseEntityManager))
     // eslint-disable-next-line no-unused-vars
     public readonly manager: ClickHouseEntityManager

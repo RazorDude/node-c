@@ -13,14 +13,17 @@ export function getNested<ReturnData = unknown>(
   parent: unknown | unknown[],
   field: string,
   options?: GetNestedOptions
-): ReturnData | undefined {
+): { paths: string[]; unifiedValue?: ReturnData | ReturnData[]; values: (ReturnData | undefined)[] } {
   if (typeof parent !== 'object' || parent === null || !field.length) {
-    return undefined;
+    return { paths: [field], values: [] };
   }
   const { arrayItemsShouldBeUnique, removeNestedFieldEscapeSign } = options || {};
   const fieldData = field.split('.');
   const fieldDataLength = fieldData.length;
+  const paths: string[] = [];
+  const values: (ReturnData | undefined)[] = [];
   let currentElement = parent;
+  let currentPath = '';
   for (let i = 0; i < fieldDataLength; i++) {
     let innerElementName = fieldData[i];
     // logic for handling Sequelize-style $foo.bar$ - should be treated as a single element
@@ -51,49 +54,55 @@ export function getNested<ReturnData = unknown>(
       }
     }
     const nextElement = (currentElement as GenericObject)[innerElementName];
+    currentPath += `${currentPath.length ? '.' : ''}${innerElementName}`;
     if (typeof nextElement === 'undefined') {
-      return undefined;
+      paths.push(currentPath);
+      break;
     }
     // if the next element is an array, prepare to return an array of the inner items
     if (nextElement instanceof Array) {
       // if this is the last item, just return the array
       if (i === fieldDataLength - 1) {
-        return nextElement as ReturnData;
+        paths.push(currentPath);
+        values.push(nextElement as ReturnData);
+        break;
       }
       // if the next item is not an index, recursively call self for each item of the array
       if (isNaN(parseInt(fieldData[i + 1], 10))) {
-        currentElement = [];
         let innerPath = '';
         for (let j = i + 1; j < fieldDataLength; j++) {
           innerPath += `${fieldData[j]}${j < fieldDataLength - 1 ? '.' : ''}`;
         }
         nextElement.forEach(item => {
-          const innerValue = getNested(item, innerPath);
-          if (typeof innerValue !== 'undefined') {
-            // if the innerValue is an array too, merge it with the currentElement - this way we can have nested arrays without indexes
-            if (innerValue instanceof Array) {
-              innerValue.forEach(innerValueItem => {
-                if (
-                  !arrayItemsShouldBeUnique ||
-                  (arrayItemsShouldBeUnique && (currentElement as unknown[]).indexOf(innerValueItem) === -1)
-                ) {
-                  (currentElement as unknown[]).push(innerValueItem);
-                }
-              });
-              return;
-            }
+          const { paths: innerPaths, values: innerValue } = getNested(item, innerPath, options);
+          if (typeof innerValue === 'undefined') {
+            return;
+          }
+          // flatten inner arrays
+          innerValue.forEach((innerValueItem, innerValueItemIndex) => {
             if (
               !arrayItemsShouldBeUnique ||
-              (arrayItemsShouldBeUnique && (currentElement as unknown[]).indexOf(innerValue) === -1)
+              (arrayItemsShouldBeUnique && values.indexOf(innerValueItem as ReturnData) === -1)
             ) {
-              (currentElement as unknown[]).push(innerValue);
+              paths.push(`${currentPath}.${innerValueItemIndex}.${innerPaths[innerValueItemIndex]}`);
+              values.push(innerValueItem as ReturnData);
             }
-          }
+          });
         });
-        return currentElement as ReturnData;
+        break;
       }
     }
     currentElement = nextElement as GenericObject;
+    if (i === fieldDataLength - 1) {
+      paths.push(currentPath);
+      values.push(currentElement as ReturnData);
+    }
   }
-  return currentElement as ReturnData;
+  let unifiedValue = undefined;
+  if (paths.length > 1 || values.length > 1) {
+    unifiedValue = values;
+  } else {
+    unifiedValue = values[0];
+  }
+  return { paths, unifiedValue: unifiedValue as ReturnData | ReturnData[], values };
 }

@@ -13,7 +13,7 @@ export class ClickHouseDBEntityService<
     protected configProvider: ConfigProviderService,
     protected qb: SQLQueryBuilderService,
     protected repository: ClickHouseDBRepository<Entity>,
-    protected schema: ClickHouseDBEntitySchema
+    protected schema: ClickHouseDBEntitySchema<Entity>
   ) {
     super(configProvider, qb, repository, schema);
     this.primaryKeys = repository.primaryKeys;

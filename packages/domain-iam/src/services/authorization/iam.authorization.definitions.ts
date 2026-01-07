@@ -2,8 +2,10 @@ import { GenericObject } from '@node-c/core';
 
 export interface AuthorizationPoint<Id> {
   allowedInputData?: GenericObject;
+  allowedOutputData?: GenericObject;
   controllerNames?: string[];
   forbiddenInputData?: GenericObject;
+  forbiddenOutputData?: GenericObject;
   handlerNames?: string[];
   id: Id;
   inputDataFieldName?: string;

@@ -10,7 +10,7 @@ import morgan from 'morgan';
 import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
-import { HttpExceptionFilter } from '../exceptionFilters';
+import { HttpExceptionFilter } from '../filters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
 import { HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 

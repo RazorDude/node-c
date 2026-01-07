@@ -8,11 +8,10 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import { ConfigProviderService, EndpointSecurityMode } from '@node-c/core';
+import { ConfigProviderService, EndpointSecurityMode, GenericObject, setNested } from '@node-c/core';
 import { AuthorizationPoint, IAMAuthorizationService, UserWithPermissionsData } from '@node-c/domain-iam';
 
-import ld from 'lodash';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
 
@@ -63,7 +62,11 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
         return next.handle();
       }
     }
-    const { hasAccess, inputDataToBeMutated } = IAMAuthorizationService.checkAccess(
+    const {
+      authorizationPoints: usedAuthorizationPoints,
+      hasAccess,
+      inputDataToBeMutated
+    } = IAMAuthorizationService.checkAccess(
       handlerData,
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user
@@ -75,8 +78,23 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     for (const key in inputDataToBeMutated) {
-      ld.set(req, key, inputDataToBeMutated[key]);
+      setNested(req, key, inputDataToBeMutated[key]);
     }
-    return next.handle();
+    return next.handle().pipe(
+      map((data?: unknown) => {
+        if (typeof data === 'undefined' || data === null || typeof data !== 'object' || data instanceof Date) {
+          return data;
+        }
+        const actualData = data as GenericObject;
+        const { outputDataToBeMutated } = IAMAuthorizationService.processOutputData(
+          usedAuthorizationPoints,
+          actualData
+        );
+        for (const key in outputDataToBeMutated) {
+          setNested(actualData, key, outputDataToBeMutated[key]);
+        }
+        return actualData;
+      })
+    );
   }
 }

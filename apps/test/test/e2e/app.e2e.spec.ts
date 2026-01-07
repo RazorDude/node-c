@@ -44,7 +44,7 @@ describe('NodeC.Apps.Test', () => {
   // TODO: find users (sorting)
   // TODO: find users (no sorting and pagination)
   // -- end of admin cases
-  // -- start of user 0 cases
+  // -- start of user 0 cases - CRUD functionality, mutation of input and output data
   // TODO: log in as user 0
   // TODO: find courses (no options)
   // TODO: find courses (pagination, page 1 and 2)

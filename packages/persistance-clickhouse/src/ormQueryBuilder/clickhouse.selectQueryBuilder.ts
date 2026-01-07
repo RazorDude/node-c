@@ -19,7 +19,7 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     // eslint-disable-next-line no-unused-vars
     protected manager: ClickHouseEntityManager,
     // eslint-disable-next-line no-unused-vars
-    protected schema: ClickHouseDBEntitySchema
+    protected schema: ClickHouseDBEntitySchema<Entity>
   ) {
     const {
       options: { columns }

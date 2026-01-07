@@ -12,7 +12,9 @@ import { ClickHouseEntityManager } from '../entityManager';
 
 @Module({})
 export class ClickHouseDBRepositoryModule {
-  static register<Entity extends GenericObject<unknown>>(options: ClickHouseDBRepositoryModuleOptions): DynamicModule {
+  static register<Entity extends GenericObject<unknown>>(
+    options: ClickHouseDBRepositoryModuleOptions<Entity>
+  ): DynamicModule {
     const { entitySchema, persistanceModuleName } = options;
     const clientName = `${Constants.CLICKHOUSE_CLIENT_PREFIX}${persistanceModuleName}`;
     return {

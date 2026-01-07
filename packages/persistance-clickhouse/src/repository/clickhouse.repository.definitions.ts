@@ -1,9 +1,11 @@
+import { GenericObject } from '@node-c/core';
 import { RDBEntitySchema } from '@node-c/persistance-rdb';
 
-export interface ClickHouseDBEntitySchema extends RDBEntitySchema {
+export interface ClickHouseDBEntitySchema<EntityClass extends GenericObject<unknown>> extends RDBEntitySchema {
   options: {
     columns: {
-      [columnName: string]: ClickHouseDBEntitySchemaColumnOptions;
+      // eslint-disable-next-line no-unused-vars
+      [columnName in keyof EntityClass]: ClickHouseDBEntitySchemaColumnOptions;
     };
     name: string;
     paranoid?: boolean;
@@ -28,7 +30,11 @@ export enum ClickHouseDBEntitySchemaColumnType {
   // eslint-disable-next-line no-unused-vars
   DateTime = 'DATETIME',
   // eslint-disable-next-line no-unused-vars
+  Enum = 'ENUM',
+  // eslint-disable-next-line no-unused-vars
   Integer = 'INT',
+  // eslint-disable-next-line no-unused-vars
+  JSON = 'JSON',
   // eslint-disable-next-line no-unused-vars
   Text = 'TEXT',
   // eslint-disable-next-line no-unused-vars
@@ -37,7 +43,7 @@ export enum ClickHouseDBEntitySchemaColumnType {
   Varchar = 'VARCHAR'
 }
 
-export interface ClickHouseDBRepositoryModuleOptions {
-  entitySchema: ClickHouseDBEntitySchema;
+export interface ClickHouseDBRepositoryModuleOptions<EntityClass extends GenericObject<unknown>> {
+  entitySchema: ClickHouseDBEntitySchema<EntityClass>;
   persistanceModuleName: string;
 }

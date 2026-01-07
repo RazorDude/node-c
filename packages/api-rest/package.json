@@ -1,6 +1,6 @@
 {
   "name": "@node-c/api-rest",
-  "version": "1.0.0-alpha52",
+  "version": "1.0.0-alpha53",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "class-validator": "^0.14.1"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha52",
-    "@node-c/core": "^1.0.0-alpha52"
+    "@node-c/api-http": "^1.0.0-alpha53",
+    "@node-c/core": "^1.0.0-alpha53"
   }
 }
