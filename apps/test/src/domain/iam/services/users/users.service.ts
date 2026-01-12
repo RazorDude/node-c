@@ -5,7 +5,7 @@ import {
   ConfigProviderService,
   Constants as CoreConstants,
   DomainMethod,
-  DomainPersistanceEntityServiceType,
+  // DomainPersistanceEntityServiceType,
   PersistanceEntityService,
   PersistanceFindOneOptions
 } from '@node-c/core';
@@ -47,6 +47,7 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
     );
   }
 
+  // TODO: caching by email
   async getUserWithPermissionsData(
     options: PersistanceFindOneOptions,
     privateOptions?: GetUserWithPermissionsDataOptions
@@ -57,8 +58,9 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
       {
         ...options,
         include,
-        persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
-        saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
+        // persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+        persistanceServices: ['db']
+        // saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
       },
       { withPassword: true }
     );

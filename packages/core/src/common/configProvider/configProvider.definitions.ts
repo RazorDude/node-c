@@ -148,6 +148,7 @@ export interface AppConfigCommonPersistanceClickHouse extends AppConfigCommonPer
 
 export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersistance {
   clusterMode?: boolean;
+  defaultIndividualSearchEnabled?: boolean;
   defaultTTL?: number;
   sentinelMasterName?: string;
   sentinelMode?: boolean;
@@ -163,6 +164,7 @@ export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersista
 
 export interface AppConfigCommonPersistanceNoSQLEntityServiceSettings
   extends AppConfigCommonPersistanceEntityServiceSettings {
+  defaultIndividualSearchEnabled?: boolean;
   ttl?: number;
   validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
 }

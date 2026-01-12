@@ -51,6 +51,7 @@ export interface RedisRepositoryModuleOptions {
 export interface RepositoryFindOptions {
   filters?: GenericObject<unknown>;
   findAll?: boolean;
+  individualSearch?: boolean;
   page?: number;
   perPage?: number;
   withValues?: boolean;

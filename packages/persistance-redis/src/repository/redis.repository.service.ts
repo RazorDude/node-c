@@ -35,6 +35,7 @@ export class RedisRepositoryService<Entity> {
   protected _columnNames: string[];
   protected _primaryKeys: string[];
   protected defaultTTL?: number;
+  protected defaultIndividualSearchEnabled: boolean;
   protected storeDelimiter: string;
   protected validationSchemaProperties: ValidationSchema['properties'];
   protected validationSettings: AppConfigCommonPersistanceNoSQLValidationSettings;
@@ -58,14 +59,12 @@ export class RedisRepositoryService<Entity> {
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
-    const { defaultTTL, storeDelimiter, settingsPerEntity } = configProvider.config.persistance[
-      _persistanceModuleName
-    ] as AppConfigPersistanceNoSQL;
+    const { defaultIndividualSearchEnabled, defaultTTL, storeDelimiter, settingsPerEntity } = configProvider.config
+      .persistance[_persistanceModuleName] as AppConfigPersistanceNoSQL;
     const { columns, name: entityName } = schema;
     const columnNames: string[] = [];
     const primaryKeys: string[] = [];
     const validationSchemaProperties: ValidationSchema['properties'] = {};
-    this.defaultTTL = settingsPerEntity?.[entityName]?.ttl || defaultTTL;
     for (const columnName in columns) {
       const { primary, primaryOrder, validationProperties } = columns[columnName];
       columnNames.push(columnName);
@@ -82,6 +81,14 @@ export class RedisRepositoryService<Entity> {
       }
     }
     this._columnNames = columnNames;
+    this.defaultTTL = settingsPerEntity?.[entityName]?.ttl || defaultTTL;
+    if (typeof settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled !== 'undefined') {
+      this.defaultIndividualSearchEnabled = settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled;
+    } else if (typeof defaultIndividualSearchEnabled !== 'undefined') {
+      this.defaultIndividualSearchEnabled = defaultIndividualSearchEnabled;
+    } else {
+      this.defaultIndividualSearchEnabled = false;
+    }
     this._primaryKeys = primaryKeys.sort(
       (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
     );
@@ -93,69 +100,81 @@ export class RedisRepositoryService<Entity> {
   async find<ResultItem extends Entity | string = Entity>(
     options: RepositoryFindOptions,
     privateOptions?: RepositoryFindPrivateOptions
-  ): Promise<ResultItem[]> {
+  ): Promise<{ items: ResultItem[]; more: boolean }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
     const { name: entityName } = schema;
-    const { filters, findAll, page, perPage, withValues: optWithValues } = options;
+    const { filters, findAll, page, perPage, individualSearch, withValues: optWithValues } = options;
     const { requirePrimaryKeys } = privateOptions || {};
+    const individualSearchEnabled =
+      typeof individualSearch !== 'undefined' ? individualSearch : this.defaultIndividualSearchEnabled;
     const paginationOptions: { count?: number; cursor?: number } = {};
     const primaryKeyFiltersToForceCheck: string[] = [];
+    const storeEntityKeys: string[] = [];
     const withValues = typeof optWithValues === 'undefined' || optWithValues === true ? true : false;
     let count: number = 0;
     let hasNonPrimaryKeyFilters = false;
-    let storeEntityKey = '';
+    let primaryKeyFiltersCount = 0;
     if (filters && Object.keys(filters).length) {
-      let primaryKeyFiltersCount = 0;
-      storeEntityKey =
-        storeDelimiter +
-        primaryKeys
-          .map(field => {
-            const value = filters[field];
+      storeEntityKeys.push('');
+      primaryKeys.forEach(field => {
+        const value = filters[field];
+        if (typeof value !== 'undefined' && typeof value !== 'object' && (typeof value !== 'string' || value.length)) {
+          primaryKeyFiltersCount++;
+          storeEntityKeys.forEach((_key, keyIndex) => {
+            storeEntityKeys[keyIndex] += `${storeDelimiter}${value}`;
+          });
+          return;
+        }
+        if (value instanceof Array) {
+          const finalValues: (string | number)[] = [];
+          value.forEach(valueItem => {
             if (
-              typeof value !== 'undefined' &&
-              typeof value !== 'object' &&
-              (typeof value !== 'string' || value.length)
+              (typeof valueItem === 'string' && !valueItem.length) ||
+              (typeof valueItem !== 'string' && typeof valueItem !== 'number')
             ) {
-              primaryKeyFiltersCount++;
-              return value;
+              return;
             }
-            if (value instanceof Array) {
-              const finalValues: (string | number)[] = [];
-              value.forEach(valueItem => {
-                // unfortunately, a glob OR pattern doesn't exist
-                // if (typeof valueItem === 'string') {
-                //   finalValues.push(`[${valueItem.replace('*', '').replace(storeDelimiter, '')}]`);
-                //   return;
-                // }
-                // if (typeof valueItem === 'number') {
-                //   finalValues.push(`[${valueItem}]`);
-                //   return;
-                // }
-                if (
-                  (typeof valueItem === 'string' && !valueItem.length) ||
-                  (typeof valueItem !== 'string' && typeof valueItem !== 'number')
-                ) {
-                  return;
-                }
-                finalValues.push(valueItem);
-              });
-              if (finalValues.length) {
-                // primaryKeyFiltersCount++;
-                // return finalValues.join('');
-                hasNonPrimaryKeyFilters = true;
-                primaryKeyFiltersToForceCheck.push(field);
-                return '*';
+            finalValues.push(valueItem);
+          });
+          if (finalValues.length) {
+            // TODO: this will only work if the previous keys haven't been arrays
+            if (individualSearchEnabled) {
+              if (storeEntityKeys.length <= 1) {
+                const baseStoreEntityKey = storeEntityKeys[0] || '';
+                primaryKeyFiltersCount++;
+                finalValues.forEach((finalValue, finalValueIndex) => {
+                  const fullFinalValue = `${baseStoreEntityKey}${storeDelimiter}${finalValue}`;
+                  if (typeof storeEntityKeys[finalValueIndex] === 'undefined') {
+                    storeEntityKeys.push(fullFinalValue);
+                    return;
+                  }
+                  storeEntityKeys[finalValueIndex] = fullFinalValue;
+                });
+                return;
               }
+            } else {
+              hasNonPrimaryKeyFilters = true;
+              primaryKeyFiltersToForceCheck.push(field);
+              storeEntityKeys[0] += `${storeDelimiter}*`;
+              return;
             }
-            if (requirePrimaryKeys) {
-              throw new ApplicationError(
-                `[RedisRepositoryService ${entityName}][Find Error]: ` +
-                  `The primary key field ${field} is required when requirePrimaryKeys is set to true.`
-              );
-            }
-            return '*';
-          })
-          .join(storeDelimiter);
+          }
+        }
+        if (requirePrimaryKeys) {
+          throw new ApplicationError(
+            `[RedisRepositoryService ${entityName}][Find Error]: ` +
+              `The primary key field ${field} is required when requirePrimaryKeys is set to true.`
+          );
+        }
+        if (individualSearchEnabled) {
+          throw new ApplicationError(
+            `[RedisRepositoryService ${entityName}][Find Error]: ` +
+              `The primary key field ${field} is required when individualSearchEnabled ` +
+              'is set to true.'
+          );
+        }
+        storeEntityKeys[0] += `${storeDelimiter}*`;
+      });
       if (!hasNonPrimaryKeyFilters) {
         hasNonPrimaryKeyFilters = primaryKeyFiltersCount === Object.keys(filters).length;
       }
@@ -171,48 +190,89 @@ export class RedisRepositoryService<Entity> {
       );
     }
     if (findAll) {
-      const { values: initialResults } = await store.scan(`${entityName}${storeEntityKey}`, {
-        ...paginationOptions,
-        parseToJSON: true,
-        scanAll: findAll,
-        withValues
-      });
-      if (!hasNonPrimaryKeyFilters) {
-        return initialResults as ResultItem[];
+      if (individualSearchEnabled && !primaryKeyFiltersCount) {
+        throw new ApplicationError(
+          `[RedisRepositoryService ${entityName}][Error]: ` +
+            'Primary key filters are required when findAll and individualSearchEnabled ' +
+            'are enabled in the find method.'
+        );
       }
-      return initialResults.filter(item => {
-        let filterResult = true;
-        for (const key in filters) {
-          if (primaryKeys.includes(key) && !primaryKeyFiltersToForceCheck.includes(key)) {
-            continue;
-          }
-          const filterValue = filters[key];
-          const itemValue = (item as Record<string, unknown>)[key];
-          if (filterValue instanceof Array) {
-            if (!filterValue.includes(itemValue)) {
+      let initialResults: ResultItem[] = [];
+      // get the base results
+      if (individualSearch) {
+        initialResults = (await Promise.all(
+          storeEntityKeys.map(key => store.get(`${entityName}${key}`, { parseToJSON: true }))
+        )) as ResultItem[];
+      } else {
+        // TODO: if no filters are provided, this will not return anything
+        const scanData = await store.scan(`${entityName}${storeEntityKeys[0]}`, {
+          ...paginationOptions,
+          parseToJSON: true,
+          scanAll: findAll,
+          withValues
+        });
+        initialResults = scanData.values as ResultItem[];
+      }
+      if (!hasNonPrimaryKeyFilters) {
+        return { items: initialResults, more: false };
+      }
+      // filter by the results' object data
+      return {
+        items: initialResults.filter(item => {
+          let filterResult = true;
+          for (const key in filters) {
+            if (primaryKeys.includes(key) && !primaryKeyFiltersToForceCheck.includes(key)) {
+              continue;
+            }
+            const filterValue = filters[key];
+            const itemValue = (item as Record<string, unknown>)[key];
+            if (filterValue instanceof Array) {
+              if (!filterValue.includes(itemValue)) {
+                filterResult = false;
+                break;
+              }
+              continue;
+            }
+            if (filterValue !== itemValue) {
               filterResult = false;
               break;
             }
-            continue;
           }
-          if (filterValue !== itemValue) {
-            filterResult = false;
-            break;
-          }
-        }
-        return filterResult;
-      }) as ResultItem[];
+          return filterResult;
+        }) as ResultItem[],
+        more: false
+      };
     }
+    // process non-findAll
+    const [storeEntityKey] = storeEntityKeys;
+    let more = false;
     let results: ResultItem[] = [];
     while (results.length < count) {
-      const { cursor: newCursor, values: innerResults } = await store.scan(`${entityName}${storeEntityKey}`, {
-        ...paginationOptions,
-        parseToJSON: true,
-        scanAll: false,
-        withValues
-      });
+      let endReached = false;
+      let iterationResults: ResultItem[] = [];
+      // get the base results
+      if (individualSearchEnabled) {
+        iterationResults = (await Promise.all(
+          storeEntityKeys.map(key => store.get(`${entityName}${key}`, { parseToJSON: true }))
+        )) as ResultItem[];
+        endReached = true;
+      } else {
+        const { cursor: newCursor, values: innerResults } = await store.scan(`${entityName}${storeEntityKey}`, {
+          ...paginationOptions,
+          parseToJSON: true,
+          scanAll: false,
+          withValues
+        });
+        iterationResults = innerResults as ResultItem[];
+        if (newCursor === 0) {
+          endReached = true;
+        } else {
+          paginationOptions.cursor = newCursor;
+        }
+      }
+      // filter by the results' object data
       results = results.concat(
-        innerResults.filter(item => {
+        iterationResults.filter(item => {
           let filterResult = true;
           for (const key in filters) {
             if (primaryKeys.includes(key)) {
@@ -226,15 +286,15 @@ export class RedisRepositoryService<Entity> {
           return filterResult;
         }) as ResultItem[]
       );
-      if (newCursor === 0) {
+      if (endReached) {
         break;
       }
-      paginationOptions.cursor = newCursor;
     }
     if (results.length > count) {
+      more = true;
       results = results.slice(0, count);
     }
-    return results;
+    return { items: results, more };
   }
 
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {

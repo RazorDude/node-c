@@ -27,6 +27,7 @@ export const appConfigCommon: AppConfigCommon = {
     audit: { type: RDBType.ClickHouse },
     cache: {
       defaultTTL: 3600,
+      defaultIndividualSearchEnabled: true,
       storeKey: Constants.PERSISTANCE_CACHE_STORE_KEY,
       ttlPerEntity: { users: 60000 },
       type: NoSQLType.Redis,
@@ -34,6 +35,7 @@ export const appConfigCommon: AppConfigCommon = {
     },
     cacheAuth: {
       // clusterMode: true,
+      defaultIndividualSearchEnabled: true,
       defaultTTL: 600,
       // failOnConnectionError: false,
       // sentinelMode: true,

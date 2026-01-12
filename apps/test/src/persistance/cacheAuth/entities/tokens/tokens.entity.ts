@@ -1,6 +1,8 @@
 import { TokenType as TokenTypeBase } from '@node-c/domain-iam';
 import { EntitySchema, EntitySchemaColumnType } from '@node-c/persistance-redis';
 
+import ld from 'lodash';
+
 import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
 
 export type TokenType = TokenTypeBase;
@@ -16,7 +18,7 @@ const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'token'
 export const CacheAuthTokenSchema: EntitySchema = {
   ...baseSchema,
   columns: {
-    ...baseSchema.columns,
+    ...ld.omit(baseSchema.columns, ['id']),
     refreshToken: {
       type: EntitySchemaColumnType.String
     },
@@ -24,9 +26,13 @@ export const CacheAuthTokenSchema: EntitySchema = {
       type: EntitySchemaColumnType.String
     },
     type: {
+      primary: true,
+      primaryOrder: 1,
       type: EntitySchemaColumnType.String
     },
     userId: {
+      primary: true,
+      primaryOrder: 0,
       type: EntitySchemaColumnType.String
     }
   }

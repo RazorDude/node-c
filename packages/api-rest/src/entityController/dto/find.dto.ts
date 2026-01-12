@@ -18,6 +18,10 @@ export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options>
   @IsOptional()
   include?: string[];
 
+  @IsBooleanString()
+  @IsOptional()
+  individualSearch?: boolean;
+
   @IsObject()
   @IsOptional()
   @IsNotEmptyObject()

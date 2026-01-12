@@ -44,7 +44,20 @@ export class TypeORMDBModule {
             // example : configProvider.config.persistance.db
             const { database, failOnConnectionError, host, password, port, type, typeormExtraOptions, user } =
               persistanceConfig[moduleName as keyof typeof persistanceConfig] as AppConfigPersistanceRDB;
+            const dataSourceOptions: { toRetry?: TypeOrmModuleOptions['toRetry'] } = {};
+            if (!failOnConnectionError) {
+              dataSourceOptions.toRetry = () => {
+                const now = new Date().valueOf();
+                // 1 minute retry interval
+                if (Math.abs(lastRetryAt - now) > 60000) {
+                  lastRetryAt = now;
+                  return true;
+                }
+                return false;
+              };
+            }
             return {
+              ...dataSourceOptions,
               database,
               entities: entities as EntityClassOrSchema[],
               failOnConnectionError,
@@ -54,15 +67,6 @@ export class TypeORMDBModule {
               password,
               port,
               synchronize: false,
-              toRetry: () => {
-                const now = new Date().valueOf();
-                // 1 minute retry interval
-                if (Math.abs(lastRetryAt - now) > 60000) {
-                  lastRetryAt = now;
-                  return true;
-                }
-                return false;
-              },
               type: type === RDBType.Aurora ? RDBType.MySQL : type,
               username: user,
               ...(typeormExtraOptions || {})

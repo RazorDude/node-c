@@ -10,7 +10,7 @@ import {
   NoSQLType
 } from '@node-c/core';
 
-import Redis, { ChainableCommander, Cluster } from 'ioredis';
+import Redis, { ChainableCommander, Cluster, ClusterOptions, RedisOptions } from 'ioredis';
 import Valkey from 'iovalkey';
 import { v4 as uuid } from 'uuid';
 
@@ -67,6 +67,12 @@ export class RedisStoreService {
     const actualPassword = password?.length ? password : undefined;
     const actualPort = port || 6379;
     const actualUser = user?.length ? user : undefined;
+    const clientOptions: {
+      clusterRetryStrategy?: ClusterOptions['clusterRetryStrategy'];
+      maxRetriesPerRequest?: RedisOptions['maxRetriesPerRequest'];
+      retryStrategy?: RedisOptions['retryStrategy'];
+      sentinelRetryStrategy?: RedisOptions['sentinelRetryStrategy'];
+    } = {};
     let lastRetryAt = new Date().valueOf();
     const retryMethod = () => {
       const now = new Date().valueOf();
@@ -78,9 +84,12 @@ export class RedisStoreService {
       return null;
     };
     if (clusterMode) {
+      if (!failOnConnectionError) {
+        clientOptions.clusterRetryStrategy = retryMethod;
+      }
       const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
       const client = new ClusterConstructor(RedisStoreService.getNodeList(actualHost, actualPort), {
-        clusterRetryStrategy: retryMethod,
+        ...clientOptions,
         lazyConnect: true,
         redisOptions: { password: actualPassword, username: actualUser }
       });
@@ -96,10 +105,14 @@ export class RedisStoreService {
       return client as Cluster;
     }
     if (sentinelMode) {
+      if (!failOnConnectionError) {
+        clientOptions.maxRetriesPerRequest = 0;
+        clientOptions.sentinelRetryStrategy = retryMethod;
+      }
       const SentinelConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
       const client = new SentinelConstructor({
+        ...clientOptions,
         lazyConnect: true,
-        maxRetriesPerRequest: 0,
         name: sentinelMasterName || 'mymaster',
         password: actualPassword,
         role: sentinelRole || 'master',
@@ -109,7 +122,6 @@ export class RedisStoreService {
           : usePasswordForSentinelPassword
             ? actualPassword
             : undefined,
-        sentinelRetryStrategy: retryMethod,
         username: actualUser
       });
       client.on('error', (error: unknown) => {
@@ -126,14 +138,17 @@ export class RedisStoreService {
       }
       return client as Redis;
     }
+    if (!failOnConnectionError) {
+      clientOptions.maxRetriesPerRequest = 0;
+      clientOptions.retryStrategy = retryMethod;
+    }
     const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
     const client = new ClientConstructor({
+      ...clientOptions,
       host: actualHost,
       lazyConnect: true,
-      maxRetriesPerRequest: 0,
       password: actualPassword,
       port: actualPort,
-      retryStrategy: retryMethod,
       username: actualUser
     });
     try {

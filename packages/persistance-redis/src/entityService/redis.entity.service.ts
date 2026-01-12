@@ -83,7 +83,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field for counting is required.');
     }
-    return (await repository.find({ filters: parsedFilters, findAll })).length;
+    return (await repository.find({ filters: parsedFilters, findAll, individualSearch: false })).items.length;
   }
 
   async create(data: Partial<Entity>, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
@@ -141,7 +141,14 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   async find(options: FindOptions, privateOptions?: FindPrivateOptions): Promise<PersistanceFindResults<Entity>> {
     const { repository } = this;
-    const { filters, getTotalCount = true, page: optPage, perPage: optPerPage, findAll: optFindAll } = options;
+    const {
+      filters,
+      getTotalCount = true,
+      individualSearch,
+      page: optPage,
+      perPage: optPerPage,
+      findAll: optFindAll
+    } = options;
     const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } = privateOptions || {};
     // make sure it's truly a number - it could come as string from GET requests
     const page = optPage ? parseInt(optPage as unknown as string, 10) : 1;
@@ -158,17 +165,18 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       findResults.page = page;
       findResults.perPage = perPage;
     }
-    const items: Entity[] = await repository.find(
-      { filters: parsedFilters, findAll, page, perPage },
+    const { items, more } = await repository.find(
+      { filters: parsedFilters, findAll, individualSearch, page, perPage },
       { requirePrimaryKeys }
     );
     if (findAll) {
       findResults.perPage = items.length;
     } else {
+      // TODO: is this really needed?
       if (items.length === perPage + 1) {
         items.pop();
-        findResults.more = true;
       }
+      findResults.more = more;
       if (getTotalCount) {
         findResults.totalCount = await this.count(options, { allowCountWithoutFilters: true });
       }
@@ -188,8 +196,11 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     if (!Object.keys(parsedFilters).length) {
       throw new ApplicationError('At least one filter field is required for the findOne method.');
     }
-    const items: Entity[] = await this.repository.find({ filters, page: 1, perPage: 1 }, { requirePrimaryKeys });
-    return items[0] || null;
+    const result = await this.repository.find(
+      { filters, individualSearch: true, page: 1, perPage: 1 },
+      { requirePrimaryKeys }
+    );
+    return result.items[0] || null;
   }
 
   protected async save<Data extends Partial<Entity> | Partial<Entity>[], ReturnData = unknown>(

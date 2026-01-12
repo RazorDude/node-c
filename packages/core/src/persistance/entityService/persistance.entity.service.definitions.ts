@@ -59,6 +59,7 @@ export interface PersistanceFindOptions {
   findAll?: boolean;
   getTotalCount?: boolean;
   include?: string[];
+  individualSearch?: boolean;
   orderBy?: GenericObject<PersistanceOrderByDirection>;
   page?: number;
   perPage?: number;

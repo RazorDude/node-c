@@ -1,7 +1,7 @@
 import {
-  DomainBaseOptionsForAdditionalServicesFull,
   DomainEntityService,
   DomainEntityServiceDefaultData,
+  DomainFindOptions,
   DomainMethod,
   GenericObject,
   PersistanceEntityService,
@@ -154,14 +154,14 @@ export class IAMAuthorizationService<
 
   async mapAuthorizationPoints(
     moduleName: string,
-    additionalServicesOptions?: DomainBaseOptionsForAdditionalServicesFull
+    findOptions?: DomainFindOptions
   ): Promise<AuthorizationData<unknown>> {
     // Get all APs in order to avoid the situation where some of the TTLs have expired,
     // so we only get partial cache results, which leads to us not loading the rest from the DB
     const {
       result: { items: apList }
     } = await this.find({
-      ...(additionalServicesOptions || {}),
+      ...(findOptions || {}),
       findAll: true
     });
     const authorizationData: AuthorizationData<unknown> = { __all: { __all: {} } };

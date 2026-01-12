@@ -19,7 +19,11 @@ export class IAMAuthorizationService extends BaseAuthorizationService<Authorizat
 
   async mapAuthorizationPoints(moduleName: string): Promise<AuthorizationData<unknown>> {
     return await super.mapAuthorizationPoints(moduleName, {
+      individualSearch: false,
       persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+      // optionsOverridesByService: {
+      //   [DomainPersistanceEntityServiceType.Main]: { individualSearch: false }
+      // },
       saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
     });
   }
