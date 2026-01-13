@@ -8,6 +8,8 @@ export interface EntitySchema {
       generated?: boolean;
       isCreationDate?: boolean;
       isDeletionDate?: boolean;
+      // this only works with arrays
+      isInnerPrimary?: boolean;
       isUpdateDate?: boolean;
       primary?: boolean;
       primaryOrder?: number;
@@ -16,8 +18,11 @@ export interface EntitySchema {
       validationProperties?: ValidationSchema['properties'][''];
     };
   };
+  isArray?: boolean;
   name: string;
+  nestedObjectContainerPath?: string;
   paranoid?: boolean;
+  storeKey: string;
 }
 
 export enum EntitySchemaColumnType {

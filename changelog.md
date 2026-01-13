@@ -1,3 +1,15 @@
+# 1.0.0-alpha55
+- `packages/persistance-redis`
+  - BREAKING: entitySchema now has name and storeKey.
+  - Repositroy service - fixes for the individualSearch functionality.
+  - Repositroy service - Fixed an issue with find where incorrect handles are constructed when findAll is enabled.
+  - Repositroy service - general fixes.
+  - MAJOR UPDATE: added support for array-based storage.
+  - MAJOR UPDATE: added support for array-based storage in nested objects.
+- `apps/test`
+  - Overall redis entity fixes in accordance with the entity fixes in persistance-redis.
+  - Auth fixes in accordance with the redis changes for individualSearch.
+
 # 1.0.0-alpha54
 - `packages/core`
   - WIP: support for supplying default options for triggering additional persistance entity services in the domain entity service.

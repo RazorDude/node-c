@@ -5,7 +5,8 @@ import {
   AppConfigPersistanceNoSQL,
   ApplicationError,
   ConfigProviderService,
-  Constants as CoreConstants
+  Constants as CoreConstants,
+  getNested
 } from '@node-c/core';
 
 import { ValidationSchema, registerSchema, validate } from 'class-validator';
@@ -28,11 +29,10 @@ import { RedisStoreService } from '../store';
 // TODO: support "paranoid" mode
 // TODO: support complex filtering, not just equality
 // TODO: support indexing
-// TODO: support validations according to the rules in the schema
-// TODO: support defining the keys' delimiter symbol
 @Injectable()
 export class RedisRepositoryService<Entity> {
   protected _columnNames: string[];
+  protected _innerPrimaryKeys: string[];
   protected _primaryKeys: string[];
   protected defaultTTL?: number;
   protected defaultIndividualSearchEnabled: boolean;
@@ -42,6 +42,9 @@ export class RedisRepositoryService<Entity> {
 
   public get columnNames(): string[] {
     return this._columnNames;
+  }
+  public get innerPrimaryKeys(): string[] {
+    return this._innerPrimaryKeys;
   }
   public get persistanceModuleName(): string {
     return this._persistanceModuleName;
@@ -63,10 +66,11 @@ export class RedisRepositoryService<Entity> {
       .persistance[_persistanceModuleName] as AppConfigPersistanceNoSQL;
     const { columns, name: entityName } = schema;
     const columnNames: string[] = [];
+    const innerPrimaryKeys: string[] = [];
     const primaryKeys: string[] = [];
     const validationSchemaProperties: ValidationSchema['properties'] = {};
     for (const columnName in columns) {
-      const { primary, primaryOrder, validationProperties } = columns[columnName];
+      const { isInnerPrimary, primary, primaryOrder, validationProperties } = columns[columnName];
       columnNames.push(columnName);
       if (primary) {
         if (typeof primaryOrder === 'undefined') {
@@ -76,11 +80,18 @@ export class RedisRepositoryService<Entity> {
         }
         primaryKeys.push(columnName);
       }
+      if (isInnerPrimary) {
+        innerPrimaryKeys.push(columnName);
+      }
       if (validationProperties) {
         validationSchemaProperties[columnName] = validationProperties;
       }
     }
     this._columnNames = columnNames;
+    this._innerPrimaryKeys = innerPrimaryKeys;
+    this._primaryKeys = primaryKeys.sort(
+      (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
+    );
     this.defaultTTL = settingsPerEntity?.[entityName]?.ttl || defaultTTL;
     if (typeof settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled !== 'undefined') {
       this.defaultIndividualSearchEnabled = settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled;
@@ -89,20 +100,18 @@ export class RedisRepositoryService<Entity> {
     } else {
       this.defaultIndividualSearchEnabled = false;
     }
-    this._primaryKeys = primaryKeys.sort(
-      (columnName0, columnName1) => columns[columnName0].primaryOrder! - columns[columnName1].primaryOrder!
-    );
     this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
     this.validationSchemaProperties = validationSchemaProperties;
     registerSchema({ name: entityName, properties: validationSchemaProperties });
   }
 
+  // TODO: reduce the large numbers of whole-array iterations on the found results
   async find<ResultItem extends Entity | string = Entity>(
     options: RepositoryFindOptions,
     privateOptions?: RepositoryFindPrivateOptions
   ): Promise<{ items: ResultItem[]; more: boolean }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
-    const { name: entityName } = schema;
+    const { isArray, name: entityName, nestedObjectContainerPath, storeKey: entityStoreKey } = schema;
     const { filters, findAll, page, perPage, individualSearch, withValues: optWithValues } = options;
     const { requirePrimaryKeys } = privateOptions || {};
     const individualSearchEnabled =
@@ -199,19 +208,32 @@ export class RedisRepositoryService<Entity> {
       }
       let initialResults: ResultItem[] = [];
       // get the base results
-      if (individualSearch) {
-        initialResults = (await Promise.all(
-          storeEntityKeys.map(key => store.get(`${entityName}${key}`, { parseToJSON: true }))
-        )) as ResultItem[];
+      if (individualSearchEnabled) {
+        initialResults = (
+          await Promise.all(storeEntityKeys.map(key => store.get(`${entityStoreKey}${key}`, { parseToJSON: true })))
+        ).filter(item => item !== null) as ResultItem[];
       } else {
         // TODO: if no filters are provided, this will not return anything
-        const scanData = await store.scan(`${entityName}${storeEntityKeys[0]}`, {
+        const scanData = await store.scan(`${entityStoreKey}${storeEntityKeys[0]}`, {
           ...paginationOptions,
           parseToJSON: true,
           scanAll: findAll,
           withValues
         });
         initialResults = scanData.values as ResultItem[];
+      }
+      if (nestedObjectContainerPath) {
+        initialResults = initialResults
+          .map(item => {
+            if (item && typeof item === 'object' && !(item instanceof Date)) {
+              return getNested(item, nestedObjectContainerPath).unifiedValue;
+            }
+            return item;
+          })
+          .filter(item => typeof item !== 'undefined' && item !== null) as ResultItem[];
+      }
+      if (isArray) {
+        initialResults = initialResults.flat() as ResultItem[];
       }
       if (!hasNonPrimaryKeyFilters) {
         return { items: initialResults, more: false };
@@ -252,12 +274,12 @@ export class RedisRepositoryService<Entity> {
       let iterationResults: ResultItem[] = [];
       // get the base results
       if (individualSearchEnabled) {
-        iterationResults = (await Promise.all(
-          storeEntityKeys.map(key => store.get(`${entityName}${key}`, { parseToJSON: true }))
-        )) as ResultItem[];
+        iterationResults = (
+          await Promise.all(storeEntityKeys.map(key => store.get(`${entityStoreKey}${key}`, { parseToJSON: true })))
+        ).filter(item => item !== null) as ResultItem[];
         endReached = true;
       } else {
-        const { cursor: newCursor, values: innerResults } = await store.scan(`${entityName}${storeEntityKey}`, {
+        const { cursor: newCursor, values: innerResults } = await store.scan(`${entityStoreKey}${storeEntityKey}`, {
           ...paginationOptions,
           parseToJSON: true,
           scanAll: false,
@@ -269,6 +291,19 @@ export class RedisRepositoryService<Entity> {
         } else {
           paginationOptions.cursor = newCursor;
         }
+      }
+      if (nestedObjectContainerPath) {
+        iterationResults = iterationResults
+          .map(item => {
+            if (item && typeof item === 'object' && !(item instanceof Date)) {
+              return getNested(item, nestedObjectContainerPath).unifiedValue;
+            }
+            return item;
+          })
+          .filter(item => typeof item !== 'undefined' && item !== null) as ResultItem[];
+      }
+      if (isArray) {
+        iterationResults = iterationResults.flat() as ResultItem[];
       }
       // filter by the results' object data
       results = results.concat(
@@ -297,9 +332,10 @@ export class RedisRepositoryService<Entity> {
     return { items: results, more };
   }
 
+  // TODO: isArray support
   protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
-    const { columns, name: entityName } = schema;
+    const { columns, name: entityName, storeKey: entityStoreKey } = schema;
     const opt = options || ({} as PrepareOptions);
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
     const onConflict = optOnConflict || SaveOptionsOnConflict.ThrowError;
@@ -316,7 +352,7 @@ export class RedisRepositoryService<Entity> {
       );
       if (generated) {
         if (valueExists) {
-          storeEntityKey += `${value}`;
+          storeEntityKey += `${value}${storeDelimiter}`;
           continue;
         }
         if (allPKValuesExist) {
@@ -330,11 +366,11 @@ export class RedisRepositoryService<Entity> {
         }
         if (type === EntitySchemaColumnType.Integer) {
           let currentMaxValue =
-            (await store.get<number>(`${entityName}${storeDelimiter}increment${storeDelimiter}${columnName}`, {
+            (await store.get<number>(`${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`, {
               parseToJSON: true
             })) || 0;
           currentMaxValue++;
-          await store.set(`${entityName}${storeDelimiter}increment${storeDelimiter}${columnName}`, currentMaxValue);
+          await store.set(`${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`, currentMaxValue);
           preparedData[columnName] = currentMaxValue;
           storeEntityKey += `${currentMaxValue}${storeDelimiter}`;
           continue;
@@ -359,7 +395,7 @@ export class RedisRepositoryService<Entity> {
             `A value is required for non-generated PK column ${columnName}`
         );
       }
-      storeEntityKey += `${value}`;
+      storeEntityKey += `${value}${storeDelimiter}`;
     }
     if (optValidate) {
       const validationErrors = await validate(entityName, data as Record<string, unknown>);
@@ -398,7 +434,7 @@ export class RedisRepositoryService<Entity> {
     options?: SaveOptions
   ): Promise<ResultItem[]> {
     const { defaultTTL, schema, store, storeDelimiter } = this;
-    const { name: entityName } = schema;
+    const { storeKey: entityStoreKey } = schema;
     const { delete: optDelete, onConflict, transactionId, ttl, validate } = options || ({} as SaveOptions);
     const actualData = data instanceof Array ? data : [data];
     if (optDelete) {
@@ -409,7 +445,7 @@ export class RedisRepositoryService<Entity> {
       const deleteKeys: string[] = [];
       for (const i in actualData) {
         deleteKeys.push(
-          `${entityName}${storeDelimiter}${(await this.prepare(actualData[i], prepareOptions)).storeEntityKey}`
+          `${entityStoreKey}${storeDelimiter}${(await this.prepare(actualData[i], prepareOptions)).storeEntityKey}`
         );
       }
       if (deleteKeys.length) {
@@ -425,7 +461,7 @@ export class RedisRepositoryService<Entity> {
     const results: Entity[] = [];
     for (const i in actualData) {
       const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData[i], prepareOptions);
-      await store.set(`${entityName}${storeDelimiter}${storeEntityKey}`, validatedEntity, {
+      await store.set(`${entityStoreKey}${storeDelimiter}${storeEntityKey}`, validatedEntity, {
         transactionId,
         ttl: ttl || defaultTTL
       });

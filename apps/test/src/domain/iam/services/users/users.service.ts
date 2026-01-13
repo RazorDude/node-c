@@ -5,7 +5,7 @@ import {
   ConfigProviderService,
   Constants as CoreConstants,
   DomainMethod,
-  // DomainPersistanceEntityServiceType,
+  DomainPersistanceEntityServiceType,
   PersistanceEntityService,
   PersistanceFindOneOptions
 } from '@node-c/core';
@@ -58,9 +58,12 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
       {
         ...options,
         include,
-        // persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
-        persistanceServices: ['db']
-        // saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
+        ...(!!options.filters.id
+          ? {
+              persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+              saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
+            }
+          : { persistanceServices: ['db'] })
       },
       { withPassword: true }
     );

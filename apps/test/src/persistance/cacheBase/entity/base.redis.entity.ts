@@ -8,7 +8,11 @@ export interface RedisEntity<Id> {
 }
 
 // TODO: validate this somehow; class-validator?
-export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: string): EntitySchema => {
+export const getDefaultEntitySchema = (
+  idColumn: EntitySchemaColumnType,
+  name: string,
+  storeKey?: string
+): EntitySchema => {
   return {
     columns: {
       createdAt: {
@@ -30,6 +34,7 @@ export const getDefaultEntitySchema = (idColumn: EntitySchemaColumnType, name: s
         type: EntitySchemaColumnType.TimestampTz
       }
     },
-    name
+    name,
+    storeKey: storeKey || name
   };
 };
