@@ -1,9 +1,17 @@
+# 1.0.0-alpha56
+- `packages/api-rest`
+  - Delete DTO - added the missing "returnOriginalItems" property.
+- `packages/core`
+  - DomainEntityServices.delete - fixed the issue where returnOriginalItems does not pass the "items" arg to the runMethodInAdditionalServices method correctly.
+- `packages/persistance-rdb`
+  - RDBEntityService - fixed the issue where "in" SQL search is borken.
+
 # 1.0.0-alpha55
 - `packages/persistance-redis`
   - BREAKING: entitySchema now has name and storeKey.
-  - Repositroy service - fixes for the individualSearch functionality.
-  - Repositroy service - Fixed an issue with find where incorrect handles are constructed when findAll is enabled.
-  - Repositroy service - general fixes.
+  - Repository service - fixes for the individualSearch functionality.
+  - Repository service - Fixed an issue with find where incorrect handles are constructed when findAll is enabled.
+  - Repository service - general fixes.
   - MAJOR UPDATE: added support for array-based storage.
   - MAJOR UPDATE: added support for array-based storage in nested objects.
 - `apps/test`

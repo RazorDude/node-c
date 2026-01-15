@@ -162,7 +162,7 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        firstServiceResult: result,
+        firstServiceResult: { ...result, items: result.originalItems || [] },
         hasFirstServiceResult: !!result.count,
         methodArgs: [otherOptions, privateOptions],
         methodName: 'delete',

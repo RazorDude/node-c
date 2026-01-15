@@ -92,7 +92,7 @@ export class RDBEntityService<
         field: primaryKey,
         value: {
           params: { [primaryKey]: data.map(item => item[primaryKey as keyof Entity]) },
-          query: `${cqs}${tableName}${cqs}.${cqs}${primaryKey}${cqs} in :${primaryKey}`
+          query: `${cqs}${tableName}${cqs}.${cqs}${primaryKey}${cqs} in (:...${primaryKey})`
         }
       };
     }
