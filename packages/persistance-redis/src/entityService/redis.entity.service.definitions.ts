@@ -58,6 +58,14 @@ export interface FindPrivateOptions extends PersistanceFindPrivateOptions {
   requirePrimaryKeys?: boolean;
 }
 
+export interface ServiceSaveOptions {
+  delete?: boolean;
+  generatePrimaryKeys: boolean;
+  processObjectAllowedFieldsEnabled?: boolean;
+  transactionId?: string;
+  validate?: boolean;
+}
+
 export interface UpdateOptions extends BaseCreateOptions, PersistanceUpdateOptions {}
 
 export interface UpdatePrivateOptions extends PersistanceUpdatePrivateOptions {

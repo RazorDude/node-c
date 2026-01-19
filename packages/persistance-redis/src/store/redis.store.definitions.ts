@@ -1,5 +1,6 @@
 export interface GetOptions {
   parseToJSON?: boolean;
+  withValues?: boolean;
 }
 
 export interface RedisStoreModuleOptions {

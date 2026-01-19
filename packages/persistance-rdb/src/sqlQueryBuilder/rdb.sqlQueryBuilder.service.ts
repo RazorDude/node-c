@@ -162,7 +162,7 @@ export class SQLQueryBuilderService {
 
   protected getValueForFilter(
     entityName: string,
-    _fieldName: string,
+    fieldName: string,
     fieldAlias: string,
     fieldValue: unknown,
     isNot: boolean,
@@ -170,7 +170,8 @@ export class SQLQueryBuilderService {
   ): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
     const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
-    const fieldString = `${cqs}${entityName}${cqs}.${cqs}${fieldAlias}${cqs}`;
+    const escapedFieldName = fieldName.replace(/\$/, '__ds__');
+    const fieldString = `${cqs}${entityName}${cqs}.${cqs}${escapedFieldName}${cqs}`;
     let parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === PersistanceSelectOperator.Contains) {
       let query = '';
@@ -370,7 +371,6 @@ export class SQLQueryBuilderService {
         };
         continue;
       }
-      // console.log('====>', fieldValue);
       // handle array values
       if (fieldValue instanceof Array) {
         // if all values are primitive types and/or dates, then use 'between' (if provided) or 'in'
@@ -410,7 +410,6 @@ export class SQLQueryBuilderService {
               `${actualFieldAlias}_${orFieldIndex}_f`,
               operator
             );
-            // console.log('[0]:', itemData);
             finalWhereValue.params = { ...finalWhereValue.params, ...(itemData.parsedFilter.params || {}) };
             finalWhereValue.query += `${finalWhereValue.query.length ? ' or ' : '('}${itemData.parsedFilter.query}`;
             include = { ...include, ...itemData.include };
@@ -425,7 +424,6 @@ export class SQLQueryBuilderService {
             actualFieldAlias,
             operator
           );
-          // console.log('[1]:', itemData);
           if (itemData.parsedFilter.query === '()') {
             continue;
           }
@@ -443,7 +441,6 @@ export class SQLQueryBuilderService {
           actualFieldAlias,
           operator
         );
-        // console.log('[2]:', itemData);
         where[fieldName] = itemData.parsedFilter;
         include = { ...include, ...itemData.include };
         continue;
@@ -480,8 +477,7 @@ export class SQLQueryBuilderService {
         {
           fieldAliases: { [actualFieldName]: fieldParameterName },
           isTopLevel: false,
-          operator: op as PersistanceSelectOperator,
-          parameterNamesToFieldAliasesMap: { [fieldParameterName]: fieldAlias }
+          operator: op as PersistanceSelectOperator
         }
       );
       const fieldWhereData = itemData.where[actualFieldName];

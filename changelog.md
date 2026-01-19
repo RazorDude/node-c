@@ -1,3 +1,12 @@
+# 1.0.0-alpha57
+- `packages/persistance-redis`
+  - Repository - full support for nested objects and arrays for find operations.
+  - Repository - support for nested objects and arrays for delete operations WIP.
+  - Repository - big performance optimizations for find queries.
+  - EntityService - support for multi-item update.
+- `packages/persistance-rdb`
+  - Fixed the filtering by multiple operators.
+
 # 1.0.0-alpha56
 - `packages/api-rest`
   - Delete DTO - added the missing "returnOriginalItems" property.

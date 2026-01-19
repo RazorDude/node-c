@@ -203,11 +203,16 @@ export class RedisStoreService {
   // TODO: support get from transaction data
   async get<Value = unknown>(handle: string, options?: GetOptions): Promise<Value> {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
-    const { parseToJSON } = options || ({} as GetOptions);
-    const value = useHashmap
-      ? await client.hget(storeKey, handle)
-      : await client.get(`${storeKey}${storeDelimiter}${handle}`);
-    return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
+    const { parseToJSON, withValues } = options || ({} as GetOptions);
+    if (withValues || typeof withValues === 'undefined') {
+      const value = useHashmap
+        ? await client.hget(storeKey, handle)
+        : await client.get(`${storeKey}${storeDelimiter}${handle}`);
+      return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
+    }
+    return useHashmap
+      ? (!!(await client.hexists(storeKey, handle)) as Value)
+      : (!!(await client.exists(`${storeKey}${storeDelimiter}${handle}`)) as Value);
   }
 
   static getNodeList(host: string, port: number): { host: string; port: number }[] {

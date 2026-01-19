@@ -25,6 +25,7 @@ import {
   FindOnePrivateOptions,
   FindOptions,
   FindPrivateOptions,
+  ServiceSaveOptions,
   UpdateOptions,
   UpdatePrivateOptions
 } from './redis.entity.service.definitions';
@@ -64,7 +65,8 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       return result;
     }
     const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
-    return await this.save(data instanceof Array ? data : [data], {
+    return await this.save(data, {
+      generatePrimaryKeys: true,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
       validate
@@ -99,6 +101,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     }
     const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
     return await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
+      generatePrimaryKeys: false,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
       validate
@@ -130,6 +133,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     const { items: itemsToDelete } = await this.find({ filters, findAll: true }, { requirePrimaryKeys });
     const results: string[] = await this.save(itemsToDelete, {
       delete: true,
+      generatePrimaryKeys: false,
       transactionId
     });
     const dataToReturn: PersistanceDeleteResult<Entity> = { count: results.length };
@@ -172,10 +176,6 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
     if (findAll) {
       findResults.perPage = items.length;
     } else {
-      // TODO: is this really needed?
-      if (items.length === perPage + 1) {
-        items.pop();
-      }
       findResults.more = more;
       if (getTotalCount) {
         findResults.totalCount = await this.count(options, { allowCountWithoutFilters: true });
@@ -205,19 +205,21 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
 
   protected async save<Data extends Partial<Entity> | Partial<Entity>[], ReturnData = unknown>(
     data: Data,
-    options?: {
-      delete?: boolean;
-      processObjectAllowedFieldsEnabled?: boolean;
-      transactionId?: string;
-      validate?: boolean;
-    }
+    options: ServiceSaveOptions
   ): Promise<ReturnData> {
     const { repository, settings } = this;
     const { validationSettings } = settings;
-    const { delete: optDelete, processObjectAllowedFieldsEnabled, transactionId, validate } = options || {};
+    const {
+      delete: optDelete,
+      generatePrimaryKeys,
+      processObjectAllowedFieldsEnabled,
+      transactionId,
+      validate
+    } = options || {};
     if (optDelete) {
       return (await repository.save(data as unknown as Entity, {
         delete: true,
+        generatePrimaryKeys: false,
         transactionId,
         validate: false
       })) as ReturnData;
@@ -228,11 +230,14 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       objectType: ProcessObjectAllowedFieldsType.Input
     });
     return (await repository.save(dataToSave as Entity, {
+      generatePrimaryKeys,
       transactionId,
       validate: typeof validate !== 'undefined' ? validate : !!validationSettings?.isEnabled
     })) as ReturnData;
   }
 
+  // TODO: reduce to need to double 2 finds (one here and one in the repository's save method)
+  // by refactoring both methods
   async update(
     data: Entity,
     options: UpdateOptions,
@@ -254,8 +259,11 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       validate
     } = actualPrivateOptions;
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
-    const itemToUpdate = await this.findOne({ filters }, { processFiltersAllowedFieldsEnabled, requirePrimaryKeys });
-    if (!itemToUpdate) {
+    const { items: itemsToUpdate } = await this.find(
+      { filters, findAll: true },
+      { processFiltersAllowedFieldsEnabled, requirePrimaryKeys }
+    );
+    if (!itemsToUpdate.length) {
       dataToReturn.count = 0;
       if (returnData) {
         dataToReturn.items = [];
@@ -265,9 +273,10 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       }
       return dataToReturn;
     }
-    const updateResult = await this.save<Entity, Entity[]>(
-      ld.merge(itemToUpdate, data instanceof Array ? data[0] : data),
+    const updateResult = await this.save<Entity[], Entity[]>(
+      itemsToUpdate.map(item => ld.merge(item, data)),
       {
+        generatePrimaryKeys: false,
         processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
         transactionId,
         validate
@@ -278,7 +287,7 @@ export class RedisEntityService<Entity extends object> extends PersistanceEntity
       dataToReturn.items = updateResult;
     }
     if (returnOriginalItems) {
-      dataToReturn.originalItems = [itemToUpdate];
+      dataToReturn.originalItems = itemsToUpdate;
     }
     return dataToReturn;
   }

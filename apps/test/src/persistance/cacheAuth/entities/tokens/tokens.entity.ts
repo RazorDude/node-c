@@ -26,8 +26,7 @@ export const CacheAuthTokenSchema: EntitySchema = {
       type: EntitySchemaColumnType.String
     },
     type: {
-      primary: true,
-      primaryOrder: 1,
+      isInnerPrimary: true,
       type: EntitySchemaColumnType.String
     },
     userId: {
@@ -35,5 +34,6 @@ export const CacheAuthTokenSchema: EntitySchema = {
       primaryOrder: 0,
       type: EntitySchemaColumnType.String
     }
-  }
+  },
+  isArray: true
 };

@@ -42,8 +42,20 @@ export enum EntitySchemaColumnType {
   UUIDV4 = 'uuidv4'
 }
 
+export interface FilterItemOptions {
+  keysToSkip?: GenericObject<boolean>;
+  skippableKeysToForceCheck?: GenericObject<boolean>;
+}
+
+export interface GetValuesFromResultsOptions {
+  filters?: GenericObject<unknown>;
+  flattenArray?: boolean;
+  hasNonPrimaryKeyFilters?: boolean;
+  primaryKeyFiltersToForceCheck?: GenericObject<boolean>;
+}
+
 export interface PrepareOptions {
-  generatePrimaryKeys?: boolean;
+  generatePrimaryKeys: boolean;
   onConflict?: SaveOptionsOnConflict;
   validate?: boolean;
 }
@@ -68,6 +80,7 @@ export interface RepositoryFindPrivateOptions {
 
 export interface SaveOptions {
   delete?: boolean;
+  generatePrimaryKeys: boolean;
   onConflict?: SaveOptionsOnConflict;
   transactionId?: string;
   ttl?: number;

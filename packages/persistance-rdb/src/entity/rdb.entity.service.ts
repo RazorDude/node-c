@@ -266,6 +266,7 @@ export class RDBEntityService<
       });
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
+      console.log('===> [RDBEntityService]:', parsedFiltersData);
     }
     include = this.qb.parseRelations(entityName, optRelations || [], include);
     if (optOrderBy) {
