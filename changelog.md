@@ -1,3 +1,6 @@
+# 1.0.0-alpha59
+- Publishing errror fix.
+
 # 1.0.0-alpha58
 - `packages/persistance-rdb`
   - Debug log removal.
