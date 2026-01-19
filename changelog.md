@@ -1,3 +1,7 @@
+# 1.0.0-alpha58
+- `packages/persistance-rdb`
+  - Debug log removal.
+
 # 1.0.0-alpha57
 - `packages/persistance-redis`
   - Repository - full support for nested objects and arrays for find operations.
