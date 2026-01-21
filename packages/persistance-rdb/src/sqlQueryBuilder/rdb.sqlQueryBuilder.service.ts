@@ -367,7 +367,7 @@ export class SQLQueryBuilderService {
       const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
       if (fieldValue === null) {
         where[fieldName] = {
-          query: `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
+          query: `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs} is${isNot ? ' not ' : ' '}null`
         };
         continue;
       }
@@ -386,7 +386,7 @@ export class SQLQueryBuilderService {
             where[fieldName] = {
               params: paramsForQuery,
               query:
-                `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
+                `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
                 `between :${actualFieldAlias}_0 and :${actualFieldAlias}_1`
             };
             continue;
@@ -394,7 +394,7 @@ export class SQLQueryBuilderService {
           where[fieldName] = {
             params: paramsForQuery,
             query:
-              `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
+              `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
               `in (${queryTemplateParamNames.replace(/,\s$/, '')})`
           };
           continue;

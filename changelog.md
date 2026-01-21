@@ -1,3 +1,7 @@
+# 1.0.0-alpha60
+- `packages/persistance-rdb`
+  - QueryBuilder fix for association fields with aliases.
+
 # 1.0.0-alpha59
 - Publishing errror fix.
 
