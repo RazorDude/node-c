@@ -1,3 +1,7 @@
+# 1.0.0-alpha61
+- `packages/persistance-rdb`
+  - Fixed the delete method for services whose entities don't have a deletedColumn.
+
 # 1.0.0-alpha60
 - `packages/persistance-rdb`
   - QueryBuilder fix for association fields with aliases.

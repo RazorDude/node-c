@@ -195,7 +195,7 @@ export class RDBEntityService<
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.tableName;
     const dataToReturn: PersistanceUpdateResult<Entity> = {};
-    const deleteType = softDelete ? 'softDelete' : 'delete';
+    const deleteType = softDelete && this.deletedColumnName ? 'softDelete' : 'delete';
     const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
     const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
       allowedFields: this.columNames,
