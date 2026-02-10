@@ -58,6 +58,7 @@ export class IAMUsersService<
     super(persistanceUsersService, defaultMethods, additionalPersistanceEntityServices);
   }
 
+  // TODO: OAuth2.0 support
   async createAccessToken(options: CreateAccessTokenOptions): Promise<CreateAccessTokenReturnData<User>> {
     const { configProvider, moduleName } = this;
     const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =

@@ -70,7 +70,10 @@ export class HTTPAuthenticationMiddleware<User extends object> implements NestMi
           if (requestMethod === 'get' && req.query && Object.keys(req.query).length) {
             signatureContent = JSON.stringify(req.query);
           } else if (
-            (requestMethod === 'patch' || requestMethod === 'post' || requestMethod === 'put') &&
+            (requestMethod === 'delete' ||
+              requestMethod === 'patch' ||
+              requestMethod === 'post' ||
+              requestMethod === 'put') &&
             req.body &&
             Object.keys(req.body).length
           ) {

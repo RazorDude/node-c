@@ -1,3 +1,13 @@
+# 1.0.0-alpha62
+- Common
+  - BREAKING: Renamed all "persistance" packages whose name is confusing, misleading, factually inaccurate and - worst of all - contains a typo. They're now "data" packages.
+- `packages/domain-iam`
+  - WIP - Moved the authorization of api keys and bearer tokens into the authorization serivce (from the api-http pacakge).
+  - WIP - OAuth2.0 and OIDC flows.
+  - Fixed the issue with DomainIAMAuthorizationService.checkAccess in the case where inputFieldData needs to be compared to userFieldData and there is no mutation necessary.
+- `packages/domain-iam-okta`
+  - WIP - First working version.
+
 # 1.0.0-alpha61
 - `packages/persistance-rdb`
   - Fixed the delete method for services whose entities don't have a deletedColumn.

@@ -39,6 +39,17 @@ export class IAMAuthorizationService<
     super(persistanceAuthorizationPointsService, defaultMethods, additionalPersistanceEntityServices);
   }
 
+  // TODO: implement this
+  async authorizeApiKey(): Promise<boolean> {
+    return true;
+  }
+
+  // TODO: implement this
+  // TODO: validate an OAuth2.0 access token
+  async authorizeBearer(): Promise<boolean> {
+    return true;
+  }
+
   static checkAccess(
     authorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
     inputData: GenericObject,
@@ -101,10 +112,9 @@ export class IAMAuthorizationService<
             setNestedArraysPerIndex: inputFieldPaths.length > 1
           });
         } else {
-          // TODO: rework this with the new getNested
           const allowedValues = IAMAuthorizationService.matchInputValues(innerMutatedInputData, {
-            [userFieldName]: userFieldValue
-          });
+            [inputDataFieldName]: userFieldValue
+          })[inputDataFieldName] as unknown[];
           const inputValueIsArray = inputFieldValue instanceof Array;
           if (!allowedValues.length) {
             hasAccess = false;
