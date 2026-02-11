@@ -17,7 +17,7 @@ export function setNested(parent: unknown, field: string, value: unknown, option
   let finalResult = false;
   const loopEnd = fieldNames.length - 1;
   for (let i = 0; i <= loopEnd; i++) {
-    if (typeof currentParent === 'undefined' || currentParent === null) {
+    if (currentParent === null) {
       return false;
     }
     let fieldName = fieldNames[i];
@@ -72,6 +72,9 @@ export function setNested(parent: unknown, field: string, value: unknown, option
       (currentParent as Record<string, unknown>)[fieldName] = value;
       finalResult = true;
       break;
+    }
+    if (typeof (currentParent as Record<string, unknown>)[fieldName] === 'undefined') {
+      (currentParent as Record<string, unknown>)[fieldName] = {};
     }
     currentParent = (currentParent as Record<string, unknown>)[fieldName];
   }

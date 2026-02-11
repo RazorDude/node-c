@@ -1,5 +1,10 @@
+# 1.0.0-alpha64
+- `packages/core`
+  - The setNested method now creates objects along the path when they are missing.
+- `packages/domain-iam`
+  - Typo fix in the authorization service.
+
 # 1.0.0-alpha63
-- Common
 - `packages/domain-iam`
   - Typing and typo fixes for the authorization service.
 

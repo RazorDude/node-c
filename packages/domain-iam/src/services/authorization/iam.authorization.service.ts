@@ -183,7 +183,7 @@ export class IAMAuthorizationService<
             [inputDataFieldName]: userFieldValue
           })[inputDataFieldName] as unknown[];
           const inputValueIsArray = inputFieldValue instanceof Array;
-          if (!allowedValues.length) {
+          if (!allowedValues?.length) {
             hasAccess = false;
             continue;
           }
