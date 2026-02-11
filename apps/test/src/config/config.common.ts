@@ -23,7 +23,7 @@ export const appConfigCommon: AppConfigCommon = {
     }
   },
   general: { projectName: 'node-c-app', projectRootPath: path.join(__dirname, '../../'), projectVersion: '1.0.0' },
-  persistance: {
+  data: {
     audit: { type: RDBType.ClickHouse },
     cache: {
       defaultTTL: 3600,

@@ -2,11 +2,11 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
+  DataEntityService,
+  DataFindOneOptions,
   DomainEntityService,
   DomainEntityServiceDefaultData,
-  DomainMethod,
-  PersistanceEntityService,
-  PersistanceFindOneOptions
+  DomainMethod
 } from '@node-c/core';
 
 import {
@@ -30,9 +30,9 @@ export class IAMUsersService<
   Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>
 > extends DomainEntityService<
   User,
-  PersistanceEntityService<User>,
+  DataEntityService<User>,
   Data,
-  Record<string, PersistanceEntityService<Partial<User>>> | undefined
+  Record<string, DataEntityService<Partial<User>>> | undefined
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -40,7 +40,7 @@ export class IAMUsersService<
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceUsersService: PersistanceEntityService<User>,
+    protected dataUsersService: DataEntityService<User>,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager: IAMTokenManagerService<UserTokenEnityFields>,
     // eslint-disable-next-line no-unused-vars
@@ -53,9 +53,9 @@ export class IAMUsersService<
       DomainMethod.FindOne,
       DomainMethod.Update
     ],
-    protected additionalPersistanceEntityServices?: Record<string, PersistanceEntityService<Partial<User>>>
+    protected additionalDataEntityServices?: Record<string, DataEntityService<Partial<User>>>
   ) {
-    super(persistanceUsersService, defaultMethods, additionalPersistanceEntityServices);
+    super(dataUsersService, defaultMethods, additionalDataEntityServices);
   }
 
   // TODO: OAuth2.0 support
@@ -99,7 +99,7 @@ export class IAMUsersService<
         expiresInMinutes: rememberUser ? undefined : refreshTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
-        purgeOldFromPersistance: true
+        purgeOldFromData: true
       }
     );
     const {
@@ -110,7 +110,7 @@ export class IAMUsersService<
         expiresInMinutes: accessTokenExpiryTimeInMinutes,
         identifierDataField: UserTokenUserIdentifier.FieldName,
         persist: true,
-        purgeOldFromPersistance: true
+        purgeOldFromData: true
       }
     );
     console.info(`[Domain.${moduleName}.Users]: Login attempt successful for ${mainFilterField} ${mainFilterValue}.`);
@@ -119,7 +119,7 @@ export class IAMUsersService<
 
   async getUserWithPermissionsData(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _options: PersistanceFindOneOptions,
+    _options: DataFindOneOptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: GetUserWithPermissionsDataOptions
   ): Promise<UserWithPermissionsData<User, unknown> | null> {

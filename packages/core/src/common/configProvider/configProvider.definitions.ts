@@ -71,7 +71,7 @@ export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNa
       REDIS: 'redis',
       VALKEY: 'valkey'
     },
-    name: 'persistance'
+    name: 'data'
   }
 };
 
@@ -82,15 +82,13 @@ export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
   Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM;
-export type AppConfigPersistanceNoSQL = AppConfigCommonPersistanceNoSQL &
-  AppConfigFromEnvPersistanceNoSQL &
-  AppConfigProfilePersistanceNoSQL;
-export type AppConfigPersistanceRDB = AppConfigCommonPersistanceClickHouse &
-  AppConfigCommonPersistanceRDB &
-  AppConfigCommonPersistanceClickHouse &
-  AppConfigFromEnvPersistanceRDB &
-  AppConfigProfilePersistanceClickHouse &
-  AppConfigProfilePersistanceRDB;
+export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL & AppConfigFromEnvDataNoSQL & AppConfigProfileDataNoSQL;
+export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
+  AppConfigCommonDataRDB &
+  AppConfigCommonDataClickHouse &
+  AppConfigFromEnvDataRDB &
+  AppConfigProfileDataClickHouse &
+  AppConfigProfileDataRDB;
 
 /*
  * Config data held in the common config file.
@@ -104,12 +102,12 @@ export interface AppConfigCommon {
     projectRootPath: string;
     projectVersion: string;
   };
-  persistance: {
+  data: {
     [moduleName: string]:
       | GenericObject
-      | AppConfigCommonPersistanceClickHouse
-      | AppConfigCommonPersistanceNoSQL
-      | AppConfigCommonPersistanceRDB;
+      | AppConfigCommonDataClickHouse
+      | AppConfigCommonDataNoSQL
+      | AppConfigCommonDataRDB;
   };
 }
 
@@ -129,24 +127,24 @@ export interface AppConfigCommonDomainIAM {
   userPasswordHMACAlgorithm?: string;
 }
 
-export type AppConfigCommonPersistance = {
+export type AppConfigCommonData = {
   failOnConnectionError?: boolean;
-  settingsPerEntity?: Record<string, AppConfigCommonPersistanceEntityServiceSettings>;
-} & AppConfigCommonPersistanceEntityServiceSettings;
+  settingsPerEntity?: Record<string, AppConfigCommonDataEntityServiceSettings>;
+} & AppConfigCommonDataEntityServiceSettings;
 
-export interface AppConfigCommonPersistanceEntityServiceSettings {
+export interface AppConfigCommonDataEntityServiceSettings {
   processFiltersAllowedFieldsEnabled?: boolean;
   processInputAllowedFieldsEnabled?: boolean;
 }
 
-export interface AppConfigCommonPersistanceClickHouse extends AppConfigCommonPersistance {
+export interface AppConfigCommonDataClickHouse extends AppConfigCommonData {
   application?: string;
   requestTimeout?: number;
   type: RDBType;
   useHostParam?: boolean;
 }
 
-export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersistance {
+export interface AppConfigCommonDataNoSQL extends AppConfigCommonData {
   clusterMode?: boolean;
   defaultIndividualSearchEnabled?: boolean;
   defaultTTL?: number;
@@ -155,27 +153,26 @@ export interface AppConfigCommonPersistanceNoSQL extends AppConfigCommonPersista
   sentinelRole?: 'master' | 'slave';
   storeDelimiter?: string;
   storeKey: string;
-  settingsPerEntity?: Record<string, AppConfigCommonPersistanceNoSQLEntityServiceSettings>;
+  settingsPerEntity?: Record<string, AppConfigCommonDataNoSQLEntityServiceSettings>;
   type: NoSQLType;
   useHashmap?: boolean;
   usePasswordForSentinelPassword?: boolean;
-  validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
+  validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
 }
 
-export interface AppConfigCommonPersistanceNoSQLEntityServiceSettings
-  extends AppConfigCommonPersistanceEntityServiceSettings {
+export interface AppConfigCommonDataNoSQLEntityServiceSettings extends AppConfigCommonDataEntityServiceSettings {
   defaultIndividualSearchEnabled?: boolean;
   ttl?: number;
-  validationSettings?: AppConfigCommonPersistanceNoSQLValidationSettings;
+  validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
 }
 
-export interface AppConfigCommonPersistanceNoSQLValidationSettings {
+export interface AppConfigCommonDataNoSQLValidationSettings {
   throwErrorOnExtraProperies?: boolean;
   isEnabled?: boolean;
   whitelistProperties?: boolean;
 }
 
-export interface AppConfigCommonPersistanceRDB extends AppConfigCommonPersistance {
+export interface AppConfigCommonDataRDB extends AppConfigCommonData {
   connectionName: string;
   type: RDBType;
 }
@@ -187,8 +184,8 @@ export interface AppConfigCommonPersistanceRDB extends AppConfigCommonPersistanc
 export interface AppConfigFromEnv {
   api?: { [apiName: string]: GenericObject | AppConfigFromEnvAPIHTTP | AppConfigFromEnvAPIREST };
   domain?: { [domainName: string]: GenericObject | AppConfigFromEnvDomainIAM };
-  persistance?: {
-    [moduleName: string]: GenericObject | AppConfigFromEnvPersistanceNoSQL | AppConfigFromEnvPersistanceRDB;
+  data?: {
+    [moduleName: string]: GenericObject | AppConfigFromEnvDataNoSQL | AppConfigFromEnvDataRDB;
   };
 }
 
@@ -219,7 +216,7 @@ export interface AppConfigFromEnvKeysParentNames {
   };
 }
 
-export interface AppConfigFromEnvPersistanceNoSQL {
+export interface AppConfigFromEnvDataNoSQL {
   host: string;
   password: string;
   port: number;
@@ -227,7 +224,7 @@ export interface AppConfigFromEnvPersistanceNoSQL {
   user?: string;
 }
 
-export interface AppConfigFromEnvPersistanceRDB {
+export interface AppConfigFromEnvDataRDB {
   database: string;
   host: string;
   password: string;
@@ -247,12 +244,12 @@ export interface AppConfigProfile {
     projectName?: string;
     projectVersion?: string;
   };
-  persistance?: {
-    [persistanceModuleName: string]:
+  data?: {
+    [dataModuleName: string]:
       | GenericObject
-      | AppConfigProfilePersistanceClickHouse
-      | AppConfigProfilePersistanceNoSQL
-      | AppConfigProfilePersistanceRDB;
+      | AppConfigProfileDataClickHouse
+      | AppConfigProfileDataNoSQL
+      | AppConfigProfileDataRDB;
   };
 }
 
@@ -264,11 +261,11 @@ export interface AppConfigProfileDomainIAM {
   refreshTokenExpiryTimeInMinutes?: number;
 }
 
-export type AppConfigProfilePersistanceClickHouse = AppConfigCommonPersistanceClickHouse & {
+export type AppConfigProfileDataClickHouse = AppConfigCommonDataClickHouse & {
   protocol?: string;
 };
-export type AppConfigProfilePersistanceNoSQL = AppConfigCommonPersistanceNoSQL;
-export type AppConfigProfilePersistanceRDB = AppConfigCommonPersistanceRDB & {
+export type AppConfigProfileDataNoSQL = AppConfigCommonDataNoSQL;
+export type AppConfigProfileDataRDB = AppConfigCommonDataRDB & {
   typeormExtraOptions?: GenericObject;
 };
 

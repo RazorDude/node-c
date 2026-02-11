@@ -15,6 +15,9 @@ import { Observable, map } from 'rxjs';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
 
+/*
+ * Authorization interceptor - used for role-based and fine-grained access control.
+ */
 @Injectable()
 export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<unknown, unknown>>
   implements NestInterceptor

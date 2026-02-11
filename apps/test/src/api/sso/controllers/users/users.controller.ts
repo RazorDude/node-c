@@ -4,8 +4,8 @@ import { RESTAPIEntityControler } from '@node-c/api-rest';
 
 import { SSOUsersCreateAccessTokenDto } from './dto';
 
+import { CacheUser } from '../../../../data/cache';
 import { IAMUsersService } from '../../../../domain/iam';
-import { CacheUser } from '../../../../persistance/cache';
 
 // TODO: create user (signup)
 // TODO: logout

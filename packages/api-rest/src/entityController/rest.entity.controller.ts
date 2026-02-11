@@ -26,7 +26,7 @@ import {
   DomainFindOptions,
   DomainFindResult,
   DomainUpdateResult,
-  PersistanceDefaultData
+  DataDefaultData
 } from '@node-c/core';
 
 import {
@@ -49,9 +49,9 @@ import {
 @UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
   Entity,
-  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, PersistanceEntityServiceData>,
+  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, DataEntityServiceData>,
   DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
@@ -144,10 +144,10 @@ export class RESTAPIEntityControlerWithoutDto<
  */
 export class RESTAPIEntityControler<
   Entity,
-  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, PersistanceEntityServiceData>,
+  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, DataEntityServiceData>,
   Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>,
   DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
   protected defaultRouteMethods: string[];
   protected settings: { validationWhitelist?: boolean } = { validationWhitelist: true };

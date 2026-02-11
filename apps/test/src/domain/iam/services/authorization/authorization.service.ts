@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
 
-import { DomainMethod, DomainPersistanceEntityServiceType, PersistanceEntityService } from '@node-c/core';
+import { DataEntityService, DomainDataEntityServiceType, DomainMethod } from '@node-c/core';
 import { AuthorizationData, IAMAuthorizationService as BaseAuthorizationService } from '@node-c/domain-iam';
 
-import { AuthorizationPoint, CacheAuthorizationPointsEntityService } from '../../../../persistance/cache';
-import { AuthorizationPointsService as DBUAuthorizationPointsEntityService } from '../../../../persistance/db';
+import { AuthorizationPoint, CacheAuthorizationPointsEntityService } from '../../../../data/cache';
+import { AuthorizationPointsService as DBUAuthorizationPointsEntityService } from '../../../../data/db';
 
 @Injectable()
 export class IAMAuthorizationService extends BaseAuthorizationService<AuthorizationPoint> {
   constructor(
-    protected persistanceAuthorizationPointsService: CacheAuthorizationPointsEntityService,
-    protected persistanceDBAuthorizationPointsService: DBUAuthorizationPointsEntityService
+    protected dataAuthorizationPointsService: CacheAuthorizationPointsEntityService,
+    protected dataDBAuthorizationPointsService: DBUAuthorizationPointsEntityService
   ) {
-    super(persistanceAuthorizationPointsService, [DomainMethod.Find], {
-      db: persistanceDBAuthorizationPointsService as PersistanceEntityService<Partial<AuthorizationPoint>>
+    super(dataAuthorizationPointsService, [DomainMethod.Find], {
+      db: dataDBAuthorizationPointsService as DataEntityService<Partial<AuthorizationPoint>>
     });
   }
 
   async mapAuthorizationPoints(moduleName: string): Promise<AuthorizationData<unknown>> {
     return await super.mapAuthorizationPoints(moduleName, {
       individualSearch: false,
-      persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+      dataServices: [DomainDataEntityServiceType.Main, 'db'],
       // optionsOverridesByService: {
-      //   [DomainPersistanceEntityServiceType.Main]: { individualSearch: false }
+      //   [DomainDataEntityServiceType.Main]: { individualSearch: false }
       // },
       saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
     });

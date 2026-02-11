@@ -4,10 +4,10 @@ import { Constants } from '@node-c/api-http';
 import {
   ConfigProviderService,
   Constants as CoreConstants,
-  DomainMethod,
-  DomainPersistanceEntityServiceType,
-  PersistanceEntityService,
-  PersistanceFindOneOptions
+  DataEntityService,
+  DataFindOneOptions,
+  DomainDataEntityServiceType,
+  DomainMethod
 } from '@node-c/core';
 import {
   IAMUsersService as BaseIAMUsersService,
@@ -15,8 +15,8 @@ import {
   UserAuthKnownType
 } from '@node-c/domain-iam';
 
-import { AuthorizationPoint, CacheUser, CacheUsersEntityService } from '../../../../persistance/cache';
-import { UsersService as DBUsersService } from '../../../../persistance/db';
+import { AuthorizationPoint, CacheUser, CacheUsersEntityService } from '../../../../data/cache';
+import { UsersService as DBUsersService } from '../../../../data/db';
 
 import { IAMAuthenticationLocalService } from '../authenticationLocal';
 import { IAMTokenManagerService } from '../tokenManager';
@@ -30,26 +30,26 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
     protected configProvider: ConfigProviderService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
-    protected persistanceDBUsersService: DBUsersService,
-    protected persistanceUsersService: CacheUsersEntityService,
+    protected dataDBUsersService: DBUsersService,
+    protected dataUsersService: CacheUsersEntityService,
     protected tokenManager: IAMTokenManagerService
   ) {
     super(
       configProvider,
       moduleName,
-      persistanceUsersService,
+      dataUsersService,
       tokenManager,
       {
         [UserAuthKnownType.Local]: authenticationLocalService
       },
       [DomainMethod.FindOne],
-      { db: persistanceDBUsersService as unknown as PersistanceEntityService<Partial<CacheUser>> }
+      { db: dataDBUsersService as unknown as DataEntityService<Partial<CacheUser>> }
     );
   }
 
   // TODO: caching by email
   async getUserWithPermissionsData(
-    options: PersistanceFindOneOptions,
+    options: DataFindOneOptions,
     privateOptions?: GetUserWithPermissionsDataOptions
   ): Promise<CacheUser | null> {
     const { keepPassword } = privateOptions || {};
@@ -60,10 +60,10 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
         include,
         ...(!!options.filters.id
           ? {
-              persistanceServices: [DomainPersistanceEntityServiceType.Main, 'db'],
+              dataServices: [DomainDataEntityServiceType.Main, 'db'],
               saveAdditionalResultsInFirstService: { serviceName: 'db', useResultsForFirstService: true }
             }
-          : { persistanceServices: ['db'] })
+          : { dataServices: ['db'] })
       },
       { withPassword: true }
     );

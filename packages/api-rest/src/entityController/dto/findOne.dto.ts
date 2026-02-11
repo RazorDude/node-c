@@ -1,4 +1,4 @@
-import { DomainFindOneOptions, GenericObject, PersistanceOrderByDirection } from '@node-c/core';
+import { DomainFindOneOptions, GenericObject, DataOrderByDirection } from '@node-c/core';
 
 import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
@@ -23,7 +23,7 @@ export class FindOneDto<Options extends DomainFindOneOptionsWithOptionalFilters>
   @IsNotEmptyObject()
   @IsObject()
   @IsOptional()
-  orderBy?: GenericObject<PersistanceOrderByDirection>;
+  orderBy?: GenericObject<DataOrderByDirection>;
 
   @IsArray()
   @IsOptional()

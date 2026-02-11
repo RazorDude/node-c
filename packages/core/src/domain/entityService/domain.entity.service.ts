@@ -9,6 +9,7 @@ import {
   DomainCreateOptions,
   DomainCreatePrivateOptions,
   DomainCreateResult,
+  DomainDataEntityServiceType,
   DomainDeleteOptions,
   DomainDeletePrivateOptions,
   DomainDeleteResult,
@@ -20,7 +21,6 @@ import {
   DomainFindPrivateOptions,
   DomainFindResult,
   DomainMethod,
-  DomainPersistanceEntityServiceType,
   DomainRunMethodInAdditionalServicesOptions,
   DomainUpdateOptions,
   DomainUpdatePrivateOptions,
@@ -29,29 +29,25 @@ import {
 
 import { ApplicationError, GenericObject } from '../../common/definitions';
 
-import {
-  PersistanceDefaultData,
-  PersistanceEntityService,
-  PersistanceFindResults
-} from '../../persistance/entityService';
+import { DataDefaultData, DataEntityService, DataFindResults } from '../../data/entityService';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<
   Entity,
-  EntityService extends PersistanceEntityService<Entity, PersistanceEntityServiceData>,
+  EntityService extends DataEntityService<Entity, DataEntityServiceData>,
   Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  AdditionalEntityServices extends Record<string, PersistanceEntityService<Partial<Entity>>> | undefined = undefined,
-  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+  AdditionalEntityServices extends Record<string, DataEntityService<Partial<Entity>>> | undefined = undefined,
+  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected persistanceEntityService: EntityService,
+    protected dataEntityService: EntityService,
     // eslint-disable-next-line no-unused-vars
     protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
     // eslint-disable-next-line no-unused-vars
-    protected additionalPersistanceEntityServices?: AdditionalEntityServices,
+    protected additionalDataEntityServices?: AdditionalEntityServices,
     // eslint-disable-next-line no-unused-vars
-    protected defaultAdditionalPersistanceEntityServicesOptions?: {
+    protected defaultAdditionalDataEntityServicesOptions?: {
       [methodName: string]: {
         [serviceName: string]: {
           allowIncoming?: boolean;
@@ -77,17 +73,16 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
       throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
     }
-    // const defaultAdditionalPersistanceEntityServicesOptions =
-    //   this.defaultAdditionalPersistanceEntityServicesOptions?.bulkCreate;
-    const { optionsOverridesByService, persistanceServices = [DomainPersistanceEntityServiceType.Main] } =
-      options || {};
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).bulkCreate(data, privateOptions);
+    // const defaultAdditionalDataEntityServicesOptions =
+    //   this.defaultAdditionalDataEntityServicesOptions?.bulkCreate;
+    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main] } = options || {};
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    const result = await this.getDataService(firstServiceName).bulkCreate(data, privateOptions);
     let actualOtherServiceNames: string[] = [];
     let actualOptionsOverridesByService: typeof optionsOverridesByService = {};
-    // if (defaultAdditionalPersistanceEntityServicesOptions) {
-    //   for (const serviceName in defaultAdditionalPersistanceEntityServicesOptions) {
-    //     const { allowIncoming = true, serviceOptions } = defaultAdditionalPersistanceEntityServicesOptions[serviceName];
+    // if (defaultAdditionalDataEntityServicesOptions) {
+    //   for (const serviceName in defaultAdditionalDataEntityServicesOptions) {
+    //     const { allowIncoming = true, serviceOptions } = defaultAdditionalDataEntityServicesOptions[serviceName];
     //   }
     // } else {
     actualOtherServiceNames = otherServiceNames || [];
@@ -122,10 +117,9 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.Create)) {
       throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
     }
-    const { optionsOverridesByService, persistanceServices = [DomainPersistanceEntityServiceType.Main] } =
-      options || {};
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).create(data, privateOptions);
+    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main] } = options || {};
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    const result = await this.getDataService(firstServiceName).create(data, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
@@ -154,11 +148,11 @@ export class DomainEntityService<
     }
     const {
       optionsOverridesByService,
-      persistanceServices = [DomainPersistanceEntityServiceType.Main],
+      dataServices = [DomainDataEntityServiceType.Main],
       ...otherOptions
     } = options || {};
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).delete(otherOptions, privateOptions);
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    const result = await this.getDataService(firstServiceName).delete(otherOptions, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
@@ -187,14 +181,14 @@ export class DomainEntityService<
     }
     const {
       optionsOverridesByService,
-      persistanceServices = [DomainPersistanceEntityServiceType.Main],
+      dataServices = [DomainDataEntityServiceType.Main],
       saveAdditionalResultsInFirstService,
       ...otherOptions
     } = options || {};
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    let result = await this.getPersistanceService(firstServiceName).find(otherOptions, privateOptions);
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    let result = await this.getDataService(firstServiceName).find(otherOptions, privateOptions);
     const hasFirstServiceResult = result.items.length > 0;
-    const resultsByService = await this.runMethodInAdditionalServices<PersistanceFindResults<Entity>>(
+    const resultsByService = await this.runMethodInAdditionalServices<DataFindResults<Entity>>(
       otherServiceNames || [],
       {
         firstServiceResult: result,
@@ -209,7 +203,7 @@ export class DomainEntityService<
       const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService?.items?.length) {
-        await this.persistanceEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
+        await this.dataEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
         if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
@@ -236,15 +230,12 @@ export class DomainEntityService<
     }
     const {
       optionsOverridesByService,
-      persistanceServices = [DomainPersistanceEntityServiceType.Main],
+      dataServices = [DomainDataEntityServiceType.Main],
       saveAdditionalResultsInFirstService,
       ...otherOptions
     } = options || {};
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    let result: Entity | null = await this.getPersistanceService(firstServiceName).findOne(
-      otherOptions,
-      privateOptions
-    );
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    let result: Entity | null = await this.getDataService(firstServiceName).findOne(otherOptions, privateOptions);
     const hasFirstServiceResult = typeof result !== 'undefined' && result !== null;
     const resultsByService = await this.runMethodInAdditionalServices<Entity | null>(otherServiceNames || [], {
       firstServiceResult: result,
@@ -258,7 +249,7 @@ export class DomainEntityService<
       const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService) {
-        await this.persistanceEntityService.create(dataFromAdditionalService, saveOptions);
+        await this.dataEntityService.create(dataFromAdditionalService, saveOptions);
         if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
@@ -270,19 +261,17 @@ export class DomainEntityService<
     };
   }
 
-  protected getPersistanceService(
-    serviceName: DomainPersistanceEntityServiceType.Main | string
-  ): PersistanceEntityService<Entity> {
-    if (serviceName === DomainPersistanceEntityServiceType.Main) {
-      return this.persistanceEntityService;
+  protected getDataService(serviceName: DomainDataEntityServiceType.Main | string): DataEntityService<Entity> {
+    if (serviceName === DomainDataEntityServiceType.Main) {
+      return this.dataEntityService;
     }
-    const service = this.additionalPersistanceEntityServices?.[serviceName];
+    const service = this.additionalDataEntityServices?.[serviceName];
     if (!service) {
       throw new ApplicationError(
-        `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
+        `DataEntityService ${serviceName} does not exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
       );
     }
-    return service as PersistanceEntityService<Entity>;
+    return service as DataEntityService<Entity>;
   }
 
   protected async runMethodInAdditionalServices<ServiceReturnData>(
@@ -301,9 +290,9 @@ export class DomainEntityService<
       optionsOverridesByService = {}
     } = options;
     const returnDataByService: GenericObject<ServiceReturnData> = {};
-    if (!this.additionalPersistanceEntityServices) {
+    if (!this.additionalDataEntityServices) {
       throw new ApplicationError(
-        `No additional PersistanceEntityServices exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
+        `No additional DataEntityServices exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
       );
     }
     if (
@@ -311,15 +300,15 @@ export class DomainEntityService<
       (typeof optionsArgIndex === 'undefined' || optionsArgIndex < 0 || optionsArgIndex > methodArgs.length - 1)
     ) {
       throw new ApplicationError(
-        `Invalid optionsArgIndex value ${optionsArgIndex} provided for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.}.`
+        `Invalid optionsArgIndex value ${optionsArgIndex} provided for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.}.`
       );
     }
     for (const i in serviceNames) {
       const serviceName = serviceNames[i];
-      const service = this.getPersistanceService(serviceName);
+      const service = this.getDataService(serviceName);
       if (!service) {
         throw new ApplicationError(
-          `PersistanceEntityService ${serviceName} does not exist for DomainEntityService ${this.persistanceEntityService.getEntityName(true) || '(no entity name)'}.`
+          `DataEntityService ${serviceName} does not exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
         );
       }
       const serviceMethodOptionsOverrides = optionsOverridesByService[serviceName] || {};
@@ -328,7 +317,7 @@ export class DomainEntityService<
         runOnNoFirstServiceResultOnly = true,
         ...actualMethodOptionsOverrides
       } = serviceMethodOptionsOverrides;
-      // be extra careful when working with persistance that has TTL as the main service,
+      // be extra careful when working with data that has TTL as the main service,
       // since there is no way to check for limited results here.
       if (
         (runOnNoFirstServiceResultOnly === true || runOnNoFirstServiceResultOnly === 'true') &&
@@ -388,7 +377,7 @@ export class DomainEntityService<
         }
       }
       returnDataByService[serviceName] = (await (
-        service[methodName as keyof PersistanceEntityService<Entity>] as unknown as (
+        service[methodName as keyof DataEntityService<Entity>] as unknown as (
           ..._args: unknown[]
         ) => Promise<ServiceReturnData>
       ).apply(service, serviceMethodArgs)) as ServiceReturnData;
@@ -412,13 +401,9 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.Update)) {
       throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
     }
-    const {
-      optionsOverridesByService,
-      persistanceServices = [DomainPersistanceEntityServiceType.Main],
-      ...otherOptions
-    } = options;
-    const [firstServiceName, ...otherServiceNames] = persistanceServices;
-    const result = await this.getPersistanceService(firstServiceName).update(data, otherOptions, privateOptions);
+    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main], ...otherOptions } = options;
+    const [firstServiceName, ...otherServiceNames] = dataServices;
+    const result = await this.getDataService(firstServiceName).update(data, otherOptions, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {

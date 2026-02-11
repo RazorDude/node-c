@@ -30,3 +30,13 @@ export interface AuthorizationData<AuthorizationPointId> {
 export interface AuthorizationUser<AuthorizationPointId> {
   currentAuthorizationPoints: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
 }
+
+export interface AuthorizeApiKeyData {
+  apiKey: string;
+  signature?: string;
+  signatureContent?: string;
+}
+
+export interface AuthorizeApiKeyOptions {
+  config: { apiKey?: string; apiSecret?: string; apiSecretAlgorithm?: string };
+}

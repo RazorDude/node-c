@@ -1,4 +1,4 @@
-import { DomainFindOptions, GenericObject, PersistanceOrderByDirection } from '@node-c/core';
+import { DomainFindOptions, GenericObject, DataOrderByDirection } from '@node-c/core';
 
 import { IsArray, IsBooleanString, IsNotEmptyObject, IsNumberString, IsObject, IsOptional } from 'class-validator';
 
@@ -25,7 +25,7 @@ export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options>
   @IsObject()
   @IsOptional()
   @IsNotEmptyObject()
-  orderBy?: GenericObject<PersistanceOrderByDirection>;
+  orderBy?: GenericObject<DataOrderByDirection>;
 
   @IsNumberString()
   @IsOptional()

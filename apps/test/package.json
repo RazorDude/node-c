@@ -1,10 +1,12 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-alpha61",
+  "version": "1.0.0-alpha62",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "lint": "eslint src",
     "start:dev": "nest start src/main.ts --watch",
     "start:test": "NODE_ENV=test nest start src/main.ts --watch",
     "test": "NODE_ENV=test vitest --config test/vitest.config.ts",
@@ -28,12 +30,12 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha61",
-    "@node-c/api-rest": "^1.0.0-alpha61",
-    "@node-c/core": "^1.0.0-alpha61",
-    "@node-c/domain-iam": "^1.0.0-alpha61",
-    "@node-c/persistance-clickhouse": "^1.0.0-alpha61",
-    "@node-c/persistance-redis": "^1.0.0-alpha61",
-    "@node-c/persistance-typeorm": "^1.0.0-alpha61"
+    "@node-c/api-http": "^1.0.0-alpha62",
+    "@node-c/api-rest": "^1.0.0-alpha62",
+    "@node-c/core": "^1.0.0-alpha62",
+    "@node-c/domain-iam": "^1.0.0-alpha62",
+    "@node-c/data-clickhouse": "^1.0.0-alpha62",
+    "@node-c/data-redis": "^1.0.0-alpha62",
+    "@node-c/data-typeorm": "^1.0.0-alpha62"
   }
 }

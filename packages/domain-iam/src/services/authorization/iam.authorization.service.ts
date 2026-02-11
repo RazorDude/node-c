@@ -1,10 +1,12 @@
+import crypto from 'crypto';
+
 import {
+  DataEntityService,
   DomainEntityService,
   DomainEntityServiceDefaultData,
   DomainFindOptions,
   DomainMethod,
   GenericObject,
-  PersistanceEntityService,
   getNested,
   setNested
 } from '@node-c/core';
@@ -14,8 +16,12 @@ import ld from 'lodash';
 import {
   AuthorizationData,
   AuthorizationUser,
+  AuthorizeApiKeyData,
+  AuthorizeApiKeyOptions,
   AuthorizationPoint as BaseAuthorizationPoint
 } from './iam.authorization.definitions';
+
+import { DecodedTokenContent, IAMTokenManagerService } from '../tokenManager';
 
 export class IAMAuthorizationService<
   AuthorizationPoint extends BaseAuthorizationPoint<unknown>,
@@ -24,30 +30,89 @@ export class IAMAuthorizationService<
   >
 > extends DomainEntityService<
   AuthorizationPoint,
-  PersistanceEntityService<AuthorizationPoint>,
+  DataEntityService<AuthorizationPoint>,
   Data,
-  Record<string, PersistanceEntityService<Partial<AuthorizationPoint>>> | undefined
+  Record<string, DataEntityService<Partial<AuthorizationPoint>>> | undefined
 > {
   constructor(
-    protected persistanceAuthorizationPointsService: PersistanceEntityService<AuthorizationPoint>,
+    protected dataAuthorizationPointsService: DataEntityService<AuthorizationPoint>,
     protected defaultMethods: string[] = [DomainMethod.Find],
-    protected additionalPersistanceEntityServices?: Record<
-      string,
-      PersistanceEntityService<Partial<AuthorizationPoint>>
-    >
+    protected additionalDataEntityServices?: GenericObject<DataEntityService<Partial<AuthorizationPoint>>>,
+    // eslint-disable-next-line no-unused-vars
+    protected tokenManager?: IAMTokenManagerService<GenericObject<unknown>>
   ) {
-    super(persistanceAuthorizationPointsService, defaultMethods, additionalPersistanceEntityServices);
+    super(dataAuthorizationPointsService, defaultMethods, additionalDataEntityServices);
   }
 
-  // TODO: implement this
-  async authorizeApiKey(): Promise<boolean> {
-    return true;
+  async authorizeApiKey(data: AuthorizeApiKeyData, options: AuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
+    const { apiKey, signature, signatureContent } = data;
+    const {
+      config: { apiKey: expectedApiKey, apiSecret, apiSecretAlgorithm }
+    } = options;
+    if (!apiKey) {
+      console.error('Missing api key.');
+      return { valid: false };
+    }
+    if (apiKey !== expectedApiKey) {
+      console.error('Invalid api key.');
+      return { valid: false };
+    }
+    if (apiSecret && apiSecretAlgorithm) {
+      if (!signature) {
+        console.error('Missing authorization signature.');
+        return { valid: false };
+      }
+      if (!signatureContent) {
+        console.error('Missing authorization signature content.');
+        return { valid: false };
+      }
+      const calcualtedSignature = crypto
+        .createHmac(apiSecretAlgorithm, apiSecret)
+        .update(signatureContent)
+        .digest('hex');
+      if (calcualtedSignature !== signature) {
+        console.error(`Invalid signature provided. Expected: ${calcualtedSignature}. Provided: ${signature}`);
+        return { valid: false };
+      }
+    }
+    return { valid: true };
   }
 
-  // TODO: implement this
   // TODO: validate an OAuth2.0 access token
-  async authorizeBearer(): Promise<boolean> {
-    return true;
+  async authorizeBearer<UserTokenEnityFields = unknown>(
+    data: { authToken?: string; refreshToken?: string },
+    options?: { identifierDataField?: string }
+  ): Promise<{ newAuthToken?: string; tokenContent?: DecodedTokenContent<UserTokenEnityFields>; valid: boolean }> {
+    const { tokenManager } = this;
+    const { authToken, refreshToken } = data;
+    const { identifierDataField } = options || {};
+    if (!tokenManager) {
+      console.error('Token manager not configured.');
+    }
+    if (!authToken) {
+      console.error('Missing auth token.');
+      return { valid: false };
+    }
+    let newAuthToken: string | undefined;
+    let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
+    try {
+      const tokenRes = await tokenManager!.verifyAccessToken(authToken, {
+        deleteFromStoreIfExpired: true,
+        identifierDataField,
+        persistNewToken: true,
+        purgeStoreOnRenew: true,
+        refreshToken,
+        refreshTokenAccessTokenIdentifierDataField: 'accessToken'
+      });
+      tokenContent = tokenRes.content as unknown as DecodedTokenContent<UserTokenEnityFields>;
+      if (tokenRes.newToken) {
+        newAuthToken = tokenRes.newToken;
+      }
+    } catch (e) {
+      console.error('Failed to parse the access or refresh token:', e);
+      return { valid: false };
+    }
+    return { newAuthToken, tokenContent, valid: true };
   }
 
   static checkAccess(

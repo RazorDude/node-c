@@ -8,8 +8,8 @@ import ld from 'lodash';
 import {
   APP_CONFIG_FROM_ENV_KEYS as APP_CONFIG_FROM_ENV_KEYS_DEFAULT,
   APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES as APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT,
+  AppConfigDataRDB,
   AppConfig as AppConfigDefault,
-  AppConfigPersistanceRDB,
   AppEnvironment,
   GenerateOrmconfigOptions,
   LoadConfigAppConfigs,
@@ -27,14 +27,14 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     public config: AppConfig
   ) {}
 
-  // TODO: consider moving this into the persistance-rdb package
+  // TODO: consider moving this into the data-rdb package
   static async generateOrmconfig<AppConfig extends AppConfigDefault = AppConfigDefault>(
     config: AppConfig,
     options: GenerateOrmconfigOptions
   ): Promise<void> {
     const {
       general: { projectRootPath },
-      persistance
+      data
     } = config;
     const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject, seedsPathInModule } =
       options;
@@ -42,7 +42,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     const entitiesDirData = await fs.readdir(entitiesDirPath);
     const entities: string[] = [];
     const migrationsPath = path.join(projectRootPath, modulePathInProject, migrationsPathInModule);
-    const moduleConfig = persistance[moduleName] as AppConfigPersistanceRDB;
+    const moduleConfig = data[moduleName] as AppConfigDataRDB;
     const subscribers: string[] = [];
     for (const i in entitiesDirData) {
       const entityName = entitiesDirData[i];
@@ -76,7 +76,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}.json`),
       JSON.stringify(
-        ld.merge(persistance[moduleName], {
+        ld.merge(data[moduleName], {
           cli: {
             migrationsDir: migrationsPath
           },

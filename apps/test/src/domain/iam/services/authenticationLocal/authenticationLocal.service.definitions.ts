@@ -1,3 +1,3 @@
-import { CacheUser } from '../../../../persistance/cache';
+import { CacheUser } from '../../../../data/cache';
 
 export type IAMAuthenticationLocalUserFields = CacheUser & { password: string };

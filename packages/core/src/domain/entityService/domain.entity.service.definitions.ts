@@ -1,20 +1,20 @@
 import { GenericObject } from '../../common/definitions';
 
 import {
-  PersistanceBulkCreatePrivateOptions,
-  PersistanceCreatePrivateOptions,
-  PersistanceDeleteOptions,
-  PersistanceDeletePrivateOptions,
-  PersistanceDeleteResult,
-  PersistanceFindOneOptions,
-  PersistanceFindOnePrivateOptions,
-  PersistanceFindOptions,
-  PersistanceFindPrivateOptions,
-  PersistanceFindResults,
-  PersistanceUpdateOptions,
-  PersistanceUpdatePrivateOptions,
-  PersistanceUpdateResult
-} from '../../persistance/entityService';
+  DataBulkCreatePrivateOptions,
+  DataCreatePrivateOptions,
+  DataDeleteOptions,
+  DataDeletePrivateOptions,
+  DataDeleteResult,
+  DataFindOneOptions,
+  DataFindOnePrivateOptions,
+  DataFindOptions,
+  DataFindPrivateOptions,
+  DataFindResults,
+  DataUpdateOptions,
+  DataUpdatePrivateOptions,
+  DataUpdateResult
+} from '../../data/entityService';
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
   filterByFirstServiceResultFields?: GenericObject<string>;
@@ -26,18 +26,15 @@ export type DomainBaseOptions<Options> = Options & DomainBaseOptionsForAdditiona
 
 export interface DomainBaseOptionsForAdditionalServices<Options> {
   optionsOverridesByService?: GenericObject<Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides>;
-  persistanceServices?: DomainPersistanceServicesKey[];
+  dataServices?: DomainDataServicesKey[];
 }
 
 export type DomainBaseOptionsForAdditionalServicesFull<
   Options extends object | undefined = undefined,
   SaveAdditionalResultsOptions extends object | undefined = undefined
-> = DomainBaseOptionsForAdditionalServices<Options> &
-  DomainBaseOptionsWithSearchPersistance<SaveAdditionalResultsOptions>;
+> = DomainBaseOptionsForAdditionalServices<Options> & DomainBaseOptionsWithSearchData<SaveAdditionalResultsOptions>;
 
-export interface DomainBaseOptionsWithSearchPersistance<
-  SaveAdditionalResultsOptions extends object | undefined = undefined
-> {
+export interface DomainBaseOptionsWithSearchData<SaveAdditionalResultsOptions extends object | undefined = undefined> {
   saveAdditionalResultsInFirstService?: {
     saveOptions?: SaveAdditionalResultsOptions;
     serviceName: string;
@@ -50,7 +47,7 @@ export interface DomainBaseResult<Result> {
   resultsByService?: GenericObject<Result>;
 }
 
-export type DomainBulkCreatePrivateOptions = PersistanceBulkCreatePrivateOptions;
+export type DomainBulkCreatePrivateOptions = DataBulkCreatePrivateOptions;
 
 export type DomainBulkCreateData<Entity> = Partial<Entity>[];
 
@@ -62,15 +59,15 @@ export type DomainCreateData<Entity> = Partial<Entity>;
 
 export type DomainCreateOptions<Options = object> = DomainBaseOptions<Options>;
 
-export type DomainCreatePrivateOptions = PersistanceCreatePrivateOptions;
+export type DomainCreatePrivateOptions = DataCreatePrivateOptions;
 
 export type DomainCreateResult<Entity> = DomainBaseResult<Entity>;
 
-export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<PersistanceDeleteOptions>;
+export type DomainDeleteOptions<Options = object> = Options & DomainBaseOptions<DataDeleteOptions>;
 
-export type DomainDeletePrivateOptions = PersistanceDeletePrivateOptions;
+export type DomainDeletePrivateOptions = DataDeletePrivateOptions;
 
-export type DomainDeleteResult<Entity> = DomainBaseResult<PersistanceDeleteResult<Entity>>;
+export type DomainDeleteResult<Entity> = DomainBaseResult<DataDeleteResult<Entity>>;
 
 export interface DomainEntityServiceDefaultData<Entity> {
   BulkCreate: DomainBulkCreateData<Entity>;
@@ -79,20 +76,20 @@ export interface DomainEntityServiceDefaultData<Entity> {
 }
 
 export type DomainFindOneOptions<Options = object> = Options &
-  DomainBaseOptions<PersistanceFindOneOptions> &
-  DomainBaseOptionsWithSearchPersistance<DomainCreateOptions>;
+  DomainBaseOptions<DataFindOneOptions> &
+  DomainBaseOptionsWithSearchData<DomainCreateOptions>;
 
-export type DomainFindOnePrivateOptions = PersistanceFindOnePrivateOptions;
+export type DomainFindOnePrivateOptions = DataFindOnePrivateOptions;
 
 export type DomainFindOneResult<Entity> = DomainBaseResult<Entity | null>;
 
 export type DomainFindOptions<Options = object> = Options &
-  DomainBaseOptions<PersistanceFindOptions> &
-  DomainBaseOptionsWithSearchPersistance<DomainBulkCreateOptions>;
+  DomainBaseOptions<DataFindOptions> &
+  DomainBaseOptionsWithSearchData<DomainBulkCreateOptions>;
 
-export type DomainFindPrivateOptions = PersistanceFindPrivateOptions;
+export type DomainFindPrivateOptions = DataFindPrivateOptions;
 
-export type DomainFindResult<Entity> = DomainBaseResult<PersistanceFindResults<Entity>>;
+export type DomainFindResult<Entity> = DomainBaseResult<DataFindResults<Entity>>;
 
 export enum DomainMethod {
   // eslint-disable-next-line no-unused-vars
@@ -118,14 +115,14 @@ export const DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS = [
   DomainMethod.Update
 ];
 
-export enum DomainPersistanceEntityServiceType {
+export enum DomainDataEntityServiceType {
   // eslint-disable-next-line no-unused-vars
   All = 'all',
   // eslint-disable-next-line no-unused-vars
   Main = 'main'
 }
 
-export type DomainPersistanceServicesKey = DomainPersistanceEntityServiceType | string;
+export type DomainDataServicesKey = DomainDataEntityServiceType | string;
 
 export type DomainRunMethodInAdditionalServicesOptions<Options> = {
   firstServiceResult?: unknown;
@@ -138,8 +135,8 @@ export type DomainRunMethodInAdditionalServicesOptions<Options> = {
 
 export type DomainUpdateData<Entity> = Partial<Entity>;
 
-export type DomainUpdateOptions<Options = object> = Options & DomainBaseOptions<PersistanceUpdateOptions>;
+export type DomainUpdateOptions<Options = object> = Options & DomainBaseOptions<DataUpdateOptions>;
 
-export type DomainUpdatePrivateOptions = PersistanceUpdatePrivateOptions;
+export type DomainUpdatePrivateOptions = DataUpdatePrivateOptions;
 
-export type DomainUpdateResult<Entity> = DomainBaseResult<PersistanceUpdateResult<Entity>>;
+export type DomainUpdateResult<Entity> = DomainBaseResult<DataUpdateResult<Entity>>;

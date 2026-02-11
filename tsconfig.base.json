@@ -26,10 +26,10 @@
       "@node-c/core": ["packages/core/dist/index"],
       "@node-c/domain-iam": ["packages/domain-iam/dist/index"],
       "@node-c/domain-iam-okta": ["packages/domain-iam-okta/dist/index"],
-      "@node-c/persistance-clickhouse": ["packages/persistance-clickhouse/dist/index"],
-      "@node-c/persistance-rdb": ["packages/persistance-rdb/dist/index"],
-      "@node-c/persistance-redis": ["packages/persistance-redis/dist/index"],
-      "@node-c/persistance-typeorm": ["packages/persistance-typeorm/dist/index"]
+      "@node-c/data-clickhouse": ["packages/data-clickhouse/dist/index"],
+      "@node-c/data-rdb": ["packages/data-rdb/dist/index"],
+      "@node-c/data-redis": ["packages/data-redis/dist/index"],
+      "@node-c/data-typeorm": ["packages/data-typeorm/dist/index"]
     },
     "preserveConstEnums": true,
     "removeComments": true,

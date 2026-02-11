@@ -8,9 +8,9 @@ By using Node-C, you get to focus on what your project does, instead of worrying
 
 ## Overview
 Node-C divides your application code in 3 distinct layers:
-- Persistance - where the code related to any kind of persistance lives. That includes modules for both permanent storage and cache.
-- Domain - the modules here contain your business logic, split by domain. They work with the Persistance modules and with each other.
-- Api - these modules expose different sets of endpoints for external communication. They work with the Domain modules, rather than the Persistance modules directly.
+- Data - where the code related to any kind of data layer lives. That includes modules for both permanent storage and cache.
+- Domain - the modules here contain your business logic, split by domain. They work with the Data modules and with each other.
+- Api - these modules expose different sets of endpoints for external communication. They work with the Domain modules, rather than the Data modules directly.
 
 
 ## Getting Started

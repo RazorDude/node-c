@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import { AppConfigDomainIAM, ApplicationError, ConfigProviderService, PersistanceEntityService } from '@node-c/core';
+import { AppConfigDomainIAM, ApplicationError, ConfigProviderService, DataEntityService } from '@node-c/core';
 
 import {
   LocalAuthenticateUserAuthData,
@@ -19,9 +19,7 @@ export class IAMAuthenticationLocalService<
     protected configProvider: ConfigProviderService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceUsersMFAService?: PersistanceEntityService<
-      LocalAuthenticationUserMFAEntity<UserMFAEntityFields>
-    >
+    protected dataUsersMFAService?: DataEntityService<LocalAuthenticationUserMFAEntity<UserMFAEntityFields>>
   ) {
     super(configProvider, moduleName);
   }
@@ -30,7 +28,7 @@ export class IAMAuthenticationLocalService<
     userData: LocalAuthenticateUserUserData<AuthenticationUserFields>,
     authData: LocalAuthenticateUserAuthData
   ): Promise<LocalAuthenticateUserResult> {
-    const { configProvider, moduleName, persistanceUsersMFAService } = this;
+    const { configProvider, moduleName, dataUsersMFAService } = this;
     const { defaultUserIdentifierField, userPasswordHMACAlgorithm, userPasswordSecret } = configProvider.config.domain[
       moduleName
     ] as AppConfigDomainIAM;
@@ -60,10 +58,10 @@ export class IAMAuthenticationLocalService<
     }
     // TODO: MFA via userMFAServices
     if (mfaEnabled) {
-      if (!mfaCode || mfaType !== UserMFAKnownType.Local || !persistanceUsersMFAService) {
+      if (!mfaCode || mfaType !== UserMFAKnownType.Local || !dataUsersMFAService) {
         throw new ApplicationError('Invalid MFA code.');
       }
-      const storedCodeData = await persistanceUsersMFAService.findOne({
+      const storedCodeData = await dataUsersMFAService.findOne({
         filters: { [userMFAIdentifierField]: userIdentifierValue }
       });
       if (!storedCodeData?.code || mfaCode !== storedCodeData?.code) {

@@ -2,8 +2,8 @@ import { Controller, Injectable } from '@nestjs/common';
 
 import { RESTAPIEntityControler } from '@node-c/api-rest';
 
+import { Course as DBCourse } from '../../../../data/db';
 import { CoursePlatformCoursesService } from '../../../../domain/coursePlatform';
-import { Course as DBCourse } from '../../../../persistance/db';
 
 @Injectable()
 @Controller('courses')

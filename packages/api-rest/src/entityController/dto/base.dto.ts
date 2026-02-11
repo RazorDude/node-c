@@ -1,4 +1,4 @@
-import { DomainBaseAdditionalServiceOptionsOverrides, DomainPersistanceServicesKey, GenericObject } from '@node-c/core';
+import { DomainBaseAdditionalServiceOptionsOverrides, DomainDataServicesKey, GenericObject } from '@node-c/core';
 
 import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
@@ -13,5 +13,5 @@ export class BaseDto<Options> {
 
   @IsArray()
   @IsOptional()
-  persistanceServices?: DomainPersistanceServicesKey[];
+  dataServices?: DomainDataServicesKey[];
 }

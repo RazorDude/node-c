@@ -2,8 +2,8 @@ import { Controller, Injectable } from '@nestjs/common';
 
 import { RESTAPIEntityControler } from '@node-c/api-rest';
 
+import { CacheAuthToken } from '../../../../data/cacheAuth';
 import { IAMTokenManagerService } from '../../../../domain/iam';
-import { CacheAuthToken } from '../../../../persistance/cacheAuth';
 
 // TODO: consider removing this
 @Injectable()

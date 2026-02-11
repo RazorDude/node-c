@@ -1,0 +1,26 @@
+{
+  "name": "@node-c/data-rdb",
+  "version": "1.0.0-alpha62",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
+    "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "lint": "eslint src",
+    "publish-package": "npm run build:clean && npm publish --access public",
+    "test": "vitest --config src/vitest.config.ts",
+    "test:coverage": "vitest --config src/vitest.config.ts --coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.12",
+    "@node-c/core": "^1.0.0-alpha62",
+    "class-validator": "^0.14.1",
+    "lodash": "^4.17.21",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.19"
+  }
+}

@@ -61,40 +61,40 @@
         "tsConfigPath": "packages/domain-iam-okta/tsconfig.build.json"
       }
     },
-    "@node-c/persistance-clickhouse": {
+    "@node-c/data-clickhouse": {
       "type": "library",
-      "root": "packages/persistance-clickhouse",
+      "root": "packages/data-clickhouse",
       "entryFile": "index",
-      "sourceRoot": "packages/persistance-clickhouse/src",
+      "sourceRoot": "packages/data-clickhouse/src",
       "compilerOptions": {
-        "tsConfigPath": "packages/persistance-clickhouse/tsconfig.build.json"
+        "tsConfigPath": "packages/data-clickhouse/tsconfig.build.json"
       }
     },
-    "@node-c/persistance-rdb": {
+    "@node-c/data-rdb": {
       "type": "library",
-      "root": "packages/persistance-rdb",
+      "root": "packages/data-rdb",
       "entryFile": "index",
-      "sourceRoot": "packages/persistance-rdb/src",
+      "sourceRoot": "packages/data-rdb/src",
       "compilerOptions": {
-        "tsConfigPath": "packages/persistance-rdb/tsconfig.build.json"
+        "tsConfigPath": "packages/data-rdb/tsconfig.build.json"
       }
     },
-    "@node-c/persistance-redis": {
+    "@node-c/data-redis": {
       "type": "library",
-      "root": "packages/persistance-redis",
+      "root": "packages/data-redis",
       "entryFile": "index",
-      "sourceRoot": "packages/persistance-redis/src",
+      "sourceRoot": "packages/data-redis/src",
       "compilerOptions": {
-        "tsConfigPath": "packages/persistance-redis/tsconfig.build.json"
+        "tsConfigPath": "packages/data-redis/tsconfig.build.json"
       }
     },
-    "@node-c/persistance-typeorm": {
+    "@node-c/data-typeorm": {
       "type": "library",
-      "root": "packages/persistance-typeorm",
+      "root": "packages/data-typeorm",
       "entryFile": "index",
-      "sourceRoot": "packages/persistance-typeorm/src",
+      "sourceRoot": "packages/data-typeorm/src",
       "compilerOptions": {
-        "tsConfigPath": "packages/persistance-typeorm/tsconfig.build.json"
+        "tsConfigPath": "packages/data-typeorm/tsconfig.build.json"
       }
     }
   }

@@ -2,11 +2,11 @@ import {
   AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
+  DataEntityService,
   DomainCreateOptions,
   DomainCreateResult,
   DomainEntityService,
-  GenericObject,
-  PersistanceEntityService
+  GenericObject
 } from '@node-c/core';
 
 import * as jwt from 'jsonwebtoken';
@@ -25,7 +25,7 @@ import {
 // TODO: console.error -> logger
 export class IAMTokenManagerService<TokenEntityFields extends object> extends DomainEntityService<
   TokenEntity<TokenEntityFields>,
-  PersistanceEntityService<TokenEntity<TokenEntityFields>>
+  DataEntityService<TokenEntity<TokenEntityFields>>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -33,19 +33,19 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected persistanceEntityService: PersistanceEntityService<TokenEntity<TokenEntityFields>>
+    protected dataEntityService: DataEntityService<TokenEntity<TokenEntityFields>>
   ) {
-    super(persistanceEntityService!, ['create', 'delete']);
+    super(dataEntityService!, ['create', 'delete']);
   }
 
   async create(
     data: TokenManagerCreateData<TokenEntityFields>,
     options: TokenManagerCreateOptions
   ): Promise<DomainCreateResult<TokenEntity<TokenEntityFields>>> {
-    const { configProvider, moduleName, persistanceEntityService } = this;
+    const { configProvider, moduleName, dataEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { type, ...tokenData } = data;
-    const { expiresInMinutes, identifierDataField, persist, purgeOldFromPersistance } = options;
+    const { expiresInMinutes, identifierDataField, persist, purgeOldFromData } = options;
     const signOptions = {} as jwt.SignOptions;
     let secret: string;
     // Leaving this ugly big if-statement as is, in case we need to expand it in the future.
@@ -77,13 +77,13 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
       });
     });
     const objectToSave = { ...tokenData, token, type } as TokenEntity<TokenEntityFields>;
-    // save the token in the persistance system of choice
-    // TODO: multi-persistance isn't handled well here (or, actually, at all)
-    if (persist && persistanceEntityService) {
-      if (purgeOldFromPersistance && identifierDataField) {
+    // save the token in the data system of choice
+    // TODO: multi-data isn't handled well here (or, actually, at all)
+    if (persist && dataEntityService) {
+      if (purgeOldFromData && identifierDataField) {
         const identifierValue = ld.get(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-          await persistanceEntityService.delete(
+          await dataEntityService.delete(
             {
               filters: { [identifierDataField]: identifierValue, type }
             },
@@ -100,7 +100,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     token: string,
     options?: VerifyAccessTokenOptions
   ): Promise<VerifyAccessTokenReturnData<TokenEntityFields>> {
-    const { configProvider, moduleName, persistanceEntityService } = this;
+    const { configProvider, moduleName, dataEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       deleteFromStoreIfExpired,
@@ -119,7 +119,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     if (error) {
       let errorToThrow: Error | undefined;
       let throwError = true;
-      if (error === 'Token expired' && identifierDataField && content?.data && persistanceEntityService) {
+      if (error === 'Token expired' && identifierDataField && content?.data && dataEntityService) {
         if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
           const { content: refreshTokenContent, error: refreshTokenError } = await this.verify(
             refreshToken,
@@ -143,7 +143,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           if (deleteFromStoreIfExpired) {
             const identifierValue = ld.get(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-              await persistanceEntityService.delete(
+              await dataEntityService.delete(
                 {
                   filters: { [identifierDataField]: identifierValue, type: TokenType.Access }
                 },
@@ -168,7 +168,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
         expiresInMinutes: newTokenExpiresInMinutes,
         identifierDataField,
         persist: persistNewToken,
-        purgeOldFromPersistance: purgeStoreOnRenew
+        purgeOldFromData: purgeStoreOnRenew
       });
       newToken = result.token;
     }

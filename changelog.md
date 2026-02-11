@@ -2,11 +2,14 @@
 - Common
   - BREAKING: Renamed all "persistance" packages whose name is confusing, misleading, factually inaccurate and - worst of all - contains a typo. They're now "data" packages.
 - `packages/domain-iam`
-  - WIP - Moved the authorization of api keys and bearer tokens into the authorization serivce (from the api-http pacakge).
-  - WIP - OAuth2.0 and OIDC flows.
+  - BREAKING: Renamed the authentication middleware into the authorization middleware, as it actually does authorization, not authentication.
+  - Moved the authorization of api keys and bearer tokens into the authorization serivce (from the api-http pacakge).
   - Fixed the issue with DomainIAMAuthorizationService.checkAccess in the case where inputFieldData needs to be compared to userFieldData and there is no mutation necessary.
+  - WIP - OAuth2.0 and OIDC flows.
 - `packages/domain-iam-okta`
   - WIP - First working version.
+- `apps/test`
+  - Fixes for the breaking changes.
 
 # 1.0.0-alpha61
 - `packages/persistance-rdb`

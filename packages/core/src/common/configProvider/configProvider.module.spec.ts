@@ -29,7 +29,7 @@ describe('ConfigProviderModule', () => {
       projectRootPath: '/fake/path',
       projectVersion: '1.0.0'
     },
-    persistance: {}
+    data: {}
   };
   const fakeEnvKeys = {
     API: {

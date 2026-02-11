@@ -10,7 +10,7 @@ import {
 
 import { IAMAuthenticationLocalUserFields } from './authenticationLocal.service.definitions';
 
-import { AuditUserLoginLogsService } from '../../../../persistance/audit/entities';
+import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
 
 @Injectable()
 export class IAMAuthenticationLocalService extends BaseAuthenticationLocalService<IAMAuthenticationLocalUserFields> {

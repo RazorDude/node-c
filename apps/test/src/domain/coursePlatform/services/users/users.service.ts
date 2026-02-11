@@ -2,21 +2,21 @@ import { Injectable } from '@nestjs/common';
 
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
+  DataDefaultData,
   DomainEntityService,
   DomainEntityServiceDefaultData,
   DomainFindOptions,
-  DomainFindResult,
-  PersistanceDefaultData
+  DomainFindResult
 } from '@node-c/core';
 
-import { AuditUserLoginLogsService, UserLoginLog } from '../../../../persistance/audit';
-import { CacheUsersEntityService } from '../../../../persistance/cache';
+import { AuditUserLoginLogsService, UserLoginLog } from '../../../../data/audit';
+import { CacheUsersEntityService } from '../../../../data/cache';
 import {
   User as DBUser,
   UsersService as DBUsersService,
   UsersCreateUserData,
   UsersUpdateUserData
-} from '../../../../persistance/db';
+} from '../../../../data/db';
 
 @Injectable()
 export class CoursePlatformUsersService extends DomainEntityService<
@@ -24,20 +24,20 @@ export class CoursePlatformUsersService extends DomainEntityService<
   DBUsersService,
   DomainEntityServiceDefaultData<DBUser>,
   { cache: CacheUsersEntityService },
-  PersistanceDefaultData<DBUser> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
+  DataDefaultData<DBUser> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected persistanceAuditUserLoginLogsService: AuditUserLoginLogsService,
-    protected persistanceCacheUsersService: CacheUsersEntityService,
-    protected persistanceEntityService: DBUsersService
+    protected dataAuditUserLoginLogsService: AuditUserLoginLogsService,
+    protected dataCacheUsersService: CacheUsersEntityService,
+    protected dataEntityService: DBUsersService
   ) {
-    super(persistanceEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, {
-      cache: persistanceCacheUsersService
+    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, {
+      cache: dataCacheUsersService
     });
   }
 
   async findLoginLogs(options: DomainFindOptions): Promise<DomainFindResult<UserLoginLog>> {
-    return { result: await this.persistanceAuditUserLoginLogsService.find(options) };
+    return { result: await this.dataAuditUserLoginLogsService.find(options) };
   }
 }

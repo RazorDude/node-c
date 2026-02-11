@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import { AppConfigDomainIAM, ApplicationError, ConfigProviderService, PersistanceEntityService } from '@node-c/core';
+import { AppConfigDomainIAM, ApplicationError, ConfigProviderService, DataEntityService } from '@node-c/core';
 import { IAMAuthenticationService, UserMFAKnownType } from '@node-c/domain-iam';
 
 import {

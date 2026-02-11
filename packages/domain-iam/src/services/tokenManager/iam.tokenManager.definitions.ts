@@ -19,7 +19,7 @@ export type TokenManagerCreateOptions = {
   expiresInMinutes?: number;
   identifierDataField?: string;
   persist?: boolean;
-  purgeOldFromPersistance?: boolean;
+  purgeOldFromData?: boolean;
   ttl?: number;
 } & DomainCreateOptions;
 

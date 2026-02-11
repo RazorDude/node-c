@@ -5,13 +5,13 @@ import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOpt
 import { CoursePlatformAPIModule } from './api/coursePlatform';
 import { SSOAPIModule } from './api/sso';
 import * as AppConfigs from './config';
+import { DataAuditModule } from './data/audit';
+import { DataCacheModule } from './data/cache';
+import { DataCacheAuthModule } from './data/cacheAuth';
+import { DataDBModule } from './data/db';
+import { DataDBConfigsModule } from './data/dbConfigs';
 import { DomainCoursePlatformModule } from './domain/coursePlatform';
 import { DomainIAMModule } from './domain/iam';
-import { PersistanceAuditModule } from './persistance/audit';
-import { PersistanceCacheModule } from './persistance/cache';
-import { PersistanceCacheAuthModule } from './persistance/cacheAuth';
-import { PersistanceDBModule } from './persistance/db';
-import { PersistanceDBConfigsModule } from './persistance/dbConfigs';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
@@ -39,7 +39,7 @@ export class AppModuleBase {
           DB: 'db', // add another key to the .env file _MODULE_TYPE - RDB
           DB_CONFIGS: 'dbConfigs' // add another key to the .env file _MODULE_TYPE - RDB
         },
-        name: 'persistance'
+        name: 'data'
       }
     },
     useEnvFile: true,
@@ -47,11 +47,11 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
-    PersistanceAuditModule.register(),
-    PersistanceCacheAuthModule.register(),
-    PersistanceCacheModule.register(),
-    PersistanceDBConfigsModule.register(),
-    PersistanceDBModule.register(),
+    DataAuditModule.register(),
+    DataCacheAuthModule.register(),
+    DataCacheModule.register(),
+    DataDBConfigsModule.register(),
+    DataDBModule.register(),
     DomainIAMModule.register()
   ];
 }

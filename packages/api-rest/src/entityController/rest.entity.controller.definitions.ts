@@ -11,8 +11,8 @@ import {
   DomainUpdateData,
   DomainUpdateOptions,
   GenericObject,
-  PersistanceDefaultData,
-  PersistanceEntityService
+  DataDefaultData,
+  DataEntityService
 } from '@node-c/core';
 
 import {
@@ -40,13 +40,13 @@ export type CreateOptions<Entity> = Omit<CreateBody<Entity>, 'data'>;
 export type DefaultDomainEntityService<
   Entity,
   DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  PersistanceEntityServiceData extends PersistanceDefaultData<Entity> = PersistanceDefaultData<Entity>
+  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > = DomainEntityService<
   Entity,
-  PersistanceEntityService<Entity, PersistanceEntityServiceData>,
+  DataEntityService<Entity, DataEntityServiceData>,
   DomainEntityServiceData,
-  Record<string, PersistanceEntityService<Partial<Entity>>>,
-  PersistanceEntityServiceData
+  Record<string, DataEntityService<Partial<Entity>>>,
+  DataEntityServiceData
 >;
 
 export interface DefaultDtos<Entity> {

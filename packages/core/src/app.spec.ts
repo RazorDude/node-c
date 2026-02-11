@@ -24,7 +24,7 @@ const appModuleOptions = {
       },
       api: { test: {} },
       domain: {},
-      persistance: { db: { type: 'mysql', extra: 'foo' }, notADb: { type: 'unsupported' } }
+      data: { db: { type: 'mysql', extra: 'foo' }, notADb: { type: 'unsupported' } }
     },
     appConfigProfileLocal: {
       general: { environment: AppEnvironment.Local }
@@ -83,7 +83,7 @@ describe('NodeCApp.start', () => {
         db: {
           entitiesPathInModule: 'entities',
           migrationsPathInModule: 'migrations',
-          modulePathInProject: 'src/persistance/db'
+          modulePathInProject: 'src/data/db'
         }
       },
       loadConfigOptions: appModuleOptions
@@ -91,7 +91,7 @@ describe('NodeCApp.start', () => {
     apps = await NodeCApp.start([AppModule] as unknown as NestModule[], options);
     // The loadConfig method should be called once with the provided options.
     expect(loadConfigSpy).toHaveBeenCalledTimes(2);
-    // For each key in persistance (here just 1 - "db"), generateOrmconfig should be called.
+    // For each key in data (here just 1 - "db"), generateOrmconfig should be called.
     expect(generateOrmconfigSpy).toHaveBeenCalledTimes(1);
     expect(apps).toHaveLength(1);
   });
@@ -107,7 +107,7 @@ describe('NodeCApp.start', () => {
     apps = await NodeCApp.start([AppModule] as unknown as NestModule[], options);
     // The loadConfig method should be called once with the provided options.
     expect(loadConfigSpy).toHaveBeenCalledTimes(2);
-    // For each key in persistance (here just 1 - "db"), generateOrmconfig should be called.
+    // For each key in data (here just 1 - "db"), generateOrmconfig should be called.
     expect(generateOrmconfigSpy).toHaveBeenCalledTimes(1);
     expect(apps).toHaveLength(1);
   });

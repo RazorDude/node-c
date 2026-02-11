@@ -1,7 +1,7 @@
 {
   "name": "node-c",
   "private": true,
-  "version": "1.0.0-alpha61",
+  "version": "1.0.0-alpha62",
   "description": "An end-to-end NodeJS framework for building DDD apps on top of NestJS.",
   "license": "MIT",
   "repository": {
@@ -16,8 +16,10 @@
     "node": ">= 22"
   },
   "scripts": {
-    "build:clean:all": "npm run build:clean --workspace=packages/core && npm run build:clean --workspace=packages/persistance-rdb && npm run build:clean --workspace=packages/persistance-typeorm && npm run build:clean --workspace=packages/persistance-clickhouse && npm run build:clean --workspace=packages/persistance-redis && npm run build:clean --workspace=packages/domain-iam && npm run build:clean --workspace=packages/api-http && npm run build:clean --workspace=packages/api-rest",
-    "publish-package:all": "npm run publish-package --workspace=packages/core && npm run publish-package --workspace=packages/persistance-rdb && npm run publish-package --workspace=packages/persistance-typeorm && npm run publish-package --workspace=packages/persistance-clickhouse && npm run publish-package --workspace=packages/persistance-redis && npm run publish-package --workspace=packages/domain-iam && npm run publish-package --workspace=packages/api-http && npm run publish-package --workspace=packages/api-rest",
+    "build:clean:all": "npm run build:clean --workspace=packages/core && npm run build:clean --workspace=packages/data-rdb && npm run build:clean --workspace=packages/data-typeorm && npm run build:clean --workspace=packages/data-clickhouse && npm run build:clean --workspace=packages/data-redis && npm run build:clean --workspace=packages/domain-iam && npm run build:clean --workspace=packages/api-http && npm run build:clean --workspace=packages/api-rest && npm run build:clean --workspace=apps/test",
+    "lint:all": "npm run lint --workspace=packages/core && npm run lint --workspace=packages/data-rdb && npm run lint --workspace=packages/data-typeorm && npm run lint --workspace=packages/data-clickhouse && npm run lint --workspace=packages/data-redis && npm run lint --workspace=packages/domain-iam && npm run lint --workspace=packages/api-http && npm run lint --workspace=packages/api-rest && npm run lint --workspace=apps/test",
+    "lint:all:parallel": "npm run lint --workspace=packages/core & npm run lint --workspace=packages/data-rdb & npm run lint --workspace=packages/data-typeorm & npm run lint --workspace=packages/data-clickhouse & npm run lint --workspace=packages/data-redis & npm run lint --workspace=packages/domain-iam & npm run lint --workspace=packages/api-http & npm run lint --workspace=packages/api-rest & npm run lint --workspace=apps/test",
+    "publish-package:all": "npm run publish-package --workspace=packages/core && npm run publish-package --workspace=packages/data-rdb && npm run publish-package --workspace=packages/data-typeorm && npm run publish-package --workspace=packages/data-clickhouse && npm run publish-package --workspace=packages/data-redis && npm run publish-package --workspace=packages/domain-iam && npm run publish-package --workspace=packages/api-http && npm run publish-package --workspace=packages/api-rest",
     "start:apps-test:debug": "NODE_ENV=local nest start @node-c/app-test --debug --watch",
     "start:apps-test:local": "NODE_ENV=local nest start @node-c/app-test --watch",
     "start:apps-test:test": "NODE_ENV=test nest start @node-c/app-test",

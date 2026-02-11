@@ -12,7 +12,7 @@ import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 import { Constants, RequestWithLocals } from '../common/definitions';
 import { HttpExceptionFilter } from '../filters';
 import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
-import { HTTPAuthenticationMiddleware, HTTPCORSMiddleware } from '../middlewares';
+import { HTTPAuthorizationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 
 export class HTTPAPIModule {
   constructor(
@@ -32,7 +32,7 @@ export class HTTPAPIModule {
       .apply(morgan(`[${this.moduleName}]: :method :url :status :res[content-length] - :response-time ms`))
       .forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
-    consumer.apply(HTTPAuthenticationMiddleware).forRoutes('*');
+    consumer.apply(HTTPAuthorizationMiddleware).forRoutes('*');
   }
 
   static rawBodyBuffer(req: RequestWithLocals<unknown>, _res: Response, buffer: Buffer): void {

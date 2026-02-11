@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 
 import {
   AppConfig,
-  AppConfigPersistanceRDB,
+  AppConfigDataRDB,
   ConfigProviderModuleOptions,
   ConfigProviderService,
   RDBType
@@ -30,16 +30,16 @@ export class NodeCApp {
     const apiModulesOptionsMap = new Map<string, string>();
     const apps: INestApplication<unknown>[] = [];
     let config: AppConfig | undefined;
-    // generate the ormconfig.json files for the RDB persistance modules that use TypeOrm, such as MySQL and PostgreSQL
+    // generate the ormconfig.json files for the RDB data modules that use TypeOrm, such as MySQL and PostgreSQL
     if (loadConfigOptions) {
       console.info('[Node-C]: Loading configurations...');
       const { appConfigs, ...otherOptions } = loadConfigOptions;
       config = await ConfigProviderService.loadConfig(appConfigs, otherOptions);
       if (generateOrmConfig) {
         const moduleOptionsPerName = generateOrmConfigModuleOptions || {};
-        const { persistance } = config;
-        for (const moduleName in persistance) {
-          const { type } = persistance[moduleName] as AppConfigPersistanceRDB;
+        const { data } = config;
+        for (const moduleName in data) {
+          const { type } = data[moduleName] as AppConfigDataRDB;
           if (type === RDBType.ClickHouse || !Object.values(RDBType).includes(type as RDBType)) {
             continue;
           }
@@ -47,7 +47,7 @@ export class NodeCApp {
             ...(moduleOptionsPerName[moduleName] || {
               entitiesPathInModule: 'entities',
               migrationsPathInModule: 'migrations',
-              modulePathInProject: `src/persistance/${moduleName}`,
+              modulePathInProject: `src/data/${moduleName}`,
               seedsPathInModule: 'seeds'
             }),
             moduleName

@@ -28,7 +28,7 @@ describe('ConfigProviderService', () => {
           projectRootPath: '/some/path',
           projectVersion: '1.0.0'
         },
-        persistance: {}
+        data: {}
       };
       const service = new ConfigProviderService(fakeConfig);
       expect(service.config).toEqual(fakeConfig);
@@ -42,7 +42,7 @@ describe('ConfigProviderService', () => {
       entitiesPathInModule: 'entities',
       migrationsPathInModule: 'migrations',
       moduleName: defaultFakeModuleName,
-      modulePathInProject: 'src/persistance/db'
+      modulePathInProject: 'src/data/db'
     };
     const defaultFakeConfig: AppConfig = {
       api: {},
@@ -53,7 +53,7 @@ describe('ConfigProviderService', () => {
         projectRootPath: BASE_PATH,
         projectVersion: '1.0.0'
       },
-      persistance: {
+      data: {
         [defaultFakeModuleName]: { type: 'mysql', extra: 'foo' }
       }
     };
@@ -86,7 +86,7 @@ describe('ConfigProviderService', () => {
         path.join(entitiesDirPath, 'orders', 'orders.subscriber.ts'),
         path.join(entitiesDirPath, 'users', 'users.subscriber.ts')
       ];
-      const expectedMergedConfig = mergeDeepRight(fakeConfig.persistance[fakeModuleName], {
+      const expectedMergedConfig = mergeDeepRight(fakeConfig.data[fakeModuleName], {
         entities: expectedEntities,
         subscribers: expectedSubscribers,
         migrations: [`${migrationsPath}/**/*.ts`],
@@ -97,7 +97,7 @@ describe('ConfigProviderService', () => {
     it('should handle case with empty entities directory (no folders)', async () => {
       fakeOptions.entitiesPathInModule = 'entitiesEmpty';
       await ConfigProviderService.generateOrmconfig(fakeConfig, fakeOptions);
-      const expectedMergedConfig = mergeDeepRight(fakeConfig.persistance[fakeModuleName], {
+      const expectedMergedConfig = mergeDeepRight(fakeConfig.data[fakeModuleName], {
         entities: [],
         subscribers: [],
         migrations: [`${migrationsPath}/**/*.ts`],
@@ -140,7 +140,7 @@ describe('ConfigProviderService', () => {
           test: {}
         },
         domain: {},
-        persistance: {}
+        data: {}
       },
       appConfigProfileLocal: {
         general: { environment: AppEnvironment.Local }
