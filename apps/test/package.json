@@ -1,6 +1,6 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-alpha62",
+  "version": "1.0.0-alpha63",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -30,12 +30,12 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-alpha62",
-    "@node-c/api-rest": "^1.0.0-alpha62",
-    "@node-c/core": "^1.0.0-alpha62",
-    "@node-c/domain-iam": "^1.0.0-alpha62",
-    "@node-c/data-clickhouse": "^1.0.0-alpha62",
-    "@node-c/data-redis": "^1.0.0-alpha62",
-    "@node-c/data-typeorm": "^1.0.0-alpha62"
+    "@node-c/api-http": "^1.0.0-alpha63",
+    "@node-c/api-rest": "^1.0.0-alpha63",
+    "@node-c/core": "^1.0.0-alpha63",
+    "@node-c/domain-iam": "^1.0.0-alpha63",
+    "@node-c/data-clickhouse": "^1.0.0-alpha63",
+    "@node-c/data-redis": "^1.0.0-alpha63",
+    "@node-c/data-typeorm": "^1.0.0-alpha63"
   }
 }

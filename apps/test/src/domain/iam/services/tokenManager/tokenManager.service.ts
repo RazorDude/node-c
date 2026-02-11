@@ -8,7 +8,7 @@ import { CacheAuthToken, CacheAuthTokensEntityService } from '../../../../data/c
 
 @Injectable()
 export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuthToken> {
-  static injectionToken = Constants.AUTORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE;
+  static injectionToken = Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE;
 
   constructor(
     protected configProvider: ConfigProviderService,

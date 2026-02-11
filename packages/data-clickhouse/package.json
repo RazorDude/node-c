@@ -1,6 +1,6 @@
 {
   "name": "@node-c/data-clickhouse",
-  "version": "1.0.0-alpha62",
+  "version": "1.0.0-alpha63",
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
@@ -17,8 +17,8 @@
     "@clickhouse/client": "^1.12.1",
     "@nestjs/common": "^10.4.12",
     "@nestjs/typeorm": "^10.0.2",
-    "@node-c/core": "^1.0.0-alpha62",
-    "@node-c/data-rdb": "^1.0.0-alpha62",
+    "@node-c/core": "^1.0.0-alpha63",
+    "@node-c/data-rdb": "^1.0.0-alpha63",
     "class-validator": "^0.14.1",
     "typeorm": "^0.3.20",
     "uuid": "^11.0.5"

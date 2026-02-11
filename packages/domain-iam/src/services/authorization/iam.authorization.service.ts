@@ -27,7 +27,8 @@ export class IAMAuthorizationService<
   AuthorizationPoint extends BaseAuthorizationPoint<unknown>,
   Data extends DomainEntityServiceDefaultData<Partial<AuthorizationPoint>> = DomainEntityServiceDefaultData<
     Partial<AuthorizationPoint>
-  >
+  >,
+  TokenManager extends IAMTokenManagerService<object> = IAMTokenManagerService<object>
 > extends DomainEntityService<
   AuthorizationPoint,
   DataEntityService<AuthorizationPoint>,
@@ -39,7 +40,7 @@ export class IAMAuthorizationService<
     protected defaultMethods: string[] = [DomainMethod.Find],
     protected additionalDataEntityServices?: GenericObject<DataEntityService<Partial<AuthorizationPoint>>>,
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager?: IAMTokenManagerService<GenericObject<unknown>>
+    protected tokenManager?: TokenManager
   ) {
     super(dataAuthorizationPointsService, defaultMethods, additionalDataEntityServices);
   }
@@ -88,6 +89,7 @@ export class IAMAuthorizationService<
     const { identifierDataField } = options || {};
     if (!tokenManager) {
       console.error('Token manager not configured.');
+      return { valid: false };
     }
     if (!authToken) {
       console.error('Missing auth token.');
@@ -96,7 +98,7 @@ export class IAMAuthorizationService<
     let newAuthToken: string | undefined;
     let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
     try {
-      const tokenRes = await tokenManager!.verifyAccessToken(authToken, {
+      const tokenRes = await tokenManager.verifyAccessToken(authToken, {
         deleteFromStoreIfExpired: true,
         identifierDataField,
         persistNewToken: true,
