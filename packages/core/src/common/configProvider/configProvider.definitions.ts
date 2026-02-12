@@ -27,7 +27,7 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
       USER_PASSWORD_SECRET: 'userPasswordSecret'
     }
   },
-  PERSISTANCE: {
+  DATA: {
     NOSQL: {
       HOST: 'host',
       PASSWORD: 'password',
@@ -65,7 +65,7 @@ export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNa
     },
     name: 'domain'
   },
-  PERSISTANCE: {
+  DATA: {
     children: {
       DB: 'db',
       REDIS: 'redis',
@@ -81,7 +81,7 @@ type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPI
 export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
   Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
-export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM;
+export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM & AppConfigProfileDomainIAM;
 export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL & AppConfigFromEnvDataNoSQL & AppConfigProfileDataNoSQL;
 export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
   AppConfigCommonDataRDB &
@@ -123,6 +123,12 @@ export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   defaultUserIdentifierField: string;
+  oauth2?: GenericObject<{
+    authorizationUrl?: string;
+    codeChallengeMethod: string; // code_challenge_method
+    defaultScope?: string;
+    redirectUri?: string; // redirect_uri
+  }>;
   refreshTokenExpiryTimeInMinutes?: number;
   userPasswordHMACAlgorithm?: string;
 }
@@ -200,6 +206,10 @@ export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
 export interface AppConfigFromEnvDomainIAM {
   jwtAccessSecret: string;
   jwtRefreshSecret: string;
+  oauth2?: GenericObject<{
+    clientId: string; // client_id
+    clientSecret: string; // client_secret
+  }>;
   userPasswordSecret?: string;
 }
 
@@ -258,6 +268,12 @@ export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 
 export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
+  oauth2?: GenericObject<{
+    authorizationUrl?: string;
+    codeChallengeMethod?: string; // code_challenge_method
+    defaultScope?: string;
+    redirectUri?: string; // redirect_uri
+  }>;
   refreshTokenExpiryTimeInMinutes?: number;
 }
 

@@ -1,3 +1,9 @@
+# 1.0.0-alpha65
+- Common
+  - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.
+- `packages/domain-iam`
+  - WIP - OAuth2.0 and OIDC flows.
+
 # 1.0.0-alpha64
 - `packages/core`
   - The setNested method now creates objects along the path when they are missing.

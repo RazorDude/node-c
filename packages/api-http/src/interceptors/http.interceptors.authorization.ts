@@ -44,7 +44,6 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
     const { moduleName } = this;
     const controllerName = context.getClass().name;
     const handlerName = context.getHandler().name;
-    // TODO: cache this in-memory
     const authorizationData = await this.authorizationService.mapAuthorizationPoints(moduleName);
     let controllerData = authorizationData![controllerName];
     if (!controllerData) {

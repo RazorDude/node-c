@@ -173,7 +173,6 @@ export class IAMAuthorizationService<
         }
         if (typeof inputFieldValue === 'undefined') {
           innerInputDataToBeMutated[inputDataFieldName] = userFieldValue;
-          // TODO: implement setNestedArraysPerIndex
           setNested(innerMutatedInputData, inputDataFieldName, userFieldValue, {
             removeNestedFieldEscapeSign: true,
             setNestedArraysPerIndex: inputFieldPaths.length > 1

@@ -18,6 +18,7 @@ import {
 } from './configProvider.definitions';
 
 import { Constants } from '../definitions';
+import { setNested } from '../utils';
 
 @Injectable()
 export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfigDefault> {
@@ -193,7 +194,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           for (const fieldName in moduleFieldsForType) {
             const configKey = `${categoryConfigKey}.${moduleConfigKey}.${moduleFieldsForType[fieldName]}`;
             const envKey = `${moduleCategory}_${moduleName}_${fieldName}`;
-            ld.set(config, configKey, envVars[envKey]);
+            setNested(config, configKey, envVars[envKey]);
           }
         });
       }

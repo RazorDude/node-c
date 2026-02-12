@@ -1,5 +1,6 @@
 import { SetNestedOptions } from './setNested.definitions';
 
+// TODO: implement setNestedArraysPerIndex
 /**
  * Sets a value in a deeply nested object, for example foo.bar.0.baz in {foo: {bar: [{baz: 'test'}]}}.
  * @param parent (required) - The object to set the value in.

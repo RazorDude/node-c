@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
 
+import ld from 'lodash';
+
 import { CoursePlatformAPIModule } from './api/coursePlatform';
 import { SSOAPIModule } from './api/sso';
 import * as AppConfigs from './config';
@@ -16,7 +18,12 @@ import { DomainIAMModule } from './domain/iam';
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
-    envKeys: APP_CONFIG_FROM_ENV_KEYS,
+    envKeys: ld.merge(APP_CONFIG_FROM_ENV_KEYS, {
+      IAM: {
+        OAUTH2_OKTA_CLIENT_ID: 'oauth2.okta.clientId',
+        OAUTH2_OKTA_CLIENT_SECRET: 'oauth2.okta.clientSecret'
+      }
+    }),
     envKeysParentNames: {
       API: {
         children: {
