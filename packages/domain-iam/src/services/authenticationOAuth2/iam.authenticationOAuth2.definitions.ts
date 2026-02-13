@@ -3,9 +3,8 @@ import { AuthenticateUserAuthData, AuthenticateUserResult, AuthenticateUserUserD
 export type OAuth2AuthenticateUserUserData<UserFields extends object> = AuthenticateUserUserData<UserFields>;
 
 export interface OAuth2AuthenticateUserAuthData extends AuthenticateUserAuthData {
-  authorizationCode: string;
-  challengeCode: string;
-  challengeVerifier: string;
+  code: string;
+  codeVerifier: string;
 }
 
 export interface OAuth2AuthenticateUserResult extends AuthenticateUserResult {

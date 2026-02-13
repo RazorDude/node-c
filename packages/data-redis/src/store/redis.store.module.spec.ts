@@ -24,7 +24,7 @@ describe('RedisStoreModule', () => {
             useFactory: expect.any(Function),
             inject: [ConfigProviderService]
           },
-          { provide: Constants.REDIS_CLIENT_PERSISTANCE_MODULE_NAME, useValue: dummyOptions.dataModuleName },
+          { provide: Constants.REDIS_CLIENT_DATA_MODULE_NAME, useValue: dummyOptions.dataModuleName },
           { provide: serviceToken, useClass: RedisStoreService }
         ],
         exports: [{ provide: serviceToken, useClass: RedisStoreService }]

@@ -1,8 +1,15 @@
 # 1.0.0-alpha65
 - Common
   - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.
+  - WIP: BREAKING: Migration to NestJS v11.
+  - Security fixes.
+  - WIP: logging via pino.
+- `packages/core`
+  - Changes needed for OAuth2 in domain-iam.
+  - New utility method for making HTTP requests using axios.
+  - New utility method for base64UrlEncode-ing strings.
 - `packages/domain-iam`
-  - WIP - OAuth2.0 and OIDC flows.
+  - OAuth2.0 and OIDC flows.
 
 # 1.0.0-alpha64
 - `packages/core`

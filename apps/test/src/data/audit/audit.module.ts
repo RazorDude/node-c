@@ -12,7 +12,7 @@ export class DataAuditModule extends ClickHouseDBModule {
     return super.register({
       folderData: FolderData,
       moduleClass: DataAuditModule,
-      moduleName: Constants.PERSISTANCE_AUDIT_MODULE_NAME
+      moduleName: Constants.DATA_AUDIT_MODULE_NAME
     });
   }
 }

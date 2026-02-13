@@ -82,10 +82,10 @@ export async function setup(): Promise<void> {
   // set up the main DB, empty it and seed the test data
   console.info('[TestLogs]: Setting up the main DB...');
   let connection = mysql.createConnection({
-    host: envVars.PERSISTANCE_DB_HOST,
-    password: envVars.PERSISTANCE_DB_PASSWORD,
-    port: +envVars.PERSISTANCE_DB_PORT,
-    user: envVars.PERSISTANCE_DB_USER
+    host: envVars.DATA_DB_HOST,
+    password: envVars.DATA_DB_PASSWORD,
+    port: +envVars.DATA_DB_PORT,
+    user: envVars.DATA_DB_USER
   });
   await new Promise<void>((resolve, reject) => {
     connection.connect(err => {
@@ -97,7 +97,7 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`drop database if exists ${envVars.PERSISTANCE_DB_DATABASE_NAME};`, err => {
+    connection.query(`drop database if exists ${envVars.DATA_DB_DATABASE_NAME};`, err => {
       if (err) {
         reject(err);
         return;
@@ -106,7 +106,7 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`create database ${envVars.PERSISTANCE_DB_DATABASE_NAME};`, err => {
+    connection.query(`create database ${envVars.DATA_DB_DATABASE_NAME};`, err => {
       if (err) {
         reject(err);
         return;
@@ -141,10 +141,10 @@ export async function setup(): Promise<void> {
   console.info('[TestLogs]: Main DB set up. Setting up the configs DB...');
   // set up the configs DB, empty it and seed the test data
   connection = mysql.createConnection({
-    host: envVars.PERSISTANCE_DB_CONFIGS_HOST,
-    password: envVars.PERSISTANCE_DB_PASSWORD,
-    port: +envVars.PERSISTANCE_DB_PORT,
-    user: envVars.PERSISTANCE_DB_USER
+    host: envVars.DATA_DB_CONFIGS_HOST,
+    password: envVars.DATA_DB_PASSWORD,
+    port: +envVars.DATA_DB_PORT,
+    user: envVars.DATA_DB_USER
   });
   await new Promise<void>((resolve, reject) => {
     connection.connect(err => {
@@ -156,7 +156,7 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`drop database if exists ${envVars.PERSISTANCE_DB_CONFIGS_DATABASE_NAME};`, err => {
+    connection.query(`drop database if exists ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`, err => {
       if (err) {
         reject(err);
         return;
@@ -165,7 +165,7 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`create database ${envVars.PERSISTANCE_DB_CONFIGS_DATABASE_NAME};`, err => {
+    connection.query(`create database ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`, err => {
       if (err) {
         reject(err);
         return;
@@ -198,12 +198,12 @@ export async function setup(): Promise<void> {
     });
   });
   console.info('[TestLogs]: Configs DB set up. Setting up the audit DB...');
-  const clickHouseDBName = envVars.PERSISTANCE_AUDIT_DATABASE_NAME;
+  const clickHouseDBName = envVars.DATA_AUDIT_DATABASE_NAME;
   const clickHouseClient = clickHouse.createClient({
     // database: clickHouseDBName,
-    password: envVars.PERSISTANCE_AUDIT_PASSWORD,
-    url: `http://${envVars.PERSISTANCE_AUDIT_HOST}:${envVars.PERSISTANCE_AUDIT_PORT}`,
-    username: envVars.PERSISTANCE_AUDIT_USER
+    password: envVars.DATA_AUDIT_PASSWORD,
+    url: `http://${envVars.DATA_AUDIT_HOST}:${envVars.DATA_AUDIT_PORT}`,
+    username: envVars.DATA_AUDIT_USER
   });
   await clickHouseClient.query({ query: `drop database if exists ${clickHouseDBName}` });
   await clickHouseClient.query({ query: `create database ${clickHouseDBName}` });

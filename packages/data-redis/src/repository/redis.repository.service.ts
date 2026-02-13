@@ -68,7 +68,7 @@ export class RedisRepositoryService<Entity> {
 
   constructor(
     protected configProvider: ConfigProviderService,
-    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
+    @Inject(CoreConstants.DATA_MODULE_NAME)
     protected _dataModuleName: string,
     @Inject(Constants.REDIS_REPOSITORY_SCHEMA)
     protected schema: EntitySchema,

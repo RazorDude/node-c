@@ -124,6 +124,7 @@ export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   defaultUserIdentifierField: string;
   oauth2?: GenericObject<{
+    accessTokenGrantUrl?: string;
     authorizationUrl?: string;
     codeChallengeMethod: string; // code_challenge_method
     defaultScope?: string;
@@ -269,6 +270,7 @@ export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   oauth2?: GenericObject<{
+    accessTokenGrantUrl?: string;
     authorizationUrl?: string;
     codeChallengeMethod?: string; // code_challenge_method
     defaultScope?: string;

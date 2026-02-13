@@ -10,9 +10,9 @@ import { Constants } from '../../../../common/definitions';
 @Module({
   imports: [
     TypeORMDBRepositoryModule.register({
-      connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME,
+      connectionName: Constants.DATA_DB_CONFIGS_MODULE_CONNECTION_NAME,
       entityClass: GlobalConfigItemEntity,
-      dataModuleName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_NAME
+      dataModuleName: Constants.DATA_DB_CONFIGS_MODULE_NAME
     })
   ],
   providers: [GlobalConfigItemsService],

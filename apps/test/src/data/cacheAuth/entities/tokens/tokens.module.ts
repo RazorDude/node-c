@@ -10,7 +10,7 @@ import { Constants } from '../../../../common/definitions';
 @Module({
   imports: [
     RedisRepositoryModule.register({
-      dataModuleName: Constants.PERSISTANCE_CACHE_AUTH_MODULE_NAME,
+      dataModuleName: Constants.DATA_CACHE_AUTH_MODULE_NAME,
       schema: CacheAuthTokenSchema
     })
   ],

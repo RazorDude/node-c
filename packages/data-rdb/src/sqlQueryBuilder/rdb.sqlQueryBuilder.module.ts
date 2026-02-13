@@ -21,7 +21,7 @@ export class SQLQueryBuilderModule {
           useValue: `config.data.${dataModuleName}`
         },
         {
-          provide: CoreConstants.PERSISTANCE_MODULE_NAME,
+          provide: CoreConstants.DATA_MODULE_NAME,
           useValue: dataModuleName
         },
         { provide: serviceToken, useClass: SQLQueryBuilderService }

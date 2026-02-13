@@ -29,7 +29,7 @@ export class SQLQueryBuilderService {
     public configProvider: ConfigProviderService,
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
     public dbConfigPath: string,
-    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
+    @Inject(CoreConstants.DATA_MODULE_NAME)
     // eslint-disable-next-line no-unused-vars
     public dataModuleName: string
   ) {

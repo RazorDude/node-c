@@ -12,7 +12,7 @@ export class DataCacheAuthModule extends RedisModule {
     return super.register({
       folderData: FolderData,
       moduleClass: DataCacheAuthModule,
-      moduleName: Constants.PERSISTANCE_CACHE_AUTH_MODULE_NAME
+      moduleName: Constants.DATA_CACHE_AUTH_MODULE_NAME
     });
   }
 }

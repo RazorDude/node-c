@@ -25,7 +25,7 @@ export class RedisStoreModule {
           },
           inject: [ConfigProviderService]
         },
-        { provide: CoreConstants.PERSISTANCE_MODULE_NAME, useValue: dataModuleName },
+        { provide: CoreConstants.DATA_MODULE_NAME, useValue: dataModuleName },
         { provide: serviceToken, useClass: RedisStoreService }
       ],
       exports: [{ provide: serviceToken, useClass: RedisStoreService }]

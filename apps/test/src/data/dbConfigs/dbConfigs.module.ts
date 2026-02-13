@@ -10,10 +10,10 @@ import { Constants } from '../../common/definitions';
 export class DataDBConfigsModule extends TypeORMDBModule {
   static register(): DynamicModule {
     return super.register({
-      connectionName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME,
+      connectionName: Constants.DATA_DB_CONFIGS_MODULE_CONNECTION_NAME,
       folderData: FolderData,
       moduleClass: DataDBConfigsModule,
-      moduleName: Constants.PERSISTANCE_DB_CONFIGS_MODULE_NAME
+      moduleName: Constants.DATA_DB_CONFIGS_MODULE_NAME
     });
   }
 }

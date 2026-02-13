@@ -34,7 +34,7 @@ export class RedisStoreService {
     @Inject(Constants.REDIS_CLIENT)
     // eslint-disable-next-line no-unused-vars
     protected client: Redis | Cluster,
-    @Inject(CoreConstants.PERSISTANCE_MODULE_NAME)
+    @Inject(CoreConstants.DATA_MODULE_NAME)
     protected dataModuleName: string
   ) {
     const { defaultTTL, storeDelimiter, storeKey, useHashmap } = configProvider.config.data[

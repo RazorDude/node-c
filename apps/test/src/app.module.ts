@@ -38,7 +38,7 @@ export class AppModuleBase {
         },
         name: 'domain'
       },
-      PERSISTANCE: {
+      DATA: {
         children: {
           AUDIT: 'audit', // add another key to the .env file _MODULE_TYPE - RDB
           CACHE: 'cache', // add another key to the .env file _MODULE_TYPE - NOSQL

@@ -11,7 +11,7 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     ClickHouseDBRepositoryModule.register({
       entitySchema: UserLoginLogEntity,
-      dataModuleName: Constants.PERSISTANCE_AUDIT_MODULE_NAME
+      dataModuleName: Constants.DATA_AUDIT_MODULE_NAME
     })
   ],
   providers: [AuditUserLoginLogsService],

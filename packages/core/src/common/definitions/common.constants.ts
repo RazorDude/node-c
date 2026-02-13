@@ -6,7 +6,7 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   DOMAIN_MODULE_NAME = 'DOMAIN_MODULE_NAME',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_MODULE_NAME = 'PERSISTANCE_MODULE_NAME'
+  DATA_MODULE_NAME = 'DATA_MODULE_NAME'
 }
 
 export enum HttpMethod {

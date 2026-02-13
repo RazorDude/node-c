@@ -10,9 +10,9 @@ import { Constants } from '../../../../common/definitions';
 @Module({
   imports: [
     TypeORMDBRepositoryModule.register({
-      connectionName: Constants.PERSISTANCE_DB_MODULE_CONNECTION_NAME,
+      connectionName: Constants.DATA_DB_MODULE_CONNECTION_NAME,
       entityClass: LessonEntity,
-      dataModuleName: Constants.PERSISTANCE_DB_MODULE_NAME
+      dataModuleName: Constants.DATA_DB_MODULE_NAME
     })
   ],
   providers: [LessonsService],

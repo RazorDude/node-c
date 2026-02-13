@@ -6,23 +6,23 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   DOMAIN_IAM_MODULE_NAME = 'iam',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_AUDIT_MODULE_NAME = 'audit',
+  DATA_AUDIT_MODULE_NAME = 'audit',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_CACHE_AUTH_MODULE_NAME = 'cacheAuth',
+  DATA_CACHE_AUTH_MODULE_NAME = 'cacheAuth',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_CACHE_AUTH_STORE_KEY = 'store-cache-auth',
+  DATA_CACHE_AUTH_STORE_KEY = 'store-cache-auth',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_CACHE_MODULE_NAME = 'cache',
+  DATA_CACHE_MODULE_NAME = 'cache',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_CACHE_STORE_KEY = 'store-cache',
+  DATA_CACHE_STORE_KEY = 'store-cache',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_DB_CONFIGS_MODULE_CONNECTION_NAME = 'db_configs_connection',
+  DATA_DB_CONFIGS_MODULE_CONNECTION_NAME = 'db_configs_connection',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_DB_CONFIGS_MODULE_NAME = 'dbConfigs',
+  DATA_DB_CONFIGS_MODULE_NAME = 'dbConfigs',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_DB_MODULE_CONNECTION_NAME = 'db_connection',
+  DATA_DB_MODULE_CONNECTION_NAME = 'db_connection',
   // eslint-disable-next-line no-unused-vars
-  PERSISTANCE_DB_MODULE_NAME = 'db'
+  DATA_DB_MODULE_NAME = 'db'
 }
 
 export const domainMap: {

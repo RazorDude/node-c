@@ -20,7 +20,7 @@ export class RedisRepositoryModule {
           provide: Constants.REDIS_REPOSITORY_SCHEMA,
           useValue: schema
         },
-        { provide: CoreConstants.PERSISTANCE_MODULE_NAME, useValue: dataModuleName },
+        { provide: CoreConstants.DATA_MODULE_NAME, useValue: dataModuleName },
         {
           provide: RedisStoreService,
           useFactory: (redisStoreService: RedisStoreService) => redisStoreService,

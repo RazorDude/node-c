@@ -1,6 +1,12 @@
 import crypto from 'crypto';
 
-import { AppConfigDomainIAM, ApplicationError, ConfigProviderService, base64UrlEncode } from '@node-c/core';
+import {
+  AppConfigDomainIAM,
+  ApplicationError,
+  ConfigProviderService,
+  base64UrlEncode,
+  httpRequest
+} from '@node-c/core';
 
 import {
   OAuth2AuthenticateUserAuthData,
@@ -12,7 +18,6 @@ import {
 
 import { Constants } from '../../common/definitions';
 import { IAMAuthenticationService } from '../authentication';
-import { IAMOAuth2ProviderService } from '../oAuth2Provider';
 
 /*
  * This method is meant to support the OAuth2.0 flow w/ a PKCE challenge. The default, non-PKCE flow is intentionally not supported, in preparation for the upcoming OAuth2.0 spec.
@@ -34,19 +39,11 @@ export class IAMAuthenticationOAuth2Service<
     protected configProvider: ConfigProviderService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected oauth2Provider: IAMOAuth2ProviderService
+    protected providerName: string
   ) {
     super(configProvider, moduleName);
   }
 
-  // POST https://authorization-server.com/token
-  // body:
-  // grant_type=authorization_code
-  // &client_id=gd_ESRlQxAW4VE_6EUnUJyUu
-  // &client_secret=_MWOeldLnh-salSERxROhamemszxcU2osYT59O4YHgT3PtlY
-  // &redirect_uri=https://www.oauth.com/playground/authorization-code-with-pkce.html
-  // &code=6995oN8djQe74aWfsY_PRPPe-4P2GNLtrpFg-GW9LUrDuYic
-  // &code_verifier=9fjCgFaAOQEaDXsXULhH2ZI21CS4kbQ8LYBOI6hsopqipFfh
   /*
    * 6. IAMAuthenticationOAuth2Service.authenticateUser:
    * Incoming for the http redirect - state & code
@@ -58,31 +55,30 @@ export class IAMAuthenticationOAuth2Service<
     userData: OAuth2AuthenticateUserUserData<AuthenticationUserFields>,
     authData: OAuth2AuthenticateUserAuthData
   ): Promise<OAuth2AuthenticateUserResult> {
-    const { configProvider, moduleName } = this;
-    const { defaultUserIdentifierField, userPasswordHMACAlgorithm, userPasswordSecret } = configProvider.config.domain[
-      moduleName
-    ] as AppConfigDomainIAM;
-    const { password: authPassword } = authData;
-    const userIdentifierField = authData.userIdentifierField || defaultUserIdentifierField;
+    const { configProvider, moduleName, providerName } = this;
+    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { accessTokenGrantUrl, clientId, clientSecret, redirectUri } = moduleConfig.oauth2![providerName];
+    const { code, codeVerifier } = authData;
+    const userIdentifierField = authData.userIdentifierField || moduleConfig.defaultUserIdentifierField;
     const userIdentifierValue = userData[userIdentifierField as keyof AuthenticationUserFields];
-    let wrongPassword = false;
-    if (!userPasswordHMACAlgorithm || !userPasswordSecret || !userPassword) {
-      wrongPassword = true;
-    } else {
-      const computedPassword = crypto
-        .createHmac(userPasswordHMACAlgorithm, userPasswordSecret)
-        .update(`${authPassword}`)
-        .digest('hex')
-        .toString();
-      if (computedPassword !== userPassword) {
-        wrongPassword = true;
-      }
-    }
-    if (wrongPassword) {
+    const { data: providerResponseData, hasError } = await httpRequest(accessTokenGrantUrl!, {
+      body: {
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        code_verifier: codeVerifier,
+        grant_type: 'authorization_code',
+        // redirect_uri: base64UrlEncode(redirectUri!)
+        redirect_uri: redirectUri
+      },
+      isFormData: true
+    });
+    if (hasError) {
       console.info(
-        `[IAMAuthenticationOAuth2Service]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
+        `[IAMAuthenticationOAuth2Service]: Auhorization grant attempt failed for user "${userIdentifierValue}".`,
+        providerResponseData
       );
-      throw new ApplicationError('Invalid user identifier or password.');
+      throw new ApplicationError('Authorization failed.');
     }
     return { accessCode: '', valid: true };
   }
@@ -100,11 +96,22 @@ export class IAMAuthenticationOAuth2Service<
   async generateAuthorizationCodeRequestURL(
     data?: OAuth2GenerateAuthorizationURLData
   ): Promise<OAuth2GenerateAuthorizationURLReturnData> {
+    const { configProvider, moduleName, providerName } = this;
+    const { authorizationUrl, clientId, codeChallengeMethod, defaultScope, redirectUri } = (
+      configProvider.config.domain[moduleName] as AppConfigDomainIAM
+    ).oauth2![providerName];
     const { scope } = data || {};
     const verifier = this.generateUrlEncodedString(Constants.OAUTH2_CODE_VERIFIER_LENGTH);
     const challenge = await this.generateChallenge(verifier);
     const state = this.generateUrlEncodedString(16);
-    const url = this.oauth2Provider.getAuthorizationCodeRequestUrl({ challenge, scope, state });
+    const url =
+      `${authorizationUrl}?` +
+      `client_id=${clientId}&` +
+      `redirect_uri=${base64UrlEncode(redirectUri!)}&` +
+      `scope=${scope || defaultScope}&` +
+      `state=${state}&` +
+      `code_challenge=${challenge}&` +
+      `code_challenge_method=${codeChallengeMethod}`;
     return { authorizationCodeRequestURL: url, codeChallenge: challenge, codeVerifier: verifier, state };
   }
 
