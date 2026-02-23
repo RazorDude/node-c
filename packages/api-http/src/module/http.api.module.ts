@@ -11,7 +11,7 @@ import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
 import { HttpExceptionFilter } from '../filters';
-import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '../interceptors';
+import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '../interceptors';
 import { HTTPAuthorizationMiddleware, HTTPCORSMiddleware } from '../middlewares';
 
 export class HTTPAPIModule {
@@ -63,7 +63,7 @@ export class HTTPAPIModule {
         },
         {
           provide: Constants.AUTHORIZATION_INTERCEPTOR,
-          useClass: HTTPAuthorizationInterceptor
+          useClass: HTTPAccessControlInterceptor
         },
         {
           provide: Constants.ERROR_INTERCEPTOR,

@@ -6,7 +6,7 @@ import {
   IAMAuthorizationService,
   IAMTokenManagerService,
   IAMUsersService,
-  UserTokenEnityFields
+  IAMUsersUserTokenEnityFields
 } from '@node-c/domain-iam';
 
 import { NextFunction, Response } from 'express';
@@ -30,7 +30,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager?: IAMTokenManagerService<UserTokenEnityFields>,
+    protected tokenManager?: IAMTokenManagerService<IAMUsersUserTokenEnityFields>,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected usersService?: IAMUsersService<User>
@@ -114,7 +114,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         useCookie = true;
       }
       const { newAuthToken, tokenContent, valid } =
-        await this.authorizationService.authorizeBearer<UserTokenEnityFields>(
+        await this.authorizationService.authorizeBearer<IAMUsersUserTokenEnityFields>(
           { authToken, refreshToken },
           { identifierDataField: usersService ? 'userId' : undefined }
         );
@@ -127,6 +127,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           console.error('Missing userId in the tokenContent data.');
           throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
         }
+        // TODO: user the bearer auth token decoded payload for the user data, if configured this way
         req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
       }
       if (newAuthToken) {

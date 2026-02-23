@@ -23,8 +23,7 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
   DOMAIN: {
     IAM: {
       JWT_ACCESS_SECRET: 'jwtAccessSecret',
-      JWT_REFRESH_SECRET: 'jwtRefreshSecret',
-      USER_PASSWORD_SECRET: 'userPasswordSecret'
+      JWT_REFRESH_SECRET: 'jwtRefreshSecret'
     }
   },
   DATA: {
@@ -81,7 +80,16 @@ type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPI
 export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
   Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
+
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM & AppConfigProfileDomainIAM;
+
+export enum AppConfigDomainIAMAuthenticationStep {
+  // eslint-disable-next-line no-unused-vars
+  Complete = 'complete',
+  // eslint-disable-next-line no-unused-vars
+  Initialize = 'initialize'
+}
+
 export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL & AppConfigFromEnvDataNoSQL & AppConfigProfileDataNoSQL;
 export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
   AppConfigCommonDataRDB &
@@ -122,16 +130,72 @@ export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 
 export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
-  defaultUserIdentifierField: string;
-  oauth2?: GenericObject<{
-    accessTokenGrantUrl?: string;
-    authorizationUrl?: string;
-    codeChallengeMethod: string; // code_challenge_method
-    defaultScope?: string;
-    redirectUri?: string; // redirect_uri
+  authServiceSettings?: GenericObject<{
+    secretKey?: {
+      secretKeyHMACAlgorithm?: string;
+    };
+    oauth2?: {
+      accessTokenGrantUrl?: string;
+      authorizationUrl?: string;
+      codeChallengeMethod: string; // code_challenge_method
+      defaultScope?: string;
+      redirectUri?: string; // redirect_uri
+    };
+    steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
   }>;
+  defaultUserIdentifierField: string;
   refreshTokenExpiryTimeInMinutes?: number;
-  userPasswordHMACAlgorithm?: string;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigCacheSettings {
+  cacheFieldName: string;
+  inputFieldName: string;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings {
+  data?: boolean | string[];
+  options?: boolean | string[];
+  result?: boolean | string[];
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettings {
+  data?: AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem;
+  options?: AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem;
+  result?: AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem {
+  overwrite?: boolean;
+  use: boolean;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings {
+  authReturnsTokens?: boolean;
+  cache?: {
+    settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
+    use?: AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettings;
+  };
+  decodeReturnedTokens?: boolean;
+  findUser?: boolean;
+  findUserBeforeAuth?: boolean;
+  findUserInAuthResultBy?: { userFieldName: string; resultFieldName: string };
+  useReturnedTokens?: boolean;
+  validWithoutUser?: boolean;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings {
+  cache?: {
+    populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
+    settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
+  };
+  findUser?: boolean;
+  findUserBeforeAuth?: boolean;
+  validWithoutUser?: boolean;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigStepSettings {
+  [AppConfigDomainIAMAuthenticationStep.Complete]: AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings;
+  [AppConfigDomainIAMAuthenticationStep.Initialize]: AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings;
 }
 
 export type AppConfigCommonData = {
@@ -207,11 +271,15 @@ export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
 export interface AppConfigFromEnvDomainIAM {
   jwtAccessSecret: string;
   jwtRefreshSecret: string;
-  oauth2?: GenericObject<{
-    clientId: string; // client_id
-    clientSecret: string; // client_secret
+  authServiceSettings?: GenericObject<{
+    secretKey?: {
+      hashingSecret?: string;
+    };
+    oauth2?: {
+      clientId: string; // client_id
+      clientSecret: string; // client_secret
+    };
   }>;
-  userPasswordSecret?: string;
 }
 
 export interface AppConfigFromEnvKeys {
@@ -269,12 +337,14 @@ export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 
 export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
-  oauth2?: GenericObject<{
-    accessTokenGrantUrl?: string;
-    authorizationUrl?: string;
-    codeChallengeMethod?: string; // code_challenge_method
-    defaultScope?: string;
-    redirectUri?: string; // redirect_uri
+  authServiceSettings?: GenericObject<{
+    oauth2?: {
+      accessTokenGrantUrl?: string;
+      authorizationUrl?: string;
+      codeChallengeMethod?: string; // code_challenge_method
+      defaultScope?: string;
+      redirectUri?: string; // redirect_uri
+    };
   }>;
   refreshTokenExpiryTimeInMinutes?: number;
 }

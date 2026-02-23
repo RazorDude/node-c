@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 
 import { ConfigProviderService, EndpointSecurityMode, GenericObject, setNested } from '@node-c/core';
-import { AuthorizationPoint, IAMAuthorizationService, UserWithPermissionsData } from '@node-c/domain-iam';
+import { AuthorizationPoint, IAMAuthorizationService, IAMUsersUserWithPermissionsData } from '@node-c/domain-iam';
 
 import { Observable, map } from 'rxjs';
 
@@ -19,7 +19,7 @@ import { Constants, RequestWithLocals } from '../common/definitions';
  * Authorization interceptor - used for role-based and fine-grained access control.
  */
 @Injectable()
-export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<unknown, unknown>>
+export class HTTPAccessControlInterceptor<User extends IAMUsersUserWithPermissionsData<unknown, unknown>>
   implements NestInterceptor
 {
   constructor(
@@ -57,7 +57,7 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
         const { endpointSecurityMode } = this.configProvider.config.api[moduleName];
         if (!endpointSecurityMode || endpointSecurityMode === EndpointSecurityMode.Strict) {
           console.info(
-            `[${moduleName}][HTTPAuthorizationInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
+            `[${moduleName}][HTTPAccessControlInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
           );
           throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
@@ -75,7 +75,7 @@ export class HTTPAuthorizationInterceptor<User extends UserWithPermissionsData<u
     );
     if (!hasAccess) {
       console.info(
-        `[${moduleName}][HTTPAuthorizationInterceptor]: No user access to handler ${controllerName}.${handlerName}.`
+        `[${moduleName}][HTTPAccessControlInterceptor]: No user access to handler ${controllerName}.${handlerName}.`
       );
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }

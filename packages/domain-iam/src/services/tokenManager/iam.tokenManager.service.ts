@@ -23,6 +23,9 @@ import {
 } from './iam.tokenManager.definitions';
 
 // TODO: console.error -> logger
+/*
+ * Service for managing local access and refresh JWTs.
+ */
 export class IAMTokenManagerService<TokenEntityFields extends object> extends DomainEntityService<
   TokenEntity<TokenEntityFields>,
   DataEntityService<TokenEntity<TokenEntityFields>>
@@ -48,7 +51,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     const { expiresInMinutes, identifierDataField, persist, purgeOldFromData } = options;
     const signOptions = {} as jwt.SignOptions;
     let secret: string;
-    // Leaving this ugly big if-statement as is, in case we need to expand it in the future.
+    // Leaving this big and ugly if-statement as is, in case we need to expand it in the future.
     if (type === TokenType.Access) {
       secret = moduleConfig.jwtAccessSecret;
       if (expiresInMinutes) {

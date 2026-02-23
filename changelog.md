@@ -5,11 +5,16 @@
   - Security fixes.
   - WIP: logging via pino.
 - `packages/core`
-  - Changes needed for OAuth2 in domain-iam.
+  - Changes needed for OAuth2 in packages/domain-iam.
   - New utility method for making HTTP requests using axios.
   - New utility method for base64UrlEncode-ing strings.
 - `packages/domain-iam`
+  - BREAKING: removed the user-centric focus in the authentication services and split the flow into "initiate" and "complete".
+  - BREAKING: authenticationLocal is now authenticationUserLocal
+  - Generic MFA service and local MFA implementation in a separate service.
   - OAuth2.0 and OIDC flows.
+- `packages/api-http`
+  - BREAKING: Renamed the Authorization interceptor to the AccessControl interceptor in order to avoid confusion.
 
 # 1.0.0-alpha64
 - `packages/core`

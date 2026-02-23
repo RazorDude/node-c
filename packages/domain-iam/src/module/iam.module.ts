@@ -17,7 +17,7 @@ export class DomainIAMModule {
       imports: [...(importsAtStart || []), ...(importsAtEnd || [])],
       providers: [
         {
-          provide: Constants.DOMAIN_MODULE_NAME,
+          provide: Constants.DOMAIN_MODULE_NAME as string,
           useValue: options.moduleName
         },
         ...(options.providers || []),

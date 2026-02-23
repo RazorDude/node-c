@@ -13,9 +13,10 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 
-import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
+import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
 
 import {
+  DataDefaultData,
   DomainBulkCreateResult,
   DomainCreateResult,
   DomainDeleteOptions,
@@ -25,8 +26,7 @@ import {
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult,
-  DataDefaultData
+  DomainUpdateResult
 } from '@node-c/core';
 
 import {
@@ -46,7 +46,7 @@ import {
 } from './rest.entity.controller.definitions';
 
 // TODO: a middleware for converting string booleans to booleans
-@UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
+@UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
   Entity,
   EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, DataEntityServiceData>,

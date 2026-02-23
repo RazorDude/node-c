@@ -80,6 +80,7 @@ export class IAMAuthorizationService<
   }
 
   // TODO: validate an OAuth2.0 access token
+  // TODO: decouple from users
   async authorizeBearer<UserTokenEnityFields = unknown>(
     data: { authToken?: string; refreshToken?: string },
     options?: { identifierDataField?: string }

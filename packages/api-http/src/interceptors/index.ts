@@ -1,2 +1,2 @@
-export * from './http.interceptors.authorization';
+export * from './http.interceptors.accessControl';
 export * from './http.interceptors.error';

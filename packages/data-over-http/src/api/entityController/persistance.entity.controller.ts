@@ -13,7 +13,7 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 
-import { HTTPAuthorizationInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
+import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
 
 import {
   DomainBulkCreateResult,
@@ -65,7 +65,7 @@ export interface DefaultDtos<Entity> {
 }
 
 // TODO: a middleware for converting string booleans to booleans
-@UseInterceptors(HTTPAuthorizationInterceptor, HTTPErrorInterceptor)
+@UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService extends DefaultDomainEntityService<Entity>> {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
