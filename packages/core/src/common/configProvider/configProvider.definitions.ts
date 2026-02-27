@@ -135,12 +135,14 @@ export interface AppConfigCommonDomainIAM {
       secretKeyHMACAlgorithm?: string;
     };
     oauth2?: {
+      accessTokenEmailField?: string;
       accessTokenGrantUrl?: string;
       authorizationUrl?: string;
       codeChallengeMethod: string; // code_challenge_method
       defaultScope?: string;
       redirectUri?: string; // redirect_uri
     };
+    processExternalTokensOnVerify?: boolean;
     steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
   }>;
   defaultUserIdentifierField: string;
@@ -175,6 +177,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings {
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
     use?: AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettings;
   };
+  createUser?: boolean;
   decodeReturnedTokens?: boolean;
   findUser?: boolean;
   findUserBeforeAuth?: boolean;
@@ -345,6 +348,7 @@ export interface AppConfigProfileDomainIAM {
       defaultScope?: string;
       redirectUri?: string; // redirect_uri
     };
+    processExternalTokensOnVerify?: boolean;
   }>;
   refreshTokenExpiryTimeInMinutes?: number;
 }

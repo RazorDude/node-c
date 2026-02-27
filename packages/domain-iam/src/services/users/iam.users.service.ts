@@ -30,13 +30,16 @@ import {
 import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationService,
   IAMAuthenticationType
 } from '../authentication';
 import { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2';
+import { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal';
 import { IAMTokenManagerService, TokenType } from '../tokenManager';
 
 // TODO: create user (signup); this should include password hashing
+// TODO: create user flow using external user data from the authService
 // TODO: update password (incl. hashing)
 // TODO: reset password
 // TODO: console.info -> logger
@@ -51,6 +54,8 @@ export class IAMUsersService<
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
+    protected authServices: Record<IAMAuthenticationType, IAMAuthenticationService<User, User>>,
+    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
@@ -60,8 +65,6 @@ export class IAMUsersService<
     protected dataUsersAuthCacheService: DataEntityService<GenericObject>,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager: IAMTokenManagerService<IAMUsersUserTokenEnityFields>,
-    // eslint-disable-next-line no-unused-vars
-    protected userAuthServices: Record<IAMAuthenticationType, IAMAuthenticationService<User, User>>,
     protected defaultMethods: string[] = [
       DomainMethod.BulkCreate,
       DomainMethod.Create,
@@ -79,39 +82,42 @@ export class IAMUsersService<
     options: IAMUsersCreateAccessTokenOptions<AuthData>
   ): Promise<IAMUsersCreateAccessTokenReturnData<User>> {
     const { configProvider, moduleName } = this;
+    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =
-      configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+      moduleConfig;
     const {
       auth: { type: authType },
       rememberUser
     } = options;
     console.info(`[Domain.${moduleName}.Users]: Login attempt started.`);
     // 1. Make sure the auth service actually exists - local, oauth2, etc.
-    const authService = this.userAuthServices[authType];
+    const authService = this.authServices[authType];
     if (!authService) {
       console.info(`[Domain.${moduleName}.Users]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
     }
-    // 2. Get the user-specific configuration from the authService
+    // 2. Get the user-specific configuration from the authService.
     const authServiceBehaviorConfig = authService.getUserCreateAccessTokenConfig();
+    let externalAccessToken: string | undefined;
+    let externalRefreshToken: string | undefined;
     let issueTokens = false;
     let step: AppConfigDomainIAMAuthenticationStep;
-    // 3. Prepare the step behavior based on the configuration
+    let userFilterField: string | undefined;
+    let userFilterValue: unknown | undefined;
+    // 3. Prepare the step behavior based on the configuration.
     // 3.1. Complete step
     if (options.step === AppConfigDomainIAMAuthenticationStep.Complete) {
       issueTokens = true;
       step = AppConfigDomainIAMAuthenticationStep.Complete;
     }
-    // 3.2. Initialize step - assumed implicitly
+    // 3.2. Initialize step - assumed implicitly.
     else {
       step = AppConfigDomainIAMAuthenticationStep.Initialize;
     }
     let stepConfig = authServiceBehaviorConfig[step];
     // 3. Run the authentication method itself.
     let { stepResult, user } = await this.executeStep(options, { authService, name: step, stepConfig });
-    let userFilterField: string | undefined;
-    let userFilterValue: unknown | undefined;
-    // 4. Run the final step, if this is the first step no mfa has been used
+    // 4. Run the final step, if this is the first step no mfa has been used.
     if (step === AppConfigDomainIAMAuthenticationStep.Initialize && !stepResult.mfaUsed) {
       issueTokens = true;
       step = AppConfigDomainIAMAuthenticationStep.Complete;
@@ -122,63 +128,49 @@ export class IAMUsersService<
       userFilterField = finalStepData.userFilterField;
       userFilterValue = finalStepData.userFilterValue;
     }
-    // 5. Token management. In this case, we will definitely have the user.
-    if (issueTokens) {
-      const { findUser } = stepConfig;
-      if (!findUser) {
+    // 5. Process the external access, refresh and, optionally, id tokens that are returned by the step execution.
+    const actualStepResult = stepResult as
+      | IAMAuthenticationOAuth2CompleteResult
+      | IAMAuthenticationUserLocalCompleteResult;
+    if ('useReturnedTokens' in stepConfig && stepConfig.useReturnedTokens && stepConfig.authReturnsTokens) {
+      // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
+      if (!actualStepResult.accessToken) {
         console.info(
-          `[Domain.${moduleName}.Users]: Login attempt failed at step ${step} - findUser is required when issueTokens is set to true.`
+          `[Domain.${moduleName}.Users]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
+      externalAccessToken = actualStepResult.accessToken;
+      if (actualStepResult.refreshToken) {
+        externalRefreshToken = actualStepResult.refreshToken;
+      }
+    }
+    // 6. Token management. In this case, we will definitely have the user, or will be force to create it.
+    if (issueTokens) {
       if (!user) {
         console.info(
           `[Domain.${moduleName}.Users]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
-      // use this type, since it's the most complete one
-      const stepResultActual = stepResult as IAMAuthenticationOAuth2CompleteResult;
-      let externalAccessToken: string | undefined;
-      let externalRefreshToken: string | undefined;
       let refreshToken: string | undefined;
-      let useRefreshToken = false;
-      if (
-        'useReturnedTokens' in stepConfig &&
-        stepConfig.useReturnedTokens &&
-        stepConfig.authReturnsTokens &&
-        'accessToken' in stepResultActual
-      ) {
-        if (!stepResultActual.accessToken) {
-          console.info(
-            `[Domain.${moduleName}.Users]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
-          );
-          throw new ApplicationError('Authentication failed.');
-        }
-        externalAccessToken = stepResultActual.accessToken;
-        if (stepResultActual.refreshToken) {
-          externalRefreshToken = stepResultActual.refreshToken;
-          useRefreshToken = true;
-        }
-      } else {
-        useRefreshToken = true;
-      }
-      // Create local access and refresh tokens, and save them. Their payloads will contain the external tokens, if provided
+      // 6.1. Create a local refresh token and save it. The payload contains the external refresh token, if it exists.
       const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
-      if (useRefreshToken) {
+      if (externalRefreshToken || !externalAccessToken) {
         const {
           result: { token: localRefreshToken }
         } = await this.tokenManager.create(
           {
-            externalRefreshToken,
+            externalToken: externalRefreshToken,
+            externalTokenAuthService: authType,
             type: TokenType.Refresh,
             [IAMUsersUserTokenUserIdentifier.FieldName]: userIdentifierValue
           },
           {
             expiresInMinutes:
               (externalRefreshToken &&
-                'refreshTokenExpiresIn' in stepResultActual &&
-                stepResultActual.refreshTokenExpiresIn) ||
+                'refreshTokenExpiresIn' in actualStepResult &&
+                actualStepResult.refreshTokenExpiresIn) ||
               (rememberUser ? undefined : refreshTokenExpiryTimeInMinutes),
             identifierDataField: IAMUsersUserTokenUserIdentifier.FieldName,
             persist: true,
@@ -187,11 +179,13 @@ export class IAMUsersService<
         );
         refreshToken = localRefreshToken;
       }
+      // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
       const {
         result: { token: accessToken }
       } = await this.tokenManager.create(
         {
-          externalAccessToken,
+          externalToken: externalAccessToken,
+          externalTokenAuthService: authType,
           refreshToken,
           type: TokenType.Access,
           [IAMUsersUserTokenUserIdentifier.FieldName]: userIdentifierValue
@@ -199,8 +193,8 @@ export class IAMUsersService<
         {
           expiresInMinutes:
             (externalAccessToken &&
-              'accessTokenExpiresIn' in stepResultActual &&
-              stepResultActual.accessTokenExpiresIn) ||
+              'accessTokenExpiresIn' in actualStepResult &&
+              actualStepResult.accessTokenExpiresIn) ||
             accessTokenExpiryTimeInMinutes,
           identifierDataField: IAMUsersUserTokenUserIdentifier.FieldName,
           persist: true,
@@ -282,7 +276,7 @@ export class IAMUsersService<
       }
     }
     // 3. Run the step method itself.
-    const stepResult = await authService[stepName as 'complete' | 'initiate'](
+    let stepResult = await authService[stepName as 'complete' | 'initiate'](
       stepInputData.data as IAMAuthenticationCompleteData,
       stepInputData.options as IAMAuthenticationCompleteOptions<User>
     );
@@ -291,8 +285,11 @@ export class IAMUsersService<
       console.info(`[Domain.${moduleName}.Users]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
-    // 5. If thhe step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
-    // if (stepConfig.)
+    // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
+    if ('decodeReturnedTokens' in stepConfig && stepConfig.decodeReturnedTokens) {
+      const externalTokenPayloads = await authService.getPayloadsFromExternalTokens({});
+      stepResult = { ...stepResult, ...externalTokenPayloads };
+    }
     // 6. Find the user based on either the provided filters, or on the stepResult data, if enabled
     if (findUser && !findUserBeforeAuth) {
       if ('findUserInAuthResultBy' in stepConfig && stepConfig.findUserInAuthResultBy) {
@@ -316,6 +313,19 @@ export class IAMUsersService<
         user = await this.getUserWithPermissionsData({ filters: userFilters }, { keepPassword: false });
       }
     }
+    // 7. Create a user using the data from the tokens returned by the step execution, if enabled and there is no user found.
+    if (!user && 'createUser' in stepConfig && stepConfig.createUser) {
+      const userData = await authService.getUserDataFromExternalTokenPayloads(
+        stepResult as IAMAuthenticationGetUserDataFromExternalTokenPayloadsData
+      );
+      const { result: createdUser } = await this.create(userData as Data['Create']);
+      user = await this.getUserWithPermissionsData(
+        {
+          filters: { [defaultUserIdentifierField]: createdUser[defaultUserIdentifierField as keyof typeof createdUser] }
+        },
+        { keepPassword: false }
+      );
+    }
     if (validWithoutUser !== true && !user) {
       console.info(
         `[Domain.${moduleName}.Users]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
@@ -325,7 +335,7 @@ export class IAMUsersService<
     if (user && 'password' in user) {
       delete user.password;
     }
-    // 7. Populate the cache, if configured
+    // 8. Populate the cache, if configured
     if (cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
       const cacheInput: GenericObject = {
         data: stepInputData.data,

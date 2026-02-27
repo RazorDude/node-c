@@ -9,6 +9,7 @@ import {
   IAMMFAInitiateResult
 } from './iam.mfa.definitions';
 
+// TODO: local MFA implementation
 export class IAMMFAService<CompleteContext extends object, InitiateContext extends object = object> {
   constructor(
     // eslint-disable-next-line no-unused-vars

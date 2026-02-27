@@ -19,9 +19,9 @@ Node-C divides your application code in 3 distinct layers:
 - mysql installed and running on localhost:3306
 - clickhouse installed and running on localhost:8123
 
-Install the Node-C example test app:
+Install and run the Node-C example test app:
 ```bash
-npx @node-c/apps-test install
+npx @node-c/apps-test run
 ```
 
 You should now have a server running at http://localhost:3000. Try calling the /test endpoint:

@@ -37,11 +37,11 @@ import { IAMAuthenticationService } from '../authentication';
  * 6. IAMAuthenticationOAuth2Service.complete
  * 7. (outside this service) Generate a local access & refresh JWT pair with the same expiry time as the provider tokens.
  * 8. (outside this service) Save the provider's access token and (refersh or ID) tokens in the data along with the JWTs, linking them to the user.
+ * *
  * TODO: provider param name mapping, in case a specific provider has custom parameter names
  * TODO: validate access_token flow - local (JWT), endpont
  * TODO: refresh access_token flow - local (JWT), endpont
  * TODO: introspect flow - local (JWT), endpoint
- * TODO: create user flow
  */
 export class IAMAuthenticationOAuth2Service<
   CompleteContext extends object,
@@ -51,7 +51,9 @@ export class IAMAuthenticationOAuth2Service<
     protected configProvider: ConfigProviderService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected serviceName: string
+    protected serviceName: string,
+    // eslint-disable-next-line no-unused-vars
+    protected tokenLocalManagementService?: string
   ) {
     super(configProvider, moduleName);
   }
@@ -62,6 +64,7 @@ export class IAMAuthenticationOAuth2Service<
    * 6.1. Send an access token request to the provider using the following params: grant_type=authorization_code, client_id, client_secret, redirect_uri, code, code_verifier.
    * 6.2. Receive the access and refresh tokens - expires_in, access_token, scope, refresh_token OR id_token (OIDC only).
    * 6.3. Return the access and (refresh or ID) tokens.
+   * TODO: the custom param mapping will potentially be needed here.
    */
   async complete(
     data: IAMAuthenticationOAuth2CompleteData,
@@ -120,7 +123,7 @@ export class IAMAuthenticationOAuth2Service<
     return base64UrlEncode(octets.buffer).slice(0, length);
   }
 
-  // Default config - OIDC
+  // Default config - plain OAuth2 without OIDC
   getUserCreateAccessTokenConfig(): IAMAuthenticationOauth2GetUserCreateAccessTokenConfigResult {
     const { configProvider, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
@@ -136,11 +139,13 @@ export class IAMAuthenticationOAuth2Service<
             data: { overwrite: true, use: true }
           }
         },
+        createUser: true,
+        decodeReturnedTokens: true,
         findUser: true,
         findUserBeforeAuth: false,
         findUserInAuthResultBy: {
           userFieldName: 'email',
-          resultFieldName: 'idTokenPayload.email'
+          resultFieldName: 'accessTokenPayload.username'
         },
         validWithoutUser: false
       },

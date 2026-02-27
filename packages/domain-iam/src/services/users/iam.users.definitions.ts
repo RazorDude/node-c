@@ -12,7 +12,7 @@ import {
   IAMAuthenticationService,
   IAMAuthenticationType
 } from '../authentication';
-import { AuthorizationPoint } from '../authorization';
+import { AuthorizationUser } from '../authorization';
 import { IAMMFAType } from '../mfa';
 
 export interface IAMUsersCreateAccessTokenOptions<AuthData = unknown> {
@@ -58,13 +58,10 @@ export interface IAMUsersGetUserWithPermissionsDataOptions extends DomainFindOne
   keepPassword?: boolean;
 }
 
-export type IAMUsersUserWithPermissionsData<UserData, AuthorizationPointId> = {
-  currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
-} & UserData;
+export type IAMUsersUserWithPermissionsData<UserData, AuthorizationPointId> = AuthorizationUser<AuthorizationPointId> &
+  UserData;
 
 export interface IAMUsersUserTokenEnityFields<UserId = unknown> {
-  externalAccessToken?: string;
-  externalRefreshToken?: string;
   refreshToken?: string;
   userId: UserId;
 }

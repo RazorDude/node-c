@@ -4,6 +4,7 @@
   - WIP: BREAKING: Migration to NestJS v11.
   - Security fixes.
   - WIP: logging via pino.
+  - WIP: Unpublished the old "persistance" packages.
 - `packages/core`
   - Changes needed for OAuth2 in packages/domain-iam.
   - New utility method for making HTTP requests using axios.
@@ -11,10 +12,20 @@
 - `packages/domain-iam`
   - BREAKING: removed the user-centric focus in the authentication services and split the flow into "initiate" and "complete".
   - BREAKING: authenticationLocal is now authenticationUserLocal
-  - Generic MFA service and local MFA implementation in a separate service.
+  - BREAKING: authenticationPoints - renamed "controllerNames" to "resourceContext" and "handlerNames" to "resources".
+  - BREAKING: authorizationService - completely reworked the checkAccess method so that it encapsulates the logic for finding the authorizationPoint for the given resource and context.
+  - BREAKING: authorizationService - removed the mapAuthorizationPoints method.
+  - BREAKING: tokenManagerService - rearranged the injected dependencies and added a mandatory authServices dependency.
+  - tokenManagerService - addded external access token verification based on the used authService.
+  - WIP: authorizationService - Added a new, non-static checkAccessWith method for checking access which retrieves the stored authorizationPoints and runs the checkAccess method.
+  - Generic MFA service architecture.
+  - WIP: local MFA implementation in a separate service.
   - OAuth2.0 and OIDC flows.
+- `packages/domain-iam-okta`
+  - WIP - First working version.
 - `packages/api-http`
   - BREAKING: Renamed the Authorization interceptor to the AccessControl interceptor in order to avoid confusion.
+  - Refactoring to accommodate the domain-iam package changes.
 
 # 1.0.0-alpha64
 - `packages/core`

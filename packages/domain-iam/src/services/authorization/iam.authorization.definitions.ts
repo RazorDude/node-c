@@ -1,34 +1,46 @@
 import { GenericObject } from '@node-c/core';
 
+export enum AuthorizationCheckErrorCode {
+  // eslint-disable-next-line no-unused-vars
+  FGANoAccessToModule = 'FGA_NO_ACCESS',
+  // eslint-disable-next-line no-unused-vars
+  RBACNoAccessToModule = 'RBAC_NO_ACCESS_TO_MODULE',
+  // eslint-disable-next-line no-unused-vars
+  RBACNoAccessToResource = 'RBAC_NO_ACCESS_TO_RESOURCE'
+}
+
 export interface AuthorizationPoint<Id> {
   allowedInputData?: GenericObject;
   allowedOutputData?: GenericObject;
-  controllerNames?: string[];
   forbiddenInputData?: GenericObject;
   forbiddenOutputData?: GenericObject;
-  handlerNames?: string[];
   id: Id;
   inputDataFieldName?: string;
-  moduleNames?: string[];
+  moduleName: string;
   name: string;
   requiredStaticData?: GenericObject;
+  resources?: string[];
+  // required when resources is set
+  resourceContext?: string;
   userFieldName?: string;
   userTypes: GenericObject[];
 }
 
-export interface AuthorizationData<AuthorizationPointId> {
-  __all: {
-    __all: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
-    [handlerName: string]: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
-  };
-  [controllerName: string]: {
-    __all: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
-    [handlerName: string]: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
-  };
+export interface AuthorizationStaticCheckAccessOptions {
+  moduleName: string;
+  resource?: string;
+  resourceContext?: string;
+}
+
+export interface AuthorizationStaticCheckAccessResult {
+  authorizationPoints: GenericObject<AuthorizationPoint<unknown>>;
+  errorCode?: AuthorizationCheckErrorCode;
+  hasAccess: boolean;
+  inputDataToBeMutated: GenericObject;
 }
 
 export interface AuthorizationUser<AuthorizationPointId> {
-  currentAuthorizationPoints: { [authorizationPointId: string | number]: AuthorizationPoint<AuthorizationPointId> };
+  currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
 }
 
 export interface AuthorizeApiKeyData {

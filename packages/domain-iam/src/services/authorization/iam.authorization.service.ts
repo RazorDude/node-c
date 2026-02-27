@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 
 import {
+  ApplicationError,
   DataEntityService,
   DomainEntityService,
   DomainEntityServiceDefaultData,
-  DomainFindOptions,
   DomainMethod,
   GenericObject,
   getNested,
@@ -14,7 +14,9 @@ import {
 import ld from 'lodash';
 
 import {
-  AuthorizationData,
+  AuthorizationCheckErrorCode,
+  AuthorizationStaticCheckAccessOptions,
+  AuthorizationStaticCheckAccessResult,
   AuthorizationUser,
   AuthorizeApiKeyData,
   AuthorizeApiKeyOptions,
@@ -24,7 +26,7 @@ import {
 import { DecodedTokenContent, IAMTokenManagerService } from '../tokenManager';
 
 export class IAMAuthorizationService<
-  AuthorizationPoint extends BaseAuthorizationPoint<unknown>,
+  AuthorizationPoint extends BaseAuthorizationPoint<unknown> = BaseAuthorizationPoint<unknown>,
   Data extends DomainEntityServiceDefaultData<Partial<AuthorizationPoint>> = DomainEntityServiceDefaultData<
     Partial<AuthorizationPoint>
   >,
@@ -118,30 +120,59 @@ export class IAMAuthorizationService<
     return { newAuthToken, tokenContent, valid: true };
   }
 
-  static checkAccess(
-    authorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
-    inputData: GenericObject,
-    user: AuthorizationUser<unknown>
-  ): {
-    authorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> };
-    hasAccess: boolean;
-    inputDataToBeMutated: GenericObject;
-  } {
+  async checkAccessWithStorage(): Promise<void> {
+    throw new ApplicationError('[IAMAuthorizationService.checkAccessWithStorage]: Method not implemented.');
+  }
+
+  static checkAccess<InputData = GenericObject>(
+    inputData: InputData,
+    user: AuthorizationUser<unknown>,
+    options: AuthorizationStaticCheckAccessOptions
+  ): AuthorizationStaticCheckAccessResult {
+    const { moduleName, resourceContext, resource } = options;
+    let hasResource = false;
+    if (resource) {
+      if (!resourceContext) {
+        throw new ApplicationError(
+          '[IAMAuthorizationService.checkAccess]: A resourceContext is required when providing a resource value.'
+        );
+      }
+      hasResource = true;
+    }
+    // check the access to the found authorization points
     const mutatedInputData = ld.cloneDeep(inputData);
-    const usedAuthorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> } = {};
-    const userPermissionsData = user.currentAuthorizationPoints!;
+    const usedAuthorizationPoints: GenericObject<BaseAuthorizationPoint<unknown>> = {};
+    const { currentAuthorizationPoints } = user;
+    let authorizationPointsCount = 0;
+    let authorizationPointsForDifferentModules = 0;
+    let authorizationPointsForDifferentContexts = 0;
     let hasAccess = false;
     let inputDataToBeMutated: GenericObject = {};
-    for (const apId in authorizationPoints) {
-      if (!userPermissionsData[apId]) {
+    for (const apId in currentAuthorizationPoints) {
+      const apData = currentAuthorizationPoints[apId];
+      authorizationPointsCount++;
+      // RBAC - check whether the user has general access to the module and resource.
+      if (moduleName !== apData.moduleName) {
+        authorizationPointsForDifferentModules++;
         continue;
       }
-      const apData = authorizationPoints[apId];
+      // RBAC - check whether the user has general access to the module and resource.
+      if (
+        hasResource &&
+        (!apData.resourceContext ||
+          apData.resourceContext !== resourceContext ||
+          !apData.resources?.includes(resourceContext))
+      ) {
+        authorizationPointsForDifferentContexts++;
+        continue;
+      }
+      // FGA - check whether the user has access based on specific input and user fields.
       const { allowedInputData, forbiddenInputData, inputDataFieldName, requiredStaticData, userFieldName } = apData;
       const hasStaticData = requiredStaticData && Object.keys(requiredStaticData).length;
-      const innerMutatedInputData = ld.cloneDeep(mutatedInputData);
+      const innerMutatedInputData = ld.cloneDeep(mutatedInputData) as GenericObject;
       const innerInputDataToBeMutated: GenericObject = {};
       hasAccess = true;
+      // 1. Required static data
       if (hasStaticData) {
         for (const fieldName in requiredStaticData) {
           if (
@@ -159,6 +190,7 @@ export class IAMAuthorizationService<
           continue;
         }
       }
+      // 2. User field data vs input field data.
       if (userFieldName && inputDataFieldName) {
         const { paths: inputFieldPaths, unifiedValue: inputFieldValue } = getNested(
           innerMutatedInputData,
@@ -193,6 +225,7 @@ export class IAMAuthorizationService<
           }
         }
       }
+      // 3. Input data whitelist
       if (allowedInputData && Object.keys(allowedInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {
@@ -200,6 +233,7 @@ export class IAMAuthorizationService<
           setNested(innerMutatedInputData, key, values[key], { removeNestedFieldEscapeSign: true });
         }
       }
+      // 4. Input data blacklist
       if (forbiddenInputData && Object.keys(forbiddenInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, forbiddenInputData);
         for (const key in values) {
@@ -211,7 +245,21 @@ export class IAMAuthorizationService<
       usedAuthorizationPoints[apId] = apData;
       break;
     }
-    return { authorizationPoints: usedAuthorizationPoints, hasAccess, inputDataToBeMutated };
+    const returnData: AuthorizationStaticCheckAccessResult = {
+      authorizationPoints: usedAuthorizationPoints,
+      hasAccess,
+      inputDataToBeMutated
+    };
+    if (!hasAccess) {
+      if (authorizationPointsForDifferentModules === authorizationPointsCount) {
+        returnData.errorCode = AuthorizationCheckErrorCode.RBACNoAccessToModule;
+      } else if (authorizationPointsForDifferentContexts === authorizationPointsCount) {
+        returnData.errorCode = AuthorizationCheckErrorCode.RBACNoAccessToResource;
+      } else {
+        returnData.errorCode = AuthorizationCheckErrorCode.FGANoAccessToModule;
+      }
+    }
+    return returnData;
   }
 
   static getValuesForTesting(valueToTest: unknown): unknown[] {
@@ -227,51 +275,6 @@ export class IAMAuthorizationService<
       values.push(false);
     }
     return values;
-  }
-
-  async mapAuthorizationPoints(
-    moduleName: string,
-    findOptions?: DomainFindOptions
-  ): Promise<AuthorizationData<unknown>> {
-    // Get all APs in order to avoid the situation where some of the TTLs have expired,
-    // so we only get partial cache results, which leads to us not loading the rest from the DB
-    const {
-      result: { items: apList }
-    } = await this.find({
-      ...(findOptions || {}),
-      findAll: true
-    });
-    const authorizationData: AuthorizationData<unknown> = { __all: { __all: {} } };
-    const moduleGlobalData = authorizationData.__all.__all;
-    apList.forEach(item => {
-      if (item.moduleNames && !item.moduleNames?.includes(moduleName)) {
-        return;
-      }
-      if (!item.controllerNames) {
-        moduleGlobalData[item.id as string] = item;
-        return;
-      }
-      item.controllerNames.forEach(ctlName => {
-        let ctlData = authorizationData[ctlName];
-        if (!ctlData) {
-          ctlData = { __all: {} };
-          authorizationData[ctlName] = ctlData;
-        }
-        if (!item.handlerNames) {
-          ctlData.__all[item.id as string] = item;
-          return;
-        }
-        item.handlerNames.forEach(hName => {
-          let hData = ctlData[hName];
-          if (!hData) {
-            hData = {};
-            ctlData[hName] = hData;
-          }
-          hData[item.id as string] = item;
-        });
-      });
-    });
-    return authorizationData;
   }
 
   static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {

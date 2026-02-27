@@ -26,14 +26,7 @@ export interface IAMAuthenticationOAuth2CompleteData extends IAMAuthenticationCo
 export type IAMAuthenticationOAuth2CompleteOptions<Context extends object> = IAMAuthenticationCompleteOptions<Context>;
 
 export interface IAMAuthenticationOAuth2CompleteResult extends IAMAuthenticationCompleteResult {
-  // accessTokenPayload?: GenericObject;
-  // idTokenPayload?: GenericObject;
-  // refreshTokenPayload?: GenericObject;
   accessToken: string;
-  accessTokenExpiresIn?: number;
-  idToken?: string;
-  refreshToken?: string;
-  refreshTokenExpiresIn?: number;
   scope: string;
 }
 

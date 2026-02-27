@@ -21,13 +21,36 @@ export enum IAMAuthenticationType {
 }
 
 export interface IAMAuthenticationCompleteResult {
+  accessToken?: string;
+  accessTokenExpiresIn?: number;
+  idToken?: string;
   mfaUsed?: boolean;
   mfaValid?: boolean;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
   valid: boolean;
 }
 
 export type IAMAuthenticationGetUserCreateAccessTokenConfigResult =
   AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
+
+export interface IAMAuthenticationGetPayloadsFromExternalTokensData {
+  accessToken?: string;
+  idToken?: string;
+  refreshToken?: string;
+}
+
+export interface IAMAuthenticationGetPayloadsFromExternalTokensResult {
+  accessTokenPayload?: unknown;
+  idTokenPayload?: unknown;
+  refreshTokenPayload?: unknown;
+}
+
+export interface IAMAuthenticationGetUserDataFromExternalTokenPayloadsData {
+  accessToken?: string;
+  idToken?: string;
+  refreshToken?: string;
+}
 
 export interface IAMAuthenticationInitiateData {
   mfaData?: unknown;
@@ -44,4 +67,28 @@ export interface IAMAuthenticationInitiateResult {
   mfaUsed?: boolean;
   mfaValid?: boolean;
   valid: boolean;
+}
+
+export interface IAMAuthenticationRefreshExternalAccessTokenData {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface IAMAuthenticationRefreshExternalAccessTokenResult {
+  error?: string;
+  newAccessToken?: string;
+  newRefreshToken?: string;
+}
+
+export interface IAMAuthenticationVerifyExternalAccessTokenData {
+  accessToken: string;
+  refreshToken?: string;
+}
+
+export interface IAMAuthenticationVerifyExternalAccessTokenResult {
+  accessTokenPayload?: unknown;
+  error?: unknown;
+  newAccessToken?: string;
+  newRefreshToken?: string;
+  refreshTokenPayload?: unknown;
 }
