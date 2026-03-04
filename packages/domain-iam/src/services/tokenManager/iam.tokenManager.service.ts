@@ -23,6 +23,7 @@ import {
   VerifyAccessTokenReturnData
 } from './iam.tokenManager.definitions';
 
+import { Constants } from '../../common/definitions';
 import { IAMAuthenticationService, IAMAuthenticationType } from '../authentication';
 
 // TODO: console.error -> logger
@@ -125,7 +126,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
       verifyExternal: true
     });
     const externalAccessTokenExpired = !!externalTokenData?.error;
-    const internalAccessTokenExpired = error === 'Token expired';
+    const internalAccessTokenExpired = error === Constants.TOKEN_EXPIRED_ERROR;
     let errorMessageToLog: string | undefined;
     let externalRenewEnabled = false;
     let newToken: string | undefined;

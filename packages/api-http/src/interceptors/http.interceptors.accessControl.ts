@@ -8,7 +8,7 @@ import {
   NestInterceptor
 } from '@nestjs/common';
 
-import { ConfigProviderService, EndpointSecurityMode, GenericObject, setNested } from '@node-c/core';
+import { ConfigProviderService, GenericObject, setNested } from '@node-c/core';
 import { AuthorizationPoint, IAMAuthorizationService, IAMUsersUserWithPermissionsData } from '@node-c/domain-iam';
 
 import { Observable, map } from 'rxjs';
@@ -44,37 +44,29 @@ export class HTTPAccessControlInterceptor<User extends IAMUsersUserWithPermissio
     const { moduleName } = this;
     const controllerName = context.getClass().name;
     const handlerName = context.getHandler().name;
-    const authorizationData = await this.authorizationService.mapAuthorizationPoints(moduleName);
-    let controllerData = authorizationData![controllerName];
-    if (!controllerData) {
-      controllerData = authorizationData.__all;
-    }
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
-    let handlerData = controllerData[handlerName];
-    if (!handlerData) {
-      handlerData = controllerData.__all;
-      if (!Object.keys(handlerData).length) {
-        const { endpointSecurityMode } = this.configProvider.config.api[moduleName];
-        if (!endpointSecurityMode || endpointSecurityMode === EndpointSecurityMode.Strict) {
-          console.info(
-            `[${moduleName}][HTTPAccessControlInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
-          );
-          throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-        }
-        return next.handle();
-      }
-    }
     const {
       authorizationPoints: usedAuthorizationPoints,
       hasAccess,
       inputDataToBeMutated
+      // noMatchForResource
     } = IAMAuthorizationService.checkAccess(
-      handlerData,
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
-      user
+      user,
+      { moduleName, resource: handlerName, resourceContext: controllerName }
     );
     if (!hasAccess) {
-      console.info(
+      // TODO; restore this if it's actually needed
+      // const { endpointSecurityMode } = this.configProvider.config.api[moduleName];
+      // if (noMatchForResource && ) {
+      // }
+      // if (!endpointSecurityMode || endpointSecurityMode === EndpointSecurityMode.Strict) {
+      //   console.info(
+      //     `[${moduleName}][HTTPAccessControlInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
+      //   );
+      //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      // }
+      console.error(
         `[${moduleName}][HTTPAccessControlInterceptor]: No user access to handler ${controllerName}.${handlerName}.`
       );
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);

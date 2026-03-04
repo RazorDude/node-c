@@ -135,11 +135,13 @@ export interface AppConfigCommonDomainIAM {
       secretKeyHMACAlgorithm?: string;
     };
     oauth2?: {
+      accessTokenAudiences?: string[];
       accessTokenEmailField?: string;
       accessTokenGrantUrl?: string;
       authorizationUrl?: string;
       codeChallengeMethod: string; // code_challenge_method
       defaultScope?: string;
+      issuerUri?: string;
       redirectUri?: string; // redirect_uri
     };
     processExternalTokensOnVerify?: boolean;
@@ -342,10 +344,12 @@ export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   authServiceSettings?: GenericObject<{
     oauth2?: {
+      accessTokenAudiences?: string[];
       accessTokenGrantUrl?: string;
       authorizationUrl?: string;
       codeChallengeMethod?: string; // code_challenge_method
       defaultScope?: string;
+      issuerUri?: string;
       redirectUri?: string; // redirect_uri
     };
     processExternalTokensOnVerify?: boolean;

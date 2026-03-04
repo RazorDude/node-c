@@ -287,7 +287,16 @@ export class IAMUsersService<
     }
     // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
     if ('decodeReturnedTokens' in stepConfig && stepConfig.decodeReturnedTokens) {
-      const externalTokenPayloads = await authService.getPayloadsFromExternalTokens({});
+      const tokensForDecoding: Record<string, string> = {};
+      const tokenKeys = ['accessToken', 'idToken', 'refreshToken'];
+      tokenKeys.forEach(tokenKey => {
+        const resultForKey = stepResult[tokenKey as keyof typeof stepResult] as unknown as string;
+        if (!resultForKey) {
+          return;
+        }
+        tokensForDecoding[tokenKey] = resultForKey;
+      });
+      const externalTokenPayloads = await authService.getPayloadsFromExternalTokens(tokensForDecoding);
       stepResult = { ...stepResult, ...externalTokenPayloads };
     }
     // 6. Find the user based on either the provided filters, or on the stepResult data, if enabled

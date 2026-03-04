@@ -17,10 +17,13 @@ import {
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,
+  // IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData,
+  // IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult,
+  // IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult,
   IAMAuthenticationOAuth2InitiateData,
   IAMAuthenticationOAuth2InitiateOptions,
-  IAMAuthenticationOAuth2InitiateResult,
-  IAMAuthenticationOauth2GetUserCreateAccessTokenConfigResult
+  IAMAuthenticationOAuth2InitiateResult
 } from './iam.authenticationOAuth2.definitions';
 
 import { Constants } from '../../common/definitions';
@@ -51,9 +54,7 @@ export class IAMAuthenticationOAuth2Service<
     protected configProvider: ConfigProviderService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected serviceName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected tokenLocalManagementService?: string
+    protected serviceName: string
   ) {
     super(configProvider, moduleName);
   }
@@ -123,12 +124,31 @@ export class IAMAuthenticationOAuth2Service<
     return base64UrlEncode(octets.buffer).slice(0, length);
   }
 
+  // async getPayloadsFromExternalTokens(
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   _data: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData
+  // ): Promise<IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult> {
+  //   const { externalTokenManagementService } = this;
+  //   throw new ApplicationError(
+  //     `[${this.moduleName}][IAMAuthenticationService]: Method "getPayloadsFromExternalTokens" not implemented.`
+  //   );
+  // }
+
+  // async getUserDataFromExternalTokenPayloads(
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   _data: IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData
+  // ): Promise<unknown> {
+  //   throw new ApplicationError(
+  //     `[${this.moduleName}][IAMAuthenticationService]: Method "getUserDataFromExternalTokenPayloads" not implemented.`
+  //   );
+  // }
+
   // Default config - plain OAuth2 without OIDC
-  getUserCreateAccessTokenConfig(): IAMAuthenticationOauth2GetUserCreateAccessTokenConfigResult {
+  getUserCreateAccessTokenConfig(): IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult {
     const { configProvider, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationOauth2GetUserCreateAccessTokenConfigResult = {
+    const defaultConfig: IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult = {
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
         cache: {
           settings: {

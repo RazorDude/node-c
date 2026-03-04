@@ -4,5 +4,7 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   OAUTH2_CODE_VERIFIER_LENGTH = 128,
   // eslint-disable-next-line no-unused-vars
-  OAUTH2_PKCE_CHALLENGE_HASH_METHOD = 'SHA-256'
+  OAUTH2_PKCE_CHALLENGE_HASH_METHOD = 'SHA-256',
+  // eslint-disable-next-line no-unused-vars
+  TOKEN_EXPIRED_ERROR = 'Token expired'
 }

@@ -2,7 +2,10 @@ import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
+  // IAMAuthenticationGetPayloadsFromExternalTokensData,
+  // IAMAuthenticationGetPayloadsFromExternalTokensResult,
   IAMAuthenticationGetUserCreateAccessTokenConfigResult,
+  // IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
   IAMAuthenticationInitiateResult
@@ -30,8 +33,17 @@ export interface IAMAuthenticationOAuth2CompleteResult extends IAMAuthentication
   scope: string;
 }
 
-export type IAMAuthenticationOauth2GetUserCreateAccessTokenConfigResult =
+// export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData =
+//   IAMAuthenticationGetPayloadsFromExternalTokensData;
+
+// export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
+//   IAMAuthenticationGetPayloadsFromExternalTokensResult;
+
+export type IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult =
   IAMAuthenticationGetUserCreateAccessTokenConfigResult;
+
+// export type IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData =
+//   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData;
 
 export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationInitiateData {
   scope?: string;

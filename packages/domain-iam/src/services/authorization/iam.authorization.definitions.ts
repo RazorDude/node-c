@@ -37,6 +37,7 @@ export interface AuthorizationStaticCheckAccessResult {
   errorCode?: AuthorizationCheckErrorCode;
   hasAccess: boolean;
   inputDataToBeMutated: GenericObject;
+  noMatchForResource: boolean;
 }
 
 export interface AuthorizationUser<AuthorizationPointId> {

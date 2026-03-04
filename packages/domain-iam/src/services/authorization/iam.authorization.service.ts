@@ -81,7 +81,6 @@ export class IAMAuthorizationService<
     return { valid: true };
   }
 
-  // TODO: validate an OAuth2.0 access token
   // TODO: decouple from users
   async authorizeBearer<UserTokenEnityFields = unknown>(
     data: { authToken?: string; refreshToken?: string },
@@ -148,6 +147,7 @@ export class IAMAuthorizationService<
     let authorizationPointsForDifferentContexts = 0;
     let hasAccess = false;
     let inputDataToBeMutated: GenericObject = {};
+    let noMatchForResource = false;
     for (const apId in currentAuthorizationPoints) {
       const apData = currentAuthorizationPoints[apId];
       authorizationPointsCount++;
@@ -172,6 +172,9 @@ export class IAMAuthorizationService<
       const innerMutatedInputData = ld.cloneDeep(mutatedInputData) as GenericObject;
       const innerInputDataToBeMutated: GenericObject = {};
       hasAccess = true;
+      if (!noMatchForResource) {
+        noMatchForResource = true;
+      }
       // 1. Required static data
       if (hasStaticData) {
         for (const fieldName in requiredStaticData) {
@@ -248,7 +251,8 @@ export class IAMAuthorizationService<
     const returnData: AuthorizationStaticCheckAccessResult = {
       authorizationPoints: usedAuthorizationPoints,
       hasAccess,
-      inputDataToBeMutated
+      inputDataToBeMutated,
+      noMatchForResource
     };
     if (!hasAccess) {
       if (authorizationPointsForDifferentModules === authorizationPointsCount) {
