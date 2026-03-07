@@ -14,8 +14,8 @@
     "test:coverage": "vitest --config src/vitest.config.ts --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^10.4.12",
-    "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/common": "^11.1.16",
+    "@nestjs/typeorm": "^11.0.0",
     "@node-c/data-rdb": "^1.0.0-alpha64",
     "class-validator": "^0.14.1",
     "typeorm": "^0.3.20",

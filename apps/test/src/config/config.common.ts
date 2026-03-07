@@ -18,6 +18,11 @@ export const appConfigCommon: AppConfigCommon = {
     iam: {
       accessTokenExpiryTimeInMinutes: 120,
       authServiceSettings: {
+        okta: {
+          oauth2: {
+            issuerUri: 'https://test'
+          }
+        },
         userLocal: {
           secretKey: {
             secretKeyHMACAlgorithm: 'sha256'

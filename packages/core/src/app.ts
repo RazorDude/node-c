@@ -1,4 +1,4 @@
-import { INestApplication, NestModule } from '@nestjs/common';
+import { DynamicModule, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import {
@@ -24,7 +24,10 @@ export interface NodeCAppStartOptions {
 
 export class NodeCApp {
   // TODO: start each server in a different process
-  static async start(appModules: NestModule[], options?: NodeCAppStartOptions): Promise<INestApplication<unknown>[]> {
+  static async start(
+    appModules: DynamicModule[],
+    options?: NodeCAppStartOptions
+  ): Promise<INestApplication<unknown>[]> {
     console.info(`[Node-C]: Launching ${appModules.length} applications...`);
     const { apiModulesOptions, generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
     const apiModulesOptionsMap = new Map<string, string>();

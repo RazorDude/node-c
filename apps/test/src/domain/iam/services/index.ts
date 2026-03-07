@@ -1,3 +1,4 @@
+export * from './authenticationOkta';
 export * from './authenticationUserLocal';
 export * from './authorization';
 export * from './tokenManager';

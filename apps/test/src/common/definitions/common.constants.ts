@@ -24,6 +24,8 @@ export enum Constants {
   // eslint-disable-next-line no-unused-vars
   DOMAIN_IAM_MODULE_NAME = 'iam',
   // eslint-disable-next-line no-unused-vars
+  DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME = 'okta',
+  // eslint-disable-next-line no-unused-vars
   DOMAIN_IAM_AUTH_USER_LOCAL_SERVICE_NAME = 'userLocal'
 }
 

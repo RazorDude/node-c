@@ -14,7 +14,7 @@
     "test:coverage": "vitest --config src/vitest.config.ts --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^10.4.12",
+    "@nestjs/common": "^11.1.16",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1"
   },

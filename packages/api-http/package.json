@@ -14,7 +14,8 @@
     "test:coverage": "vitest --config src/vitest.config.ts --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^10.4.12",
+    "@nestjs/common": "^11.1.16",
+    "@nestjs/platform-express": "^11.1.16",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
     "lodash": "^4.17.21",

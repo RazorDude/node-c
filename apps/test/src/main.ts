@@ -1,4 +1,4 @@
-import { NestModule } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 
 import { NodeCApp } from '@node-c/core';
 
@@ -6,7 +6,7 @@ import { AppModuleBase, AppModuleCoursePlatform, AppModuleSSO } from './app.modu
 import { Constants } from './common/definitions';
 
 (async function () {
-  await NodeCApp.start([AppModuleCoursePlatform, AppModuleSSO] as unknown as NestModule[], {
+  await NodeCApp.start([AppModuleCoursePlatform, AppModuleSSO] as unknown as DynamicModule[], {
     apiModulesOptions: [
       { appModuleIndex: 0, apiModuleName: Constants.API_COURSE_PLATFORM_MODULE_NAME },
       { appModuleIndex: 1, apiModuleName: Constants.API_SSO_MODULE_NAME }

@@ -1,10 +1,10 @@
 # 1.0.0-alpha65
 - Common
   - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.
-  - WIP: BREAKING: Migration to NestJS v11.
+  - BREAKING: Migration to NestJS v11.
   - Security fixes.
   - WIP: logging via pino.
-  - WIP: Unpublished the old "persistance" packages.
+  - Unpublished the old "persistance" packages.
 - `packages/core`
   - Changes needed for OAuth2 in packages/domain-iam.
   - New utility method for making HTTP requests using axios.
@@ -22,7 +22,7 @@
   - WIP: local MFA implementation in a separate service.
   - OAuth2.0 and OIDC flows.
 - `packages/domain-iam-okta`
-  - WIP - First working version.
+  - First working version.
 - `packages/api-http`
   - BREAKING: Renamed the Authorization interceptor to the AccessControl interceptor in order to avoid confusion.
   - Refactoring to accommodate the domain-iam package changes.
