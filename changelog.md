@@ -1,4 +1,4 @@
-# 1.0.0-alpha65
+# 1.0.0-beta0
 - Common
   - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.
   - BREAKING: Migration to NestJS v11.
