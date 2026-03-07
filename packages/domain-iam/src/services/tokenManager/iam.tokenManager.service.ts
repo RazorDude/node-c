@@ -24,7 +24,9 @@ import {
 } from './iam.tokenManager.definitions';
 
 import { Constants } from '../../common/definitions';
-import { IAMAuthenticationService, IAMAuthenticationType } from '../authentication';
+import { IAMAuthenticationType } from '../authentication';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 
 // TODO: console.error -> logger
 /*
@@ -36,15 +38,19 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected authServices: Record<IAMAuthenticationType, IAMAuthenticationService<object, object>>,
+    // protected authServices: Record<string, IAMAuthenticationService<object, object>>,
+    // eslint-disable-next-line no-unused-vars
+    protected authServices: {
+      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
+      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
+    },
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    // eslint-disable-next-line no-unused-vars
     protected dataEntityService: DataEntityService<TokenEntity<TokenEntityFields>>,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string
   ) {
-    super(dataEntityService!, ['create', 'delete']);
+    super(dataEntityService, ['create', 'delete']);
   }
 
   async create(
@@ -212,7 +218,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
       if (externalRenewEnabled) {
         const externalAccessTokenRenewalResult = await this.authServices[
           refreshTokenContent!.data!.externalTokenAuthService!
-        ].refreshExternalAccessToken({
+        ]!.refreshExternalAccessToken({
           accessToken: content.data!.externalToken!,
           refreshToken: refreshTokenContent!.data!.externalToken!
         });

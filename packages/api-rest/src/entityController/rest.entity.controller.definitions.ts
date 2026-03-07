@@ -1,28 +1,16 @@
 import {
+  DataDefaultData,
+  DataEntityService,
   DomainBulkCreateData,
   DomainBulkCreateOptions,
   DomainCreateData,
   DomainCreateOptions,
-  DomainDeleteOptions,
   DomainEntityService,
   DomainEntityServiceDefaultData,
-  DomainFindOneOptions,
-  DomainFindOptions,
   DomainUpdateData,
   DomainUpdateOptions,
-  GenericObject,
-  DataDefaultData,
-  DataEntityService
+  GenericObject
 } from '@node-c/core';
-
-import {
-  BulkCreateDto as BaseBulkCreateDto,
-  CreateDto as BaseCreateDto,
-  DeleteDto as BaseDeleteDto,
-  FindDto as BaseFindDto,
-  FindOneDto as BaseFindOneDto,
-  UpdateDto as BaseUpdateDto
-} from './dto';
 
 export interface BulkCreateBody<Entity> extends DomainBulkCreateOptions {
   data: DomainBulkCreateData<Entity>;
@@ -48,15 +36,6 @@ export type DefaultDomainEntityService<
   Record<string, DataEntityService<Partial<Entity>>>,
   DataEntityServiceData
 >;
-
-export interface DefaultDtos<Entity> {
-  BulkCreate: BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
-  Create: BaseCreateDto<Entity, CreateOptions<Entity>>;
-  Delete: BaseDeleteDto<DomainDeleteOptions>;
-  Find: BaseFindDto<DomainFindOptions>;
-  FindOne: BaseFindOneDto<DomainFindOneOptions>;
-  Update: BaseUpdateDto<Entity, UpdateOptions<Entity>>;
-}
 
 export interface UpdateBody<Entity> extends DomainUpdateOptions {
   data: DomainUpdateData<Entity>;

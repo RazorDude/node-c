@@ -41,9 +41,9 @@ import {
   BulkCreateBody,
   CreateBody,
   DefaultDomainEntityService,
-  DefaultDtos,
   UpdateBody
 } from './rest.entity.controller.definitions';
+import { DefaultDtos } from './rest.entity.controller.dto.definitions';
 
 // TODO: a middleware for converting string booleans to booleans
 @UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)

@@ -5,6 +5,7 @@ import {
   ConfigProviderService,
   DataEntityService,
   DataFindOneOptions,
+  DomainBaseAdditionalServiceOptionsOverrides,
   DomainEntityService,
   DomainEntityServiceDefaultData,
   DomainMethod,
@@ -34,8 +35,11 @@ import {
   IAMAuthenticationService,
   IAMAuthenticationType
 } from '../authentication';
-import { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2';
-import { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal';
+import { IAMAuthenticationOAuth2CompleteResult, IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
+import {
+  IAMAuthenticationUserLocalCompleteResult,
+  IAMAuthenticationUserLocalService
+} from '../authenticationUserLocal';
 import { IAMTokenManagerService, TokenType } from '../tokenManager';
 
 // TODO: create user (signup); this should include password hashing
@@ -54,15 +58,18 @@ export class IAMUsersService<
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    protected authServices: Record<IAMAuthenticationType, IAMAuthenticationService<User, User>>,
+    protected authServices: {
+      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
+      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
+    },
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
-    protected moduleName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected dataUsersService: DataEntityService<User>,
+    protected dataEntityService: DataEntityService<User>,
     // eslint-disable-next-line no-unused-vars
     protected dataUsersAuthCacheService: DataEntityService<GenericObject>,
+    // eslint-disable-next-line no-unused-vars
+    protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager: IAMTokenManagerService<IAMUsersUserTokenEnityFields>,
     protected defaultMethods: string[] = [
@@ -73,9 +80,17 @@ export class IAMUsersService<
       DomainMethod.FindOne,
       DomainMethod.Update
     ],
-    protected additionalDataEntityServices?: Record<string, DataEntityService<Partial<User>>>
+    protected additionalDataEntityServices?: Record<string, DataEntityService<Partial<User>>>,
+    protected defaultAdditionalDataEntityServicesOptions?: {
+      [methodName: string]: {
+        [serviceName: string]: {
+          allowIncoming?: boolean;
+          serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides & GenericObject<unknown>;
+        };
+      };
+    }
   ) {
-    super(dataUsersService, defaultMethods, additionalDataEntityServices);
+    super(dataEntityService, defaultMethods, additionalDataEntityServices, defaultAdditionalDataEntityServicesOptions);
   }
 
   async createAccessToken<AuthData = unknown>(
@@ -91,7 +106,7 @@ export class IAMUsersService<
     } = options;
     console.info(`[Domain.${moduleName}.Users]: Login attempt started.`);
     // 1. Make sure the auth service actually exists - local, oauth2, etc.
-    const authService = this.authServices[authType];
+    const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
     if (!authService) {
       console.info(`[Domain.${moduleName}.Users]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
@@ -110,19 +125,23 @@ export class IAMUsersService<
       issueTokens = true;
       step = AppConfigDomainIAMAuthenticationStep.Complete;
     }
-    // 3.2. Initialize step - assumed implicitly.
+    // 3.2. Initiate step - assumed implicitly.
     else {
-      step = AppConfigDomainIAMAuthenticationStep.Initialize;
+      step = AppConfigDomainIAMAuthenticationStep.Initiate;
     }
     let stepConfig = authServiceBehaviorConfig[step];
     // 3. Run the authentication method itself.
     let { stepResult, user } = await this.executeStep(options, { authService, name: step, stepConfig });
     // 4. Run the final step, if this is the first step no mfa has been used.
-    if (step === AppConfigDomainIAMAuthenticationStep.Initialize && !stepResult.mfaUsed) {
+    if (step === AppConfigDomainIAMAuthenticationStep.Initiate && !stepResult.mfaUsed) {
       issueTokens = true;
       step = AppConfigDomainIAMAuthenticationStep.Complete;
       stepConfig = authServiceBehaviorConfig[step];
-      const finalStepData = await this.executeStep(options, { authService, name: step, stepConfig });
+      const finalStepData = await this.executeStep(options, {
+        authService,
+        name: step,
+        stepConfig: ld.omit(stepConfig, 'cache')
+      });
       stepResult = finalStepData.stepResult;
       user = user ?? finalStepData.user;
       userFilterField = finalStepData.userFilterField;
@@ -345,7 +364,7 @@ export class IAMUsersService<
       delete user.password;
     }
     // 8. Populate the cache, if configured
-    if (cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
+    if (stepResult.mfaUsed && cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
       const cacheInput: GenericObject = {
         data: stepInputData.data,
         options: stepInputData.options,
@@ -356,11 +375,12 @@ export class IAMUsersService<
         const inputSettings = cacheSettings.populate[inputName as keyof typeof cacheSettings.populate];
         if (inputSettings instanceof Array) {
           const innerInputItem: GenericObject = {};
-          inputSettings.forEach(fieldName => {
+          inputSettings.forEach(inputItemSettings => {
+            const { cacheFieldName, inputFieldName } = inputItemSettings;
             setNested(
               innerInputItem,
-              fieldName.split('.').slice(1).join('.'),
-              getNested(cacheInput, fieldName, { removeNestedFieldEscapeSign: true }).unifiedValue
+              cacheFieldName,
+              getNested(cacheInput, inputFieldName, { removeNestedFieldEscapeSign: true }).unifiedValue
             );
           });
           cacheData[inputName] = innerInputItem;

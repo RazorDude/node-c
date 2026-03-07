@@ -17,9 +17,14 @@ export const appConfigCommon: AppConfigCommon = {
     coursePlatform: {},
     iam: {
       accessTokenExpiryTimeInMinutes: 120,
+      authServiceSettings: {
+        userLocal: {
+          secretKey: {
+            secretKeyHMACAlgorithm: 'sha256'
+          }
+        }
+      },
       defaultUserIdentifierField: 'id',
-      oauth2: {},
-      userPasswordHMACAlgorithm: 'sha256',
       refreshTokenExpiryTimeInHours: 24
     }
   },

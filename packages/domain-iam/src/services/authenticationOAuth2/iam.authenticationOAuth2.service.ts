@@ -169,10 +169,10 @@ export class IAMAuthenticationOAuth2Service<
         },
         validWithoutUser: false
       },
-      [AppConfigDomainIAMAuthenticationStep.Initialize]: {
+      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
         cache: {
           populate: {
-            data: ['result.codeVerifier']
+            data: [{ cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' }]
           },
           settings: {
             cacheFieldName: 'state',
@@ -183,7 +183,7 @@ export class IAMAuthenticationOAuth2Service<
         validWithoutUser: true
       }
     };
-    return ld.merge(defaultConfig, steps);
+    return ld.merge(defaultConfig, steps || {});
   }
 
   /*

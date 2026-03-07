@@ -22,7 +22,7 @@ import {
 import { IAMAuthenticationService } from '../authentication';
 import { IAMMFAService, IAMMFAType } from '../mfa';
 
-// TODO: rename from UserLocal to LocalSecret and decouple from users, so that the logic can be reused elsewhere
+// TODO: add a LocalSecret service to take care of the hashing logic and reuse it here
 export class IAMAuthenticationUserLocalService<
   CompleteContext extends object,
   InitiateContext extends object
@@ -42,7 +42,7 @@ export class IAMAuthenticationUserLocalService<
     data: IAMAuthenticationUserLocalCompleteData,
     options: IAMAuthenticationUserLocalCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationUserLocalCompleteResult> {
-    const { configProvider, moduleName, mfaServices } = this;
+    const { configProvider, moduleName, mfaServices, serviceName } = this;
     const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { mfaData, mfaType } = data;
     const { context, mfaOptions } = options;
@@ -54,13 +54,13 @@ export class IAMAuthenticationUserLocalService<
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
         console.error(
-          `[${moduleName}][IAMAuthenticationUserLocalService]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
         console.error(
-          `[${moduleName}][IAMAuthenticationUserLocalService]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -90,10 +90,10 @@ export class IAMAuthenticationUserLocalService<
         findUserBeforeAuth: true,
         validWithoutUser: false
       },
-      [AppConfigDomainIAMAuthenticationStep.Initialize]: {
+      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
         cache: {
           populate: {
-            options: ['options.context']
+            options: [{ cacheFieldName: 'context', inputFieldName: 'options.context' }]
           },
           settings: {
             cacheFieldName: 'userId',
@@ -105,7 +105,7 @@ export class IAMAuthenticationUserLocalService<
         validWithoutUser: false
       }
     };
-    return ld.merge(defaultConfig, steps);
+    return ld.merge(defaultConfig, steps || {});
   }
 
   async initiate(
@@ -128,6 +128,9 @@ export class IAMAuthenticationUserLocalService<
     let wrongPassword = false;
     if (!secretKeyHMACAlgorithm || !hashingSecret || !userPassword) {
       wrongPassword = true;
+      console.error(
+        `[${moduleName}][${serviceName}]: secretKeyHMACAlgorithm, hashingSecret and/or userPassword not provided.`
+      );
     } else {
       const computedPassword = crypto
         .createHmac(secretKeyHMACAlgorithm, hashingSecret)
@@ -140,7 +143,7 @@ export class IAMAuthenticationUserLocalService<
     }
     if (wrongPassword) {
       console.error(
-        `[${moduleName}][IAMAuthenticationUserLocalService]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
+        `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
       );
       throw new ApplicationError('Authentication failed.');
     }
@@ -148,13 +151,13 @@ export class IAMAuthenticationUserLocalService<
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
         console.error(
-          `[${moduleName}][IAMAuthenticationUserLocalService]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
         console.error(
-          `[${moduleName}][IAMAuthenticationUserLocalService]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');
       }

@@ -1,6 +1,6 @@
 import {
   AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings,
-  AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings,
+  AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings,
   AppConfigDomainIAMAuthenticationStep,
   DomainFindOnePrivateOptions,
   GenericObject
@@ -44,7 +44,7 @@ export interface IAMUsersExecuteStepOptions<User extends object> {
   name: AppConfigDomainIAMAuthenticationStep;
   stepConfig:
     | AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
-    | AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings;
+    | AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings;
 }
 
 export interface IAMUsersExecuteStepResult<User extends object> {

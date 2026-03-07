@@ -1,5 +1,5 @@
-import { GenericObjectClass } from '@node-c/core';
-import { CreateAccessTokenOptions, UserAuthType, UserMFAType } from '@node-c/domain-iam';
+import { AppConfigDomainIAMAuthenticationStep, GenericObjectClass } from '@node-c/core';
+import { IAMAuthenticationType, IAMMFAType, IAMUsersCreateAccessTokenOptions } from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
 import { IsDefined, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -8,16 +8,21 @@ export class SSOUsersCreateAccessTokenAuthDto extends GenericObjectClass {
   @IsDefined()
   @IsString()
   @IsNotEmpty()
-  type: UserAuthType;
+  type: IAMAuthenticationType;
 
   @IsOptional()
   @IsString()
-  mfaType?: UserMFAType;
+  mfaType?: IAMMFAType;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   password?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  scope?: string;
 }
 
 export class SSOUsersCreateAccessTokenFiltersDto extends GenericObjectClass {
@@ -27,16 +32,20 @@ export class SSOUsersCreateAccessTokenFiltersDto extends GenericObjectClass {
   email: string;
 }
 
-export class SSOUsersCreateAccessTokenDto implements Omit<CreateAccessTokenOptions, 'mainFilterField'> {
+export class SSOUsersCreateAccessTokenDto implements Omit<IAMUsersCreateAccessTokenOptions, 'mainFilterField'> {
   @IsDefined()
   @IsObject()
   @Type(() => SSOUsersCreateAccessTokenAuthDto)
   @ValidateNested()
   auth: SSOUsersCreateAccessTokenAuthDto;
 
-  @IsDefined()
+  @IsOptional()
   @IsObject()
   @Type(() => SSOUsersCreateAccessTokenFiltersDto)
   @ValidateNested()
-  filters: SSOUsersCreateAccessTokenFiltersDto;
+  filters?: SSOUsersCreateAccessTokenFiltersDto;
+
+  @IsOptional()
+  @IsString()
+  step?: AppConfigDomainIAMAuthenticationStep;
 }

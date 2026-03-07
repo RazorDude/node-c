@@ -1,4 +1,4 @@
-import { DomainFindOneOptions, GenericObject, DataOrderByDirection } from '@node-c/core';
+import { DataOrderByDirection, DomainFindOneOptions, GenericObject } from '@node-c/core';
 
 import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 

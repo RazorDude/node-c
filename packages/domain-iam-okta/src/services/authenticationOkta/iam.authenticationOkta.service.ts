@@ -123,10 +123,10 @@ export class IAMAuthenticationOktaService<
         },
         validWithoutUser: false
       },
-      [AppConfigDomainIAMAuthenticationStep.Initialize]: {
+      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
         cache: {
           populate: {
-            data: ['result.codeVerifier']
+            data: [{ cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' }]
           },
           settings: {
             cacheFieldName: 'state',

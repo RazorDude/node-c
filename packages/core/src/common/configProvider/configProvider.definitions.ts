@@ -87,7 +87,7 @@ export enum AppConfigDomainIAMAuthenticationStep {
   // eslint-disable-next-line no-unused-vars
   Complete = 'complete',
   // eslint-disable-next-line no-unused-vars
-  Initialize = 'initialize'
+  Initiate = 'initiate'
 }
 
 export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL & AppConfigFromEnvDataNoSQL & AppConfigProfileDataNoSQL;
@@ -157,9 +157,9 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCacheSettings {
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings {
-  data?: boolean | string[];
-  options?: boolean | string[];
-  result?: boolean | string[];
+  data?: boolean | AppConfigCommonDomainIAMAuthServiceConfigCacheSettings[];
+  options?: boolean | AppConfigCommonDomainIAMAuthServiceConfigCacheSettings[];
+  result?: boolean | AppConfigCommonDomainIAMAuthServiceConfigCacheSettings[];
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettings {
@@ -188,7 +188,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings {
   validWithoutUser?: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings {
   cache?: {
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -200,7 +200,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings {
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigStepSettings {
   [AppConfigDomainIAMAuthenticationStep.Complete]: AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings;
-  [AppConfigDomainIAMAuthenticationStep.Initialize]: AppConfigCommonDomainIAMAuthServiceConfigInitializeSettings;
+  [AppConfigDomainIAMAuthenticationStep.Initiate]: AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings;
 }
 
 export type AppConfigCommonData = {

@@ -19,10 +19,12 @@ export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
     envKeys: ld.merge(APP_CONFIG_FROM_ENV_KEYS, {
-      IAM: {
-        OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
-        OAUTH2_OKTA_CLIENT_SECRET: 'authServiceSettings.okta.oauth2.clientSecret',
-        USER_LOCAL_PASSWORD_SECRET: 'authServiceSettings.userLocal.hashingSecret'
+      DOMAIN: {
+        IAM: {
+          OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
+          OAUTH2_OKTA_CLIENT_SECRET: 'authServiceSettings.okta.oauth2.clientSecret',
+          USER_LOCAL_PASSWORD_SECRET: 'authServiceSettings.userLocal.secretKey.hashingSecret'
+        }
       }
     }),
     envKeysParentNames: {

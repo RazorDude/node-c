@@ -7,7 +7,7 @@ import { DBEntity, DBEntitySchema } from '../../../dbBase';
 export interface AuthorizationPoint<UserType extends DBEntity = DBEntity> extends DBEntity {
   allowedInputData?: GenericObject;
   allowedOutputData?: GenericObject;
-  serviceNames?: string[];
+  controllerNames?: string[];
   forbiddenInputData?: GenericObject;
   forbiddenOutputData?: GenericObject;
   handlerNames?: string[];
@@ -24,7 +24,7 @@ export const AuthorizationPointEntity = new EntitySchema<AuthorizationPoint>({
     ...DBEntitySchema.columns,
     allowedInputData: { type: 'json', nullable: true },
     allowedOutputData: { type: 'json', nullable: true },
-    serviceNames: { type: 'json', nullable: true },
+    controllerNames: { type: 'json', nullable: true },
     forbiddenInputData: { type: 'json', nullable: true },
     forbiddenOutputData: { type: 'json', nullable: true },
     handlerNames: { type: 'json', nullable: true },
@@ -52,13 +52,13 @@ export const AuthorizationPointEntity = new EntitySchema<AuthorizationPoint>({
   //   },
   //   {
   //     spatial: true,
-  //     columns: [ '"serviceNames"', '"moduleNames"' ],
+  //     columns: [ '"controllerNames"', '"moduleNames"' ],
   //     where: '"handlerNames" is not null'
   //   },
   //   {
   //     spatial: true,
   //     columns: [ '"moduleNames"' ],
-  //     where: '"serviceNames" is not null'
+  //     where: '"controllerNames" is not null'
   //   }
   // ],
 });

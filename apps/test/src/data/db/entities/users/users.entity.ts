@@ -1,7 +1,8 @@
+import { AuthorizationPoint as BaseIAMAuthorizationPoint } from '@node-c/domain-iam';
+
 import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { AuthorizationPoint } from '../authorizationPoints';
 import { Course } from '../courses';
 import { UserAccountStatus } from '../userAccountStatuses';
 import { UserType } from '../userTypes';
@@ -11,7 +12,7 @@ export interface User extends DBEntity {
   accountStatusId: number;
   assignedCourses?: Course[];
   assignedUserTypes?: UserType[];
-  currentAuthorizationPoints?: { [authorizationPointId: string]: AuthorizationPoint };
+  currentAuthorizationPoints?: { [authorizationPointId: string]: BaseIAMAuthorizationPoint<number> };
   email: string;
   firstName: string;
   hasTakenIntro: boolean;

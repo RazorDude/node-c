@@ -23,7 +23,7 @@ export interface AuthorizationPoint<Id> {
   // required when resources is set
   resourceContext?: string;
   userFieldName?: string;
-  userTypes: GenericObject[];
+  // userTypes: GenericObject[];
 }
 
 export interface AuthorizationStaticCheckAccessOptions {

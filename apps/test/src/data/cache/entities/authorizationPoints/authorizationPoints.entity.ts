@@ -16,10 +16,16 @@ export const AuthorizationPointSchema: EntitySchema = {
     allowedInputData: {
       type: EntitySchemaColumnType.Object
     },
-    serviceNames: {
+    allowedOutputData: {
+      type: EntitySchemaColumnType.Object
+    },
+    controllerNames: {
       type: EntitySchemaColumnType.Array
     },
     forbiddenInputData: {
+      type: EntitySchemaColumnType.Object
+    },
+    forbiddenOutputData: {
       type: EntitySchemaColumnType.Object
     },
     handlerNames: {

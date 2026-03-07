@@ -10,15 +10,17 @@ import {
   DomainMethod
 } from '@node-c/core';
 import {
+  AuthorizationPoint as BaseIAMAuthorizationPoint,
   IAMUsersService as BaseIAMUsersService,
-  GetUserWithPermissionsDataOptions,
-  UserAuthKnownType
+  IAMAuthenticationType,
+  IAMUsersGetUserWithPermissionsDataOptions
 } from '@node-c/domain-iam';
 
-import { AuthorizationPoint, CacheUser, CacheUsersEntityService } from '../../../../data/cache';
+import { CacheUser, CacheUsersEntityService } from '../../../../data/cache';
+import { CacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth';
 import { UsersService as DBUsersService } from '../../../../data/db';
 
-import { IAMAuthenticationLocalService } from '../authenticationLocal';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 import { IAMTokenManagerService } from '../tokenManager';
 
 @Injectable()
@@ -26,31 +28,32 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
   static injectionToken = Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE;
 
   constructor(
-    protected authenticationLocalService: IAMAuthenticationLocalService,
+    protected authenticationUserLocalService: IAMAuthenticationUserLocalService,
     protected configProvider: ConfigProviderService,
+    protected dataDBUsersService: DBUsersService,
+    protected dataEntityService: CacheUsersEntityService,
+    protected dataUserStepDataItemsService: CacheAuthUserStepDataItemsEntityService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
-    protected dataDBUsersService: DBUsersService,
-    protected dataUsersService: CacheUsersEntityService,
     protected tokenManager: IAMTokenManagerService
   ) {
     super(
+      { [IAMAuthenticationType.UserLocal]: authenticationUserLocalService },
       configProvider,
+      dataEntityService,
+      dataUserStepDataItemsService,
       moduleName,
-      dataUsersService,
       tokenManager,
-      {
-        [UserAuthKnownType.Local]: authenticationLocalService
-      },
       [DomainMethod.FindOne],
       { db: dataDBUsersService as unknown as DataEntityService<Partial<CacheUser>> }
     );
   }
 
   // TODO: caching by email
+  // TODO: permanently fix the naming of the controller & other fields to the new context scheme
   async getUserWithPermissionsData(
     options: DataFindOneOptions,
-    privateOptions?: GetUserWithPermissionsDataOptions
+    privateOptions?: IAMUsersGetUserWithPermissionsDataOptions
   ): Promise<CacheUser | null> {
     const { keepPassword } = privateOptions || {};
     const include = [...(options.include || []), 'accountStatus', 'assignedUserTypes.authorizationPoints'];
@@ -71,10 +74,18 @@ export class IAMUsersService extends BaseIAMUsersService<CacheUser> {
       return null;
     }
     const { assignedUserTypes } = user;
-    const currentAuthorizationPoints: { [id: string]: AuthorizationPoint } = {};
+    const currentAuthorizationPoints: { [id: string]: BaseIAMAuthorizationPoint<number> } = {};
     if (assignedUserTypes) {
       assignedUserTypes.forEach(item => {
-        item.authorizationPoints?.forEach(ap => (currentAuthorizationPoints[ap.id] = ap as AuthorizationPoint));
+        item.authorizationPoints?.forEach(ap => {
+          const { controllerNames, handlerNames, moduleNames, ...apData } = ap;
+          currentAuthorizationPoints[ap.id] = {
+            ...apData,
+            moduleName: moduleNames![0],
+            resourceContext: controllerNames![0],
+            resources: handlerNames
+          };
+        });
       });
     }
     user.currentAuthorizationPoints = currentAuthorizationPoints;
