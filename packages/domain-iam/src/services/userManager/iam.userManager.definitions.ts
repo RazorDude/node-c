@@ -64,6 +64,7 @@ export type IAMUserManagerUserWithPermissionsData<UserData, AuthorizationPointId
 export interface IAMUserManagerUserTokenEnityFields<UserId = unknown> {
   refreshToken?: string;
   userId: UserId;
+  user?: IAMUserManagerUserWithPermissionsData<object, unknown>;
 }
 
 export enum IAMUserManagerUserTokenUserIdentifier {

@@ -278,6 +278,7 @@ export class SQLQueryBuilderService {
   }
 
   // TODO: fieldAliases for nested fields
+  // TODO: columns with sql names
   /*
    * This method is a tid bit complex, so it requires a proper explanation. The idea is that you can pass a deeply nested filters object (example below)
    * and receive back two objects - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder,

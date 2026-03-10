@@ -23,10 +23,13 @@ export const CacheAuthTokenSchema: EntitySchema = {
       type: EntitySchemaColumnType.String
     },
     token: {
+      isInnerPrimary: true,
       type: EntitySchemaColumnType.String
     },
     type: {
-      isInnerPrimary: true,
+      // isInnerPrimary: true,
+      primary: true,
+      primaryOrder: 1,
       type: EntitySchemaColumnType.String
     },
     userId: {

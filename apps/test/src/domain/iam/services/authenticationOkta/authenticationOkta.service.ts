@@ -55,7 +55,7 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
     return {
       ...parentResult,
       accountStatusId: 1,
-      assignedUserTypes: [2],
+      assignedUserTypes: [{ id: 2 }],
       initialPassword: this.generateUrlEncodedString(30)
     } as unknown as IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
   }

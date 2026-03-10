@@ -244,7 +244,7 @@ export class RedisRepositoryService<Entity> {
           filters,
           hasNonPrimaryKeyFilters,
           primaryKeyFiltersToForceCheck
-        }),
+        }).resultItems,
         more: false
       };
     }
@@ -300,7 +300,7 @@ export class RedisRepositoryService<Entity> {
           filters,
           hasNonPrimaryKeyFilters,
           primaryKeyFiltersToForceCheck
-        })
+        }).resultItems
       );
       if (endReached) {
         break;
@@ -347,10 +347,12 @@ export class RedisRepositoryService<Entity> {
   protected getValuesFromResults<ResultItem>(
     inputData: ResultItem[],
     options?: GetValuesFromResultsOptions
-  ): ResultItem[] {
+  ): { indexes: number[]; resultItems: ResultItem[] } {
     const { primaryKeysMap, schema } = this;
     const { isArray, nestedObjectContainerPath } = schema;
     const { filters, flattenArray, hasNonPrimaryKeyFilters, primaryKeyFiltersToForceCheck } = options || {};
+    const filteredResultIndexes: number[] = [];
+    const filteredResults: ResultItem[] = [];
     let initialResults = [...inputData];
     if (nestedObjectContainerPath) {
       initialResults = initialResults.map(item => {
@@ -360,35 +362,51 @@ export class RedisRepositoryService<Entity> {
         return item;
       }) as ResultItem[];
     }
+    // TODO: account for the indexes when flattenning
     if (isArray && (flattenArray || typeof flattenArray === 'undefined')) {
       initialResults = initialResults.flat() as ResultItem[];
     }
     if (!hasNonPrimaryKeyFilters || !filters) {
-      return initialResults.filter(item => typeof item !== 'undefined' && item !== null);
+      initialResults.forEach((resultItem, resultItemIndex) => {
+        if (typeof resultItem !== 'undefined' && resultItem !== null) {
+          filteredResultIndexes.push(resultItemIndex);
+          filteredResults.push(resultItem);
+        }
+      });
+    } else {
+      // filter by the results' object data
+      initialResults.forEach((resultItem, resultItemIndex) => {
+        const filtered = this.filterItem<ResultItem>(resultItem, filters, {
+          keysToSkip: primaryKeysMap,
+          skippableKeysToForceCheck: primaryKeyFiltersToForceCheck
+        });
+        if (filtered) {
+          filteredResultIndexes.push(resultItemIndex);
+          filteredResults.push(resultItem);
+        }
+      });
     }
-    // filter by the results' object data
-    return initialResults.filter(item =>
-      this.filterItem<ResultItem>(item, filters, {
-        keysToSkip: primaryKeysMap,
-        skippableKeysToForceCheck: primaryKeyFiltersToForceCheck
-      })
-    );
+    return { indexes: filteredResultIndexes, resultItems: filteredResults };
   }
 
-  protected async prepare(data: Entity, options?: PrepareOptions): Promise<{ data: Entity; storeEntityKey: string }> {
-    const { primaryKeys, schema, store, storeDelimiter } = this;
-    const { columns, name: entityName, storeKey: entityStoreKey } = schema;
+  protected async prepare(
+    data: Entity | Entity[],
+    options?: PrepareOptions
+  ): Promise<{ data: Entity | Entity[]; storeEntityKey: string }> {
+    const { columnNames, primaryKeys, schema, store, storeDelimiter } = this;
+    const { columns, isArray, name: entityName, storeKey: entityStoreKey } = schema;
     const opt = options || ({} as PrepareOptions);
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
     const onConflict = optOnConflict || SaveOptionsOnConflict.ThrowError;
     let allPKValuesExist = true;
-    let preparedData = ld.cloneDeep(data) as GenericObject<unknown>;
+    let preparedData = ld.cloneDeep(data) as GenericObject | GenericObject[];
     let storeEntityKey = '';
+    const preparedDataForPrimaryKeyFilters = (isArray && data instanceof Array ? data[0] : data) as GenericObject;
     // set up the construction of the store keys by primary keys
     // additionally, perform the generation of primary keys, if doing a create opearation
     for (const columnName of primaryKeys) {
       const { generated, type } = columns[columnName];
-      const value = preparedData[columnName];
+      const value = preparedDataForPrimaryKeyFilters[columnName];
       const valueExists = !(
         typeof value === 'undefined' ||
         (typeof value === 'string' && !value.length) ||
@@ -402,10 +420,11 @@ export class RedisRepositoryService<Entity> {
         if (allPKValuesExist) {
           allPKValuesExist = false;
         }
-        if (!generatePrimaryKeys) {
+        if (!generatePrimaryKeys || isArray) {
           throw new ApplicationError(
             `[RedisRepositoryService ${entityName}][Validation Error]: ` +
-              `A value is required for generated PK column ${columnName} when the generatePrimaryKeys is set to false.`
+              `A value is required for generated PK column ${columnName} when the generatePrimaryKeys is set to false ` +
+              'or isArray is set to true.'
           );
         }
         if (type === EntitySchemaColumnType.Integer) {
@@ -415,7 +434,7 @@ export class RedisRepositoryService<Entity> {
             })) || 0;
           currentMaxValue++;
           await store.set(`${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`, currentMaxValue);
-          preparedData[columnName] = currentMaxValue;
+          preparedDataForPrimaryKeyFilters[columnName] = currentMaxValue;
           storeEntityKey += `${currentMaxValue}${storeDelimiter}`;
           continue;
         }
@@ -424,7 +443,7 @@ export class RedisRepositoryService<Entity> {
           if (storeDelimiter === '-') {
             newValue = newValue.replace(/-/g, '_');
           }
-          preparedData[columnName] = newValue;
+          (preparedData as GenericObject)[columnName] = newValue;
           storeEntityKey += `${newValue}${storeDelimiter}`;
           continue;
         }
@@ -452,8 +471,8 @@ export class RedisRepositoryService<Entity> {
         );
       }
     }
-    // TODO: make this work using getValuesFromResults
-    if (onConflict !== SaveOptionsOnConflict.DoNothing && allPKValuesExist) {
+    // TODO: make cases other than SaveOptionsOnConflict.DoNothing work with isArray
+    if ((onConflict !== SaveOptionsOnConflict.DoNothing || isArray) && allPKValuesExist) {
       const hasValue = await store.get<string | undefined>(storeEntityKey, { withValues: false });
       if (hasValue) {
         if (onConflict === SaveOptionsOnConflict.ThrowError) {
@@ -461,9 +480,48 @@ export class RedisRepositoryService<Entity> {
             `[RedisRepositoryService ${entityName}][Unique Error]: An entry already exists for key ${storeEntityKey}.`
           );
         }
+        const existingData = await store.get<GenericObject<unknown> | GenericObject<unknown>[]>(storeEntityKey, {
+          parseToJSON: true
+        });
         if (onConflict === SaveOptionsOnConflict.Update) {
-          const existingData = await store.get<GenericObject<unknown>>(storeEntityKey, { parseToJSON: true });
+          // TODO: make this work using getValuesFromResults
           preparedData = ld.merge(existingData, preparedData);
+        } else if (onConflict === SaveOptionsOnConflict.DoNothing && isArray) {
+          if (existingData instanceof Array && existingData.length) {
+            const innerFilters: GenericObject = {};
+            columnNames.forEach(fieldName => {
+              const fieldValue = data[fieldName as keyof typeof data];
+              if (
+                typeof fieldValue !== 'undefined' &&
+                fieldValue !== null &&
+                (typeof fieldValue !== 'string' || fieldValue.length)
+              ) {
+                innerFilters[fieldName] = fieldValue;
+              }
+            });
+            if (!Object.keys(innerFilters).length) {
+              throw new ApplicationError(
+                `[RedisRepositoryService ${entityName}][Execution Error]: ` +
+                  'Inner filters are required when search inside nested arrays.'
+              );
+            }
+            const innerData = this.getValuesFromResults(existingData, {
+              filters: innerFilters,
+              flattenArray: false
+            });
+            if (innerData.resultItems.length) {
+              innerData.resultItems.forEach((resultItem, resultItemIndex) => {
+                ld.set(existingData, innerData.indexes[resultItemIndex], resultItem);
+              });
+              preparedData = existingData;
+            } else {
+              preparedData = existingData.concat(preparedData instanceof Array ? preparedData : [preparedData]);
+            }
+          }
+          // WARNING: this disregards the current values if they're not an array
+          else if (!(preparedData instanceof Array)) {
+            preparedData = [preparedData];
+          }
         } else {
           throw new ApplicationError(
             `[RedisRepositoryService ${entityName}][Execution Error]: ` +
@@ -472,7 +530,7 @@ export class RedisRepositoryService<Entity> {
         }
       }
     }
-    return { data: preparedData as unknown as Entity, storeEntityKey };
+    return { data: preparedData as Entity | Entity[], storeEntityKey };
   }
 
   async save<ResultItem extends Entity | string = Entity>(
@@ -576,14 +634,23 @@ export class RedisRepositoryService<Entity> {
       onConflict,
       validate
     };
-    const results: Entity[] = [];
-    for (const i in actualData) {
-      const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData[i], prepareOptions);
+    let results: Entity[] = [];
+    if (isArray) {
+      const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData, prepareOptions);
       await store.set(`${entityStoreKey}${storeDelimiter}${storeEntityKey}`, validatedEntity, {
         transactionId,
         ttl: ttl || defaultTTL
       });
-      results.push(validatedEntity);
+      results = validatedEntity as Entity[];
+    } else {
+      for (const i in actualData) {
+        const { data: validatedEntity, storeEntityKey } = await this.prepare(actualData[i], prepareOptions);
+        await store.set(`${entityStoreKey}${storeDelimiter}${storeEntityKey}`, validatedEntity, {
+          transactionId,
+          ttl: ttl || defaultTTL
+        });
+        results.push(validatedEntity as Entity);
+      }
     }
     return results as ResultItem[];
   }

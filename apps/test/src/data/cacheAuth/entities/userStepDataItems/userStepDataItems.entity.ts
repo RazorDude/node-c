@@ -23,6 +23,5 @@ export const CacheAuthUserStepDataItemSchema: EntitySchema = {
       primaryOrder: 0,
       type: EntitySchemaColumnType.String
     }
-  },
-  isArray: true
+  }
 };

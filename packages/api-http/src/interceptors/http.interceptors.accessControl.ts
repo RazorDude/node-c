@@ -47,9 +47,9 @@ export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPer
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
     const {
       authorizationPoints: usedAuthorizationPoints,
+      errorCode,
       hasAccess,
       inputDataToBeMutated
-      // noMatchForResource
     } = IAMAuthorizationService.checkAccess(
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user,
@@ -67,7 +67,7 @@ export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPer
       //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
       // }
       console.error(
-        `[${moduleName}][HTTPAccessControlInterceptor]: No user access to handler ${controllerName}.${handlerName}.`
+        `[${moduleName}][HTTPAccessControlInterceptor]: No user access to handler ${controllerName}.${handlerName} - ${errorCode}.`
       );
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }

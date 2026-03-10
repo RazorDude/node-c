@@ -89,6 +89,8 @@ export class NodeCApp {
         const { hostname, port } = apiConfig;
         if (hostname && port) {
           console.info(`[Node-C][${i}/${apiModuleName}]: Starting listeners...`);
+          // eslint-disable-next-line no-unused-vars
+          (app as unknown as { set: (...args: unknown[]) => void }).set('query parser', 'extended');
           await app.listen(port as number, hostname as string);
           console.info(`[NODE-C][${i}/${apiModuleName}] Server listening at ${hostname}:${port}.`);
         } else {

@@ -151,17 +151,17 @@ export class IAMAuthorizationService<
     for (const apId in currentAuthorizationPoints) {
       const apData = currentAuthorizationPoints[apId];
       authorizationPointsCount++;
-      // RBAC - check whether the user has general access to the module and resource.
+      // RBAC - check whether the user has general access to the module.
       if (moduleName !== apData.moduleName) {
         authorizationPointsForDifferentModules++;
         continue;
       }
-      // RBAC - check whether the user has general access to the module and resource.
+      // RBAC - check whether the user has general access to the resource.
       if (
         hasResource &&
         (!apData.resourceContext ||
           apData.resourceContext !== resourceContext ||
-          !apData.resources?.includes(resourceContext))
+          !apData.resources?.includes(resource!))
       ) {
         authorizationPointsForDifferentContexts++;
         continue;
@@ -186,6 +186,7 @@ export class IAMAuthorizationService<
             )
           ) {
             hasAccess = false;
+            console.log('=> 0', apData, innerMutatedInputData, fieldName, requiredStaticData[fieldName]);
             break;
           }
         }
@@ -229,6 +230,7 @@ export class IAMAuthorizationService<
         }
       }
       // 3. Input data whitelist
+      // TODO: no longer working properly - not stripping disallowed values
       if (allowedInputData && Object.keys(allowedInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {

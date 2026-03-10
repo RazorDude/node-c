@@ -11,6 +11,7 @@
   - New utility method for making HTTP requests using axios.
   - New utility method for base64UrlEncode-ing strings.
 - `packages/domain-iam`
+  - BREAKING: access and refresh tokens are now saved as arrays based on the user id, and are being searched for based on that + the token itself in the array.
   - BREAKING: removed the user-centric focus in the authentication services and split the flow into "initiate" and "complete".
   - BREAKING: AuthenticationLocal is now AuthenticationUserLocal
   - BREAKING: AuthenticationPoints - renamed "controllerNames" to "resourceContext" and "handlerNames" to "resources".

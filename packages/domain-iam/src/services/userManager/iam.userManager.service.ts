@@ -42,10 +42,10 @@ import {
 import { IAMTokenManagerService, TokenType } from '../tokenManager';
 
 // TODO: create user (signup); this should include password hashing
-// TODO: create user flow using external user data from the authService
 // TODO: update password (incl. hashing)
 // TODO: reset password
 // TODO: console.info -> logger
+// TODO: periodic checking of external access tokens and their revoking
 export class IAMUserManagerService<
   User extends object,
   Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>,
@@ -74,6 +74,8 @@ export class IAMUserManagerService<
     protected tokenManager: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>
   ) {}
 
+  // TODO: clear the cache from the previous steps
+  // TODO: make the issuing of local tokens work with purgeOldFromStore = false
   async createAccessToken<AuthData = unknown>(
     options: IAMUserManagerCreateAccessTokenOptions<AuthData>
   ): Promise<IAMUserManagerCreateAccessTokenReturnData<User>> {
@@ -177,11 +179,11 @@ export class IAMUserManagerService<
             type: TokenType.Refresh,
             [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
             ...(externalRefreshToken
-              ? {}
-              : {
+              ? {
                   externalToken: externalRefreshToken,
                   externalTokenAuthService: authType as IAMAuthenticationType
-                })
+                }
+              : {})
           },
           {
             expiresInMinutes:
@@ -191,7 +193,8 @@ export class IAMUserManagerService<
               (rememberUser ? undefined : refreshTokenExpiryTimeInMinutes),
             identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
             persist: true,
-            purgeOldFromData: true
+            purgeOldFromData: true,
+            tokenContentOnlyFields: ['externalToken']
           }
         );
         refreshToken = localRefreshToken;
@@ -203,13 +206,14 @@ export class IAMUserManagerService<
         {
           refreshToken,
           type: TokenType.Access,
+          user,
           [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
           ...(externalAccessToken
-            ? {}
-            : {
+            ? {
                 externalToken: externalAccessToken,
                 externalTokenAuthService: authType as IAMAuthenticationType
-              })
+              }
+            : {})
         },
         {
           expiresInMinutes:
@@ -219,7 +223,8 @@ export class IAMUserManagerService<
             accessTokenExpiryTimeInMinutes,
           identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
           persist: true,
-          purgeOldFromData: true
+          purgeOldFromData: true,
+          tokenContentOnlyFields: ['externalToken', 'refreshToken', 'user']
         }
       );
       console.info(

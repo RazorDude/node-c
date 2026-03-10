@@ -127,8 +127,13 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           console.error('Missing userId in the tokenContent data.');
           throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
         }
-        // TODO: user the bearer auth token decoded payload for the user data, if configured this way
-        req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
+        // use the bearer auth token decoded payload for the user data, if configured this way
+        const user = tokenContent?.data?.user;
+        if (user) {
+          req.locals!.user = user;
+        } else {
+          req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
+        }
       }
       if (newAuthToken) {
         res.setHeader('Authorization', `Bearer ${newAuthToken}${refreshToken ? ` ${refreshToken}` : ''}`);

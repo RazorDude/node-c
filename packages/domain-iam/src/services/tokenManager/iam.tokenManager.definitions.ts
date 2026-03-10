@@ -28,6 +28,7 @@ export type TokenManagerCreateOptions = {
   identifierDataField?: string;
   persist?: boolean;
   purgeOldFromData?: boolean;
+  tokenContentOnlyFields?: string[];
   ttl?: number;
 } & DomainCreateOptions;
 
