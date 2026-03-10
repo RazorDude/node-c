@@ -5,6 +5,7 @@
   - Security fixes.
   - WIP: logging via pino.
   - Unpublished the old "persistance" packages.
+  - Added the src folder to the npm packages for easier debugging.
 - `packages/core`
   - Changes needed for OAuth2 in packages/domain-iam.
   - New utility method for making HTTP requests using axios.

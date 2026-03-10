@@ -85,11 +85,13 @@ export class IAMUserManagerService<
       auth: { type: authType },
       rememberUser
     } = options;
-    console.info(`[Domain.${moduleName}.Users]: Login attempt started.`);
+    console.info(
+      `[Domain.${moduleName}.UserManager]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
+    );
     // 1. Make sure the auth service actually exists - local, oauth2, etc.
     const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
     if (!authService) {
-      console.info(`[Domain.${moduleName}.Users]: No authService ${authType} found.`);
+      console.info(`[Domain.${moduleName}.UserManager]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
     }
     // 2. Get the user-specific configuration from the authService.
@@ -112,7 +114,12 @@ export class IAMUserManagerService<
     }
     let stepConfig = authServiceBehaviorConfig[step];
     // 3. Run the authentication method itself.
-    let { stepResult, user } = await this.executeStep(options, { authService, name: step, stepConfig });
+    // eslint-disable-next-line prefer-const
+    let { stepResult, user, ...otherStepData } = await this.executeStep(options, {
+      authService,
+      name: step,
+      stepConfig
+    });
     // 4. Run the final step, if this is the first step no mfa has been used.
     if (step === AppConfigDomainIAMAuthenticationStep.Initiate && !stepResult.mfaUsed) {
       issueTokens = true;
@@ -132,11 +139,17 @@ export class IAMUserManagerService<
     const actualStepResult = stepResult as
       | IAMAuthenticationOAuth2CompleteResult
       | IAMAuthenticationUserLocalCompleteResult;
+    if (!userFilterField && otherStepData.userFilterField) {
+      userFilterField = otherStepData.userFilterField;
+    }
+    if (!userFilterValue && otherStepData.userFilterValue) {
+      userFilterValue = otherStepData.userFilterValue;
+    }
     if ('useReturnedTokens' in stepConfig && stepConfig.useReturnedTokens && stepConfig.authReturnsTokens) {
       // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
       if (!actualStepResult.accessToken) {
         console.info(
-          `[Domain.${moduleName}.Users]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
+          `[Domain.${moduleName}.UserManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -149,7 +162,7 @@ export class IAMUserManagerService<
     if (issueTokens) {
       if (!user) {
         console.info(
-          `[Domain.${moduleName}.Users]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
+          `[Domain.${moduleName}.UserManager]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -209,7 +222,9 @@ export class IAMUserManagerService<
           purgeOldFromData: true
         }
       );
-      console.info(`[Domain.${moduleName}.Users]: Login attempt successful for ${userFilterField} ${userFilterValue}.`);
+      console.info(
+        `[Domain.${moduleName}.UserManager]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
+      );
       return { accessToken, refreshToken, user };
     }
     const returnData: IAMUserManagerCreateAccessTokenReturnData<User> = { nextStepsRequired: true };
@@ -247,7 +262,7 @@ export class IAMUserManagerService<
     // 1. Find the user based on the provided filters, if enabled.
     if (findUser && findUserBeforeAuth) {
       if (!hasFilters) {
-        console.info(`[Domain.${moduleName}.Users]: No filters provided for findUserBeforeToken=true.`);
+        console.info(`[Domain.${moduleName}.UserManager]: No filters provided for findUserBeforeToken=true.`);
         throw new ApplicationError('Authentication failed.');
       }
       userFilterField = mainFilterField;
@@ -255,7 +270,7 @@ export class IAMUserManagerService<
       user = await this.getUserForStepExecution({ filters: userFilters, mainFilterField: userFilterField });
       if (!user) {
         console.info(
-          `[Domain.${moduleName}.Users]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
+          `[Domain.${moduleName}.UserManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -300,7 +315,7 @@ export class IAMUserManagerService<
     );
     // 4. Process the step result
     if (!stepResult.valid || (stepResult.mfaUsed && !stepResult.mfaValid)) {
-      console.info(`[Domain.${moduleName}.Users]: Bad step result:`, stepResult);
+      console.info(`[Domain.${moduleName}.UserManager]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
     // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
@@ -321,10 +336,10 @@ export class IAMUserManagerService<
     if (findUser && !findUserBeforeAuth) {
       if ('findUserInAuthResultBy' in stepConfig && stepConfig.findUserInAuthResultBy) {
         const { userFieldName, resultFieldName } = stepConfig.findUserInAuthResultBy;
-        let userFilterValue: unknown | undefined;
         const payloadFilterValue = getNested(stepResult, resultFieldName, {
           removeNestedFieldEscapeSign: true
         }).unifiedValue;
+        userFilterField = userFieldName;
         if (typeof payloadFilterValue !== 'undefined') {
           userFilterValue = payloadFilterValue;
         }
@@ -362,7 +377,7 @@ export class IAMUserManagerService<
     }
     if (validWithoutUser !== true && !user) {
       console.info(
-        `[Domain.${moduleName}.Users]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
+        `[Domain.${moduleName}.UserManager]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
       );
       throw new ApplicationError('Authentication failed.');
     }
@@ -418,7 +433,8 @@ export class IAMUserManagerService<
         return null;
       }
       filters = {
-        [mainFilterField]: mainFilterFieldResult.result[mainFilterField as keyof typeof mainFilterFieldResult.result]
+        [defaultUserIdentifierField]:
+          mainFilterFieldResult.result[defaultUserIdentifierField as keyof typeof mainFilterFieldResult.result]
       };
     } else {
       filters = options.filters;

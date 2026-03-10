@@ -1,6 +1,6 @@
 !coverage
 !dist
 node_modules
-src
+# src
 test
 tsconfig
