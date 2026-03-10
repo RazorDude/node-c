@@ -1,4 +1,4 @@
-import { DataFindOnePrivateOptions, DataFindPrivateOptions, DataRelationItem } from '@node-c/core';
+import { DataDefaultData, DataFindOnePrivateOptions, DataFindPrivateOptions, DataRelationItem } from '@node-c/core';
 
 export interface UsersBaseSerachPrivateOptions {
   withPassword?: boolean;
@@ -12,6 +12,11 @@ export interface UsersCreateUserData {
   lastName: string;
   phoneNumber?: string;
 }
+
+export type UsersDataEntityServiceData<User> = DataDefaultData<User> & {
+  Create: UsersCreateUserData;
+  Update: UsersUpdateUserData;
+};
 
 export type UsersFindOnePrivateOptions = UsersBaseSerachPrivateOptions & DataFindPrivateOptions;
 

@@ -5,7 +5,9 @@ import {
   IAMAuthenticationOktaService as BaseIAMAuthenticationOktaService,
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
-  IAMAuthenticationOktaCompleteResult
+  IAMAuthenticationOktaCompleteResult,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
 import { IAMAuthenticationOktaUserFields } from './authenticationOkta.definitions';
@@ -41,5 +43,20 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
       userId: options.context.id
     });
     return result;
+  }
+
+  async getUserDataFromExternalTokenPayloads(
+    data: IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData
+  ): Promise<IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult | null> {
+    const parentResult = await super.getUserDataFromExternalTokenPayloads(data);
+    if (!parentResult) {
+      return null;
+    }
+    return {
+      ...parentResult,
+      accountStatusId: 1,
+      assignedUserTypes: [2],
+      initialPassword: this.generateUrlEncodedString(30)
+    } as unknown as IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
   }
 }

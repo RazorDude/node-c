@@ -4,9 +4,7 @@ import {
   ApplicationError,
   ConfigProviderService
 } from '@node-c/core';
-import { Constants, IAMAuthenticationOAuth2Service } from '@node-c/domain-iam';
-
-import OktaJwtVerifier from '@okta/jwt-verifier';
+import { IAMAuthenticationOAuth2Service } from '@node-c/domain-iam';
 
 import ld from 'lodash';
 
@@ -14,17 +12,14 @@ import {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
-  IAMAuthenticationOktaGetPayloadsFromExternalTokensData,
-  IAMAuthenticationOktaGetPayloadsFromExternalTokensResult,
   IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult,
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationOktaInitiateData,
   IAMAuthenticationOktaInitiateOptions,
   IAMAuthenticationOktaInitiateResult,
   IAMAuthenticationOktaRefreshExternalAccessTokenData,
-  IAMAuthenticationOktaRefreshExternalAccessTokenResult,
-  IAMAuthenticationOktaVerifyExternalAccessTokenData,
-  IAMAuthenticationOktaVerifyExternalAccessTokenResult
+  IAMAuthenticationOktaRefreshExternalAccessTokenResult
 } from './iam.authenticationOkta.definitions';
 
 /*
@@ -34,21 +29,12 @@ export class IAMAuthenticationOktaService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationOAuth2Service<CompleteContext, InitiateContext> {
-  protected oktaJWTVerifier: OktaJwtVerifier;
-
   constructor(
     protected configProvider: ConfigProviderService,
     protected moduleName: string,
     protected serviceName: string
   ) {
     super(configProvider, moduleName, serviceName);
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { issuerUri } = moduleConfig.authServiceSettings![serviceName].oauth2!;
-    if (!issuerUri) {
-      throw new ApplicationError(`[${moduleName}][${serviceName}]: Issuer URI not configured.`);
-    }
-    // TODO: custom jwks endpoint support
-    this.oktaJWTVerifier = new OktaJwtVerifier({ issuer: issuerUri });
   }
 
   async complete(
@@ -58,43 +44,15 @@ export class IAMAuthenticationOktaService<
     return super.complete(data, options) as Promise<IAMAuthenticationOktaCompleteResult>;
   }
 
-  async getPayloadsFromExternalTokens(
-    data: IAMAuthenticationOktaGetPayloadsFromExternalTokensData
-  ): Promise<IAMAuthenticationOktaGetPayloadsFromExternalTokensResult> {
-    const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { clientId } = moduleConfig.authServiceSettings![serviceName].oauth2!;
-    const { accessToken, idToken } = data;
-    const returnData: IAMAuthenticationOktaGetPayloadsFromExternalTokensResult = {};
-    if (accessToken) {
-      const { accessTokenPayload, error } = await this.verifyExternalAccessToken({
-        accessToken
-      });
-      if (error) {
-        console.error(
-          `[${this.moduleName}][${this.serviceName}]: Method "getUserDataFromExternalTokenPayloads" has produced an error:`,
-          error
-        );
-        throw new ApplicationError(
-          `[${this.moduleName}][${this.serviceName}]: Error getting data from external tokens.`
-        );
-      }
-      returnData.accessTokenPayload = accessTokenPayload;
-    }
-    if (idToken) {
-      const idTokenData = await this.oktaJWTVerifier.verifyIdToken(idToken, clientId);
-      returnData.idTokenPayload = idTokenData;
-    }
-    return returnData;
-  }
-
   async getUserDataFromExternalTokenPayloads(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData
-  ): Promise<unknown> {
-    throw new ApplicationError(
-      `[${this.moduleName}][${this.serviceName}]: Method "getUserDataFromExternalTokenPayloads" not implemented.`
-    );
+    data: IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData
+  ): Promise<IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult | null> {
+    const { idTokenPayload } = data;
+    if (!idTokenPayload) {
+      return null;
+    }
+    const nameData = idTokenPayload.name.split(' ');
+    return { email: idTokenPayload.email, firstName: nameData[0], lastName: nameData[nameData.length - 1] };
   }
 
   // Okta Auth via OIDC
@@ -104,6 +62,7 @@ export class IAMAuthenticationOktaService<
     const { steps } = moduleConfig.authServiceSettings![serviceName];
     const defaultConfig: IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult = {
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
+        authReturnsTokens: true,
         cache: {
           settings: {
             cacheFieldName: 'state',
@@ -121,6 +80,7 @@ export class IAMAuthenticationOktaService<
           userFieldName: 'email',
           resultFieldName: 'idTokenPayload.email'
         },
+        useReturnedTokens: true,
         validWithoutUser: false
       },
       [AppConfigDomainIAMAuthenticationStep.Initiate]: {
@@ -134,6 +94,7 @@ export class IAMAuthenticationOktaService<
           }
         },
         findUser: false,
+        stepResultPublicFields: ['authorizationCodeRequestURL'],
         validWithoutUser: true
       }
     };
@@ -157,26 +118,7 @@ export class IAMAuthenticationOktaService<
     _data: IAMAuthenticationOktaRefreshExternalAccessTokenData
   ): Promise<IAMAuthenticationOktaRefreshExternalAccessTokenResult> {
     throw new ApplicationError(
-      `[${this.moduleName}][IAMAuthenticationService]: Method "refreshExternalAccessToken" not implemented.`
+      `[${this.moduleName}][${this.serviceName}}]: Method "refreshExternalAccessToken" not implemented.`
     );
-  }
-
-  async verifyExternalAccessToken(
-    data: IAMAuthenticationOktaVerifyExternalAccessTokenData
-  ): Promise<IAMAuthenticationOktaVerifyExternalAccessTokenResult> {
-    const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { accessTokenAudiences } = moduleConfig.authServiceSettings![serviceName].oauth2!;
-    const { accessToken } = data;
-    if (!accessTokenAudiences) {
-      throw new ApplicationError(
-        `[${moduleName}][${serviceName}]: In method "verifyExternalAccessToken": accessTokenAudiences not configured.`
-      );
-    }
-    const accessTokenData = await this.oktaJWTVerifier.verifyAccessToken(accessToken, accessTokenAudiences);
-    if (accessTokenData.isExpired()) {
-      return { error: Constants.TOKEN_EXPIRED_ERROR };
-    }
-    return { accessTokenPayload: accessTokenData };
   }
 }

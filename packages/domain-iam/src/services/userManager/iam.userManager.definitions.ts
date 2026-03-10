@@ -15,10 +15,10 @@ import {
 import { AuthorizationUser } from '../authorization';
 import { IAMMFAType } from '../mfa';
 
-export interface IAMUsersCreateAccessTokenOptions<AuthData = unknown> {
+export interface IAMUserManagerCreateAccessTokenOptions<AuthData = unknown> {
   auth: {
     mfaType?: IAMMFAType;
-    type: IAMAuthenticationType;
+    type: IAMAuthenticationType | string;
   } & AuthData;
   filters?: GenericObject;
   mainFilterField: string;
@@ -26,7 +26,7 @@ export interface IAMUsersCreateAccessTokenOptions<AuthData = unknown> {
   step?: AppConfigDomainIAMAuthenticationStep;
 }
 
-export type IAMUsersCreateAccessTokenReturnData<UserData> =
+export type IAMUserManagerCreateAccessTokenReturnData<UserData> =
   | {
       accessToken: string;
       refreshToken?: string;
@@ -34,12 +34,12 @@ export type IAMUsersCreateAccessTokenReturnData<UserData> =
     }
   | { nextStepsRequired: boolean };
 
-export type IAMUsersExecuteStepData<AuthData = unknown> = Omit<
-  IAMUsersCreateAccessTokenOptions<AuthData>,
+export type IAMUserManagerExecuteStepData<AuthData = unknown> = Omit<
+  IAMUserManagerCreateAccessTokenOptions<AuthData>,
   'rememberUser' | 'step'
 >;
 
-export interface IAMUsersExecuteStepOptions<User extends object> {
+export interface IAMUserManagerExecuteStepOptions<User extends object> {
   authService: IAMAuthenticationService<User, User>;
   name: AppConfigDomainIAMAuthenticationStep;
   stepConfig:
@@ -47,26 +47,26 @@ export interface IAMUsersExecuteStepOptions<User extends object> {
     | AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings;
 }
 
-export interface IAMUsersExecuteStepResult<User extends object> {
+export interface IAMUserManagerExecuteStepResult<User extends object> {
   stepResult: IAMAuthenticationCompleteResult | IAMAuthenticationInitiateResult;
-  user: IAMUsersUserWithPermissionsData<User, unknown> | null;
+  user: IAMUserManagerUserWithPermissionsData<User, unknown> | null;
   userFilterField?: string | undefined;
   userFilterValue?: unknown | undefined;
 }
 
-export interface IAMUsersGetUserWithPermissionsDataOptions extends DomainFindOnePrivateOptions {
+export interface IAMUserManagerGetUserWithPermissionsDataOptions extends DomainFindOnePrivateOptions {
   keepPassword?: boolean;
 }
 
-export type IAMUsersUserWithPermissionsData<UserData, AuthorizationPointId> = AuthorizationUser<AuthorizationPointId> &
-  UserData;
+export type IAMUserManagerUserWithPermissionsData<UserData, AuthorizationPointId> =
+  AuthorizationUser<AuthorizationPointId> & UserData;
 
-export interface IAMUsersUserTokenEnityFields<UserId = unknown> {
+export interface IAMUserManagerUserTokenEnityFields<UserId = unknown> {
   refreshToken?: string;
   userId: UserId;
 }
 
-export enum IAMUsersUserTokenUserIdentifier {
+export enum IAMUserManagerUserTokenUserIdentifier {
   // eslint-disable-next-line no-unused-vars
   FieldName = 'userId'
 }

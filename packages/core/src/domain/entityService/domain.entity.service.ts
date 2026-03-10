@@ -36,7 +36,9 @@ export class DomainEntityService<
   Entity,
   EntityService extends DataEntityService<Entity, DataEntityServiceData>,
   Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  AdditionalEntityServices extends Record<string, DataEntityService<Partial<Entity>>> | undefined = undefined,
+  AdditionalEntityServices extends
+    | Record<string, DataEntityService<Partial<Entity>, DataDefaultData<object>>>
+    | undefined = undefined,
   DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
   constructor(

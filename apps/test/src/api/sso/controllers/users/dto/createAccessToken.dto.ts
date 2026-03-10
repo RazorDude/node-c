@@ -1,5 +1,5 @@
 import { AppConfigDomainIAMAuthenticationStep, GenericObjectClass } from '@node-c/core';
-import { IAMAuthenticationType, IAMMFAType, IAMUsersCreateAccessTokenOptions } from '@node-c/domain-iam';
+import { IAMAuthenticationType, IAMMFAType, IAMUserManagerCreateAccessTokenOptions } from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
 import { IsDefined, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -32,7 +32,7 @@ export class SSOUsersCreateAccessTokenFiltersDto extends GenericObjectClass {
   email: string;
 }
 
-export class SSOUsersCreateAccessTokenDto implements Omit<IAMUsersCreateAccessTokenOptions, 'mainFilterField'> {
+export class SSOUsersCreateAccessTokenDto implements Omit<IAMUserManagerCreateAccessTokenOptions, 'mainFilterField'> {
   @IsDefined()
   @IsObject()
   @Type(() => SSOUsersCreateAccessTokenAuthDto)

@@ -1,4 +1,4 @@
-import { AppConfigCommonDomainIAMAuthServiceConfigStepSettings } from '@node-c/core';
+import { AppConfigCommonDomainIAMAuthServiceConfigStepSettings, GenericObject } from '@node-c/core';
 
 import { IAMMFAType } from '../mfa';
 
@@ -47,9 +47,15 @@ export interface IAMAuthenticationGetPayloadsFromExternalTokensResult {
 }
 
 export interface IAMAuthenticationGetUserDataFromExternalTokenPayloadsData {
-  accessToken?: string;
-  idToken?: string;
-  refreshToken?: string;
+  accessTokenPayload?: GenericObject;
+  idTokenPayload?: { email: string; name: string } & GenericObject;
+  refreshTokenPayload?: GenericObject;
+}
+
+export interface IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult {
+  email: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface IAMAuthenticationInitiateData {

@@ -3,12 +3,11 @@ import {
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
+  DataDefaultData,
   DataEntityService,
   DataFindOneOptions,
-  DomainBaseAdditionalServiceOptionsOverrides,
   DomainEntityService,
   DomainEntityServiceDefaultData,
-  DomainMethod,
   GenericObject,
   getNested,
   setNested
@@ -17,16 +16,16 @@ import {
 import ld from 'lodash';
 
 import {
-  IAMUsersCreateAccessTokenOptions,
-  IAMUsersCreateAccessTokenReturnData,
-  IAMUsersExecuteStepData,
-  IAMUsersExecuteStepOptions,
-  IAMUsersExecuteStepResult,
-  IAMUsersGetUserWithPermissionsDataOptions,
-  IAMUsersUserTokenEnityFields,
-  IAMUsersUserTokenUserIdentifier,
-  IAMUsersUserWithPermissionsData
-} from './iam.users.definitions';
+  IAMUserManagerCreateAccessTokenOptions,
+  IAMUserManagerCreateAccessTokenReturnData,
+  IAMUserManagerExecuteStepData,
+  IAMUserManagerExecuteStepOptions,
+  IAMUserManagerExecuteStepResult,
+  IAMUserManagerGetUserWithPermissionsDataOptions,
+  IAMUserManagerUserTokenEnityFields,
+  IAMUserManagerUserTokenUserIdentifier,
+  IAMUserManagerUserWithPermissionsData
+} from './iam.userManager.definitions';
 
 import {
   IAMAuthenticationCompleteData,
@@ -47,55 +46,37 @@ import { IAMTokenManagerService, TokenType } from '../tokenManager';
 // TODO: update password (incl. hashing)
 // TODO: reset password
 // TODO: console.info -> logger
-export class IAMUsersService<
+export class IAMUserManagerService<
   User extends object,
-  Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>
-> extends DomainEntityService<
-  User,
-  DataEntityService<User>,
-  Data,
-  Record<string, DataEntityService<Partial<User>>> | undefined
+  Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>,
+  DataEntityServiceData extends DataDefaultData<Partial<User>> = DataDefaultData<Partial<User>>
 > {
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected authServices: {
       [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
       [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
-    },
+    } & { [serviceName: string]: IAMAuthenticationService<object, object> },
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
-    protected dataEntityService: DataEntityService<User>,
-    // eslint-disable-next-line no-unused-vars
     protected dataUsersAuthCacheService: DataEntityService<GenericObject>,
+    // eslint-disable-next-line no-unused-vars
+    protected domainUsersEntityService: DomainEntityService<
+      User,
+      DataEntityService<User, DataEntityServiceData>,
+      Data,
+      Record<string, DataEntityService<Partial<User>, DataDefaultData<object>>> | undefined
+    >,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager: IAMTokenManagerService<IAMUsersUserTokenEnityFields>,
-    protected defaultMethods: string[] = [
-      DomainMethod.BulkCreate,
-      DomainMethod.Create,
-      DomainMethod.Delete,
-      DomainMethod.Find,
-      DomainMethod.FindOne,
-      DomainMethod.Update
-    ],
-    protected additionalDataEntityServices?: Record<string, DataEntityService<Partial<User>>>,
-    protected defaultAdditionalDataEntityServicesOptions?: {
-      [methodName: string]: {
-        [serviceName: string]: {
-          allowIncoming?: boolean;
-          serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides & GenericObject<unknown>;
-        };
-      };
-    }
-  ) {
-    super(dataEntityService, defaultMethods, additionalDataEntityServices, defaultAdditionalDataEntityServicesOptions);
-  }
+    protected tokenManager: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>
+  ) {}
 
   async createAccessToken<AuthData = unknown>(
-    options: IAMUsersCreateAccessTokenOptions<AuthData>
-  ): Promise<IAMUsersCreateAccessTokenReturnData<User>> {
+    options: IAMUserManagerCreateAccessTokenOptions<AuthData>
+  ): Promise<IAMUserManagerCreateAccessTokenReturnData<User>> {
     const { configProvider, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =
@@ -180,10 +161,14 @@ export class IAMUsersService<
           result: { token: localRefreshToken }
         } = await this.tokenManager.create(
           {
-            externalToken: externalRefreshToken,
-            externalTokenAuthService: authType,
             type: TokenType.Refresh,
-            [IAMUsersUserTokenUserIdentifier.FieldName]: userIdentifierValue
+            [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
+            ...(externalRefreshToken
+              ? {}
+              : {
+                  externalToken: externalRefreshToken,
+                  externalTokenAuthService: authType as IAMAuthenticationType
+                })
           },
           {
             expiresInMinutes:
@@ -191,7 +176,7 @@ export class IAMUsersService<
                 'refreshTokenExpiresIn' in actualStepResult &&
                 actualStepResult.refreshTokenExpiresIn) ||
               (rememberUser ? undefined : refreshTokenExpiryTimeInMinutes),
-            identifierDataField: IAMUsersUserTokenUserIdentifier.FieldName,
+            identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
             persist: true,
             purgeOldFromData: true
           }
@@ -203,11 +188,15 @@ export class IAMUsersService<
         result: { token: accessToken }
       } = await this.tokenManager.create(
         {
-          externalToken: externalAccessToken,
-          externalTokenAuthService: authType,
           refreshToken,
           type: TokenType.Access,
-          [IAMUsersUserTokenUserIdentifier.FieldName]: userIdentifierValue
+          [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
+          ...(externalAccessToken
+            ? {}
+            : {
+                externalToken: externalAccessToken,
+                externalTokenAuthService: authType as IAMAuthenticationType
+              })
         },
         {
           expiresInMinutes:
@@ -215,7 +204,7 @@ export class IAMUsersService<
               'accessTokenExpiresIn' in actualStepResult &&
               actualStepResult.accessTokenExpiresIn) ||
             accessTokenExpiryTimeInMinutes,
-          identifierDataField: IAMUsersUserTokenUserIdentifier.FieldName,
+          identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true
         }
@@ -223,14 +212,24 @@ export class IAMUsersService<
       console.info(`[Domain.${moduleName}.Users]: Login attempt successful for ${userFilterField} ${userFilterValue}.`);
       return { accessToken, refreshToken, user };
     }
-    return { nextStepsRequired: true };
+    const returnData: IAMUserManagerCreateAccessTokenReturnData<User> = { nextStepsRequired: true };
+    if (stepConfig.stepResultPublicFields?.length) {
+      stepConfig.stepResultPublicFields.forEach(fieldName => {
+        setNested(
+          returnData,
+          fieldName,
+          getNested(stepResult, fieldName, { removeNestedFieldEscapeSign: true }).unifiedValue
+        );
+      });
+    }
+    return returnData;
   }
 
   private async executeStep<AuthData>(
-    data: IAMUsersExecuteStepData<AuthData>,
-    options: IAMUsersExecuteStepOptions<User>
-  ): Promise<IAMUsersExecuteStepResult<User>> {
-    const { configProvider, moduleName } = this;
+    data: IAMUserManagerExecuteStepData<AuthData>,
+    options: IAMUserManagerExecuteStepOptions<User>
+  ): Promise<IAMUserManagerExecuteStepResult<User>> {
+    const { configProvider, domainUsersEntityService, moduleName } = this;
     const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
@@ -242,7 +241,7 @@ export class IAMUsersService<
     const { cache: cacheSettings, findUser, findUserBeforeAuth, validWithoutUser } = stepConfig;
     const hasFilters = userFilters && Object.keys(userFilters).length;
     const stepInputData: { data: unknown; options?: unknown } = { data: ld.cloneDeep(authData) };
-    let user: IAMUsersUserWithPermissionsData<User, unknown> | null = null;
+    let user: IAMUserManagerUserWithPermissionsData<User, unknown> | null = null;
     let userFilterField: string | undefined;
     let userFilterValue: unknown | undefined;
     // 1. Find the user based on the provided filters, if enabled.
@@ -253,7 +252,7 @@ export class IAMUsersService<
       }
       userFilterField = mainFilterField;
       userFilterValue = userFilters[userFilterField];
-      user = await this.getUserWithPermissionsData({ filters: userFilters }, { keepPassword: true });
+      user = await this.getUserForStepExecution({ filters: userFilters, mainFilterField: userFilterField });
       if (!user) {
         console.info(
           `[Domain.${moduleName}.Users]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
@@ -262,7 +261,7 @@ export class IAMUsersService<
       }
     }
     stepInputData.options = {
-      context: user || ({} as IAMUsersUserWithPermissionsData<User, unknown>),
+      context: user || ({} as IAMUserManagerUserWithPermissionsData<User, unknown>),
       contextIdentifierField: defaultUserIdentifierField
     };
     // 2. Restore the cache, if configured
@@ -330,15 +329,18 @@ export class IAMUsersService<
           userFilterValue = payloadFilterValue;
         }
         if (typeof userFilterValue !== 'undefined') {
-          user = await this.getUserWithPermissionsData(
-            { filters: { [userFieldName]: userFilterValue } },
-            { keepPassword: false }
-          );
+          user = await this.getUserForStepExecution({
+            filters: { [userFieldName]: userFilterValue },
+            mainFilterField: userFieldName
+          });
         }
       } else if (hasFilters) {
         userFilterField = mainFilterField;
         userFilterValue = userFilters[userFilterField];
-        user = await this.getUserWithPermissionsData({ filters: userFilters }, { keepPassword: false });
+        user = await this.getUserForStepExecution({
+          filters: userFilters,
+          mainFilterField: userFilterField
+        });
       }
     }
     // 7. Create a user using the data from the tokens returned by the step execution, if enabled and there is no user found.
@@ -346,13 +348,17 @@ export class IAMUsersService<
       const userData = await authService.getUserDataFromExternalTokenPayloads(
         stepResult as IAMAuthenticationGetUserDataFromExternalTokenPayloadsData
       );
-      const { result: createdUser } = await this.create(userData as Data['Create']);
-      user = await this.getUserWithPermissionsData(
-        {
-          filters: { [defaultUserIdentifierField]: createdUser[defaultUserIdentifierField as keyof typeof createdUser] }
-        },
-        { keepPassword: false }
-      );
+      if (userData) {
+        const { result: createdUser } = await domainUsersEntityService.create(userData as unknown as Data['Create']);
+        user = await this.getUserWithPermissionsData(
+          {
+            filters: {
+              [defaultUserIdentifierField]: createdUser[defaultUserIdentifierField as keyof typeof createdUser]
+            }
+          },
+          { keepPassword: false }
+        );
+      }
     }
     if (validWithoutUser !== true && !user) {
       console.info(
@@ -397,12 +403,38 @@ export class IAMUsersService<
     return { stepResult, user, userFilterField, userFilterValue };
   }
 
+  protected async getUserForStepExecution(options: {
+    filters: GenericObject;
+    mainFilterField: string;
+  }): Promise<IAMUserManagerUserWithPermissionsData<User, unknown> | null> {
+    const { configProvider, moduleName } = this;
+    const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { mainFilterField } = options;
+    let filters: GenericObject = options.filters;
+    let user: IAMUserManagerUserWithPermissionsData<User, unknown> | null = null;
+    if (mainFilterField !== defaultUserIdentifierField) {
+      const mainFilterFieldResult = await this.domainUsersEntityService.findOne({ filters });
+      if (!mainFilterFieldResult.result) {
+        return null;
+      }
+      filters = {
+        [mainFilterField]: mainFilterFieldResult.result[mainFilterField as keyof typeof mainFilterFieldResult.result]
+      };
+    } else {
+      filters = options.filters;
+    }
+    user = await this.getUserWithPermissionsData({ filters }, { keepPassword: true });
+    return user;
+  }
+
   async getUserWithPermissionsData(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: DataFindOneOptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _privateOptions?: IAMUsersGetUserWithPermissionsDataOptions
-  ): Promise<IAMUsersUserWithPermissionsData<User, unknown> | null> {
-    throw new ApplicationError(`Method ${this.moduleName}.IAMUsersService.getUserWithPermissionsData not implemented.`);
+    _privateOptions?: IAMUserManagerGetUserWithPermissionsDataOptions
+  ): Promise<IAMUserManagerUserWithPermissionsData<User, unknown> | null> {
+    throw new ApplicationError(
+      `Method ${this.moduleName}.IAMUserManagerService.getUserWithPermissionsData not implemented.`
+    );
   }
 }

@@ -5,8 +5,8 @@ import {
   AuthorizationPoint,
   IAMAuthorizationService,
   IAMTokenManagerService,
-  IAMUsersService,
-  IAMUsersUserTokenEnityFields
+  IAMUserManagerService,
+  IAMUserManagerUserTokenEnityFields
 } from '@node-c/domain-iam';
 
 import { NextFunction, Response } from 'express';
@@ -30,10 +30,10 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager?: IAMTokenManagerService<IAMUsersUserTokenEnityFields>,
+    protected tokenManager?: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>,
     @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected usersService?: IAMUsersService<User>
+    protected usersService?: IAMUserManagerService<User>
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
@@ -114,7 +114,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         useCookie = true;
       }
       const { newAuthToken, tokenContent, valid } =
-        await this.authorizationService.authorizeBearer<IAMUsersUserTokenEnityFields>(
+        await this.authorizationService.authorizeBearer<IAMUserManagerUserTokenEnityFields>(
           { authToken, refreshToken },
           { identifierDataField: usersService ? 'userId' : undefined }
         );

@@ -8,6 +8,7 @@ import {
   IAMAuthenticationGetPayloadsFromExternalTokensResult,
   IAMAuthenticationGetUserCreateAccessTokenConfigResult,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
   IAMAuthenticationInitiateResult,
@@ -18,6 +19,8 @@ import {
 } from './iam.authentication.definitions';
 
 export class IAMAuthenticationService<CompleteContext extends object, InitiateContext extends object> {
+  protected isLocal: boolean;
+
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
@@ -62,7 +65,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
   async getUserDataFromExternalTokenPayloads(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _data: IAMAuthenticationGetUserDataFromExternalTokenPayloadsData
-  ): Promise<unknown> {
+  ): Promise<IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult | null> {
     throw new ApplicationError(
       `[${this.moduleName}][IAMAuthenticationService]: Method "getUserDataFromExternalTokenPayloads" not implemented.`
     );

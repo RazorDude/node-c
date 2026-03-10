@@ -36,6 +36,7 @@ export class IAMAuthenticationUserLocalService<
     protected mfaServices?: Record<IAMMFAType, IAMMFAService<object, object>>
   ) {
     super(configProvider, moduleName);
+    this.isLocal = true;
   }
 
   async complete(

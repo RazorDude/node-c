@@ -10,6 +10,7 @@ import {
   httpRequest
 } from '@node-c/core';
 
+import * as jwt from 'jsonwebtoken';
 import ld from 'lodash';
 
 import {
@@ -17,13 +18,14 @@ import {
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,
-  // IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData,
-  // IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult,
-  // IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData,
+  IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult,
   IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult,
   IAMAuthenticationOAuth2InitiateData,
   IAMAuthenticationOAuth2InitiateOptions,
-  IAMAuthenticationOAuth2InitiateResult
+  IAMAuthenticationOAuth2InitiateResult,
+  IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
+  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
 } from './iam.authenticationOAuth2.definitions';
 
 import { Constants } from '../../common/definitions';
@@ -42,9 +44,8 @@ import { IAMAuthenticationService } from '../authentication';
  * 8. (outside this service) Save the provider's access token and (refersh or ID) tokens in the data along with the JWTs, linking them to the user.
  * *
  * TODO: provider param name mapping, in case a specific provider has custom parameter names
- * TODO: validate access_token flow - local (JWT), endpont
+ * TODO: validate access_token flow - endpont
  * TODO: refresh access_token flow - local (JWT), endpont
- * TODO: introspect flow - local (JWT), endpoint
  */
 export class IAMAuthenticationOAuth2Service<
   CompleteContext extends object,
@@ -57,6 +58,7 @@ export class IAMAuthenticationOAuth2Service<
     protected serviceName: string
   ) {
     super(configProvider, moduleName);
+    this.isLocal = false;
   }
 
   /*
@@ -76,16 +78,23 @@ export class IAMAuthenticationOAuth2Service<
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenGrantUrl, clientId, clientSecret, redirectUri } =
       moduleConfig.authServiceSettings![serviceName].oauth2!;
+    if (!accessTokenGrantUrl) {
+      console.error(`[${moduleName}][${serviceName}]: Access token grant URL not configured.`);
+      throw new ApplicationError('Authentication failed.');
+    }
+    if (!redirectUri) {
+      console.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
+      throw new ApplicationError('Authentication failed.');
+    }
     const { code, codeVerifier } = data;
     const { data: providerResponseData, hasError } =
-      await httpRequest<IAMAuthenticationOAuth2AccessTokenProviderResponseData>(accessTokenGrantUrl!, {
+      await httpRequest<IAMAuthenticationOAuth2AccessTokenProviderResponseData>(accessTokenGrantUrl, {
         body: {
           client_id: clientId,
           client_secret: clientSecret,
           code,
           code_verifier: codeVerifier,
           grant_type: 'authorization_code',
-          // redirect_uri: base64UrlEncode(redirectUri!)
           redirect_uri: redirectUri
         },
         isFormData: true,
@@ -93,7 +102,7 @@ export class IAMAuthenticationOAuth2Service<
       });
     if (hasError || !providerResponseData) {
       console.error(
-        `[IAMAuthenticationOAuth2Service]: Auhorization grant attempt failed for code "${code}".`,
+        `[${moduleName}][${serviceName}]: Auhorization grant attempt failed for code "${code}".`,
         providerResponseData
       );
       throw new ApplicationError('Authentication failed.');
@@ -124,24 +133,32 @@ export class IAMAuthenticationOAuth2Service<
     return base64UrlEncode(octets.buffer).slice(0, length);
   }
 
-  // async getPayloadsFromExternalTokens(
-  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //   _data: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData
-  // ): Promise<IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult> {
-  //   const { externalTokenManagementService } = this;
-  //   throw new ApplicationError(
-  //     `[${this.moduleName}][IAMAuthenticationService]: Method "getPayloadsFromExternalTokens" not implemented.`
-  //   );
-  // }
-
-  // async getUserDataFromExternalTokenPayloads(
-  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //   _data: IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData
-  // ): Promise<unknown> {
-  //   throw new ApplicationError(
-  //     `[${this.moduleName}][IAMAuthenticationService]: Method "getUserDataFromExternalTokenPayloads" not implemented.`
-  //   );
-  // }
+  // TODO: introspect endpoint for non-JWTs
+  async getPayloadsFromExternalTokens(
+    data: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData
+  ): Promise<IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult> {
+    const { moduleName, serviceName } = this;
+    const { accessToken, idToken } = data;
+    const returnData: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult = {};
+    if (accessToken) {
+      const { accessTokenPayload, error } = await this.verifyExternalAccessToken({
+        accessToken
+      });
+      if (error) {
+        console.error(
+          `[${moduleName}][${serviceName}]: Method "getPayloadsFromExternalTokens" has produced an error:`,
+          error
+        );
+        throw new ApplicationError(`[${moduleName}][${serviceName}]: Error getting data from external tokens.`);
+      }
+      returnData.accessTokenPayload = accessTokenPayload;
+    }
+    if (idToken) {
+      const idTokenData = await this.verifyToken(idToken);
+      returnData.idTokenPayload = idTokenData.content;
+    }
+    return returnData;
+  }
 
   // Default config - plain OAuth2 without OIDC
   getUserCreateAccessTokenConfig(): IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult {
@@ -167,6 +184,7 @@ export class IAMAuthenticationOAuth2Service<
           userFieldName: 'email',
           resultFieldName: 'accessTokenPayload.username'
         },
+        useReturnedTokens: true,
         validWithoutUser: false
       },
       [AppConfigDomainIAMAuthenticationStep.Initiate]: {
@@ -180,6 +198,7 @@ export class IAMAuthenticationOAuth2Service<
           }
         },
         findUser: false,
+        stepResultPublicFields: ['authorizationCodeRequestURL'],
         validWithoutUser: true
       }
     };
@@ -206,15 +225,31 @@ export class IAMAuthenticationOAuth2Service<
       moduleConfig.authServiceSettings![serviceName].oauth2!;
     const { scope } = data;
     const { generateNonce, withPCKE } = options;
+    const finalScope = scope || defaultScope;
+    if (!authorizationUrl) {
+      console.error(`[${moduleName}][${serviceName}]: Authorization URL not configured.`);
+      throw new ApplicationError('Authentication failed.');
+    }
+    if (!redirectUri) {
+      console.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
+      throw new ApplicationError('Authentication failed.');
+    }
+    if (!finalScope) {
+      console.error(
+        `[${moduleName}][${serviceName}]: Either a scope in thwe input, or a configured default scope, is required..`
+      );
+      throw new ApplicationError('Authentication failed.');
+    }
     const state = this.generateUrlEncodedString(16);
     let challenge: string | undefined;
     let nonce: string | undefined;
     let verifier: string | undefined;
     let url =
       `${authorizationUrl}?` +
+      'response_type=code&' +
       `client_id=${clientId}&` +
-      `redirect_uri=${base64UrlEncode(redirectUri!)}&` +
-      `scope=${scope || defaultScope}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=${encodeURIComponent(finalScope)}&` +
       `state=${state}`;
     if (withPCKE) {
       verifier = this.generateUrlEncodedString(Constants.OAUTH2_CODE_VERIFIER_LENGTH);
@@ -235,5 +270,81 @@ export class IAMAuthenticationOAuth2Service<
       state,
       valid: true
     };
+  }
+
+  // TODO: verification endpoint for non-JWTs
+  async verifyExternalAccessToken(
+    data: IAMAuthenticationOAuth2VerifyExternalAccessTokenData
+  ): Promise<IAMAuthenticationOAuth2VerifyExternalAccessTokenResult> {
+    const { configProvider, moduleName, serviceName } = this;
+    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { accessTokenAudiences, issuerUri, verifyTokensLocally } =
+      moduleConfig.authServiceSettings![serviceName].oauth2!;
+    const { accessToken } = data;
+    if (!accessTokenAudiences) {
+      throw new ApplicationError(
+        `[${moduleName}][${serviceName}]: In method "verifyExternalAccessToken": accessTokenAudiences not configured.`
+      );
+    }
+    if (!issuerUri) {
+      throw new ApplicationError(
+        `[${moduleName}][${serviceName}]:  In method "verifyExternalAccessToken": issuer URI not configured.`
+      );
+    }
+    if (verifyTokensLocally) {
+      const accessTokenData = await this.verifyToken(accessToken, {
+        audiences: accessTokenAudiences,
+        issuer: issuerUri
+      });
+      if (accessTokenData.error) {
+        // return { error: Constants.TOKEN_EXPIRED_ERROR };
+        return { error: accessTokenData.error };
+      }
+      return { accessTokenPayload: accessTokenData.content };
+    }
+    throw new ApplicationError(
+      `[${moduleName}][${serviceName}]:  In method "verifyExternalAccessToken": verification via external endpoint not configured.`
+    );
+  }
+
+  protected async verifyToken<DecodedTokenContent = unknown>(
+    token: string,
+    options?: { audiences?: string[]; issuer?: string; secret?: string }
+  ): Promise<{ content?: DecodedTokenContent; error?: unknown }> {
+    const { audiences, issuer, secret } = options || {};
+    let returnData: { content?: DecodedTokenContent; error?: unknown } = {};
+    if (secret) {
+      returnData = await new Promise<{ content?: DecodedTokenContent; error?: unknown }>(resolve => {
+        jwt.verify(token, secret, (err, decoded) => {
+          if (err) {
+            resolve({ content: decoded as DecodedTokenContent, error: err });
+          }
+          resolve({ content: decoded as DecodedTokenContent });
+        });
+      });
+    } else {
+      const tokenContent = jwt.decode(token) as DecodedTokenContent & { aud?: string; exp?: number; iss?: string };
+      if (tokenContent.exp) {
+        // tokenContent.exp < new Date().valueOf()
+        let currentTimeStamp = `${new Date().valueOf()}`;
+        let expString = `${tokenContent.exp}`;
+        if (expString.length < currentTimeStamp.length) {
+          currentTimeStamp = currentTimeStamp.substring(0, expString.length);
+        } else if (expString.length > currentTimeStamp.length) {
+          expString = expString.substring(0, currentTimeStamp.length);
+        }
+        if (parseInt(expString, 10) < parseInt(currentTimeStamp, 10)) {
+          returnData.error = Constants.TOKEN_EXPIRED_ERROR;
+        }
+      }
+      if (tokenContent.aud && audiences && !audiences.includes(tokenContent.aud)) {
+        returnData.error = Constants.TOKEN_MISMATCHED_AUDIENCES_ERROR;
+      }
+      if (tokenContent.iss && issuer && issuer !== tokenContent.iss) {
+        returnData.error = Constants.TOKEN_MISMATCHED_ISSUER_ERROR;
+      }
+      returnData.content = tokenContent;
+    }
+    return returnData;
   }
 }

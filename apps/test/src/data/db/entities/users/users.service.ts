@@ -1,12 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import {
-  ApplicationError,
-  ConfigProviderService,
-  DataDefaultData,
-  DataFindResults,
-  DataUpdateResult
-} from '@node-c/core';
+import { ApplicationError, ConfigProviderService, DataFindResults, DataUpdateResult } from '@node-c/core';
 import {
   Constants,
   CreateOptions,
@@ -23,6 +17,7 @@ import { EntityManager } from 'typeorm';
 
 import {
   UsersCreateUserData,
+  UsersDataEntityServiceData,
   UsersFindOnePrivateOptions,
   UsersFindPrivateOptions,
   UsersUpdatePasswordData,
@@ -33,10 +28,7 @@ import { User, UserEntity } from './users.entity';
 
 // TODO: move all of the "omit password" logic to a new UsersDataEntityService in the core module
 @Injectable()
-export class UsersService extends TypeORMDBEntityService<
-  User,
-  DataDefaultData<User> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
-> {
+export class UsersService extends TypeORMDBEntityService<User, UsersDataEntityServiceData<User>> {
   constructor(
     configProvider: ConfigProviderService,
     qb: SQLQueryBuilderService,

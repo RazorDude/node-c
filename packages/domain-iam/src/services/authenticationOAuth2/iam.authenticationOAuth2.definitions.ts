@@ -2,13 +2,14 @@ import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
-  // IAMAuthenticationGetPayloadsFromExternalTokensData,
-  // IAMAuthenticationGetPayloadsFromExternalTokensResult,
+  IAMAuthenticationGetPayloadsFromExternalTokensData,
+  IAMAuthenticationGetPayloadsFromExternalTokensResult,
   IAMAuthenticationGetUserCreateAccessTokenConfigResult,
-  // IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
-  IAMAuthenticationInitiateResult
+  IAMAuthenticationInitiateResult,
+  IAMAuthenticationVerifyExternalAccessTokenData,
+  IAMAuthenticationVerifyExternalAccessTokenResult
 } from '../authentication';
 
 export interface IAMAuthenticationOAuth2AccessTokenProviderResponseData {
@@ -33,17 +34,14 @@ export interface IAMAuthenticationOAuth2CompleteResult extends IAMAuthentication
   scope: string;
 }
 
-// export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData =
-//   IAMAuthenticationGetPayloadsFromExternalTokensData;
+export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData =
+  IAMAuthenticationGetPayloadsFromExternalTokensData;
 
-// export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
-//   IAMAuthenticationGetPayloadsFromExternalTokensResult;
+export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
+  IAMAuthenticationGetPayloadsFromExternalTokensResult;
 
 export type IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult =
   IAMAuthenticationGetUserCreateAccessTokenConfigResult;
-
-// export type IAMAuthenticationOAuth2GetUserDataFromExternalTokenPayloadsData =
-//   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData;
 
 export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationInitiateData {
   scope?: string;
@@ -62,3 +60,12 @@ export interface IAMAuthenticationOAuth2InitiateResult extends IAMAuthentication
   nonce?: string;
   state: string;
 }
+
+export type IAMAuthenticationOAuth2VerifyExternalAccessTokenData = Pick<
+  IAMAuthenticationVerifyExternalAccessTokenData,
+  'accessToken'
+>;
+export type IAMAuthenticationOAuth2VerifyExternalAccessTokenResult = Pick<
+  IAMAuthenticationVerifyExternalAccessTokenResult,
+  'accessTokenPayload' | 'error'
+>;

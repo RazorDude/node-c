@@ -9,7 +9,8 @@ export const appConfigCommon: AppConfigCommon = {
     coursePlatform: { endpointSecurityMode: EndpointSecurityMode.Strict },
     sso: {
       anonymousAccessRoutes: {
-        '/users/accessToken': [HttpMethod.POST]
+        '/users/accessToken': [HttpMethod.POST],
+        '/users/accessToken/callback/:authType': [HttpMethod.GET]
       }
     }
   },
@@ -20,7 +21,9 @@ export const appConfigCommon: AppConfigCommon = {
       authServiceSettings: {
         okta: {
           oauth2: {
-            issuerUri: 'https://test'
+            codeChallengeMethod: 'S256',
+            defaultScope: 'openid profile email',
+            verifyTokensLocally: true
           }
         },
         userLocal: {

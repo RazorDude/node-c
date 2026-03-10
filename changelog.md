@@ -11,13 +11,16 @@
   - New utility method for base64UrlEncode-ing strings.
 - `packages/domain-iam`
   - BREAKING: removed the user-centric focus in the authentication services and split the flow into "initiate" and "complete".
-  - BREAKING: authenticationLocal is now authenticationUserLocal
-  - BREAKING: authenticationPoints - renamed "controllerNames" to "resourceContext" and "handlerNames" to "resources".
-  - BREAKING: authorizationService - completely reworked the checkAccess method so that it encapsulates the logic for finding the authorizationPoint for the given resource and context.
-  - BREAKING: authorizationService - removed the mapAuthorizationPoints method.
-  - BREAKING: tokenManagerService - rearranged the injected dependencies and added a mandatory authServices dependency.
-  - tokenManagerService - addded external access token verification based on the used authService.
-  - WIP: authorizationService - Added a new, non-static checkAccessWith method for checking access which retrieves the stored authorizationPoints and runs the checkAccess method.
+  - BREAKING: AuthenticationLocal is now AuthenticationUserLocal
+  - BREAKING: AuthenticationPoints - renamed "controllerNames" to "resourceContext" and "handlerNames" to "resources".
+  - BREAKING: AuthorizationService - completely reworked the checkAccess method so that it encapsulates the logic for finding the authorizationPoint for the given resource and context.
+  - BREAKING: AuthorizationService - removed the mapAuthorizationPoints method.
+  - WIP: AuthorizationService - Added a new, non-static checkAccessWith method for checking access which retrieves the stored authorizationPoints and runs the checkAccess method.
+  - BREAKING: TokenManagerService - rearranged the injected dependencies and added a mandatory authServices dependency.
+  - BREAKING: TokenManagerService - the service no longer extends the DomainEntityService, but requires it to be injected instead.
+  - TokenManagerService - addded external access token verification based on the used authService.
+  - BREAKING: UsersService - renamed to UserManagerService, similar to TokenManager.
+  - BREAKING: UsersService - the service no longer extends the DomainEntityService, but requires it to be injected instead.
   - Generic MFA service architecture.
   - WIP: local MFA implementation in a separate service.
   - OAuth2.0 and OIDC flows.

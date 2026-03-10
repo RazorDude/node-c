@@ -33,7 +33,7 @@ export type DefaultDomainEntityService<
   Entity,
   DataEntityService<Entity, DataEntityServiceData>,
   DomainEntityServiceData,
-  Record<string, DataEntityService<Partial<Entity>>>,
+  Record<string, DataEntityService<Partial<Entity>, DataDefaultData<object>>>,
   DataEntityServiceData
 >;
 

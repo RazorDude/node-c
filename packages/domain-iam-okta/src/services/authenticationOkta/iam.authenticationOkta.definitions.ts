@@ -1,8 +1,6 @@
 import {
-  IAMAuthenticationGetPayloadsFromExternalTokensData,
-  IAMAuthenticationGetPayloadsFromExternalTokensResult,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
-  // IAMAuthenticationOAuth2AccessTokenProviderResponseData,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,
@@ -11,20 +9,8 @@ import {
   IAMAuthenticationOAuth2InitiateOptions,
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationRefreshExternalAccessTokenData,
-  IAMAuthenticationRefreshExternalAccessTokenResult,
-  IAMAuthenticationVerifyExternalAccessTokenData,
-  IAMAuthenticationVerifyExternalAccessTokenResult
+  IAMAuthenticationRefreshExternalAccessTokenResult
 } from '@node-c/domain-iam';
-
-// export interface IAMAuthenticationOktaAccessTokenProviderResponseData
-//   extends IAMAuthenticationOAuth2AccessTokenProviderResponseData {
-//   access_token: string;
-//   expires_in: number;
-//   id_token: string; // mandatory, since Okta uses OIDC
-//   refresh_token: string;
-//   scope: string;
-//   token_type: string;
-// }
 
 export type IAMAuthenticationOktaCompleteData = IAMAuthenticationOAuth2CompleteData;
 
@@ -36,19 +22,14 @@ export interface IAMAuthenticationOktaCompleteResult extends IAMAuthenticationOA
   refreshToken: string;
 }
 
-export interface IAMAuthenticationOktaGetPayloadsFromExternalTokensData
-  extends IAMAuthenticationGetPayloadsFromExternalTokensData {
-  accessToken: string;
-}
-
-export type IAMAuthenticationOktaGetPayloadsFromExternalTokensResult =
-  IAMAuthenticationGetPayloadsFromExternalTokensResult;
-
 export type IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult =
   IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult;
 
 export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData;
+
+export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult;
 
 export interface IAMAuthenticationOktaInitiateData extends IAMAuthenticationOAuth2InitiateData {
   scope: string;
@@ -69,12 +50,3 @@ export interface IAMAuthenticationOktaInitiateResult extends IAMAuthenticationOA
 
 export type IAMAuthenticationOktaRefreshExternalAccessTokenData = IAMAuthenticationRefreshExternalAccessTokenData;
 export type IAMAuthenticationOktaRefreshExternalAccessTokenResult = IAMAuthenticationRefreshExternalAccessTokenResult;
-
-export type IAMAuthenticationOktaVerifyExternalAccessTokenData = Pick<
-  IAMAuthenticationVerifyExternalAccessTokenData,
-  'accessToken'
->;
-export type IAMAuthenticationOktaVerifyExternalAccessTokenResult = Pick<
-  IAMAuthenticationVerifyExternalAccessTokenResult,
-  'accessTokenPayload' | 'error'
->;

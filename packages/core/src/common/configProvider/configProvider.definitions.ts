@@ -143,12 +143,20 @@ export interface AppConfigCommonDomainIAM {
       defaultScope?: string;
       issuerUri?: string;
       redirectUri?: string; // redirect_uri
+      verifyTokensLocally?: boolean;
     };
     processExternalTokensOnVerify?: boolean;
     steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
   }>;
   defaultUserIdentifierField: string;
   refreshTokenExpiryTimeInMinutes?: number;
+}
+
+export interface AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+  findUser?: boolean;
+  findUserBeforeAuth?: boolean;
+  stepResultPublicFields?: string[];
+  validWithoutUser?: boolean;
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigCacheSettings {
@@ -173,7 +181,8 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem
   use: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
+  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   authReturnsTokens?: boolean;
   cache?: {
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -181,21 +190,16 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings {
   };
   createUser?: boolean;
   decodeReturnedTokens?: boolean;
-  findUser?: boolean;
-  findUserBeforeAuth?: boolean;
   findUserInAuthResultBy?: { userFieldName: string; resultFieldName: string };
   useReturnedTokens?: boolean;
-  validWithoutUser?: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings
+  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   cache?: {
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
   };
-  findUser?: boolean;
-  findUserBeforeAuth?: boolean;
-  validWithoutUser?: boolean;
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigStepSettings {
@@ -345,12 +349,14 @@ export interface AppConfigProfileDomainIAM {
   authServiceSettings?: GenericObject<{
     oauth2?: {
       accessTokenAudiences?: string[];
+      accessTokenEmailField?: string;
       accessTokenGrantUrl?: string;
       authorizationUrl?: string;
-      codeChallengeMethod?: string; // code_challenge_method
+      codeChallengeMethod: string; // code_challenge_method
       defaultScope?: string;
       issuerUri?: string;
       redirectUri?: string; // redirect_uri
+      verifyTokensLocally?: boolean;
     };
     processExternalTokensOnVerify?: boolean;
   }>;

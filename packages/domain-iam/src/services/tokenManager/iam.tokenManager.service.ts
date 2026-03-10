@@ -24,7 +24,7 @@ import {
 } from './iam.tokenManager.definitions';
 
 import { Constants } from '../../common/definitions';
-import { IAMAuthenticationType } from '../authentication';
+import { IAMAuthenticationService, IAMAuthenticationType } from '../authentication';
 import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
 import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 
@@ -32,10 +32,7 @@ import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 /*
  * Service for managing local access and refresh JWTs.
  */
-export class IAMTokenManagerService<TokenEntityFields extends object> extends DomainEntityService<
-  TokenEntity<TokenEntityFields>,
-  DataEntityService<TokenEntity<TokenEntityFields>>
-> {
+export class IAMTokenManagerService<TokenEntityFields extends object> {
   constructor(
     // eslint-disable-next-line no-unused-vars
     // protected authServices: Record<string, IAMAuthenticationService<object, object>>,
@@ -43,21 +40,23 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     protected authServices: {
       [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
       [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
-    },
+    } & { [serviceName: string]: IAMAuthenticationService<object, object> },
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    protected dataEntityService: DataEntityService<TokenEntity<TokenEntityFields>>,
+    // eslint-disable-next-line no-unused-vars
+    protected domainTokensEntityService: DomainEntityService<
+      TokenEntity<TokenEntityFields>,
+      DataEntityService<TokenEntity<TokenEntityFields>>
+    >,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string
-  ) {
-    super(dataEntityService, ['create', 'delete']);
-  }
+  ) {}
 
   async create(
     data: TokenManagerCreateData<TokenEntityFields>,
     options: TokenManagerCreateOptions
   ): Promise<DomainCreateResult<TokenEntity<TokenEntityFields>>> {
-    const { configProvider, moduleName, dataEntityService } = this;
+    const { configProvider, moduleName, domainTokensEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { type, ...tokenData } = data;
     const { expiresInMinutes, identifierDataField, persist, purgeOldFromData } = options;
@@ -94,11 +93,11 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     const objectToSave = { ...tokenData, token, type } as TokenEntity<TokenEntityFields>;
     // save the token in the data system of choice
     // TODO: multi-data isn't handled well here (or, actually, at all)
-    if (persist && dataEntityService) {
+    if (persist) {
       if (purgeOldFromData && identifierDataField) {
         const identifierValue = ld.get(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-          await dataEntityService.delete(
+          await domainTokensEntityService.delete(
             {
               filters: { [identifierDataField]: identifierValue, type }
             },
@@ -106,7 +105,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           );
         }
       }
-      await super.create(objectToSave, { ttl: signOptions.expiresIn } as DomainCreateOptions);
+      await domainTokensEntityService.create(objectToSave, { ttl: signOptions.expiresIn } as DomainCreateOptions);
     }
     return { result: objectToSave };
   }
@@ -116,7 +115,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     token: string,
     options?: VerifyAccessTokenOptions
   ): Promise<VerifyAccessTokenReturnData<TokenEntityFields>> {
-    const { configProvider, moduleName, dataEntityService } = this;
+    const { configProvider, moduleName, domainTokensEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       deleteFromStoreIfExpired,
@@ -142,7 +141,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
     // check whether the local and/or external access tokens have expired
     if (internalAccessTokenExpired || externalAccessTokenExpired) {
       // prepare renewal if the necessary data is present
-      if (identifierDataField && content?.data && dataEntityService) {
+      if (identifierDataField && content?.data) {
         if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
           // internal refresh token verification
           const { content: rtc, error: refreshTokenError } = await this.verify(
@@ -158,7 +157,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
             if (deleteFromStoreIfExpired && refreshTokenContent.data) {
               const identifierValue = ld.get(refreshTokenContent.data, refreshTokenAccessTokenIdentifierDataField);
               if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-                await dataEntityService.delete(
+                await domainTokensEntityService.delete(
                   {
                     filters: { [refreshTokenAccessTokenIdentifierDataField]: identifierValue, type: TokenType.Refresh }
                   },
@@ -190,7 +189,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
           if (deleteFromStoreIfExpired) {
             const identifierValue = ld.get(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
-              await dataEntityService.delete(
+              await domainTokensEntityService.delete(
                 {
                   filters: { [identifierDataField]: identifierValue, type: TokenType.Access }
                 },
@@ -257,7 +256,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> extends Do
         resolve({ content: decoded as DecodedTokenContent<TokenEntityFields> });
       });
     });
-    // TODO: move this data to the verifyAccessToken method.
+    // TODO: move this logic to the verifyAccessToken method.
     const returnData: TokenManagerVerifyResult<TokenEntityFields> = { ...data };
     const tokenPayload = data.content?.data;
     if (verifyExternal && tokenPayload?.externalToken && tokenPayload?.externalTokenAuthService) {
