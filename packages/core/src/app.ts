@@ -89,8 +89,17 @@ export class NodeCApp {
         const { hostname, port } = apiConfig;
         if (hostname && port) {
           console.info(`[Node-C][${i}/${apiModuleName}]: Starting listeners...`);
+          // TODO: move the following app.set and app.use to the http module
           // eslint-disable-next-line no-unused-vars
           (app as unknown as { set: (...args: unknown[]) => void }).set('query parser', 'extended');
+          app.use((req: { query: unknown }, _res: unknown, next: () => void) => {
+            Object.defineProperty(req, 'query', {
+              ...Object.getOwnPropertyDescriptor(req, 'query'),
+              value: req.query,
+              writable: true
+            });
+            next();
+          });
           await app.listen(port as number, hostname as string);
           console.info(`[NODE-C][${i}/${apiModuleName}] Server listening at ${hostname}:${port}.`);
         } else {

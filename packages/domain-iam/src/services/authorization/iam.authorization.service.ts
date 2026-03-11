@@ -186,7 +186,6 @@ export class IAMAuthorizationService<
             )
           ) {
             hasAccess = false;
-            console.log('=> 0', apData, innerMutatedInputData, fieldName, requiredStaticData[fieldName]);
             break;
           }
         }
@@ -230,7 +229,7 @@ export class IAMAuthorizationService<
         }
       }
       // 3. Input data whitelist
-      // TODO: no longer working properly - not stripping disallowed values
+      // WARNING: In an expressjs v5+ environment, this will only work properly if the query is mutable
       if (allowedInputData && Object.keys(allowedInputData).length) {
         const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
         for (const key in values) {

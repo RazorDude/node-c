@@ -10,6 +10,11 @@
   - Changes needed for OAuth2 in packages/domain-iam.
   - New utility method for making HTTP requests using axios.
   - New utility method for base64UrlEncode-ing strings.
+  - Fixed express apps' parsing of queries and made the query properrty mutable.
+- `packages/data-rdb`
+  - Include from filters is now being whitelisted based on the explicit include for the query by default.
+- `packages/data-redis`
+  - Arrays support in the Repository's set method.
 - `packages/domain-iam`
   - BREAKING: access and refresh tokens are now saved as arrays based on the user id, and are being searched for based on that + the token itself in the array.
   - BREAKING: removed the user-centric focus in the authentication services and split the flow into "initiate" and "complete".

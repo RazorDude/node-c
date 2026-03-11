@@ -81,7 +81,7 @@ export class IAMUserManagerService extends BaseIAMUserManagerService<
     const { assignedUserTypes } = user;
     const currentAuthorizationPoints: { [id: string]: BaseIAMAuthorizationPoint<number> } = {};
     if (assignedUserTypes) {
-      assignedUserTypes.forEach(item => {
+      assignedUserTypes.forEach((item, itemIndex) => {
         item.authorizationPoints?.forEach(ap => {
           const { controllerNames, handlerNames, moduleNames, ...apData } = ap;
           currentAuthorizationPoints[ap.id] = {
@@ -91,6 +91,7 @@ export class IAMUserManagerService extends BaseIAMUserManagerService<
             resources: handlerNames
           };
         });
+        delete user.assignedUserTypes![itemIndex].authorizationPoints;
       });
     }
     user.currentAuthorizationPoints = currentAuthorizationPoints;

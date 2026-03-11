@@ -278,7 +278,7 @@ export class SQLQueryBuilderService {
   }
 
   // TODO: fieldAliases for nested fields
-  // TODO: columns with sql names
+  // TODO: top-level operators are not working!!
   /*
    * This method is a tid bit complex, so it requires a proper explanation. The idea is that you can pass a deeply nested filters object (example below)
    * and receive back two objects - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder,
@@ -317,20 +317,24 @@ export class SQLQueryBuilderService {
     include: IncludeItems;
   } {
     const cqs = this.columnQuotesSymbol;
-    const { isTopLevel, operator } = options;
+    const { isTopLevel = true, operator } = options;
     const fieldAliases = options.fieldAliases || {};
+    // const isTopLevelDebugPrefix = isTopLevel ? '' : '[inner]';
     const parameterNamesToFieldAliasesMap = options.parameterNamesToFieldAliasesMap || {};
     const where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
+    // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[begin]:`, filters, options);
     for (const fieldName in filters) {
       const fieldValue = filters[fieldName];
       if (typeof fieldValue === 'undefined') {
+        // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[0]: No value for fieldName ${fieldName}`);
         continue;
       }
       const isNot = operator === DataSelectOperator.Not;
       let fieldAlias = fieldAliases[fieldName];
       // handle relation fields
       if (fieldName.match(/\./)) {
+        // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[1.0]: No value for fieldName ${fieldName}`);
         const fieldData = fieldName.split('.');
         const finalItemIndex = fieldData.length - 1;
         const actualFieldName = fieldData[finalItemIndex];
@@ -346,6 +350,15 @@ export class SQLQueryBuilderService {
           fieldAlias = actualFieldName;
         }
         const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
+        // console.log(
+        //   `=> [parseFilters]${isTopLevelDebugPrefix}[1.1]: Running parseFilters recursively`,
+        //   { [actualFieldName]: fieldValue },
+        //   {
+        //     fieldAliases: { [actualFieldName]: actualFieldAlias },
+        //     isTopLevel: false,
+        //     operator
+        //   }
+        // );
         const itemData = this.parseFilters(
           entityAlias,
           { [actualFieldName]: fieldValue },
@@ -364,41 +377,59 @@ export class SQLQueryBuilderService {
       }
       const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
       if (fieldValue === null) {
+        // console.log(
+        //   `=> [parseFilters]${isTopLevelDebugPrefix}[2]: Null value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+        // );
         where[fieldName] = {
-          query: `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs} is${isNot ? ' not ' : ' '}null`
+          query: `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
         };
         continue;
       }
       // handle array values
       if (fieldValue instanceof Array) {
+        // console.log(
+        //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.0]: Array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+        // );
         // if all values are primitive types and/or dates, then use 'between' (if provided) or 'in'
         const { hasValues, isSimple, paramsForQuery, queryTemplateParamNames } = this.parseArrayOfFilters(
           fieldValue,
           actualFieldAlias
         );
         if (!hasValues) {
+          // console.log(
+          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.1]: No values for array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+          // );
           continue;
         }
         if (isSimple) {
           if (operator === DataSelectOperator.Between) {
+            // console.log(
+            //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.2.0]: Simple array value with BETWEEN operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+            // );
             where[fieldName] = {
               params: paramsForQuery,
               query:
-                `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
+                `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
                 `between :${actualFieldAlias}_0 and :${actualFieldAlias}_1`
             };
             continue;
           }
+          // console.log(
+          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.2.0]: Simple array value with IN operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+          // );
           where[fieldName] = {
             params: paramsForQuery,
             query:
-              `${cqs}${entityName}${cqs}.${cqs}${fieldName}${cqs}${isNot ? ' not ' : ' '}` +
+              `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
               `in (${queryTemplateParamNames.replace(/,\s$/, '')})`
           };
           continue;
         }
         // otherwise, go through the array's items recursively and build the query
         if (isTopLevel && fieldName === DataSelectOperator.Or) {
+          // console.log(
+          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.3]: Complex array value with OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+          // );
           const finalWhereValue = { params: {}, query: '' };
           fieldValue.forEach((orFieldValue, orFieldIndex) => {
             const itemData = this.parseInnerFilters(
@@ -415,6 +446,9 @@ export class SQLQueryBuilderService {
           finalWhereValue.query += ')';
           where[fieldName] = finalWhereValue;
         } else {
+          // console.log(
+          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.0]: Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+          // );
           const itemData = this.parseInnerFilters(
             entityName,
             fieldValue as unknown as GenericObject,
@@ -423,8 +457,14 @@ export class SQLQueryBuilderService {
             operator
           );
           if (itemData.parsedFilter.query === '()') {
+            // console.log(
+            //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.1]: (no values) Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+            // );
             continue;
           }
+          // console.log(
+          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.2]: (yes values) Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
+          // );
           where[fieldName] = itemData.parsedFilter;
           include = { ...include, ...itemData.include };
         }
@@ -432,6 +472,9 @@ export class SQLQueryBuilderService {
       }
       // handle non-date object values - go through the object's values recursively and build the query
       if (typeof fieldValue === 'object' && !(fieldValue instanceof Date)) {
+        // console.log(
+        //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.5]: Object value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+        // );
         const itemData = this.parseInnerFilters(
           entityName,
           fieldValue as unknown as GenericObject,
@@ -444,8 +487,19 @@ export class SQLQueryBuilderService {
         continue;
       }
       // handle the rest of the allowed operators and the $not operator, where applicable
-      where[fieldName] = this.getValueForFilter(entityName, fieldName, actualFieldAlias, fieldValue, isNot, operator);
+      // console.log(
+      //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.6]: Simple value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+      // );
+      where[fieldName] = this.getValueForFilter(
+        entityName,
+        actualFieldAlias,
+        actualFieldAlias,
+        fieldValue,
+        isNot,
+        operator
+      );
     }
+    // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[end]:`, where, include);
     return { where, include };
   }
 
@@ -475,7 +529,8 @@ export class SQLQueryBuilderService {
         {
           fieldAliases: { [actualFieldName]: fieldParameterName },
           isTopLevel: false,
-          operator: op as DataSelectOperator
+          operator: op as DataSelectOperator,
+          parameterNamesToFieldAliasesMap: { [fieldParameterName]: fieldAlias }
         }
       );
       const fieldWhereData = itemData.where[actualFieldName];

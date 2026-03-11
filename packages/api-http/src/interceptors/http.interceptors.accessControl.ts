@@ -72,7 +72,7 @@ export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPer
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     for (const key in inputDataToBeMutated) {
-      setNested(req, key, inputDataToBeMutated[key]);
+      setNested(req, key, inputDataToBeMutated[key], { removeNestedFieldEscapeSign: true });
     }
     return next.handle().pipe(
       map((data?: unknown) => {

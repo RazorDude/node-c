@@ -7,6 +7,7 @@ export interface DataBulkCreatePrivateOptions extends GenericObject {
 export interface DataCountOptions {
   filters?: GenericObject;
   findAll?: boolean;
+  include?: string[];
   withDeleted?: boolean;
 }
 
