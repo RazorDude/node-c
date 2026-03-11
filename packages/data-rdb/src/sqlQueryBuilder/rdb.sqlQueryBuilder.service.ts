@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  ApplicationError,
   ConfigProviderService,
   Constants as CoreConstants,
   DataOrderBy,
@@ -548,18 +549,66 @@ export class SQLQueryBuilderService {
     return { parsedFilter: parsedFilterItem, include };
   }
 
-  parseRelations(entityName: string, include: string[], currentInclude?: IncludeItems): IncludeItems {
+  parseRelations(
+    entityName: string,
+    data: {
+      currentInclude?: IncludeItems;
+      newIncludeItems?: IncludeItems;
+      unparsedInclude?: string[];
+    },
+    options: {
+      allowedInclude: string[];
+      throwErrorOnForbiddenInclude?: boolean;
+    }
+  ): IncludeItems {
+    const { allowedInclude, throwErrorOnForbiddenInclude } = options;
+    if (!allowedInclude.length) {
+      return {};
+    }
+    const { currentInclude, newIncludeItems, unparsedInclude } = data;
+    const allowedIncludeMap: GenericObject<boolean> = {};
     const resultInclude: IncludeItems = { ...(currentInclude || {}) };
-    include.forEach(includeItem => {
-      const includeData = includeItem.split('.');
-      let entityAlias = `${entityName}`;
-      let previousEntityAlias = `${entityName}`;
-      includeData.forEach(currentEntityName => {
-        entityAlias += `__${currentEntityName}`;
-        resultInclude[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
-        previousEntityAlias = `${entityAlias}`;
+    allowedInclude.forEach(allowedIncludeItem => {
+      let currentParent = '';
+      allowedIncludeItem.split('.').forEach(innerItem => {
+        currentParent += `${currentParent.length ? '.' : ''}${innerItem}`;
+        if (!allowedIncludeMap[currentParent]) {
+          allowedIncludeMap[currentParent] = true;
+        }
       });
     });
+    if (newIncludeItems) {
+      for (const includeItemPath in newIncludeItems) {
+        const includeItemAlias = newIncludeItems[includeItemPath];
+        if (!allowedIncludeMap[includeItemPath]) {
+          if (throwErrorOnForbiddenInclude) {
+            throw new ApplicationError(
+              `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItemPath} (${includeItemAlias}).`
+            );
+          }
+          continue;
+        }
+        resultInclude[includeItemPath] = includeItemAlias;
+      }
+    }
+    if (unparsedInclude) {
+      unparsedInclude.forEach(includeItem => {
+        if (!allowedIncludeMap[includeItem]) {
+          if (throwErrorOnForbiddenInclude) {
+            throw new ApplicationError(`[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItem}.`);
+          }
+          return;
+        }
+        const includeData = includeItem.split('.');
+        let entityAlias = `${entityName}`;
+        let previousEntityAlias = `${entityName}`;
+        includeData.forEach(currentEntityName => {
+          entityAlias += `__${currentEntityName}`;
+          resultInclude[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
+          previousEntityAlias = `${entityAlias}`;
+        });
+      });
+    }
     return resultInclude;
   }
 

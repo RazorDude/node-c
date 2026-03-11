@@ -130,7 +130,7 @@ export class RDBEntityService<
   }
 
   async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
-    const { filters, forceTransaction, transactionManager, withDeleted = false } = options;
+    const { filters, forceTransaction, include: optInclude, transactionManager, withDeleted = false } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
       return this.repository.manager.transaction(tm => {
@@ -152,7 +152,14 @@ export class RDBEntityService<
     const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters, {
       fieldAliases: this.columnAliases
     });
-    const include = this.qb.parseRelations(tableName, [], includeFromFilters);
+    const include = this.qb.parseRelations(
+      tableName,
+      {
+        unparsedInclude: optInclude,
+        newIncludeItems: includeFromFilters
+      },
+      { allowedInclude: optInclude || [], throwErrorOnForbiddenInclude: true }
+    );
     this.qb.buildQuery<Entity>(queryBuilder, {
       currentEntityName: this.getEntityTarget() as string,
       deletedColumnName: this.deletedColumnName,
@@ -264,7 +271,14 @@ export class RDBEntityService<
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
-    include = this.qb.parseRelations(entityName, optRelations || [], include);
+    include = this.qb.parseRelations(
+      entityName,
+      {
+        unparsedInclude: optRelations,
+        newIncludeItems: include
+      },
+      { allowedInclude: optRelations || [], throwErrorOnForbiddenInclude: true }
+    );
     if (optOrderBy) {
       const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
       include = { ...parsedOrderByData.include, ...include };
@@ -335,7 +349,14 @@ export class RDBEntityService<
       fieldAliases: this.columnAliases,
       operator: selectOperator as DataSelectOperator
     });
-    const include = this.qb.parseRelations(entityName, optRelations || [], includeFromFilters);
+    const include = this.qb.parseRelations(
+      entityName,
+      {
+        unparsedInclude: optRelations,
+        newIncludeItems: includeFromFilters
+      },
+      { allowedInclude: optRelations || [], throwErrorOnForbiddenInclude: true }
+    );
     let orderBy: DataOrderBy[] = [];
     if (optOrderBy) {
       const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);

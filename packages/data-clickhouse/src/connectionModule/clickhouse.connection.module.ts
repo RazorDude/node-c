@@ -2,7 +2,7 @@ import { ClickHouseClient, createClient } from '@clickhouse/client';
 import { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config';
 import { DynamicModule } from '@nestjs/common';
 
-import { AppConfigDataRDB, ConfigProviderService } from '@node-c/core';
+import { AppConfigDataRDB, ApplicationError, ConfigProviderService } from '@node-c/core';
 
 import { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions';
 
@@ -55,7 +55,7 @@ export class ClickHouseConnectionModule {
               client = createClient(connectionOptions);
               const pingResult = await client.ping({ select: true });
               if (!pingResult.success) {
-                throw new Error(JSON.stringify(pingResult));
+                throw new ApplicationError(JSON.stringify(pingResult));
               }
             } catch (err) {
               console.error(`[ClickHouseConnectionModule][${dataModuleName}]: Error connecting to ClickHouse:`, err);

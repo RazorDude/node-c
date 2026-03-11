@@ -12,7 +12,7 @@
   - New utility method for base64UrlEncode-ing strings.
   - Fixed express apps' parsing of queries and made the query properrty mutable.
 - `packages/data-rdb`
-  - Include from filters is now being whitelisted based on the explicit include for the query by default.
+  - BREAKING: Include from filters is now being whitelisted based on the explicit include for the query.
 - `packages/data-redis`
   - Arrays support in the Repository's set method.
 - `packages/domain-iam`
@@ -22,7 +22,6 @@
   - BREAKING: AuthenticationPoints - renamed "controllerNames" to "resourceContext" and "handlerNames" to "resources".
   - BREAKING: AuthorizationService - completely reworked the checkAccess method so that it encapsulates the logic for finding the authorizationPoint for the given resource and context.
   - BREAKING: AuthorizationService - removed the mapAuthorizationPoints method.
-  - WIP: AuthorizationService - Added a new, non-static checkAccessWith method for checking access which retrieves the stored authorizationPoints and runs the checkAccess method.
   - BREAKING: TokenManagerService - rearranged the injected dependencies and added a mandatory authServices dependency.
   - BREAKING: TokenManagerService - the service no longer extends the DomainEntityService, but requires it to be injected instead.
   - TokenManagerService - addded external access token verification based on the used authService.
