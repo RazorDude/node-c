@@ -35,6 +35,7 @@
 - `packages/api-http`
   - BREAKING: Renamed the Authorization interceptor to the AccessControl interceptor in order to avoid confusion.
   - Refactoring to accommodate the domain-iam package changes.
+  - WIP: AccessControlContext and AccessControlResource decorators.
 
 # 1.0.0-alpha64
 - `packages/core`
