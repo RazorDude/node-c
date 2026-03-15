@@ -4,7 +4,8 @@ import {
   AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService
+  ConfigProviderService,
+  LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
@@ -29,13 +30,14 @@ export class IAMAuthenticationUserLocalService<
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected serviceName: string,
     // eslint-disable-next-line no-unused-vars
     protected mfaServices?: Record<IAMMFAType, IAMMFAService<object, object>>
   ) {
-    super(configProvider, moduleName);
+    super(configProvider, logger, moduleName);
     this.isLocal = true;
   }
 
@@ -43,7 +45,7 @@ export class IAMAuthenticationUserLocalService<
     data: IAMAuthenticationUserLocalCompleteData,
     options: IAMAuthenticationUserLocalCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationUserLocalCompleteResult> {
-    const { configProvider, moduleName, mfaServices, serviceName } = this;
+    const { configProvider, logger, moduleName, mfaServices, serviceName } = this;
     const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { mfaData, mfaType } = data;
     const { context, mfaOptions } = options;
@@ -54,13 +56,13 @@ export class IAMAuthenticationUserLocalService<
     if (mfaType) {
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
-        console.error(
+        logger.error(
           `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
-        console.error(
+        logger.error(
           `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');
@@ -113,7 +115,7 @@ export class IAMAuthenticationUserLocalService<
     data: IAMAuthenticationUserLocalInitiateData,
     options: IAMAuthenticationUserLocalInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationUserLocalInitiateResult> {
-    const { configProvider, moduleName, mfaServices, serviceName } = this;
+    const { configProvider, logger, moduleName, mfaServices, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { secretKeyHMACAlgorithm, hashingSecret } = moduleConfig.authServiceSettings![serviceName].secretKey!;
     const { mfaData, mfaType, password: authPassword } = data;
@@ -129,7 +131,7 @@ export class IAMAuthenticationUserLocalService<
     let wrongPassword = false;
     if (!secretKeyHMACAlgorithm || !hashingSecret || !userPassword) {
       wrongPassword = true;
-      console.error(
+      logger.error(
         `[${moduleName}][${serviceName}]: secretKeyHMACAlgorithm, hashingSecret and/or userPassword not provided.`
       );
     } else {
@@ -143,7 +145,7 @@ export class IAMAuthenticationUserLocalService<
       }
     }
     if (wrongPassword) {
-      console.error(
+      logger.error(
         `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
       );
       throw new ApplicationError('Authentication failed.');
@@ -151,13 +153,13 @@ export class IAMAuthenticationUserLocalService<
     if (mfaType) {
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
-        console.error(
+        logger.error(
           `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
-        console.error(
+        logger.error(
           `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');

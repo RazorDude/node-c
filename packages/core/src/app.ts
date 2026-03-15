@@ -8,17 +8,20 @@ import {
   ConfigProviderService,
   RDBType
 } from './common/configProvider';
+import { LoggerService } from './common/logger';
+
+export interface NodeCAppGenerateOrmConfigModuleOptions {
+  [moduleName: string]: {
+    entitiesPathInModule: string;
+    migrationsPathInModule: string;
+    modulePathInProject: string;
+  };
+}
 
 export interface NodeCAppStartOptions {
   apiModulesOptions?: { appModuleIndex: number; apiModuleName: string }[];
   generateOrmConfig?: boolean;
-  generateOrmConfigModuleOptions?: {
-    [moduleName: string]: {
-      entitiesPathInModule: string;
-      migrationsPathInModule: string;
-      modulePathInProject: string;
-    };
-  };
+  generateOrmConfigModuleOptions?: NodeCAppGenerateOrmConfigModuleOptions;
   loadConfigOptions?: ConfigProviderModuleOptions;
 }
 
@@ -71,12 +74,14 @@ export class NodeCApp {
       if (!apiModuleName) {
         console.info(`[Node-C][${i}]: No api module found. Creating standalone app...`);
         const app = await NestFactory.createApplicationContext(appModules[i]);
+        app.useLogger(app.get(LoggerService));
         apps.push(app as INestApplication);
         console.info(`[Node-C][${i}]: Standalone created successfully.`);
         continue;
       }
       console.info(`[Node-C][${i}]: Api module found. Creating network app...`);
       const app = await NestFactory.create(appModules[i], { bodyParser: false });
+      app.useLogger(app.get(LoggerService));
       console.info(`[Node-C]: Created a network app for module no ${i} (API module name "${apiModuleName}").`);
       // TODO: starting the network app will potentially cause problems, so we can't rely on the config being loaded after the app
       if (!config) {

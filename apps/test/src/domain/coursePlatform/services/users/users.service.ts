@@ -6,7 +6,8 @@ import {
   DomainEntityService,
   DomainEntityServiceDefaultData,
   DomainFindOptions,
-  DomainFindResult
+  DomainFindResult,
+  LoggerService
 } from '@node-c/core';
 
 import { AuditUserLoginLogsService, UserLoginLog } from '../../../../data/audit';
@@ -30,9 +31,10 @@ export class CoursePlatformUsersService extends DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     protected dataAuditUserLoginLogsService: AuditUserLoginLogsService,
     protected dataCacheUsersService: CacheUsersEntityService,
-    protected dataEntityService: DBUsersService
+    protected dataEntityService: DBUsersService,
+    protected logger: LoggerService
   ) {
-    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, {
+    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, {
       cache: dataCacheUsersService
     });
   }

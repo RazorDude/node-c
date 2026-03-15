@@ -1,6 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ApplicationError, ConfigProviderService, DataFindResults, DataUpdateResult } from '@node-c/core';
+import {
+  ApplicationError,
+  ConfigProviderService,
+  DataFindResults,
+  DataUpdateResult,
+  LoggerService
+} from '@node-c/core';
 import {
   Constants,
   CreateOptions,
@@ -31,11 +37,12 @@ import { User, UserEntity } from './users.entity';
 export class UsersService extends TypeORMDBEntityService<User, UsersDataEntityServiceData<User>> {
   constructor(
     configProvider: ConfigProviderService,
+    logger: LoggerService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
     repository: TypeORMDBRepository<User>
   ) {
-    super(configProvider, qb, repository, UserEntity);
+    super(configProvider, logger, qb, repository, UserEntity);
   }
 
   async create(data: UsersCreateUserData, options: CreateOptions, privateOptions: CreatePrivateOptions): Promise<User> {

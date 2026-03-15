@@ -1,4 +1,4 @@
-import { ApplicationError, ConfigProviderService } from '@node-c/core';
+import { ApplicationError, ConfigProviderService, LoggerService } from '@node-c/core';
 
 import {
   IAMAuthenticationCompleteData,
@@ -24,6 +24,8 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string
   ) {}

@@ -1,3 +1,19 @@
+# 1.0.0-beta1
+- Common
+  - BREAKING: Logging via pino.
+- `packages/core`
+  - New script for generating data source files.
+- `packages/data-rdb`
+  - Fixed the operator-based filters for fileds, i.e. ```{ createdAt: { '$gte': '2020-01-01', '$lte': '2030-01-01' } }```.
+- `packages/api-http`
+  - AccessControlContext and AccessControlResource decorators & their integration in the HTTPAccessControlInterceptor.
+  - HTTPAccessControlInterceptor - removed the injection of the authorizationService, as it's only used statically.
+  - HTTPAccessControlInterceptor - fully decoupled from the injection of NodeC dependencies, making them optional via moduleRef, so that the interceptor can be injected into non-NodeC apps safely and without workarounds.
+- `apps/test`
+  - Updates for testing the changes to the packages for this release.
+  - Updates to how data source configs are loaded.
+  - Improvements to the tests config & basic tests up to 25% code coverage.
+
 # 1.0.0-beta0
 - Common
   - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.

@@ -5,9 +5,9 @@ import { ClickHouseEntityManager } from '../entityManager';
 import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions';
 
 // TODO: field selection, join, update, delete
-export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
-  implements OrmSelectQueryBuilder<Entity>
-{
+export class ClickHouseSelectQueryBuilder<
+  Entity extends GenericObject<unknown>
+> implements OrmSelectQueryBuilder<Entity> {
   protected deletedColumn?: string;
   protected limitClause: string = '';
   protected offsetClause: string = '';

@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
-import { ApplicationError } from '@node-c/core';
+import { ApplicationError, LoggerService } from '@node-c/core';
 
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -9,10 +9,15 @@ import { ServerError } from '../common/definitions/common.errors';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {
+  constructor(
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService
+  ) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       catchError(error => {
-        console.error(error);
+        this.logger.error(error);
         let message: string | string[] = 'An error has occurred.';
         let status = 500;
         if (error instanceof ApplicationError || error instanceof ServerError) {

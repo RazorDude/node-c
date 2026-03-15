@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants } from '@node-c/core';
+import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 
 import { RedisStoreModuleOptions } from './redis.store.definitions';
 import { RedisStoreService } from './redis.store.service';
@@ -18,9 +18,9 @@ export class RedisStoreModule {
       providers: [
         {
           provide: Constants.REDIS_CLIENT,
-          useFactory: async (configProvider: ConfigProviderService) => {
+          useFactory: async (configProvider: ConfigProviderService, logger: LoggerService) => {
             // this is purposfully split like this, so we can place debug logs in between when needed :D
-            const client = await RedisStoreService.createClient(configProvider.config, { dataModuleName });
+            const client = await RedisStoreService.createClient(configProvider.config, { dataModuleName, logger });
             return client;
           },
           inject: [ConfigProviderService]

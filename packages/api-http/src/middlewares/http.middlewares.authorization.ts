@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
+import { AppConfigAPIHTTP, ConfigProviderService, LoggerService } from '@node-c/core';
 import {
   AuthorizationPoint,
   IAMAuthorizationService,
@@ -20,14 +20,16 @@ import { checkRoutes } from '../common/utils';
 @Injectable()
 export class HTTPAuthorizationMiddleware<User extends object> implements NestMiddleware {
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    protected configProvider: ConfigProviderService,
-    @Inject(Constants.API_MODULE_NAME)
-    // eslint-disable-next-line no-unused-vars
-    protected moduleName: string,
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
+    // eslint-disable-next-line no-unused-vars
+    protected configProvider: ConfigProviderService,
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
+    @Inject(Constants.API_MODULE_NAME)
+    // eslint-disable-next-line no-unused-vars
+    protected moduleName: string,
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected tokenManager?: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>,
@@ -37,8 +39,9 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
+    const { configProvider, logger, moduleName, tokenManager, usersService } = this;
     (async () => {
-      const moduleConfig = this.configProvider.config.api![this.moduleName] as AppConfigAPIHTTP;
+      const moduleConfig = configProvider.config.api![moduleName] as AppConfigAPIHTTP;
       const { anonymousAccessRoutes } = moduleConfig;
       const requestMethod = req.method.toLowerCase();
       if (!req.locals) {
@@ -62,7 +65,6 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           return;
         }
       }
-      const { tokenManager, usersService } = this;
       const hasApiKey = !!req.headers.authorization?.match(/^ApiKey\s/);
       if (hasApiKey) {
         const [apiKeyFromHeader, requestSignature] =
@@ -96,7 +98,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         next();
         return;
       } else if (!tokenManager) {
-        console.error('Missing api key in the configuration and no tokenManager set up.');
+        logger.error('Missing api key in the configuration and no tokenManager set up.');
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       let tokens: string[] = [];
@@ -124,7 +126,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
       if (usersService) {
         const userId = tokenContent?.data?.userId;
         if (!userId) {
-          console.error('Missing userId in the tokenContent data.');
+          logger.error('Missing userId in the tokenContent data.');
           throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
         }
         // use the bearer auth token decoded payload for the user data, if configured this way
@@ -145,7 +147,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     })().then(
       () => true,
       err => {
-        console.error(err);
+        logger.error(err);
         res.status((err && err.status) || HttpStatus.INTERNAL_SERVER_ERROR).end();
       }
     );

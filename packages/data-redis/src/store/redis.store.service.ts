@@ -7,6 +7,7 @@ import {
   ConfigProviderService,
   Constants as CoreConstants,
   GenericObject,
+  LoggerService,
   NoSQLType
 } from '@node-c/core';
 
@@ -47,8 +48,11 @@ export class RedisStoreService {
     this.useHashmap = typeof useHashmap !== 'undefined' ? useHashmap : true;
   }
 
-  static async createClient(config: AppConfig, options: { dataModuleName: string }): Promise<Redis | Cluster> {
-    const { dataModuleName } = options;
+  static async createClient(
+    config: AppConfig,
+    options: { dataModuleName: string; logger: LoggerService }
+  ): Promise<Redis | Cluster> {
+    const { dataModuleName, logger } = options;
     const {
       clusterMode,
       failOnConnectionError = true,
@@ -96,7 +100,7 @@ export class RedisStoreService {
       try {
         await client.connect();
       } catch (err) {
-        console.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
         if (failOnConnectionError) {
           throw err;
         }
@@ -125,12 +129,12 @@ export class RedisStoreService {
         username: actualUser
       });
       client.on('error', (error: unknown) => {
-        console.error(`[RedisStore][${dataModuleName}]: Error:`, error);
+        logger.error(`[RedisStore][${dataModuleName}]: Error:`, error);
       });
       try {
         await client.connect();
       } catch (err) {
-        console.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
         if (failOnConnectionError) {
           throw err;
         }
@@ -154,7 +158,7 @@ export class RedisStoreService {
     try {
       await client.connect();
     } catch (err) {
-      console.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+      logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
       if (failOnConnectionError) {
         throw err;
       }

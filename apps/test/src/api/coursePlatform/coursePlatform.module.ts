@@ -3,8 +3,9 @@ import { Module } from '@nestjs/common';
 import {
   HTTPAPIModule as BaseHTTPAPIModule,
   HTTPAPIModuleOptions,
-  Constants as NodeCConstants
+  Constants as NodeCAPIHTTPConstants
 } from '@node-c/api-http';
+import { Constants as NodeCDomainIAMConstants } from '@node-c/domain-iam';
 
 import * as FolderData from './controllers';
 
@@ -19,7 +20,11 @@ export class CoursePlatformAPIModule extends BaseHTTPAPIModule {
     moduleName: Constants.API_COURSE_PLATFORM_MODULE_NAME,
     providers: [
       {
-        provide: NodeCConstants.API_MODULE_AUTHORIZATION_SERVICE,
+        provide: NodeCDomainIAMConstants.ACCESS_CONTROL_MODULE_NAME,
+        useValue: Constants.API_COURSE_PLATFORM_MODULE_NAME
+      },
+      {
+        provide: NodeCAPIHTTPConstants.API_MODULE_AUTHORIZATION_SERVICE,
         useExisting: IAMAuthorizationService
       }
     ]

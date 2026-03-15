@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  LoggerService,
   Param,
   Patch,
   Post,
@@ -58,6 +59,8 @@ export class RESTAPIEntityControlerWithoutDto<
   constructor(
     // eslint-disable-next-line no-unused-vars
     protected domainEntityService: EntityDomainService,
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
     protected defaultRouteMethods?: string[]
   ) {
@@ -140,7 +143,7 @@ export class RESTAPIEntityControlerWithoutDto<
 /*
  * For reference on why the dto validation was done in this way - it's a limitation of Typescript itself:
  * the compiler doesn't emit generic type metadata, making it impossible to achieve a DRY OOP base class with schema validation.
- * At this point, it's a decade-old issue - see https://www.typescriptneedstypes.com/ for more details.
+ * At this point, it's a decade-old issue.
  */
 export class RESTAPIEntityControler<
   Entity,
@@ -163,9 +166,10 @@ export class RESTAPIEntityControler<
       findOne?: Dto['FindOne'];
       update?: Dto['Update'];
     },
+    protected logger: LoggerService,
     defaultRouteMethods?: string[]
   ) {
-    super(domainEntityService, Object.keys(dto || {}).concat(defaultRouteMethods || []));
+    super(domainEntityService, logger, Object.keys(dto || {}).concat(defaultRouteMethods || []));
     // const finalDto: typeof dto = {};
     // finalDto.bulkCreate = dto?.bulkCreate || BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
     const { validationWhitelist } = this.settings;

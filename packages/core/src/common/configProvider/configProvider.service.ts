@@ -34,7 +34,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     options: GenerateOrmconfigOptions
   ): Promise<void> {
     const {
-      general: { projectRootPath },
+      general: { environment, projectRootPath },
       data
     } = config;
     const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject, seedsPathInModule } =
@@ -75,7 +75,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       ormconfigMigrations.push(`${baseSeedsPath}/common/**/*.ts`);
     }
     await fs.writeFile(
-      path.join(projectRootPath, `ormconfig-${moduleName}.json`),
+      path.join(projectRootPath, `ormconfig-${moduleName}-${environment}.json`),
       JSON.stringify(
         ld.merge(data[moduleName], {
           cli: {
@@ -94,7 +94,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     // write the Datasource file
     const entitiesPathInProject = path.join(modulePathInProject, entitiesPathInModule);
     await fs.writeFile(
-      path.join(projectRootPath, `datasource-${moduleName}.ts`),
+      path.join(projectRootPath, `datasource-${moduleName}-${environment}.ts`),
       "import { loadDynamicModules } from '@node-c/core';\n" +
         '\n' +
         "import { DataSource } from 'typeorm';\n" +
@@ -129,7 +129,7 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     const envKeys = optionsData.envKeys || APP_CONFIG_FROM_ENV_KEYS_DEFAULT;
     const envKeysParentNames = optionsData.envKeysParentNames || APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT;
     const processEnv = process.env;
-    const envName = (processEnv['NODE_ENV'] as AppEnvironment) || AppEnvironment.Local;
+    const envName = optionsData.envName || (processEnv['NODE_ENV'] as AppEnvironment) || AppEnvironment.Local;
     const config = ld.merge(
       appConfigs.appConfigCommon,
       appConfigs[

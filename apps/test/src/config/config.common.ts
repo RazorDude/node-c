@@ -36,7 +36,7 @@ export const appConfigCommon: AppConfigCommon = {
       refreshTokenExpiryTimeInHours: 24
     }
   },
-  general: { projectName: 'node-c-app', projectRootPath: path.join(__dirname, '../../'), projectVersion: '1.0.0' },
+  general: { projectName: 'node-c-app', projectRootPath: path.resolve(__dirname, '../../'), projectVersion: '1.0.0' },
   data: {
     audit: { type: RDBType.ClickHouse },
     cache: {

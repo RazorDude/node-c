@@ -1,36 +1,32 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NestInterceptor
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
+import { ModuleRef, Reflector } from '@nestjs/core';
 
-import { ConfigProviderService, GenericObject, setNested } from '@node-c/core';
-import { AuthorizationPoint, IAMAuthorizationService, IAMUserManagerUserWithPermissionsData } from '@node-c/domain-iam';
+import { GenericObject, LoggerService, Constants as NodeCCoreConstants, setNested } from '@node-c/core';
+import {
+  IAMAuthorizationService,
+  IAMUserManagerUserWithPermissionsData,
+  Constants as NodeCDomainIAMConstants
+} from '@node-c/domain-iam';
 
 import { Observable, map } from 'rxjs';
 
-import { Constants, RequestWithLocals } from '../common/definitions';
+import { RequestWithLocals } from '../common/definitions';
+import { AccessControlContext, AccessControlResource } from '../decorators';
 
 /*
  * Authorization interceptor - used for role-based and fine-grained access control.
  */
 @Injectable()
-export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPermissionsData<unknown, unknown>>
-  implements NestInterceptor
-{
+export class HTTPAccessControlInterceptor<
+  User extends IAMUserManagerUserWithPermissionsData<unknown, unknown>
+> implements NestInterceptor {
   constructor(
-    @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
+    protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
-    protected configProvider: ConfigProviderService,
-    @Inject(Constants.API_MODULE_NAME)
+    protected moduleRef: ModuleRef,
     // eslint-disable-next-line no-unused-vars
-    protected moduleName: string
+    protected reflector: Reflector
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
@@ -41,9 +37,30 @@ export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPer
     } else if (locals.isAnonymous) {
       return next.handle();
     }
-    const { moduleName } = this;
-    const controllerName = context.getClass().name;
-    const handlerName = context.getHandler().name;
+    const { logger, moduleRef, reflector } = this;
+    const contextClass = context.getClass();
+    const contextHandler = context.getHandler();
+    const moduleName =
+      moduleRef.get(NodeCDomainIAMConstants.ACCESS_CONTROL_MODULE_NAME) ||
+      moduleRef.get(NodeCCoreConstants.API_MODULE_NAME);
+    if (!moduleName) {
+      logger.error(
+        `[HTTPAccessControlInterceptor]: No moduleName configured for ${contextClass.name}.${contextHandler.name}.`
+      );
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const resourceContextData = reflector.get(AccessControlContext, contextClass);
+    const accessControlOptions = {
+      moduleName,
+      resource:
+        reflector.get(AccessControlResource, contextHandler) ||
+        (typeof resourceContextData !== 'string' && resourceContextData?.resourceMap?.[contextHandler.name]) ||
+        contextHandler.name,
+      resourceContext:
+        (typeof resourceContextData === 'string' && resourceContextData) ||
+        (typeof resourceContextData !== 'string' && resourceContextData?.context) ||
+        contextClass.name
+    };
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
     const {
       authorizationPoints: usedAuthorizationPoints,
@@ -53,21 +70,11 @@ export class HTTPAccessControlInterceptor<User extends IAMUserManagerUserWithPer
     } = IAMAuthorizationService.checkAccess(
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user,
-      { moduleName, resource: handlerName, resourceContext: controllerName }
+      accessControlOptions
     );
     if (!hasAccess) {
-      // TODO; restore this if it's actually needed
-      // const { endpointSecurityMode } = this.configProvider.config.api[moduleName];
-      // if (noMatchForResource && ) {
-      // }
-      // if (!endpointSecurityMode || endpointSecurityMode === EndpointSecurityMode.Strict) {
-      //   console.info(
-      //     `[${moduleName}][HTTPAccessControlInterceptor]: No authorization point data for handler ${controllerName}.${handlerName}.`
-      //   );
-      //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-      // }
-      console.error(
-        `[${moduleName}][HTTPAccessControlInterceptor]: No user access to handler ${controllerName}.${handlerName} - ${errorCode}.`
+      logger.error(
+        `[${moduleName}][HTTPAccessControlInterceptor]: No user access to resource ${accessControlOptions.moduleName}.${accessControlOptions.resourceContext}.${accessControlOptions.resource} - ${errorCode}.`
       );
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/core';
+import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
@@ -10,10 +10,11 @@ import { CourseType, CourseTypeEntity } from './courseTypes.entity';
 export class CourseTypesService extends TypeORMDBEntityService<CourseType> {
   constructor(
     configProvider: ConfigProviderService,
+    logger: LoggerService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
     repository: TypeORMDBRepository<CourseType>
   ) {
-    super(configProvider, qb, repository, CourseTypeEntity);
+    super(configProvider, logger, qb, repository, CourseTypeEntity);
   }
 }

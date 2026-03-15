@@ -29,6 +29,7 @@ import {
 
 import { ApplicationError, GenericObject } from '../../common/definitions';
 
+import { LoggerService } from '../../common/logger';
 import { DataDefaultData, DataEntityService, DataFindResults } from '../../data/entityService';
 
 // TODO: privateOptionsOverrides by service
@@ -46,6 +47,8 @@ export class DomainEntityService<
     protected dataEntityService: EntityService,
     // eslint-disable-next-line no-unused-vars
     protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
     protected additionalDataEntityServices?: AdditionalEntityServices,
     // eslint-disable-next-line no-unused-vars

@@ -3,10 +3,12 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import clickHouse from '@clickhouse/client';
+import { AppEnvironment } from '@node-c/core';
+
 import dotenv from 'dotenv';
 import mysql from 'mysql2';
 
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'endToEndTests';
 
 export async function teardown(): Promise<void> {
   let commandData = await new Promise<string>((resolve, reject) => {
@@ -76,7 +78,7 @@ export async function setup(): Promise<void> {
   // set the test server up and run the tests
   // parse the env vars
   const envVars = dotenv.parse(
-    (await fs.readFile(path.resolve(__dirname, '../apps/test/envFiles/.test.env'))).toString()
+    (await fs.readFile(path.resolve(__dirname, '../apps/test/envFiles/.endToEndTests.env'))).toString()
   );
   // TODO: generate ormconfig and datasource files
   // set up the main DB, empty it and seed the test data
@@ -115,7 +117,25 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    exec('cd apps/test && npm run typeorm migration:run -- -d ./datasource-db.ts', (err, stdout, stderr) => {
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests MODULE_NAMES=db npm run generate:datasource-files:local',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
+      }
+    );
+  });
+  await new Promise<void>((resolve, reject) => {
+    exec('cd apps/test && DATASOURCE_ENV=endToEndTests npm run typeorm:migration:run:db', (err, stdout, stderr) => {
       if (err) {
         reject(err);
         return;
@@ -174,19 +194,40 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    exec('cd apps/test && npm run typeorm migration:run -- -d ./datasource-dbConfigs.ts', (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-        return;
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests MODULE_NAMES=dbConfigs npm run generate:datasource-files:local',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
       }
-      if (stdout) {
-        console.info(stdout);
+    );
+  });
+  await new Promise<void>((resolve, reject) => {
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests npm run typeorm:migration:run:dbConfigs',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
       }
-      if (stderr) {
-        console.error(stderr);
-      }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
     connection.end(err => {
@@ -218,7 +259,7 @@ export async function setup(): Promise<void> {
   let appPromiseFulfilled = false;
   await new Promise<void>((resolve, reject) => {
     const appsProcess = spawn('npm', ['run', 'start:apps-test:test'], {
-      env: { NODE_ENV: 'test', PATH: process.env.PATH }
+      env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
     });
     appsProcess.on('exit', () => {
       if (appPromiseFulfilled) {

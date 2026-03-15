@@ -7,6 +7,7 @@ import {
   DataFindResults,
   DataUpdateResult,
   GenericObject,
+  LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
@@ -39,14 +40,13 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
   protected settings: AppConfigCommonDataNoSQLEntityServiceSettings;
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
     protected repository: RedisRepositoryService<Entity>,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
-    super(configProvider, repository.dataModuleName);
+    super(configProvider, repository.dataModuleName, logger);
   }
 
   async bulkCreate(

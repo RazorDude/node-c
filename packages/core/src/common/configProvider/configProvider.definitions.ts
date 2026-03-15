@@ -181,8 +181,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem
   use: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
-  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   authReturnsTokens?: boolean;
   cache?: {
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -194,8 +193,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
   useReturnedTokens?: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings
-  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   cache?: {
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -381,7 +379,7 @@ export enum AppEnvironment {
   // eslint-disable-next-line no-unused-vars
   Staging = 'staging',
   // eslint-disable-next-line no-unused-vars
-  Test = 'test'
+  Test = 'endToEndTests'
 }
 
 /*
@@ -440,6 +438,7 @@ export type LoadConfigAppConfigs<
 export interface LoadConfigOptions {
   envKeys?: AppConfigFromEnvKeys;
   envKeysParentNames?: AppConfigFromEnvKeysParentNames;
+  envName?: AppEnvironment;
   useEnvFile?: boolean;
   useEnvFileWithPriority?: boolean;
 }

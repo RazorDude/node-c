@@ -10,6 +10,7 @@ import {
   DataSelectOperator,
   DataUpdateResult,
   GenericObject,
+  LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
@@ -52,12 +53,13 @@ export class RDBEntityService<
 
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected qb: SQLQueryBuilderService,
     // eslint-disable-next-line no-unused-vars
     protected repository: RDBRepository<Entity>,
     protected schema: RDBEntitySchema
   ) {
-    super(configProvider, qb.dataModuleName);
+    super(configProvider, qb.dataModuleName, logger);
     const { columns } = schema.options;
     const primaryKeys: string[] = [];
     let deletedColumnName: string | undefined;

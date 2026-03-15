@@ -8,6 +8,7 @@ coverage
 datasource*.ts
 dist
 docs
+logs
 node_modules
 ormconfig*
 tmp

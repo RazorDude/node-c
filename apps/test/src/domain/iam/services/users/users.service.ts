@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, DomainEntityService } from '@node-c/core';
+import { DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, DomainEntityService, LoggerService } from '@node-c/core';
 
 import { IAMUsersDomainEntityServiceData } from './users.definitions';
 
@@ -21,8 +21,9 @@ export class IAMUsersService extends DomainEntityService<
 > {
   constructor(
     protected cacheUsersEntityService: CacheUsersEntityService,
-    protected dataEntityService: DBUsersEntityService
+    protected dataEntityService: DBUsersEntityService,
+    protected logger: LoggerService
   ) {
-    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, { cache: cacheUsersEntityService });
+    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, { cache: cacheUsersEntityService });
   }
 }

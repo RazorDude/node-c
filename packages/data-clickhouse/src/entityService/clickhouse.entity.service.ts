@@ -1,4 +1,4 @@
-import { ConfigProviderService, DataDefaultData, GenericObject } from '@node-c/core';
+import { ConfigProviderService, DataDefaultData, GenericObject, LoggerService } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
 
 import { ClickHouseDBEntitySchema, ClickHouseDBRepository } from '../repository';
@@ -11,11 +11,12 @@ export class ClickHouseDBEntityService<
 
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected qb: SQLQueryBuilderService,
     protected repository: ClickHouseDBRepository<Entity>,
     protected schema: ClickHouseDBEntitySchema<Entity>
   ) {
-    super(configProvider, qb, repository, schema);
+    super(configProvider, logger, qb, repository, schema);
     this.primaryKeys = repository.primaryKeys;
   }
 }

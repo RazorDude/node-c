@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
 
-import { APP_CONFIG_FROM_ENV_KEYS, ConfigProviderModule, ConfigProviderModuleOptions } from '@node-c/core';
+import {
+  APP_CONFIG_FROM_ENV_KEYS,
+  ConfigProviderModule,
+  ConfigProviderModuleOptions,
+  LoggerModule
+} from '@node-c/core';
 
 import ld from 'lodash';
+// import pino from 'pino';
 
 import { CoursePlatformAPIModule } from './api/coursePlatform';
 import { SSOAPIModule } from './api/sso';
@@ -57,6 +63,7 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
+    LoggerModule.register(),
     DataAuditModule.register(),
     DataCacheAuthModule.register(),
     DataCacheModule.register(),

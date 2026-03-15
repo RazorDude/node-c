@@ -6,6 +6,7 @@ import {
   ApplicationError,
   ConfigProviderService,
   HttpMethod,
+  LoggerService,
   base64UrlEncode,
   httpRequest
 } from '@node-c/core';
@@ -53,11 +54,12 @@ export class IAMAuthenticationOAuth2Service<
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected serviceName: string
   ) {
-    super(configProvider, moduleName);
+    super(configProvider, logger, moduleName);
     this.isLocal = false;
   }
 
@@ -74,16 +76,16 @@ export class IAMAuthenticationOAuth2Service<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: IAMAuthenticationOAuth2CompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationOAuth2CompleteResult> {
-    const { configProvider, moduleName, serviceName } = this;
+    const { configProvider, logger, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenGrantUrl, clientId, clientSecret, redirectUri } =
       moduleConfig.authServiceSettings![serviceName].oauth2!;
     if (!accessTokenGrantUrl) {
-      console.error(`[${moduleName}][${serviceName}]: Access token grant URL not configured.`);
+      logger.error(`[${moduleName}][${serviceName}]: Access token grant URL not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     if (!redirectUri) {
-      console.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
+      logger.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     const { code, codeVerifier } = data;
@@ -101,7 +103,7 @@ export class IAMAuthenticationOAuth2Service<
         method: HttpMethod.POST
       });
     if (hasError || !providerResponseData) {
-      console.error(
+      logger.error(
         `[${moduleName}][${serviceName}]: Auhorization grant attempt failed for code "${code}".`,
         providerResponseData
       );
@@ -137,7 +139,7 @@ export class IAMAuthenticationOAuth2Service<
   async getPayloadsFromExternalTokens(
     data: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData
   ): Promise<IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult> {
-    const { moduleName, serviceName } = this;
+    const { logger, moduleName, serviceName } = this;
     const { accessToken, idToken } = data;
     const returnData: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult = {};
     if (accessToken) {
@@ -145,7 +147,7 @@ export class IAMAuthenticationOAuth2Service<
         accessToken
       });
       if (error) {
-        console.error(
+        logger.error(
           `[${moduleName}][${serviceName}]: Method "getPayloadsFromExternalTokens" has produced an error:`,
           error
         );
@@ -219,7 +221,7 @@ export class IAMAuthenticationOAuth2Service<
     data: IAMAuthenticationOAuth2InitiateData,
     options: IAMAuthenticationOAuth2InitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationOAuth2InitiateResult> {
-    const { configProvider, moduleName, serviceName } = this;
+    const { configProvider, logger, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { authorizationUrl, clientId, codeChallengeMethod, defaultScope, redirectUri } =
       moduleConfig.authServiceSettings![serviceName].oauth2!;
@@ -227,15 +229,15 @@ export class IAMAuthenticationOAuth2Service<
     const { generateNonce, withPCKE } = options;
     const finalScope = scope || defaultScope;
     if (!authorizationUrl) {
-      console.error(`[${moduleName}][${serviceName}]: Authorization URL not configured.`);
+      logger.error(`[${moduleName}][${serviceName}]: Authorization URL not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     if (!redirectUri) {
-      console.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
+      logger.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     if (!finalScope) {
-      console.error(
+      logger.error(
         `[${moduleName}][${serviceName}]: Either a scope in thwe input, or a configured default scope, is required..`
       );
       throw new ApplicationError('Authentication failed.');
@@ -252,7 +254,7 @@ export class IAMAuthenticationOAuth2Service<
       `scope=${encodeURIComponent(finalScope)}&` +
       `state=${state}`;
     if (withPCKE) {
-      verifier = this.generateUrlEncodedString(Constants.OAUTH2_CODE_VERIFIER_LENGTH);
+      verifier = this.generateUrlEncodedString(parseInt(Constants.OAUTH2_CODE_VERIFIER_LENGTH, 10));
       challenge = await this.generateChallenge(verifier);
       url += `&code_challenge=${challenge}&code_challenge_method=${codeChallengeMethod}`;
     }

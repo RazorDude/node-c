@@ -5,7 +5,8 @@ import {
   ConfigProviderService,
   Constants as CoreConstants,
   DataFindOneOptions,
-  DomainDataEntityServiceType
+  DomainDataEntityServiceType,
+  LoggerService
 } from '@node-c/core';
 import {
   AuthorizationPoint as BaseIAMAuthorizationPoint,
@@ -37,6 +38,7 @@ export class IAMUserManagerService extends BaseIAMUserManagerService<
     protected configProvider: ConfigProviderService,
     protected dataUserStepDataItemsService: CacheAuthUserStepDataItemsEntityService,
     protected domainUsersEntityService: IAMUsersService,
+    protected logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
     protected tokenManager: IAMTokenManagerService
@@ -46,6 +48,7 @@ export class IAMUserManagerService extends BaseIAMUserManagerService<
       configProvider,
       dataUserStepDataItemsService,
       domainUsersEntityService,
+      logger,
       moduleName,
       tokenManager
     );

@@ -1,4 +1,4 @@
-import { ConfigProviderService, DataDefaultData } from '@node-c/core';
+import { ConfigProviderService, DataDefaultData, LoggerService } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
 
 import { EntitySchema, ObjectLiteral } from 'typeorm';
@@ -13,10 +13,11 @@ export class TypeORMDBEntityService<
 
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected qb: SQLQueryBuilderService,
     protected repository: TypeORMDBRepository<Entity>,
     protected schema: EntitySchema
   ) {
-    super(configProvider, qb, repository, schema);
+    super(configProvider, logger, qb, repository, schema);
   }
 }

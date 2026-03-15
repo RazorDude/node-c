@@ -2,7 +2,7 @@ import { Body, Controller, Get, Injectable, Param, Post, Query } from '@nestjs/c
 
 import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 
-import { AppConfigDomainIAMAuthenticationStep } from '@node-c/core';
+import { AppConfigDomainIAMAuthenticationStep, LoggerService } from '@node-c/core';
 
 import { SSOUsersCreateAccessTokenDto, SSOUsersCreateAccessTokenOAuth2CallbackDto } from './dto';
 
@@ -23,9 +23,10 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
   constructor(
     protected domainEntityService: IAMUsersService,
     // eslint-disable-next-line no-unused-vars
-    protected domainUserManagerService: IAMUserManagerService
+    protected domainUserManagerService: IAMUserManagerService,
+    protected logger: LoggerService
   ) {
-    super(domainEntityService, {}, ['find', 'findOne']);
+    super(domainEntityService, {}, logger, ['find', 'findOne']);
   }
 
   @Post('accessToken')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { ConfigProviderService } from '@node-c/core';
+import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/data-redis';
 
 import { CacheAuthToken } from './tokens.entity';
@@ -9,9 +9,10 @@ import { CacheAuthToken } from './tokens.entity';
 export class CacheAuthTokensEntityService extends RedisEntityService<CacheAuthToken> {
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected repository: RedisRepositoryService<CacheAuthToken>,
     protected store: RedisStoreService
   ) {
-    super(configProvider, repository, store);
+    super(configProvider, logger, repository, store);
   }
 }

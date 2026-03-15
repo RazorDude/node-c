@@ -489,16 +489,9 @@ export class SQLQueryBuilderService {
       }
       // handle the rest of the allowed operators and the $not operator, where applicable
       // console.log(
-      //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.6]: Simple value for fieldName ${fieldName}, alias ${actualFieldAlias}`
+      //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.6]: Simple value for fieldName ${fieldName}, alias ${actualFieldAlias}, parameter name ${fieldAlias}.`
       // );
-      where[fieldName] = this.getValueForFilter(
-        entityName,
-        actualFieldAlias,
-        actualFieldAlias,
-        fieldValue,
-        isNot,
-        operator
-      );
+      where[fieldName] = this.getValueForFilter(entityName, actualFieldAlias, fieldAlias, fieldValue, isNot, operator);
     }
     // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[end]:`, where, include);
     return { where, include };

@@ -43,16 +43,14 @@ export interface DeleteOptions extends BaseOptions, Omit<DataDeleteOptions, 'sof
 export type DeletePrivateOptions = DataDeletePrivateOptions;
 
 export interface FindOneOptions
-  extends BaseOptions,
-    Omit<DataFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
+  extends BaseOptions, Omit<DataFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
 
 export interface FindOnePrivateOptions extends DataFindOnePrivateOptions {
   requirePrimaryKeys?: boolean;
 }
 
 export interface FindOptions
-  extends BaseOptions,
-    Omit<DataFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
+  extends BaseOptions, Omit<DataFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
 
 export interface FindPrivateOptions extends DataFindPrivateOptions {
   requirePrimaryKeys?: boolean;

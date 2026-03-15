@@ -9,6 +9,7 @@ import {
   DomainEntityService,
   DomainEntityServiceDefaultData,
   GenericObject,
+  LoggerService,
   getNested,
   setNested
 } from '@node-c/core';
@@ -44,7 +45,6 @@ import { IAMTokenManagerService, TokenType } from '../tokenManager';
 // TODO: create user (signup); this should include password hashing
 // TODO: update password (incl. hashing)
 // TODO: reset password
-// TODO: console.info -> logger
 // TODO: periodic checking of external access tokens and their revoking
 export class IAMUserManagerService<
   User extends object,
@@ -69,6 +69,8 @@ export class IAMUserManagerService<
       Record<string, DataEntityService<Partial<User>, DataDefaultData<object>>> | undefined
     >,
     // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
+    // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>
@@ -79,7 +81,7 @@ export class IAMUserManagerService<
   async createAccessToken<AuthData = unknown>(
     options: IAMUserManagerCreateAccessTokenOptions<AuthData>
   ): Promise<IAMUserManagerCreateAccessTokenReturnData<User>> {
-    const { configProvider, moduleName } = this;
+    const { configProvider, logger, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =
       moduleConfig;
@@ -87,13 +89,13 @@ export class IAMUserManagerService<
       auth: { type: authType },
       rememberUser
     } = options;
-    console.info(
+    logger.info(
       `[Domain.${moduleName}.UserManager]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
     );
     // 1. Make sure the auth service actually exists - local, oauth2, etc.
     const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
     if (!authService) {
-      console.info(`[Domain.${moduleName}.UserManager]: No authService ${authType} found.`);
+      logger.info(`[Domain.${moduleName}.UserManager]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
     }
     // 2. Get the user-specific configuration from the authService.
@@ -150,7 +152,7 @@ export class IAMUserManagerService<
     if ('useReturnedTokens' in stepConfig && stepConfig.useReturnedTokens && stepConfig.authReturnsTokens) {
       // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
       if (!actualStepResult.accessToken) {
-        console.info(
+        logger.info(
           `[Domain.${moduleName}.UserManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
@@ -163,7 +165,7 @@ export class IAMUserManagerService<
     // 6. Token management. In this case, we will definitely have the user, or will be force to create it.
     if (issueTokens) {
       if (!user) {
-        console.info(
+        logger.info(
           `[Domain.${moduleName}.UserManager]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
@@ -227,7 +229,7 @@ export class IAMUserManagerService<
           tokenContentOnlyFields: ['externalToken', 'refreshToken', 'user']
         }
       );
-      console.info(
+      logger.info(
         `[Domain.${moduleName}.UserManager]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
       );
       return { accessToken, refreshToken, user };
@@ -249,7 +251,7 @@ export class IAMUserManagerService<
     data: IAMUserManagerExecuteStepData<AuthData>,
     options: IAMUserManagerExecuteStepOptions<User>
   ): Promise<IAMUserManagerExecuteStepResult<User>> {
-    const { configProvider, domainUsersEntityService, moduleName } = this;
+    const { configProvider, domainUsersEntityService, logger, moduleName } = this;
     const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
@@ -267,14 +269,14 @@ export class IAMUserManagerService<
     // 1. Find the user based on the provided filters, if enabled.
     if (findUser && findUserBeforeAuth) {
       if (!hasFilters) {
-        console.info(`[Domain.${moduleName}.UserManager]: No filters provided for findUserBeforeToken=true.`);
+        logger.info(`[Domain.${moduleName}.UserManager]: No filters provided for findUserBeforeToken=true.`);
         throw new ApplicationError('Authentication failed.');
       }
       userFilterField = mainFilterField;
       userFilterValue = userFilters[userFilterField];
       user = await this.getUserForStepExecution({ filters: userFilters, mainFilterField: userFilterField });
       if (!user) {
-        console.info(
+        logger.info(
           `[Domain.${moduleName}.UserManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
         );
         throw new ApplicationError('Authentication failed.');
@@ -320,7 +322,7 @@ export class IAMUserManagerService<
     );
     // 4. Process the step result
     if (!stepResult.valid || (stepResult.mfaUsed && !stepResult.mfaValid)) {
-      console.info(`[Domain.${moduleName}.UserManager]: Bad step result:`, stepResult);
+      logger.info(`[Domain.${moduleName}.UserManager]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
     // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
@@ -381,7 +383,7 @@ export class IAMUserManagerService<
       }
     }
     if (validWithoutUser !== true && !user) {
-      console.info(
+      logger.info(
         `[Domain.${moduleName}.UserManager]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
       );
       throw new ApplicationError('Authentication failed.');

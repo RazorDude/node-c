@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants } from '@node-c/core';
+import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import {
   IAMAuthenticationOktaService as BaseIAMAuthenticationOktaService,
   IAMAuthenticationOktaCompleteData,
@@ -22,12 +22,13 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
 > {
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     protected moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: AuditUserLoginLogsService
   ) {
-    super(configProvider, moduleName, Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME);
+    super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME);
   }
 
   async complete(

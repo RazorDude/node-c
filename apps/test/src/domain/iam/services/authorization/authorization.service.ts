@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataEntityService, DomainMethod } from '@node-c/core';
+import { DataEntityService, DomainMethod, LoggerService } from '@node-c/core';
 import { IAMAuthorizationService as BaseAuthorizationService } from '@node-c/domain-iam';
 
 import { AuthorizationPoint, CacheAuthorizationPointsEntityService } from '../../../../data/cache';
@@ -12,11 +12,13 @@ export class IAMAuthorizationService extends BaseAuthorizationService<Authorizat
   constructor(
     protected dataAuthorizationPointsService: CacheAuthorizationPointsEntityService,
     protected dataDBAuthorizationPointsService: DBUAuthorizationPointsEntityService,
+    protected logger: LoggerService,
     protected tokenManager: IAMTokenManagerService
   ) {
     super(
       dataAuthorizationPointsService,
       [DomainMethod.Find],
+      logger,
       {
         db: dataDBAuthorizationPointsService as DataEntityService<Partial<AuthorizationPoint>>
       },

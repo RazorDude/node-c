@@ -2,7 +2,8 @@ import {
   AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService
+  ConfigProviderService,
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationOAuth2Service } from '@node-c/domain-iam';
 
@@ -31,10 +32,11 @@ export class IAMAuthenticationOktaService<
 > extends IAMAuthenticationOAuth2Service<CompleteContext, InitiateContext> {
   constructor(
     protected configProvider: ConfigProviderService,
+    protected logger: LoggerService,
     protected moduleName: string,
     protected serviceName: string
   ) {
-    super(configProvider, moduleName, serviceName);
+    super(configProvider, logger, moduleName, serviceName);
   }
 
   async complete(

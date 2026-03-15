@@ -5,14 +5,13 @@ import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
-import morgan from 'morgan';
 
 import { HTTPAPIModuleOptions } from './http.api.module.definitions';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
 import { HttpExceptionFilter } from '../filters';
 import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '../interceptors';
-import { HTTPAuthorizationMiddleware, HTTPCORSMiddleware } from '../middlewares';
+import { HTTPAuthorizationMiddleware, HTTPCORSMiddleware, HTTPRequestLoggingMiddleware } from '../middlewares';
 
 export class HTTPAPIModule {
   constructor(
@@ -28,9 +27,7 @@ export class HTTPAPIModule {
     consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
     // configure logging
-    consumer
-      .apply(morgan(`[${this.moduleName}]: :method :url :status :res[content-length] - :response-time ms`))
-      .forRoutes('*');
+    consumer.apply(HTTPRequestLoggingMiddleware).forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
     consumer.apply(HTTPAuthorizationMiddleware).forRoutes('*');
   }

@@ -2,7 +2,7 @@ import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
-import { AppConfigDataRDB, ConfigProviderService, RDBType, loadDynamicModules } from '@node-c/core';
+import { AppConfigDataRDB, ConfigProviderService, LoggerService, RDBType, loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 
 import { DataSource } from 'typeorm';
@@ -30,8 +30,11 @@ export class TypeORMDBModule {
               dataSource = new DataSource(options!);
               await dataSource.initialize();
             } catch (err) {
-              console.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
-              const { failOnConnectionError = true } = (options || {}) as { failOnConnectionError?: boolean };
+              const { failOnConnectionError = true, nodeCAppLoggerService } = (options || {}) as {
+                failOnConnectionError?: boolean;
+                nodeCAppLoggerService: LoggerService;
+              };
+              nodeCAppLoggerService.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
               if (failOnConnectionError) {
                 throw err;
               }
@@ -39,7 +42,7 @@ export class TypeORMDBModule {
             return dataSource!;
           },
           name: connectionName,
-          useFactory: (configProvider: ConfigProviderService) => {
+          useFactory: (configProvider: ConfigProviderService, logger: LoggerService) => {
             const dataConfig = configProvider.config.data;
             // example : configProvider.config.data.db
             const { database, failOnConnectionError, host, password, port, type, typeormExtraOptions, user } =
@@ -64,6 +67,7 @@ export class TypeORMDBModule {
               host,
               manualInitialization: true,
               name: connectionName,
+              nodeCAppLoggerService: logger,
               password,
               port,
               synchronize: false,

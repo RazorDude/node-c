@@ -7,6 +7,7 @@ import {
   DomainEntityServiceDefaultData,
   DomainMethod,
   GenericObject,
+  LoggerService,
   getNested,
   setNested
 } from '@node-c/core';
@@ -40,33 +41,35 @@ export class IAMAuthorizationService<
   constructor(
     protected dataAuthorizationPointsService: DataEntityService<AuthorizationPoint>,
     protected defaultMethods: string[] = [DomainMethod.Find],
+    protected logger: LoggerService,
     protected additionalDataEntityServices?: GenericObject<DataEntityService<Partial<AuthorizationPoint>>>,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager?: TokenManager
   ) {
-    super(dataAuthorizationPointsService, defaultMethods, additionalDataEntityServices);
+    super(dataAuthorizationPointsService, defaultMethods, logger, additionalDataEntityServices);
   }
 
   async authorizeApiKey(data: AuthorizeApiKeyData, options: AuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
+    const { logger } = this;
     const { apiKey, signature, signatureContent } = data;
     const {
       config: { apiKey: expectedApiKey, apiSecret, apiSecretAlgorithm }
     } = options;
     if (!apiKey) {
-      console.error('Missing api key.');
+      logger.error('Missing api key.');
       return { valid: false };
     }
     if (apiKey !== expectedApiKey) {
-      console.error('Invalid api key.');
+      logger.error('Invalid api key.');
       return { valid: false };
     }
     if (apiSecret && apiSecretAlgorithm) {
       if (!signature) {
-        console.error('Missing authorization signature.');
+        logger.error('Missing authorization signature.');
         return { valid: false };
       }
       if (!signatureContent) {
-        console.error('Missing authorization signature content.');
+        logger.error('Missing authorization signature content.');
         return { valid: false };
       }
       const calcualtedSignature = crypto
@@ -74,7 +77,7 @@ export class IAMAuthorizationService<
         .update(signatureContent)
         .digest('hex');
       if (calcualtedSignature !== signature) {
-        console.error(`Invalid signature provided. Expected: ${calcualtedSignature}. Provided: ${signature}`);
+        logger.error(`Invalid signature provided. Expected: ${calcualtedSignature}. Provided: ${signature}`);
         return { valid: false };
       }
     }
@@ -86,15 +89,15 @@ export class IAMAuthorizationService<
     data: { authToken?: string; refreshToken?: string },
     options?: { identifierDataField?: string }
   ): Promise<{ newAuthToken?: string; tokenContent?: DecodedTokenContent<UserTokenEnityFields>; valid: boolean }> {
-    const { tokenManager } = this;
+    const { logger, tokenManager } = this;
     const { authToken, refreshToken } = data;
     const { identifierDataField } = options || {};
     if (!tokenManager) {
-      console.error('Token manager not configured.');
+      logger.error('Token manager not configured.');
       return { valid: false };
     }
     if (!authToken) {
-      console.error('Missing auth token.');
+      logger.error('Missing auth token.');
       return { valid: false };
     }
     let newAuthToken: string | undefined;
@@ -113,7 +116,7 @@ export class IAMAuthorizationService<
         newAuthToken = tokenRes.newToken;
       }
     } catch (e) {
-      console.error('Failed to parse the access or refresh token:', e);
+      logger.error('Failed to parse the access or refresh token:', e);
       return { valid: false };
     }
     return { newAuthToken, tokenContent, valid: true };

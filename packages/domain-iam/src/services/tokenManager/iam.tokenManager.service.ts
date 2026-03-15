@@ -7,6 +7,7 @@ import {
   DomainCreateResult,
   DomainEntityService,
   GenericObject,
+  LoggerService,
   setNested
 } from '@node-c/core';
 
@@ -29,7 +30,6 @@ import { IAMAuthenticationService, IAMAuthenticationType } from '../authenticati
 import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
 import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 
-// TODO: console.error -> logger
 /*
  * Service for managing local access and refresh JWTs.
  */
@@ -50,6 +50,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       DataEntityService<TokenEntity<TokenEntityFields>>
     >,
     // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService,
+    // eslint-disable-next-line no-unused-vars
     protected moduleName: string
   ) {}
 
@@ -57,7 +59,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     data: TokenManagerCreateData<TokenEntityFields>,
     options: TokenManagerCreateOptions
   ): Promise<DomainCreateResult<TokenEntity<TokenEntityFields>>> {
-    const { configProvider, moduleName, domainTokensEntityService } = this;
+    const { configProvider, logger, moduleName, domainTokensEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { type, ...tokenData } = data;
     const { expiresInMinutes, identifierDataField, persist, purgeOldFromData, tokenContentOnlyFields } = options;
@@ -84,7 +86,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     const token = await new Promise<string>((resolve, reject) => {
       jwt.sign({ data }, secret, signOptions, (err, token) => {
         if (err) {
-          console.error(err);
+          logger.error(err);
           reject(new ApplicationError('Failed to sign token.'));
           return;
         }
@@ -121,7 +123,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     token: string,
     options?: VerifyAccessTokenOptions
   ): Promise<VerifyAccessTokenReturnData<TokenEntityFields>> {
-    const { configProvider, moduleName, domainTokensEntityService } = this;
+    const { configProvider, domainTokensEntityService, logger, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
       deleteFromStoreIfExpired,
@@ -217,7 +219,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       throwError = false;
     }
     if (throwError) {
-      console.error(errorMessageToLog);
+      logger.error(errorMessageToLog);
       throw new ApplicationError('Expired access token.');
     }
     // renewal
@@ -235,7 +237,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
         });
         if (externalAccessTokenRenewalResult.error) {
           // TODO: delete from store
-          console.error(errorMessageToLog);
+          logger.error(errorMessageToLog);
           throw new ApplicationError('Expired access token.');
         }
         // TODO: save the new refresh token, if such exists

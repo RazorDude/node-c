@@ -47,8 +47,9 @@ export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationIn
   scope?: string;
 }
 
-export interface IAMAuthenticationOAuth2InitiateOptions<Context extends object>
-  extends IAMAuthenticationInitiateOptions<Context> {
+export interface IAMAuthenticationOAuth2InitiateOptions<
+  Context extends object
+> extends IAMAuthenticationInitiateOptions<Context> {
   generateNonce?: boolean;
   withPCKE?: boolean;
 }

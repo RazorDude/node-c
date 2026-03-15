@@ -23,6 +23,7 @@ import {
   ConfigProviderService
 } from '../../common/configProvider';
 import { ApplicationError } from '../../common/definitions';
+import { LoggerService } from '../../common/logger';
 
 /*
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
@@ -33,7 +34,9 @@ export abstract class DataEntityService<Entity, Data extends DataDefaultData<Ent
 
   constructor(
     protected configProvider: ConfigProviderService,
-    protected dataModuleName: string
+    protected dataModuleName: string,
+    // eslint-disable-next-line no-unused-vars
+    protected logger: LoggerService
   ) {
     const { settingsPerEntity } = configProvider.config.data[dataModuleName] as AppConfigCommonData;
     this.settings = settingsPerEntity || {};
