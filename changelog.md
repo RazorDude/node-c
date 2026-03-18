@@ -1,3 +1,11 @@
+# 1.0.0-beta2
+- `packages/data-clickhouse`
+  - Fixed the DI for the connection initiation and added more logs.
+- `packages/data-redis`
+  - Fixed the DI for the connection initiation and added more logs.
+- `packages/data-typeorm`
+  - Fixed the DI for the connection initiation and added more logs.
+
 # 1.0.0-beta1
 - Common
   - BREAKING: Logging via pino.

@@ -98,9 +98,11 @@ export class RedisStoreService {
         redisOptions: { password: actualPassword, username: actualUser }
       });
       try {
+        logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
         await client.connect();
+        logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
       } catch (err) {
-        logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
         if (failOnConnectionError) {
           throw err;
         }
@@ -129,12 +131,14 @@ export class RedisStoreService {
         username: actualUser
       });
       client.on('error', (error: unknown) => {
-        logger.error(`[RedisStore][${dataModuleName}]: Error:`, error);
+        logger.error(`[RedisStoreService][${dataModuleName}]: Error:`, error);
       });
       try {
+        logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
         await client.connect();
+        logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
       } catch (err) {
-        logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
         if (failOnConnectionError) {
           throw err;
         }
@@ -156,9 +160,15 @@ export class RedisStoreService {
       username: actualUser
     });
     try {
+      logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
       await client.connect();
+      const pingResult = await client.ping();
+      if (pingResult !== 'PONG') {
+        throw new ApplicationError(`Invalid ping result: ${pingResult}. Expected PONG`);
+      }
+      logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
     } catch (err) {
-      logger.error(`[RedisStore][${dataModuleName}]: Error connecting to Redis:`, err);
+      logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
       if (failOnConnectionError) {
         throw err;
       }

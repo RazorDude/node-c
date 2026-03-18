@@ -25,16 +25,18 @@ export class TypeORMDBModule {
         ...(importsPreORM || []),
         TypeOrmModule.forRootAsync({
           dataSourceFactory: async options => {
+            const { failOnConnectionError = true, nodeCAppLoggerService } = (options || {}) as {
+              failOnConnectionError?: boolean;
+              nodeCAppLoggerService: LoggerService;
+            };
             let dataSource: DataSource;
             try {
+              nodeCAppLoggerService.info(`[TypeORMDBModule][${moduleName}]: Connecting to the DB server...`);
               dataSource = new DataSource(options!);
               await dataSource.initialize();
+              nodeCAppLoggerService.info(`[TypeORMDBModule][${moduleName}]: Connected to the DB server successfully.`);
             } catch (err) {
-              const { failOnConnectionError = true, nodeCAppLoggerService } = (options || {}) as {
-                failOnConnectionError?: boolean;
-                nodeCAppLoggerService: LoggerService;
-              };
-              nodeCAppLoggerService.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB Server:`, err);
+              nodeCAppLoggerService.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB server:`, err);
               if (failOnConnectionError) {
                 throw err;
               }
@@ -76,7 +78,7 @@ export class TypeORMDBModule {
               ...(typeormExtraOptions || {})
             } as TypeOrmModuleOptions;
           },
-          inject: [ConfigProviderService]
+          inject: [ConfigProviderService, LoggerService]
         }),
         SQLQueryBuilderModule.register({ dataModuleName: moduleName }),
         ...(importsPostORM || []),

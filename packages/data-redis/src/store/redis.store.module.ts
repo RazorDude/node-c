@@ -23,7 +23,7 @@ export class RedisStoreModule {
             const client = await RedisStoreService.createClient(configProvider.config, { dataModuleName, logger });
             return client;
           },
-          inject: [ConfigProviderService]
+          inject: [ConfigProviderService, LoggerService]
         },
         { provide: CoreConstants.DATA_MODULE_NAME, useValue: dataModuleName },
         { provide: serviceToken, useClass: RedisStoreService }

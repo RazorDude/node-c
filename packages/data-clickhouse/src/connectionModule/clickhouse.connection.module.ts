@@ -52,11 +52,13 @@ export class ClickHouseConnectionModule {
               connectionOptions.url = url;
             }
             try {
+              logger.info(`[ClickHouseConnectionModule][${dataModuleName}]: Connecting to ClickHouse...`);
               client = createClient(connectionOptions);
               const pingResult = await client.ping({ select: true });
               if (!pingResult.success) {
                 throw new ApplicationError(JSON.stringify(pingResult));
               }
+              logger.info(`[ClickHouseConnectionModule][${dataModuleName}]: Connected to ClickHouse successfully.`);
             } catch (err) {
               logger.error(`[ClickHouseConnectionModule][${dataModuleName}]: Error connecting to ClickHouse:`, err);
               if (failOnConnectionError) {
@@ -65,7 +67,7 @@ export class ClickHouseConnectionModule {
             }
             return client!;
           },
-          inject: [ConfigProviderService]
+          inject: [ConfigProviderService, LoggerService]
         }
       ],
       exports: [clientName]
