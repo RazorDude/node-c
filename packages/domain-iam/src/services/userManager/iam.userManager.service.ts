@@ -202,6 +202,9 @@ export class IAMUserManagerService<
         refreshToken = localRefreshToken;
       }
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
+      const accessTokenExpiresIn =
+        (externalAccessToken && 'accessTokenExpiresIn' in actualStepResult && actualStepResult.accessTokenExpiresIn) ||
+        accessTokenExpiryTimeInMinutes;
       const {
         result: { token: accessToken }
       } = await this.tokenManager.create(
@@ -218,21 +221,35 @@ export class IAMUserManagerService<
             : {})
         },
         {
-          expiresInMinutes:
-            (externalAccessToken &&
-              'accessTokenExpiresIn' in actualStepResult &&
-              actualStepResult.accessTokenExpiresIn) ||
-            accessTokenExpiryTimeInMinutes,
+          expiresInMinutes: accessTokenExpiresIn,
           identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
-          tokenContentOnlyFields: ['externalToken', 'refreshToken', 'user']
+          tokenContentOnlyFields: ['externalToken', 'refreshToken']
+        }
+      );
+      // 6.3. Create an idToken. The payload contains the user with permissions data
+      const {
+        result: { token: idToken }
+      } = await this.tokenManager.create(
+        {
+          accessToken,
+          type: TokenType.Id,
+          user,
+          [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue
+        },
+        {
+          expiresInMinutes: accessTokenExpiresIn,
+          identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
+          persist: true,
+          purgeOldFromData: true,
+          tokenContentOnlyFields: ['accessToken', 'user']
         }
       );
       logger.info(
         `[Domain.${moduleName}.UserManager]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
       );
-      return { accessToken, refreshToken, user };
+      return { accessToken, idToken, refreshToken, user };
     }
     const returnData: IAMUserManagerCreateAccessTokenReturnData<User> = { nextStepsRequired: true };
     if (stepConfig.stepResultPublicFields?.length) {
@@ -292,7 +309,7 @@ export class IAMUserManagerService<
         data: stepInputData.data,
         options: stepInputData.options
       };
-      const cacheResult = await this.dataUsersAuthCacheService.findOne({
+      const cacheResult = await this.tokenManager.domainTokensEntityService.findOne({
         filters: {
           [cacheSettings.settings.cacheFieldName]: getNested(cacheInput, cacheSettings.settings.inputFieldName)
             .unifiedValue

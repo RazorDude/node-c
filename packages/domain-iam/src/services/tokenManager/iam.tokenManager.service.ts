@@ -45,7 +45,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
-    protected domainTokensEntityService: DomainEntityService<
+    public domainTokensEntityService: DomainEntityService<
       TokenEntity<TokenEntityFields>,
       DataEntityService<TokenEntity<TokenEntityFields>>
     >,
@@ -65,7 +65,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     const { expiresInMinutes, identifierDataField, persist, purgeOldFromData, tokenContentOnlyFields } = options;
     const signOptions = {} as jwt.SignOptions;
     let secret: string;
-    // Leaving this big and ugly if-statement as is, in case we need to expand it in the future.
+    // access token options
     if (type === TokenType.Access) {
       secret = moduleConfig.jwtAccessSecret;
       if (expiresInMinutes) {
@@ -73,7 +73,18 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
         signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
       }
-    } else if (type === TokenType.Refresh) {
+    }
+    // id token options: this intentionally uses the jwtAccessSecret and the jwtRefreshTokenExpiryTimeInMinutes
+    else if (type === TokenType.Id) {
+      secret = moduleConfig.jwtAccessSecret;
+      if (expiresInMinutes) {
+        signOptions.expiresIn = expiresInMinutes * 60;
+      } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {
+        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInMinutes * 60;
+      }
+    }
+    // refresh token options
+    else if (type === TokenType.Refresh) {
       secret = moduleConfig.jwtRefreshSecret;
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
@@ -118,7 +129,6 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     return { result: objectToSave };
   }
 
-  // TODO: delete from store at the end
   async verifyAccessToken(
     token: string,
     options?: VerifyAccessTokenOptions
@@ -128,22 +138,25 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     const {
       deleteFromStoreIfExpired,
       identifierDataField,
-      newTokenExpiresInMinutes,
+      newAccessTokenExpiresInMinutes,
       persistNewToken,
       purgeStoreOnRenew,
       refreshToken,
       refreshTokenAccessTokenIdentifierDataField
     } = options || {};
     // decode the token
-    const { content, error, externalTokenData } = await this.verify(token, moduleConfig.jwtAccessSecret, {
+    const { error, externalTokenData, ...accessTokenData } = await this.verify(token, moduleConfig.jwtAccessSecret, {
       // TODO: make this configurable
       verifyExternal: true
     });
     const externalAccessTokenExpired = !!externalTokenData?.error;
     const internalAccessTokenExpired = error === Constants.TOKEN_EXPIRED_ERROR;
+    let content = accessTokenData.content;
     let errorMessageToLog: string | undefined;
     let externalRenewEnabled = false;
-    let newToken: string | undefined;
+    let newAccessToken: string | undefined;
+    let newIdToken: string | undefined;
+    let newRefreshToken: string | undefined;
     let refreshTokenContent: DecodedTokenContent<object> | undefined;
     let renewEnabled = false;
     let throwError = true;
@@ -222,36 +235,93 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       logger.error(errorMessageToLog);
       throw new ApplicationError('Expired access token.');
     }
-    // renewal
-    if (content?.data && renewEnabled) {
-      const tokenData: TokenManagerCreateData<GenericObject<unknown>> = { ...content.data, type: TokenType.Access };
-      if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
-        tokenData[refreshTokenAccessTokenIdentifierDataField] = refreshToken;
-      }
-      if (externalRenewEnabled) {
-        const externalAccessTokenRenewalResult = await this.authServices[
-          refreshTokenContent!.data!.externalTokenAuthService!
-        ]!.refreshExternalAccessToken({
-          accessToken: content.data!.externalToken!,
-          refreshToken: refreshTokenContent!.data!.externalToken!
+    if (content?.data) {
+      let idTokenContent: DecodedTokenContent<TokenEntityFields> | undefined;
+      let identifierValue: unknown | undefined;
+      // find and decode the id token, and add its data to the content
+      if (identifierDataField) {
+        identifierValue = ld.get(content.data, identifierDataField);
+        const idToken = await this.domainTokensEntityService.findOne({
+          filters: { [identifierDataField]: identifierValue, token, type: TokenType.Access }
         });
-        if (externalAccessTokenRenewalResult.error) {
-          // TODO: delete from store
-          logger.error(errorMessageToLog);
-          throw new ApplicationError('Expired access token.');
+        if (idToken.result) {
+          const idTokenData = await this.verify(idToken.result.token, moduleConfig.jwtAccessSecret);
+          if (idTokenData.content) {
+            idTokenContent = idTokenData.content;
+            content = ld.merge(content, idTokenContent);
+          }
         }
-        // TODO: save the new refresh token, if such exists
-        tokenData.externalToken = externalAccessTokenRenewalResult.newAccessToken;
       }
-      const { result } = await this.create(tokenData as TokenManagerCreateData<TokenEntityFields>, {
-        expiresInMinutes: newTokenExpiresInMinutes,
-        identifierDataField,
-        persist: persistNewToken,
-        purgeOldFromData: purgeStoreOnRenew
-      });
-      newToken = result.token;
+      // renewal
+      if (renewEnabled) {
+        const tokenData: TokenManagerCreateData<GenericObject<unknown>> = { ...content.data, type: TokenType.Access };
+        const refreshTokenData: TokenManagerCreateData<GenericObject<unknown>> = {
+          ...refreshTokenContent?.data,
+          type: TokenType.Access
+        };
+        if (refreshToken && refreshTokenAccessTokenIdentifierDataField) {
+          tokenData[refreshTokenAccessTokenIdentifierDataField] = refreshToken;
+        }
+        // renew the external access token, if enabled
+        if (externalRenewEnabled) {
+          const externalAccessTokenRenewalResult = await this.authServices[
+            refreshTokenContent!.data!.externalTokenAuthService!
+          ]!.refreshExternalAccessToken({
+            accessToken: content.data!.externalToken!,
+            refreshToken: refreshTokenContent!.data!.externalToken!
+          });
+          if (externalAccessTokenRenewalResult.error) {
+            // TODO: delete the old token from store
+            logger.error(errorMessageToLog);
+            throw new ApplicationError('Expired access token.');
+          }
+          tokenData.externalToken = externalAccessTokenRenewalResult.newAccessToken;
+          if (externalAccessTokenRenewalResult.newRefreshToken) {
+            refreshTokenData.externalToken = externalAccessTokenRenewalResult.newRefreshToken;
+          }
+        }
+        // renew the internal access tokens
+        const { result } = await this.create(tokenData as TokenManagerCreateData<TokenEntityFields>, {
+          expiresInMinutes: newAccessTokenExpiresInMinutes,
+          identifierDataField,
+          persist: persistNewToken,
+          purgeOldFromData: purgeStoreOnRenew
+        });
+        newAccessToken = result.token;
+        refreshTokenData.accessToken = newAccessToken;
+        // renew the internal refreshToken
+        const { result: refreshTokenResult } = await this.create(
+          refreshTokenData as TokenManagerCreateData<TokenEntityFields>,
+          {
+            expiresInMinutes: newAccessTokenExpiresInMinutes,
+            identifierDataField,
+            persist: persistNewToken,
+            purgeOldFromData: purgeStoreOnRenew
+          }
+        );
+        newRefreshToken = refreshTokenResult.token;
+        // renew the internal idToken
+        if (idTokenContent?.data) {
+          const { result: newIdTokenResult } = await this.create(
+            {
+              ...idTokenContent.data,
+              accessToken: newAccessToken,
+              type: TokenType.Id,
+              [identifierDataField!]: identifierValue
+            } as TokenEntityFields,
+            {
+              expiresInMinutes: newAccessTokenExpiresInMinutes,
+              identifierDataField,
+              persist: true,
+              purgeOldFromData: true,
+              tokenContentOnlyFields: Object.keys(idTokenContent.data)
+            }
+          );
+          newIdToken = newIdTokenResult.token;
+        }
+      }
     }
-    return { content, newToken };
+    return { content, newAccessToken, newRefreshToken, newIdToken };
   }
 
   protected async verify(

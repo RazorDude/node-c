@@ -1,3 +1,12 @@
+# 1.0.0-beta3
+- `packages/domain-iam`
+  - BREAKING: Switched from encoding user data in the local accessToken to encoding user data in the new local idToken.
+- `packages/api-http`
+  - BREAKING: Changes related to the changes in the `packages/domain-iam` package.
+- `apps/test`
+  - BREAKING: Changes related to the changes in the `packages/domain-iam` and `packages/api-http` packages.
+
+
 # 1.0.0-beta2
 - `packages/data-clickhouse`
   - Fixed the DI for the connection initiation and added more logs.

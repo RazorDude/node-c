@@ -36,6 +36,8 @@ export enum TokenType {
   // eslint-disable-next-line no-unused-vars
   Access = 'access',
   // eslint-disable-next-line no-unused-vars
+  Id = 'id',
+  // eslint-disable-next-line no-unused-vars
   Refresh = 'refresh'
 }
 
@@ -48,7 +50,7 @@ export interface TokenManagerVerifyResult<TokenEntityFields> {
 export interface VerifyAccessTokenOptions {
   deleteFromStoreIfExpired?: boolean;
   identifierDataField?: string;
-  newTokenExpiresInMinutes?: number;
+  newAccessTokenExpiresInMinutes?: number;
   persistNewToken?: boolean;
   purgeStoreOnRenew?: boolean;
   refreshToken?: string;
@@ -57,5 +59,7 @@ export interface VerifyAccessTokenOptions {
 
 export interface VerifyAccessTokenReturnData<TokenEntityFields> {
   content?: DecodedTokenContent<TokenEntityFields>;
-  newToken?: string;
+  newAccessToken?: string;
+  newIdToken?: string;
+  newRefreshToken?: string;
 }

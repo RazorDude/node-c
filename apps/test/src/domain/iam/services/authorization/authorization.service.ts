@@ -12,8 +12,8 @@ export class IAMAuthorizationService extends BaseAuthorizationService<Authorizat
   constructor(
     protected dataAuthorizationPointsService: CacheAuthorizationPointsEntityService,
     protected dataDBAuthorizationPointsService: DBUAuthorizationPointsEntityService,
-    protected logger: LoggerService,
-    protected tokenManager: IAMTokenManagerService
+    logger: LoggerService,
+    tokenManager: IAMTokenManagerService
   ) {
     super(
       dataAuthorizationPointsService,

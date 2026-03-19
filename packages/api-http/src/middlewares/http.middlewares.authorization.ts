@@ -115,7 +115,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         authToken = req.cookies['sid'];
         useCookie = true;
       }
-      const { newAuthToken, tokenContent, valid } =
+      const { newAccessToken, newRefreshToken, tokenContent, valid } =
         await this.authorizationService.authorizeBearer<IAMUserManagerUserTokenEnityFields>(
           { authToken, refreshToken },
           { identifierDataField: usersService ? 'userId' : undefined }
@@ -129,7 +129,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           logger.error('Missing userId in the tokenContent data.');
           throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
         }
-        // use the bearer auth token decoded payload for the user data, if configured this way
+        // use the bearer access/id token decoded payload for the user data, if configured this way
         const user = tokenContent?.data?.user;
         if (user) {
           req.locals!.user = user;
@@ -137,10 +137,11 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
         }
       }
-      if (newAuthToken) {
-        res.setHeader('Authorization', `Bearer ${newAuthToken}${refreshToken ? ` ${refreshToken}` : ''}`);
+      if (newAccessToken) {
+        const refreshTokenValue = newRefreshToken || refreshToken;
+        res.setHeader('Authorization', `Bearer ${newAccessToken}${refreshTokenValue ? ` ${refreshTokenValue}` : ''}`);
         if (useCookie) {
-          res.cookie('sid', newAuthToken);
+          res.cookie('sid', newAccessToken);
         }
       }
       next();

@@ -16,6 +16,6 @@ export class IAMTokensService extends DomainEntityService<
     protected dataEntityService: CacheAuthTokensEntityService,
     protected logger: LoggerService
   ) {
-    super(dataEntityService, ['create', 'delete'], logger);
+    super(dataEntityService, ['create', 'findOne', 'delete'], logger);
   }
 }

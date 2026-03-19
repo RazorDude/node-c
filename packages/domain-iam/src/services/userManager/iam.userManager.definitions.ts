@@ -29,6 +29,7 @@ export interface IAMUserManagerCreateAccessTokenOptions<AuthData = unknown> {
 export type IAMUserManagerCreateAccessTokenReturnData<UserData> =
   | {
       accessToken: string;
+      idToken: string;
       refreshToken?: string;
       user: UserData;
     }
@@ -62,6 +63,7 @@ export type IAMUserManagerUserWithPermissionsData<UserData, AuthorizationPointId
   AuthorizationUser<AuthorizationPointId> & UserData;
 
 export interface IAMUserManagerUserTokenEnityFields<UserId = unknown> {
+  accessToken?: string;
   refreshToken?: string;
   userId: UserId;
   user?: IAMUserManagerUserWithPermissionsData<object, unknown>;

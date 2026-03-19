@@ -85,10 +85,17 @@ export class IAMAuthorizationService<
   }
 
   // TODO: decouple from users
+  // TODO: use an idToken, rather than an accessToken, for the permissions
   async authorizeBearer<UserTokenEnityFields = unknown>(
     data: { authToken?: string; refreshToken?: string },
     options?: { identifierDataField?: string }
-  ): Promise<{ newAuthToken?: string; tokenContent?: DecodedTokenContent<UserTokenEnityFields>; valid: boolean }> {
+  ): Promise<{
+    newAccessToken?: string;
+    newIdToken?: string;
+    newRefreshToken?: string;
+    tokenContent?: DecodedTokenContent<UserTokenEnityFields>;
+    valid: boolean;
+  }> {
     const { logger, tokenManager } = this;
     const { authToken, refreshToken } = data;
     const { identifierDataField } = options || {};
@@ -100,7 +107,9 @@ export class IAMAuthorizationService<
       logger.error('Missing auth token.');
       return { valid: false };
     }
-    let newAuthToken: string | undefined;
+    let newAccessToken: string | undefined;
+    let newIdToken: string | undefined;
+    let newRefreshToken: string | undefined;
     let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
     try {
       const tokenRes = await tokenManager.verifyAccessToken(authToken, {
@@ -112,14 +121,20 @@ export class IAMAuthorizationService<
         refreshTokenAccessTokenIdentifierDataField: 'accessToken'
       });
       tokenContent = tokenRes.content as unknown as DecodedTokenContent<UserTokenEnityFields>;
-      if (tokenRes.newToken) {
-        newAuthToken = tokenRes.newToken;
+      if (tokenRes.newAccessToken) {
+        newAccessToken = tokenRes.newAccessToken;
+      }
+      if (tokenRes.newIdToken) {
+        newIdToken = tokenRes.newIdToken;
+      }
+      if (tokenRes.newRefreshToken) {
+        newRefreshToken = tokenRes.newRefreshToken;
       }
     } catch (e) {
       logger.error('Failed to parse the access or refresh token:', e);
       return { valid: false };
     }
-    return { newAuthToken, tokenContent, valid: true };
+    return { newAccessToken, newIdToken, newRefreshToken, tokenContent, valid: true };
   }
 
   async checkAccessWithStorage(): Promise<void> {

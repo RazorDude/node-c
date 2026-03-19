@@ -16,11 +16,11 @@ export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuth
   constructor(
     protected authenticationOktaService: IAMAuthenticationOktaService,
     protected authenticationUserLocalService: IAMAuthenticationUserLocalService,
-    protected configProvider: ConfigProviderService,
-    protected domainTokensEntityService: IAMTokensService,
-    protected logger: LoggerService,
+    configProvider: ConfigProviderService,
+    domainTokensEntityService: IAMTokensService,
+    logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
-    protected moduleName: string
+    moduleName: string
   ) {
     super(
       { okta: authenticationOktaService, [IAMAuthenticationType.UserLocal]: authenticationUserLocalService },
