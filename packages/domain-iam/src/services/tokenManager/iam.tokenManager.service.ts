@@ -285,7 +285,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
           expiresInMinutes: newAccessTokenExpiresInMinutes,
           identifierDataField,
           persist: persistNewToken,
-          purgeOldFromData: purgeStoreOnRenew
+          purgeOldFromData: purgeStoreOnRenew,
+          tokenContentOnlyFields: ['externalToken']
         });
         newAccessToken = result.token;
         refreshTokenData.accessToken = newAccessToken;
@@ -296,7 +297,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
             expiresInMinutes: newAccessTokenExpiresInMinutes,
             identifierDataField,
             persist: persistNewToken,
-            purgeOldFromData: purgeStoreOnRenew
+            purgeOldFromData: purgeStoreOnRenew,
+            tokenContentOnlyFields: ['accessToken', 'externalToken']
           }
         );
         newRefreshToken = refreshTokenResult.token;
@@ -314,7 +316,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
               identifierDataField,
               persist: true,
               purgeOldFromData: true,
-              tokenContentOnlyFields: Object.keys(idTokenContent.data)
+              tokenContentOnlyFields: [...Object.keys(idTokenContent.data), 'accessToken']
             }
           );
           newIdToken = newIdTokenResult.token;

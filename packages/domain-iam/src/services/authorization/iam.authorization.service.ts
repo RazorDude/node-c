@@ -112,6 +112,7 @@ export class IAMAuthorizationService<
     let newRefreshToken: string | undefined;
     let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
     try {
+      logger.info('=> HERE');
       const tokenRes = await tokenManager.verifyAccessToken(authToken, {
         deleteFromStoreIfExpired: true,
         identifierDataField,

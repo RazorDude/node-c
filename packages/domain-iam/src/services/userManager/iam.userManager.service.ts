@@ -211,7 +211,6 @@ export class IAMUserManagerService<
         {
           refreshToken,
           type: TokenType.Access,
-          user,
           [IAMUserManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
           ...(externalAccessToken
             ? {

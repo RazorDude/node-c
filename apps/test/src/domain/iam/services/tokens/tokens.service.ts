@@ -12,10 +12,7 @@ export class IAMTokensService extends DomainEntityService<
   undefined,
   DataDefaultData<CacheAuthToken>
 > {
-  constructor(
-    protected dataEntityService: CacheAuthTokensEntityService,
-    protected logger: LoggerService
-  ) {
+  constructor(dataEntityService: CacheAuthTokensEntityService, logger: LoggerService) {
     super(dataEntityService, ['create', 'findOne', 'delete'], logger);
   }
 }

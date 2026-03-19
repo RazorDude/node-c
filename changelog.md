@@ -1,3 +1,9 @@
+# 1.0.0-beta4
+- `packages/domain-iam`
+  - AccessToken and idToken hotfix.
+- `packages/api-http`
+  - AccessToken and idToken hotfix.
+
 # 1.0.0-beta3
 - `packages/domain-iam`
   - BREAKING: Switched from encoding user data in the local accessToken to encoding user data in the new local idToken.
