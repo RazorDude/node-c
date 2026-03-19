@@ -133,8 +133,12 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         const user = tokenContent?.data?.user;
         if (user) {
           req.locals!.user = user;
-        } else {
+        } else if (moduleConfig.localSearchForUsersEnabledOnAuthorization) {
           req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
+        }
+        if (!userId) {
+          logger.error('Missing user data in the session.');
+          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
         }
       }
       if (newAccessToken) {

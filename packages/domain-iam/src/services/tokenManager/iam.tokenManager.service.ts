@@ -229,7 +229,26 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
         errorMessageToLog = '[IAMTokenManagerService.verify]: Internal access token expired.';
       }
     } else {
-      throwError = false;
+      // check whether the local access token exists in the cache
+      if (moduleConfig.checkAccessTokenExistanceLocally) {
+        if (!identifierDataField || !content?.data) {
+          errorMessageToLog =
+            'The identifierDataField and the content.data are required when checkAccessTokenExistanceLocally is set to true.';
+          throwError = true;
+        } else {
+          const accessTokenResult = await this.domainTokensEntityService.findOne({
+            filters: { [identifierDataField]: ld.get(content.data, identifierDataField), token, type: TokenType.Access }
+          });
+          if (!accessTokenResult.result) {
+            errorMessageToLog = 'Access token not found locally.';
+            throwError = true;
+          } else {
+            throwError = false;
+          }
+        }
+      } else {
+        throwError = false;
+      }
     }
     if (throwError) {
       logger.error(errorMessageToLog);
@@ -242,7 +261,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       if (identifierDataField) {
         identifierValue = ld.get(content.data, identifierDataField);
         const idToken = await this.domainTokensEntityService.findOne({
-          filters: { [identifierDataField]: identifierValue, token, type: TokenType.Access }
+          filters: { [identifierDataField]: identifierValue, token, type: TokenType.Id }
         });
         if (idToken.result) {
           const idTokenData = await this.verify(idToken.result.token, moduleConfig.jwtAccessSecret);

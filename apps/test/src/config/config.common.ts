@@ -6,7 +6,10 @@ import { Constants } from '../common/definitions';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
-    coursePlatform: { endpointSecurityMode: EndpointSecurityMode.Strict },
+    coursePlatform: {
+      endpointSecurityMode: EndpointSecurityMode.Strict,
+      localSearchForUsersEnabledOnAuthorization: false
+    },
     sso: {
       anonymousAccessRoutes: {
         '/users/accessToken': [HttpMethod.POST],
@@ -32,6 +35,7 @@ export const appConfigCommon: AppConfigCommon = {
           }
         }
       },
+      checkAccessTokenExistanceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
     }

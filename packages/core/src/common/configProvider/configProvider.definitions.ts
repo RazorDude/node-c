@@ -124,6 +124,7 @@ export interface AppConfigCommonAPIHTTP {
   anonymousAccessRoutes?: Record<string, HttpMethod[]>;
   endpointSecurityMode?: EndpointSecurityMode;
   hostname?: string;
+  localSearchForUsersEnabledOnAuthorization?: boolean;
   port?: number;
 }
 export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
@@ -148,6 +149,7 @@ export interface AppConfigCommonDomainIAM {
     processExternalTokensOnVerify?: boolean;
     steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
   }>;
+  checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField: string;
   refreshTokenExpiryTimeInMinutes?: number;
 }
@@ -358,6 +360,8 @@ export interface AppConfigProfileDomainIAM {
     };
     processExternalTokensOnVerify?: boolean;
   }>;
+  checkAccessTokenExistanceLocally?: boolean;
+  defaultUserIdentifierField?: string;
   refreshTokenExpiryTimeInMinutes?: number;
 }
 

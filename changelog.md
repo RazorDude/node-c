@@ -1,3 +1,16 @@
+# 1.0.0-beta5
+- `packages/core`
+  - More options for validating access and id tokens.
+  - IDToken hotfix.
+- `packages/domain-iam`
+  - More options for validating access and id tokens.
+  - IDToken hotfix.
+- `packages/api-http`
+  - More options for validating access and id tokens.
+  - IDToken hotfix.
+- `apps/test`
+  - Changes to test the above.
+
 # 1.0.0-beta4
 - `packages/domain-iam`
   - AccessToken and idToken hotfix.
