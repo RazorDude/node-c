@@ -3,7 +3,7 @@ import {
   ApplicationError,
   ConfigProviderService,
   DataEntityService,
-  DomainCreateOptions,
+  DomainCreatePrivateOptions,
   DomainCreateResult,
   DomainEntityService,
   GenericObject,
@@ -79,8 +79,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       secret = moduleConfig.jwtAccessSecret;
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
-      } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {
-        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInMinutes * 60;
+      } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
+        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
       }
     }
     // refresh token options
@@ -88,8 +88,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       secret = moduleConfig.jwtRefreshSecret;
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
-      } else if (moduleConfig.refreshTokenExpiryTimeInMinutes) {
-        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInMinutes * 60;
+      } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
+        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
       }
     } else {
       throw new ApplicationError(`[TokenManager.create]: Invalid token type - "${type}".`);
@@ -124,7 +124,9 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
           );
         }
       }
-      await domainTokensEntityService.create(objectToSave, { ttl: signOptions.expiresIn } as DomainCreateOptions);
+      await domainTokensEntityService.create(objectToSave, {}, {
+        ttl: signOptions.expiresIn
+      } as DomainCreatePrivateOptions);
     }
     return { result: objectToSave };
   }
@@ -231,9 +233,12 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     } else {
       // check whether the local access token exists in the cache
       if (moduleConfig.checkAccessTokenExistanceLocally) {
-        if (!identifierDataField || !content?.data) {
+        if (!identifierDataField) {
           errorMessageToLog =
-            'The identifierDataField and the content.data are required when checkAccessTokenExistanceLocally is set to true.';
+            'The identifierDataField is required when checkAccessTokenExistanceLocally is set to true.';
+          throwError = true;
+        } else if (!content?.data) {
+          errorMessageToLog = 'Content.data is required when checkAccessTokenExistanceLocally is set to true.';
           throwError = true;
         } else {
           const accessTokenResult = await this.domainTokensEntityService.findOne({

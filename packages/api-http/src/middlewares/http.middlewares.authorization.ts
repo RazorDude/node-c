@@ -38,6 +38,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     protected usersService?: IAMUserManagerService<User>
   ) {}
 
+  // TODO: throw proper error messages (maybe check the error interceptor?)
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
     const { configProvider, logger, moduleName, tokenManager, usersService } = this;
     (async () => {

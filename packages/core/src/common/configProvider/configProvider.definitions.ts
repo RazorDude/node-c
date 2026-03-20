@@ -151,7 +151,7 @@ export interface AppConfigCommonDomainIAM {
   }>;
   checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField: string;
-  refreshTokenExpiryTimeInMinutes?: number;
+  refreshTokenExpiryTimeInHours?: number;
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
@@ -362,7 +362,7 @@ export interface AppConfigProfileDomainIAM {
   }>;
   checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField?: string;
-  refreshTokenExpiryTimeInMinutes?: number;
+  refreshTokenExpiryTimeInHours?: number;
 }
 
 export type AppConfigProfileDataClickHouse = AppConfigCommonDataClickHouse & {

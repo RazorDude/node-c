@@ -60,7 +60,7 @@ export const appConfigCommon: AppConfigCommon = {
       storeDelimiter: ':',
       storeKey: Constants.DATA_CACHE_AUTH_STORE_KEY,
       type: NoSQLType.Valkey,
-      useHashmap: true
+      useHashmap: false
     },
     db: {
       connectionName: Constants.DATA_DB_MODULE_CONNECTION_NAME,

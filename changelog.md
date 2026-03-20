@@ -1,3 +1,16 @@
+# 1.0.0-beta6
+- `packages/core`
+  - DomainEntityService: Fixed the passing of privateOptions to the entityService methods in the bulkCreate and create methods.
+  - Fixed the refreshTokenExpiryTimeInHours parameter in the domain-iam config, as it was added as refreshTokenExpiryTimeInMinutes.
+- `packages/data-rdb`
+  - Fix for the SQLQueryBuilder's parseRelations allowed include method.
+- `packages/data-redis`
+  - TTL option in the EntityService.
+- `packages/domain-iam`
+  - Fixed the TTL of the tokens in the auth cache.
+  - Fixing the usage of refreshTokenExpiryTimeInHours across the board - it used to incorrectly be refreshTokenExpiryTimeInMinutes.
+  - Updated the access token validation logic so that it allows for the renewal of an expired access token, even if it doesn't exist in the auth cache, as long as it has a refresh token.
+
 # 1.0.0-beta5
 - `packages/core`
   - More options for validating access and id tokens.

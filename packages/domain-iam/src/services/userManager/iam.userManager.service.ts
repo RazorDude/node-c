@@ -83,8 +83,7 @@ export class IAMUserManagerService<
   ): Promise<IAMUserManagerCreateAccessTokenReturnData<User>> {
     const { configProvider, logger, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInMinutes } =
-      moduleConfig;
+    const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInHours } = moduleConfig;
     const {
       auth: { type: authType },
       rememberUser
@@ -192,7 +191,7 @@ export class IAMUserManagerService<
               (externalRefreshToken &&
                 'refreshTokenExpiresIn' in actualStepResult &&
                 actualStepResult.refreshTokenExpiresIn) ||
-              (rememberUser ? undefined : refreshTokenExpiryTimeInMinutes),
+              (rememberUser || !refreshTokenExpiryTimeInHours ? undefined : refreshTokenExpiryTimeInHours * 60),
             identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
             persist: true,
             purgeOldFromData: true,

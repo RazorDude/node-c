@@ -55,7 +55,6 @@ export class DomainEntityService<
     protected defaultAdditionalDataEntityServicesOptions?: {
       [methodName: string]: {
         [serviceName: string]: {
-          allowIncoming?: boolean;
           serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides & GenericObject<unknown>;
         };
       };
@@ -78,27 +77,23 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
       throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
     }
-    // const defaultAdditionalDataEntityServicesOptions =
-    //   this.defaultAdditionalDataEntityServicesOptions?.bulkCreate;
-    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main] } = options || {};
+    const {
+      optionsOverridesByService,
+      dataServices = [DomainDataEntityServiceType.Main],
+      ...otherOptions
+    } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).bulkCreate(data, privateOptions);
+    const result = await this.getDataService(firstServiceName).bulkCreate(data, otherOptions, privateOptions);
     let actualOtherServiceNames: string[] = [];
     let actualOptionsOverridesByService: typeof optionsOverridesByService = {};
-    // if (defaultAdditionalDataEntityServicesOptions) {
-    //   for (const serviceName in defaultAdditionalDataEntityServicesOptions) {
-    //     const { allowIncoming = true, serviceOptions } = defaultAdditionalDataEntityServicesOptions[serviceName];
-    //   }
-    // } else {
     actualOtherServiceNames = otherServiceNames || [];
     actualOptionsOverridesByService = optionsOverridesByService;
-    // }
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(actualOtherServiceNames, {
         firstServiceResult: result,
         hasFirstServiceResult: result.length > 0,
-        methodArgs: [result, privateOptions],
+        methodArgs: [result, otherOptions, privateOptions],
         methodName: 'bulkCreate',
         optionsArgIndex: 1,
         optionsOverridesByService: actualOptionsOverridesByService
@@ -122,15 +117,19 @@ export class DomainEntityService<
     if (!this.defaultMethods?.includes(DomainMethod.Create)) {
       throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
     }
-    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main] } = options || {};
+    const {
+      optionsOverridesByService,
+      dataServices = [DomainDataEntityServiceType.Main],
+      ...otherOptions
+    } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).create(data, privateOptions);
+    const result = await this.getDataService(firstServiceName).create(data, otherOptions, privateOptions);
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
         firstServiceResult: result,
         hasFirstServiceResult: typeof result !== 'undefined' && result !== null,
-        methodArgs: [result, privateOptions],
+        methodArgs: [result, otherOptions, privateOptions],
         methodName: 'create',
         optionsArgIndex: 1,
         optionsOverridesByService

@@ -25,6 +25,7 @@ export interface BaseOptions {
 export type BulkCreateOptions = BaseCreateOptions;
 
 export interface BulkCreatePrivateOptions extends DataBulkCreatePrivateOptions {
+  ttl?: number;
   validate?: boolean;
 }
 
@@ -35,6 +36,7 @@ export type CountPrivateOptions = DataCountPrivateOptions;
 export type CreateOptions = BaseCreateOptions;
 
 export interface CreatePrivateOptions extends DataCreatePrivateOptions {
+  ttl?: number;
   validate?: boolean;
 }
 
@@ -61,11 +63,13 @@ export interface ServiceSaveOptions {
   generatePrimaryKeys: boolean;
   processObjectAllowedFieldsEnabled?: boolean;
   transactionId?: string;
+  ttl?: number;
   validate?: boolean;
 }
 
 export interface UpdateOptions extends BaseCreateOptions, DataUpdateOptions {}
 
 export interface UpdatePrivateOptions extends DataUpdatePrivateOptions {
+  ttl?: number;
   validate?: boolean;
 }

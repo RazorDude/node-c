@@ -64,11 +64,12 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       await store.endTransaction(tId);
       return result;
     }
-    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
+    const { processInputAllowedFieldsEnabled, ttl, validate } = actualPrivateOptions;
     return await this.save(data, {
       generatePrimaryKeys: true,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
+      ttl,
       validate
     });
   }
@@ -99,11 +100,12 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       await store.endTransaction(tId);
       return result;
     }
-    const { processInputAllowedFieldsEnabled, validate } = actualPrivateOptions;
+    const { processInputAllowedFieldsEnabled, ttl, validate } = actualPrivateOptions;
     return await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
       generatePrimaryKeys: false,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
+      ttl,
       validate
     });
   }
@@ -211,6 +213,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       generatePrimaryKeys,
       processObjectAllowedFieldsEnabled,
       transactionId,
+      ttl,
       validate
     } = options || {};
     if (optDelete) {
@@ -229,6 +232,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     return (await repository.save(dataToSave as Entity, {
       generatePrimaryKeys,
       transactionId,
+      ttl,
       validate: typeof validate !== 'undefined' ? validate : !!validationSettings?.isEnabled
     })) as ReturnData;
   }
@@ -253,6 +257,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       processFiltersAllowedFieldsEnabled,
       processInputAllowedFieldsEnabled,
       requirePrimaryKeys = true,
+      ttl,
       validate
     } = actualPrivateOptions;
     const dataToReturn: DataUpdateResult<Entity> = {};
@@ -276,6 +281,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
         generatePrimaryKeys: false,
         processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
         transactionId,
+        ttl,
         validate
       }
     );

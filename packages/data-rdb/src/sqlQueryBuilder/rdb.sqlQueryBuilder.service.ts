@@ -573,7 +573,7 @@ export class SQLQueryBuilderService {
     if (newIncludeItems) {
       for (const includeItemPath in newIncludeItems) {
         const includeItemAlias = newIncludeItems[includeItemPath];
-        if (!allowedIncludeMap[includeItemPath]) {
+        if (!allowedIncludeMap[includeItemPath.replace(`${entityName}.`, '')]) {
           if (throwErrorOnForbiddenInclude) {
             throw new ApplicationError(
               `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItemPath} (${includeItemAlias}).`
