@@ -1,4 +1,5 @@
 import { HttpMethod } from '@node-c/core';
+
 import { describe, expect, it } from 'vitest';
 
 const BASE_URL_COURSE_PLATFORM = 'http://localhost:2071';

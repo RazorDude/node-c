@@ -1,7 +1,7 @@
 {
   "name": "node-c",
   "private": true,
-  "version": "1.0.0-beta6",
+  "version": "1.0.0-beta7",
   "description": "An end-to-end NodeJS framework for building DDD apps on top of NestJS.",
   "license": "MIT",
   "repository": {
@@ -21,9 +21,9 @@
     "lint:all:parallel": "npm run lint --workspace=packages/core & npm run lint --workspace=packages/data-rdb & npm run lint --workspace=packages/data-typeorm & npm run lint --workspace=packages/data-clickhouse & npm run lint --workspace=packages/data-redis & npm run lint --workspace=packages/domain-iam & npm run lint --workspace=packages/domain-iam-okta & npm run lint --workspace=packages/api-http & npm run lint --workspace=packages/api-rest & npm run lint --workspace=apps/test",
     "lint:fix:all:parallel": "npm run lint:fix --workspace=packages/core & npm run lint:fix --workspace=packages/data-rdb & npm run lint:fix --workspace=packages/data-typeorm & npm run lint:fix --workspace=packages/data-clickhouse & npm run lint:fix --workspace=packages/data-redis & npm run lint:fix --workspace=packages/domain-iam & npm run lint:fix --workspace=packages/domain-iam-okta & npm run lint:fix --workspace=packages/api-http & npm run lint:fix --workspace=packages/api-rest & npm run lint:fix --workspace=apps/test",
     "publish-package:all": "npm run publish-package --workspace=packages/core && npm run publish-package --workspace=packages/data-rdb && npm run publish-package --workspace=packages/data-typeorm && npm run publish-package --workspace=packages/data-clickhouse && npm run publish-package --workspace=packages/data-redis && npm run publish-package --workspace=packages/domain-iam && npm run publish-package --workspace=packages/domain-iam-okta && npm run publish-package --workspace=packages/api-http && npm run publish-package --workspace=packages/api-rest",
-    "start:apps-test:debug": "NODE_ENV=local nest start @node-c/app-test --debug --watch",
-    "start:apps-test:local": "NODE_ENV=local nest start @node-c/app-test --watch",
-    "start:apps-test:test": "NODE_ENV=endToEndTests nest start @node-c/app-test",
+    "start:apps-test:dev": "npm run start:dev --workspace=apps/test",
+    "start:apps-test:test": "npm run start:test:nyc:report --workspace=apps/test",
+    "start:apps-test:nyc": "NODE_ENV=endToEndTests nyc ts-node apps/test/src/main.ts",
     "test": "NODE_ENV=endToEndTests vitest --config test/vitest.config.ts",
     "test:coverage": "NODE_ENV=endToEndTests vitest --config test/vitest.config.ts --coverage"
   },
@@ -35,6 +35,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
+    "@vitest/coverage-istanbul": "^3.2.4",
     "@vitest/coverage-v8": "3.2",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",

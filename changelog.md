@@ -1,3 +1,9 @@
+# 1.0.0-beta7
+- Common
+  - WIP: Testing improvements - proper nyc setup w/ coverage reports.
+- `packages/domain-iam`
+  - Fixed the auth cache in the UserManager.
+
 # 1.0.0-beta6
 - `packages/core`
   - DomainEntityService: Fixed the passing of privateOptions to the entityService methods in the bulkCreate and create methods.

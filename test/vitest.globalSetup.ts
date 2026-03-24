@@ -3,8 +3,8 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import clickHouse from '@clickhouse/client';
-import { AppEnvironment } from '@node-c/core';
 
+import { AppEnvironment } from '@node-c/core';
 import dotenv from 'dotenv';
 import mysql from 'mysql2';
 
@@ -44,7 +44,7 @@ export async function teardown(): Promise<void> {
   if (apiServerMatches) {
     console.info('[TestLog]: Killing the server process at port 2071...');
     await new Promise<void>((resolve, reject) => {
-      exec(`kill ${apiServerMatches[1]}`, (err, _data, stderr) => {
+      exec(`kill -INT ${apiServerMatches[1]}`, (err, _data, stderr) => {
         const error = err || stderr;
         if (error) {
           console.error('[TestLog]: Teardown error at kill:', error);
@@ -59,7 +59,7 @@ export async function teardown(): Promise<void> {
   if (ssoServerMatches) {
     console.info('[TestLog]: Killing the server process at port 2081...');
     await new Promise<void>((resolve, reject) => {
-      exec(`kill ${ssoServerMatches[1]}`, (err, _data, stderr) => {
+      exec(`kill -INT ${ssoServerMatches[1]}`, (err, _data, stderr) => {
         const error = err || stderr;
         if (error) {
           console.error('[TestLog]: Teardown error at kill:', error);
@@ -255,47 +255,50 @@ export async function setup(): Promise<void> {
       'userId bigint unsigned not null' +
       ') engine Log'
   });
-  console.info('[TestLogs]: Audit DB set up. Starting apps...');
-  let appPromiseFulfilled = false;
-  await new Promise<void>((resolve, reject) => {
-    const appsProcess = spawn('npm', ['run', 'start:apps-test:test'], {
-      env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
-    });
-    appsProcess.on('exit', () => {
-      if (appPromiseFulfilled) {
-        return;
-      }
-      appPromiseFulfilled = true;
-      reject();
-    });
-    appsProcess.on('error', data => {
-      if (appPromiseFulfilled) {
-        return;
-      }
-      console.error(data);
-      appPromiseFulfilled = true;
-      reject();
-    });
-    appsProcess.stdout.on('data', data => {
-      // if (appPromiseFulfilled) {
-      //   return;
-      // }
-      const dataText = data?.toString() || '';
-      console.info(dataText);
-      if (dataText?.match(/App\sstarted/)) {
+  if (true) {
+    console.info('[TestLogs]: Audit DB set up. Starting apps...');
+    let appPromiseFulfilled = false;
+    await new Promise<void>((resolve, reject) => {
+      const appsProcess = spawn('npm', ['run', 'start:apps-test:nyc'], {
+        env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
+      });
+      appsProcess.on('exit', () => {
+        if (appPromiseFulfilled) {
+          return;
+        }
         appPromiseFulfilled = true;
-        resolve();
-      }
+        reject();
+      });
+      appsProcess.on('error', data => {
+        if (appPromiseFulfilled) {
+          return;
+        }
+        console.error(data);
+        appPromiseFulfilled = true;
+        reject();
+      });
+      appsProcess.stdout.on('data', data => {
+        // if (appPromiseFulfilled) {
+        //   return;
+        // }
+        const dataText = data?.toString() || '';
+        console.info(dataText);
+        if (dataText?.match(/App\sstarted/)) {
+          appPromiseFulfilled = true;
+          resolve();
+        }
+      });
+      appsProcess.stderr.on('data', data => {
+        // if (appPromiseFulfilled) {
+        //   return;
+        // }
+        const dataText = data?.toString() || '';
+        console.error(dataText);
+        // appPromiseFulfilled = true;
+        // reject();
+      });
     });
-    appsProcess.stderr.on('data', data => {
-      // if (appPromiseFulfilled) {
-      //   return;
-      // }
-      const dataText = data?.toString() || '';
-      console.error(dataText);
-      // appPromiseFulfilled = true;
-      // reject();
-    });
-  });
+  }
+  // await import('../apps/test/dist/main');
   console.info('[TestLogs]: Global setup completed.');
 }

@@ -307,7 +307,7 @@ export class IAMUserManagerService<
         data: stepInputData.data,
         options: stepInputData.options
       };
-      const cacheResult = await this.tokenManager.domainTokensEntityService.findOne({
+      const cacheResult = await this.dataUsersAuthCacheService.findOne({
         filters: {
           [cacheSettings.settings.cacheFieldName]: getNested(cacheInput, cacheSettings.settings.inputFieldName)
             .unifiedValue
