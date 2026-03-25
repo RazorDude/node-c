@@ -169,10 +169,17 @@ export class IAMUserManagerService<
         );
         throw new ApplicationError('Authentication failed.');
       }
-      let refreshToken: string | undefined;
-      // 6.1. Create a local refresh token and save it. The payload contains the external refresh token, if it exists.
+      const useExternalTokenAsLocal = 'useReturnedTokensAsLocal' in stepConfig && stepConfig.useReturnedTokensAsLocal;
       const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
+      let refreshToken: string | undefined;
+      let refreshTokenExppiresIn: number | undefined;
+      // 6.1. Create a local refresh token and save it. The payload contains the external refresh token, if it exists.
       if (externalRefreshToken || !externalAccessToken) {
+        refreshTokenExppiresIn =
+          (externalRefreshToken &&
+            'refreshTokenExpiresIn' in actualStepResult &&
+            actualStepResult.refreshTokenExpiresIn) ||
+          (rememberUser || !refreshTokenExpiryTimeInHours ? undefined : refreshTokenExpiryTimeInHours * 60);
         const {
           result: { token: localRefreshToken }
         } = await this.tokenManager.create(
@@ -187,21 +194,19 @@ export class IAMUserManagerService<
               : {})
           },
           {
-            expiresInMinutes:
-              (externalRefreshToken &&
-                'refreshTokenExpiresIn' in actualStepResult &&
-                actualStepResult.refreshTokenExpiresIn) ||
-              (rememberUser || !refreshTokenExpiryTimeInHours ? undefined : refreshTokenExpiryTimeInHours * 60),
+            expiresInMinutes: refreshTokenExppiresIn,
             identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
             persist: true,
             purgeOldFromData: true,
-            tokenContentOnlyFields: ['externalToken']
+            tokenContentOnlyFields: ['externalToken'],
+            useExternalTokenAsLocal
           }
         );
         refreshToken = localRefreshToken;
       }
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
       const accessTokenExpiresIn =
+        refreshTokenExppiresIn ||
         (externalAccessToken && 'accessTokenExpiresIn' in actualStepResult && actualStepResult.accessTokenExpiresIn) ||
         accessTokenExpiryTimeInMinutes;
       const {
@@ -223,7 +228,8 @@ export class IAMUserManagerService<
           identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
-          tokenContentOnlyFields: ['externalToken', 'refreshToken']
+          tokenContentOnlyFields: ['externalToken', 'refreshToken'],
+          useExternalTokenAsLocal
         }
       );
       // 6.3. Create an idToken. The payload contains the user with permissions data
@@ -241,7 +247,8 @@ export class IAMUserManagerService<
           identifierDataField: IAMUserManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
-          tokenContentOnlyFields: ['accessToken', 'user']
+          tokenContentOnlyFields: ['accessToken', 'user'],
+          useExternalTokenAsLocal
         }
       );
       logger.info(
@@ -255,7 +262,8 @@ export class IAMUserManagerService<
         setNested(
           returnData,
           fieldName,
-          getNested(stepResult, fieldName, { removeNestedFieldEscapeSign: true }).unifiedValue
+          getNested(stepResult, fieldName, { removeNestedFieldEscapeSign: true }).unifiedValue,
+          { removeNestedFieldEscapeSign: true }
         );
       });
     }

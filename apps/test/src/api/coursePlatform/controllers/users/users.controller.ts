@@ -1,8 +1,18 @@
-import { Controller, Get, Injectable, Req } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Param, Post, Query, Req } from '@nestjs/common';
 
 import { AccessControlContext, AccessControlResource, RequestWithLocals } from '@node-c/api-http';
 import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
-import { DataDefaultData, DomainEntityServiceDefaultData, GenericObject, LoggerService } from '@node-c/core';
+import {
+  AppConfigDomainIAMAuthenticationStep,
+  DataDefaultData,
+  DomainEntityServiceDefaultData,
+  GenericObject,
+  LoggerService
+} from '@node-c/core';
+
+import { IAMUserManagerService } from '@node-c/domain-iam';
+
+import { CoursePlatformUsersCreateAccessTokenDto, CoursePlatformUsersCreateAccessTokenOAuth2CallbackDto } from './dto';
 
 import { User as DBUser, UsersCreateUserData, UsersUpdateUserData } from '../../../../data/db';
 import { CoursePlatformUsersService } from '../../../../domain/coursePlatform';
@@ -22,6 +32,28 @@ export class CoursePlatformUsersEntityController extends RESTAPIEntityControler<
     protected logger: LoggerService
   ) {
     super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DBUser>(), logger, ['find', 'findOne', 'update']);
+  }
+
+  @Post('accessToken')
+  async createAccessToken(
+    @Body()
+    body: CoursePlatformUsersCreateAccessTokenDto
+  ): ReturnType<IAMUserManagerService<DBUser>['createAccessToken']> {
+    return this.domainUserManagerService.createAccessToken({ ...body, mainFilterField: 'email' });
+  }
+
+  @Get('accessToken/callback/:authType')
+  async createAccessTokenOAuth2Callback(
+    @Param()
+    params: { authType: string },
+    @Query()
+    query: CoursePlatformUsersCreateAccessTokenOAuth2CallbackDto
+  ): ReturnType<IAMUserManagerService<DBUser>['createAccessToken']> {
+    return this.domainUserManagerService.createAccessToken({
+      auth: { ...query, type: params.authType },
+      mainFilterField: 'email',
+      step: AppConfigDomainIAMAuthenticationStep.Complete
+    });
   }
 
   @AccessControlResource('findLoginLogs')

@@ -30,12 +30,7 @@ export class IAMAuthenticationOktaService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationOAuth2Service<CompleteContext, InitiateContext> {
-  constructor(
-    protected configProvider: ConfigProviderService,
-    protected logger: LoggerService,
-    protected moduleName: string,
-    protected serviceName: string
-  ) {
+  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
     super(configProvider, logger, moduleName, serviceName);
   }
 

@@ -132,8 +132,12 @@ export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 export interface AppConfigCommonDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   authServiceSettings?: GenericObject<{
-    secretKey?: {
-      secretKeyHMACAlgorithm?: string;
+    nodeC?: {
+      apiSecretHashingAlgorithm?: string;
+      baseUrl?: string;
+      completeEndpoint?: string;
+      initiateEndpoint?: string;
+      refreshExternalAccessTokenEndpoint?: string;
     };
     oauth2?: {
       accessTokenAudiences?: string[];
@@ -145,6 +149,9 @@ export interface AppConfigCommonDomainIAM {
       issuerUri?: string;
       redirectUri?: string; // redirect_uri
       verifyTokensLocally?: boolean;
+    };
+    secretKey?: {
+      secretKeyHMACAlgorithm?: string;
     };
     processExternalTokensOnVerify?: boolean;
     steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
@@ -193,6 +200,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings exten
   decodeReturnedTokens?: boolean;
   findUserInAuthResultBy?: { userFieldName: string; resultFieldName: string };
   useReturnedTokens?: boolean;
+  useReturnedTokensAsLocal?: boolean;
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
@@ -281,12 +289,16 @@ export interface AppConfigFromEnvDomainIAM {
   jwtAccessSecret: string;
   jwtRefreshSecret: string;
   authServiceSettings?: GenericObject<{
-    secretKey?: {
-      hashingSecret?: string;
+    nodeC?: {
+      apiKey?: string;
+      apiSecret?: string;
     };
     oauth2?: {
       clientId: string; // client_id
       clientSecret: string; // client_secret
+    };
+    secretKey?: {
+      hashingSecret?: string;
     };
   }>;
 }
@@ -347,6 +359,13 @@ export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 export interface AppConfigProfileDomainIAM {
   accessTokenExpiryTimeInMinutes?: number;
   authServiceSettings?: GenericObject<{
+    nodeC?: {
+      apiSecretHashingAlgorithm?: string;
+      baseUrl?: string;
+      completeEndpoint?: string;
+      initiateEndpoint?: string;
+      refreshExternalAccessTokenEndpoint?: string;
+    };
     oauth2?: {
       accessTokenAudiences?: string[];
       accessTokenEmailField?: string;
@@ -359,6 +378,9 @@ export interface AppConfigProfileDomainIAM {
       verifyTokensLocally?: boolean;
     };
     processExternalTokensOnVerify?: boolean;
+    secretKey?: {
+      secretKeyHMACAlgorithm?: string;
+    };
   }>;
   checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField?: string;

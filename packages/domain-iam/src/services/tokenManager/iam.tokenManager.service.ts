@@ -62,7 +62,14 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     const { configProvider, logger, moduleName, domainTokensEntityService } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { type, ...tokenData } = data;
-    const { expiresInMinutes, identifierDataField, persist, purgeOldFromData, tokenContentOnlyFields } = options;
+    const {
+      expiresInMinutes,
+      identifierDataField,
+      persist,
+      purgeOldFromData,
+      tokenContentOnlyFields,
+      useExternalTokenAsLocal
+    } = options;
     const signOptions = {} as jwt.SignOptions;
     let secret: string;
     // access token options
@@ -94,16 +101,26 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     } else {
       throw new ApplicationError(`[TokenManager.create]: Invalid token type - "${type}".`);
     }
-    const token = await new Promise<string>((resolve, reject) => {
-      jwt.sign({ data }, secret, signOptions, (err, token) => {
-        if (err) {
-          logger.error(err);
-          reject(new ApplicationError('Failed to sign token.'));
-          return;
-        }
-        resolve(token as string);
+    let token: string;
+    if (useExternalTokenAsLocal) {
+      if (!data.externalToken) {
+        throw new ApplicationError(
+          '[TokenManager.create]: An externalToken is required when useExternalTokenAsLocal is set to true.'
+        );
+      }
+      token = data.externalToken;
+    } else {
+      token = await new Promise<string>((resolve, reject) => {
+        jwt.sign({ data }, secret, signOptions, (err, token) => {
+          if (err) {
+            logger.error(err);
+            reject(new ApplicationError('Failed to sign token.'));
+            return;
+          }
+          resolve(token as string);
+        });
       });
-    });
+    }
     const objectToSave = { ...tokenData, token, type } as TokenEntity<TokenEntityFields>;
     if (tokenContentOnlyFields?.length) {
       tokenContentOnlyFields.forEach(fieldName =>

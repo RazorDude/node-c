@@ -1,16 +1,6 @@
 import crypto from 'crypto';
 
-import {
-  ApplicationError,
-  DataEntityService,
-  DomainEntityService,
-  DomainEntityServiceDefaultData,
-  DomainMethod,
-  GenericObject,
-  LoggerService,
-  getNested,
-  setNested
-} from '@node-c/core';
+import { ApplicationError, GenericObject, LoggerService, getNested, setNested } from '@node-c/core';
 
 import ld from 'lodash';
 
@@ -27,27 +17,14 @@ import {
 import { DecodedTokenContent, IAMTokenManagerService } from '../tokenManager';
 
 export class IAMAuthorizationService<
-  AuthorizationPoint extends BaseAuthorizationPoint<unknown> = BaseAuthorizationPoint<unknown>,
-  Data extends DomainEntityServiceDefaultData<Partial<AuthorizationPoint>> = DomainEntityServiceDefaultData<
-    Partial<AuthorizationPoint>
-  >,
   TokenManager extends IAMTokenManagerService<object> = IAMTokenManagerService<object>
-> extends DomainEntityService<
-  AuthorizationPoint,
-  DataEntityService<AuthorizationPoint>,
-  Data,
-  Record<string, DataEntityService<Partial<AuthorizationPoint>>> | undefined
 > {
   constructor(
-    protected dataAuthorizationPointsService: DataEntityService<AuthorizationPoint>,
-    protected defaultMethods: string[] = [DomainMethod.Find],
+    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    protected additionalDataEntityServices?: GenericObject<DataEntityService<Partial<AuthorizationPoint>>>,
     // eslint-disable-next-line no-unused-vars
     protected tokenManager?: TokenManager
-  ) {
-    super(dataAuthorizationPointsService, defaultMethods, logger, additionalDataEntityServices);
-  }
+  ) {}
 
   async authorizeApiKey(data: AuthorizeApiKeyData, options: AuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
     const { logger } = this;
@@ -84,8 +61,6 @@ export class IAMAuthorizationService<
     return { valid: true };
   }
 
-  // TODO: decouple from users
-  // TODO: use an idToken, rather than an accessToken, for the permissions
   async authorizeBearer<UserTokenEnityFields = unknown>(
     data: { authToken?: string; refreshToken?: string },
     options?: { identifierDataField?: string }

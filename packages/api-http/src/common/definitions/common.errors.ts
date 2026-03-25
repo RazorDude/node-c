@@ -1,5 +1,12 @@
 import { GenericObject } from '@node-c/core';
 
+export enum ErrorCodes {
+  // eslint-disable-next-line no-unused-vars
+  AUTH_INVALID = 'AUTH_INVALID',
+  // eslint-disable-next-line no-unused-vars
+  AUTH_MISSING = 'AUTH_MISSING'
+}
+
 export class ServerError implements Error {
   data: { statusCode: number } | GenericObject;
   message: string;

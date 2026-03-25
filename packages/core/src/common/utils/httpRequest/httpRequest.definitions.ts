@@ -1,8 +1,11 @@
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosHeaders, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { GenericObject, HttpMethod } from '../../definitions';
 
 export interface HTTPRequestData {
+  apiKey?: string;
+  apiSecret?: string;
+  apiSecretHashingAlgorithm?: string;
   axiosConfig?: Partial<AxiosRequestConfig>;
   body?: GenericObject<unknown>;
   headers?: GenericObject<unknown>;
@@ -16,7 +19,11 @@ export interface HTTPRequestData {
 
 export interface HTTPRequestResponseData<Data = unknown> {
   data?: Data;
-  fullResponse?: Omit<AxiosResponse, 'config' | 'request'>;
+  fullResponse?: {
+    body: Pick<AxiosResponse, 'data'>;
+    headers: AxiosHeaders;
+    status: number;
+  };
   hasError: boolean;
   statusCode: number;
 }

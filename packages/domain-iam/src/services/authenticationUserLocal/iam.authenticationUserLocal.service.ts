@@ -29,9 +29,9 @@ export class IAMAuthenticationUserLocalService<
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
   constructor(
-    protected configProvider: ConfigProviderService,
-    protected logger: LoggerService,
-    protected moduleName: string,
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected serviceName: string,
     // eslint-disable-next-line no-unused-vars

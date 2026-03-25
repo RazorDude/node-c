@@ -30,6 +30,7 @@ export type TokenManagerCreateOptions = {
   purgeOldFromData?: boolean;
   tokenContentOnlyFields?: string[];
   ttl?: number;
+  useExternalTokenAsLocal?: boolean;
 } & DomainCreateOptions;
 
 export enum TokenType {

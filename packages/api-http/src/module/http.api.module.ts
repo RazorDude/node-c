@@ -1,5 +1,5 @@
 import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata, ValidationPipe } from '@nestjs/common';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 
 import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
@@ -49,7 +49,6 @@ export class HTTPAPIModule {
         // configure DTO validation
         {
           provide: APP_PIPE,
-          // useClass: ValidationPipe
           useValue: new ValidationPipe({
             whitelist: true
           })
@@ -67,7 +66,7 @@ export class HTTPAPIModule {
           useClass: HTTPErrorInterceptor
         },
         {
-          provide: Constants.HTTP_EXCEPTION_FILTER,
+          provide: APP_FILTER,
           useClass: HttpExceptionFilter
         },
         ...(options.providers || []),

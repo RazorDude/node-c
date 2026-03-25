@@ -18,14 +18,29 @@ export const appConfigCommon: AppConfigCommon = {
     }
   },
   domain: {
-    coursePlatform: {},
+    coursePlatform: {
+      authServiceSettings: {
+        oktaNodeC: {
+          apiSecretHashingAlgorithm: 'sha256',
+          completeEndpoint: '/okta/steps/complete',
+          initiateEndpoint: '/okta/steps/initiate',
+          refreshExternalAccessTokenEndpoint: '/okta/tokens/access/refresh'
+        },
+        userLocalNodeC: {
+          apiSecretHashingAlgorithm: 'sha256',
+          completeEndpoint: '/okta/steps/complete',
+          initiateEndpoint: '/okta/steps/initiate',
+          refreshExternalAccessTokenEndpoint: '/okta/tokens/access/refresh'
+        }
+      }
+    },
     iam: {
       accessTokenExpiryTimeInMinutes: 120,
       authServiceSettings: {
         okta: {
           oauth2: {
             codeChallengeMethod: 'S256',
-            defaultScope: 'openid profile email',
+            defaultScope: 'openid profile email groups offline_access',
             verifyTokensLocally: true
           }
         },

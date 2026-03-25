@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-import { AppConfigAPIHTTP, ConfigProviderService, LoggerService } from '@node-c/core';
+import { AppConfigAPIHTTP, ConfigProviderService, HttpMethod, LoggerService } from '@node-c/core';
 import {
   AuthorizationPoint,
   IAMAuthorizationService,
@@ -10,8 +10,10 @@ import {
 } from '@node-c/domain-iam';
 
 import { NextFunction, Response } from 'express';
+import qs from 'qs';
 
 import { Constants, RequestWithLocals } from '../common/definitions';
+import { ErrorCodes } from '../common/definitions/common.errors';
 import { checkRoutes } from '../common/utils';
 
 /*
@@ -38,7 +40,6 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     protected usersService?: IAMUserManagerService<User>
   ) {}
 
-  // TODO: throw proper error messages (maybe check the error interceptor?)
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
     const { configProvider, logger, moduleName, tokenManager, usersService } = this;
     (async () => {
@@ -71,18 +72,18 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         const [apiKeyFromHeader, requestSignature] =
           req.headers.authorization?.replace(/^ApiKey\s/, '')?.split(' ') || [];
         let signatureContent = '';
-        if (requestMethod === 'get' && req.query && Object.keys(req.query).length) {
-          signatureContent = JSON.stringify(req.query);
-        } else if (
-          (requestMethod === 'delete' ||
-            requestMethod === 'patch' ||
-            requestMethod === 'post' ||
-            requestMethod === 'put') &&
-          req.body &&
-          Object.keys(req.body).length
-        ) {
-          signatureContent = JSON.stringify(req.body);
-        } else {
+        if (requestMethod === HttpMethod.GET && req.query && Object.keys(req.query).length) {
+          signatureContent = qs.stringify(req.query);
+        } else if (requestMethod !== HttpMethod.GET && req.body) {
+          if (typeof req.body === 'object') {
+            signatureContent = JSON.stringify(req.body);
+          } else if (typeof req.body === 'string') {
+            signatureContent = req.body;
+          } else if ('toString' in req.body) {
+            signatureContent = req.body.toString();
+          }
+        }
+        if (!signatureContent.length) {
           signatureContent = req.originalUrl.split('?')[0];
         }
         const { valid } = await this.authorizationService.authorizeApiKey(
@@ -94,13 +95,19 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           { config: moduleConfig }
         );
         if (!valid) {
-          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+          throw new HttpException(
+            { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.FORBIDDEN },
+            HttpStatus.FORBIDDEN
+          );
         }
         next();
         return;
       } else if (!tokenManager) {
         logger.error('Missing api key in the configuration and no tokenManager set up.');
-        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+        throw new HttpException(
+          { message: ErrorCodes.AUTH_MISSING, statusCode: HttpStatus.UNAUTHORIZED },
+          HttpStatus.UNAUTHORIZED
+        );
       }
       let tokens: string[] = [];
       let authToken = req.headers.authorization;
@@ -122,13 +129,19 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           { identifierDataField: usersService ? 'userId' : undefined }
         );
       if (!valid) {
-        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+        throw new HttpException(
+          { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.UNAUTHORIZED },
+          HttpStatus.UNAUTHORIZED
+        );
       }
       if (usersService) {
         const userId = tokenContent?.data?.userId;
         if (!userId) {
           logger.error('Missing userId in the tokenContent data.');
-          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+          throw new HttpException(
+            { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.UNAUTHORIZED },
+            HttpStatus.UNAUTHORIZED
+          );
         }
         // use the bearer access/id token decoded payload for the user data, if configured this way
         const user = tokenContent?.data?.user;
@@ -139,7 +152,10 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         }
         if (!userId) {
           logger.error('Missing user data in the session.');
-          throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+          throw new HttpException(
+            { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.UNAUTHORIZED },
+            HttpStatus.UNAUTHORIZED
+          );
         }
       }
       if (newAccessToken) {

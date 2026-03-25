@@ -33,7 +33,7 @@ import { Constants } from '../../common/definitions';
 import { IAMAuthenticationService } from '../authentication';
 
 /*
- * This method is meant to support the OAuth2.0 flow w/ a PKCE challenge. The default, non-PKCE flow is intentionally not supported, in preparation for the upcoming OAuth2.0 spec.
+ * This service is meant to support the OAuth2.0 flow w/ a PKCE challenge. The default, non-PKCE flow is intentionally not supported, in preparation for the upcoming OAuth2.0 spec.
  * The default case assumes the user is found based on the decoded access token content after the complete method, but these settings can be overwritten in the config for the authService.
  * 1. IAMAuthenticationOAuth2Service.initiate
  * 2. (outside of this service) Save the challenge, verifier and state in the data, linking it to the provided user.
@@ -53,9 +53,9 @@ export class IAMAuthenticationOAuth2Service<
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
   constructor(
-    protected configProvider: ConfigProviderService,
-    protected logger: LoggerService,
-    protected moduleName: string,
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected serviceName: string
   ) {

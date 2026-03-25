@@ -52,7 +52,7 @@ export class HTTPErrorInterceptor implements NestInterceptor {
           .switchToHttp()
           .getResponse()
           .status(status)
-          .json({ error: message instanceof Array ? message.join('\n') : message });
+          .json({ error: message instanceof Array ? message.join('\n') : message, statusCode: status });
         return new Observable();
       })
     );

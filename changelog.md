@@ -1,3 +1,21 @@
+# 1.0.0-beta8
+- `packages/core`
+  - Removed excess data from the httpRequest utility's full and error responses.
+  - Config changes for allowing the usage of external tokens as local tokens in the domain-iam package.
+  - Config changes for setting up the new authorization service for working with other NodeC apps.
+  - Changes to the httpRequest utility - new feature for apiKey + apiSecret authorization using an encrypted query & body.
+- `packages/domain-iam`
+  - The TTL of access and ID tokens now matches the TTL of refresh tokens, when refresh tokens available.
+  - New functionality for allowing the usage of external tokens as local tokens in the domain-iam package.
+  - New base authorization service for working with other NodeC apps.
+  - New userLocal and oauth2 authorization services for working with other NodeC apps, building on top of the base service.
+  - Cleanup of unsued inheritance and dependencies in the AuthorizationService.
+- `packages/api-http`
+  - Better status codes for unauthorized vs forbidden.
+  - Updates to the ApiKey authorization signatureContent assignment, mirroring the changes in the core package and widening the suppport for different kinds of bodies.
+- `apps/test`
+  - Changes to test the above.
+
 # 1.0.0-beta7
 - Common
   - WIP: Testing improvements - proper nyc setup w/ coverage reports.
