@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import { IAMAuthenticationOktaService as BaseIAMAuthenticationOktaService } from '@node-c/domain-iam-okta';
+
 import {
-  IAMAuthenticationOktaService as BaseIAMAuthenticationOktaService,
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
-  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
-} from '@node-c/domain-iam-okta';
-
-import { IAMAuthenticationOktaUserFields } from './authenticationOkta.definitions';
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
+  IAMAuthenticationOktaUserFields
+} from './authenticationOkta.definitions';
 
 import { Constants } from '../../../../common/definitions';
 import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
@@ -21,10 +21,10 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
   IAMAuthenticationOktaUserFields
 > {
   constructor(
-    protected configProvider: ConfigProviderService,
-    protected logger: LoggerService,
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
-    protected moduleName: string,
+    moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: AuditUserLoginLogsService
   ) {

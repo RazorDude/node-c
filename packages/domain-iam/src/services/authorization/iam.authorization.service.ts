@@ -79,7 +79,7 @@ export class IAMAuthorizationService<
       return { valid: false };
     }
     if (!authToken) {
-      logger.error('Missing auth token.');
+      logger.error('Missing authorization token.');
       return { valid: false };
     }
     let newAccessToken: string | undefined;

@@ -4,7 +4,7 @@ import {
   IAMAuthenticationCompleteResult,
   IAMAuthenticationGetPayloadsFromExternalTokensData,
   IAMAuthenticationGetPayloadsFromExternalTokensResult,
-  IAMAuthenticationGetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationGetUserAuthenticationConfigResult,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
   IAMAuthenticationInitiateResult,
@@ -40,8 +40,8 @@ export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData =
 export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
   IAMAuthenticationGetPayloadsFromExternalTokensResult;
 
-export type IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult =
-  IAMAuthenticationGetUserCreateAccessTokenConfigResult;
+export type IAMAuthenticationOAuth2GetUserAuthenticationConfigResult =
+  IAMAuthenticationGetUserAuthenticationConfigResult;
 
 export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationInitiateData {
   scope?: string;
@@ -70,3 +70,9 @@ export type IAMAuthenticationOAuth2VerifyExternalAccessTokenResult = Pick<
   IAMAuthenticationVerifyExternalAccessTokenResult,
   'accessTokenPayload' | 'error'
 >;
+
+export interface IAMAuthenticationOAuth2VerifyTokenOptions {
+  audiences?: string[];
+  issuer?: string;
+  secret?: string;
+}

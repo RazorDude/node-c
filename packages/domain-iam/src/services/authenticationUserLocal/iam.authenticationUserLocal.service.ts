@@ -14,7 +14,7 @@ import {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult,
-  IAMAuthenticationUserLocalGetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationUserLocalGetUserAuthenticationConfigResult,
   IAMAuthenticationUserLocalInitiateData,
   IAMAuthenticationUserLocalInitiateOptions,
   IAMAuthenticationUserLocalInitiateResult
@@ -23,7 +23,10 @@ import {
 import { IAMAuthenticationService } from '../authentication';
 import { IAMMFAService, IAMMFAType } from '../mfa';
 
-// TODO: add a LocalSecret service to take care of the hashing logic and reuse it here
+/*
+ * A service for authentication using a local user and password.
+ * This service is intended for use by the consumer environment.
+ */
 export class IAMAuthenticationUserLocalService<
   CompleteContext extends object,
   InitiateContext extends object
@@ -74,11 +77,11 @@ export class IAMAuthenticationUserLocalService<
     return { mfaUsed, mfaValid, valid: true };
   }
 
-  getUserCreateAccessTokenConfig(): IAMAuthenticationUserLocalGetUserCreateAccessTokenConfigResult {
+  getUserAuthenticationConfig(): IAMAuthenticationUserLocalGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationUserLocalGetUserCreateAccessTokenConfigResult = {
+    const defaultConfig: IAMAuthenticationUserLocalGetUserAuthenticationConfigResult = {
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
         cache: {
           settings: {

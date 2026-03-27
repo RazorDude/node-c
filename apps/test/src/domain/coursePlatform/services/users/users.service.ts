@@ -31,8 +31,8 @@ export class CoursePlatformUsersService extends DomainEntityService<
     // eslint-disable-next-line no-unused-vars
     protected dataAuditUserLoginLogsService: AuditUserLoginLogsService,
     protected dataCacheUsersService: CacheUsersEntityService,
-    protected dataEntityService: DBUsersService,
-    protected logger: LoggerService
+    dataEntityService: DBUsersService,
+    logger: LoggerService
   ) {
     super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, {
       cache: dataCacheUsersService

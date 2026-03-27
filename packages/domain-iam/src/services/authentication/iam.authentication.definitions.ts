@@ -31,8 +31,7 @@ export interface IAMAuthenticationCompleteResult {
   valid: boolean;
 }
 
-export type IAMAuthenticationGetUserCreateAccessTokenConfigResult =
-  AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
+export type IAMAuthenticationGetUserAuthenticationConfigResult = AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
 
 export interface IAMAuthenticationGetPayloadsFromExternalTokensData {
   accessToken?: string;

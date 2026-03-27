@@ -21,12 +21,13 @@ import {
   IAMAuthenticationOAuth2CompleteResult,
   IAMAuthenticationOAuth2GetPayloadsFromExternalTokensData,
   IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult,
-  IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationOAuth2GetUserAuthenticationConfigResult,
   IAMAuthenticationOAuth2InitiateData,
   IAMAuthenticationOAuth2InitiateOptions,
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
-  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
+  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult,
+  IAMAuthenticationOAuth2VerifyTokenOptions
 } from './iam.authenticationOAuth2.definitions';
 
 import { Constants } from '../../common/definitions';
@@ -35,6 +36,7 @@ import { IAMAuthenticationService } from '../authentication';
 /*
  * This service is meant to support the OAuth2.0 flow w/ a PKCE challenge. The default, non-PKCE flow is intentionally not supported, in preparation for the upcoming OAuth2.0 spec.
  * The default case assumes the user is found based on the decoded access token content after the complete method, but these settings can be overwritten in the config for the authService.
+ * This service is intended for use by the provider environment.
  * 1. IAMAuthenticationOAuth2Service.initiate
  * 2. (outside of this service) Save the challenge, verifier and state in the data, linking it to the provided user.
  * 3. (outside of this service) Send an authorization code request on the prvodied URL to the OAuth2.0 provider.
@@ -47,6 +49,7 @@ import { IAMAuthenticationService } from '../authentication';
  * TODO: provider param name mapping, in case a specific provider has custom parameter names
  * TODO: validate access_token flow - endpont
  * TODO: refresh access_token flow - local (JWT), endpont
+ * TODO: move the verifyToken method to the base authentication service.
  */
 export class IAMAuthenticationOAuth2Service<
   CompleteContext extends object,
@@ -163,11 +166,11 @@ export class IAMAuthenticationOAuth2Service<
   }
 
   // Default config - plain OAuth2 without OIDC
-  getUserCreateAccessTokenConfig(): IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult {
+  getUserAuthenticationConfig(): IAMAuthenticationOAuth2GetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult = {
+    const defaultConfig: IAMAuthenticationOAuth2GetUserAuthenticationConfigResult = {
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
         cache: {
           settings: {
@@ -309,9 +312,9 @@ export class IAMAuthenticationOAuth2Service<
     );
   }
 
-  protected async verifyToken<DecodedTokenContent = unknown>(
+  async verifyToken<DecodedTokenContent = unknown>(
     token: string,
-    options?: { audiences?: string[]; issuer?: string; secret?: string }
+    options?: IAMAuthenticationOAuth2VerifyTokenOptions
   ): Promise<{ content?: DecodedTokenContent; error?: unknown }> {
     const { audiences, issuer, secret } = options || {};
     let returnData: { content?: DecodedTokenContent; error?: unknown } = {};

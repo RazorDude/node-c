@@ -1,11 +1,9 @@
 import {
   IAMAuthenticationOktaCompleteData as BaseIAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions as BaseIAMAuthenticationOktaCompleteOptions,
-  IAMAuthenticationOktaCompleteResult as BaseIAMAuthenticationOktaCompleteResult
-  // IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult as BaseIAMAuthenticationOktaGetUserCreateAccessTokenConfigResult,
-  // IAMAuthenticationOktaInitiateData as BaseIAMAuthenticationOktaInitiateData,
-  // IAMAuthenticationOktaInitiateOptions as BaseIAMAuthenticationOktaInitiateOptions,
-  // IAMAuthenticationOktaInitiateResult as BaseIAMAuthenticationOktaInitiateResult
+  IAMAuthenticationOktaCompleteResult as BaseIAMAuthenticationOktaCompleteResult,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData as BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult as BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
 import { CacheUser } from '../../../../data/cache';
@@ -17,14 +15,10 @@ export type IAMAuthenticationOktaCompleteOptions<Context extends object> =
 
 export type IAMAuthenticationOktaCompleteResult = BaseIAMAuthenticationOktaCompleteResult;
 
-// export type IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult =
-//   BaseIAMAuthenticationOktaGetUserCreateAccessTokenConfigResult;
+export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
+  BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData;
 
-// export type IAMAuthenticationOktaInitiateData = BaseIAMAuthenticationOktaInitiateData;
-
-// export type IAMAuthenticationOktaInitiateOptions<Context extends object> =
-//   BaseIAMAuthenticationOktaInitiateOptions<Context>;
-
-// export type IAMAuthenticationOktaInitiateResult = BaseIAMAuthenticationOktaInitiateResult;
+export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
+  BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
 
 export type IAMAuthenticationOktaUserFields = CacheUser & { password: string };

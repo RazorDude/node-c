@@ -34,7 +34,8 @@ export class HTTPAccessControlInterceptor<
     const locals = req.locals!;
     if (!locals) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    } else if (locals.isAnonymous) {
+    }
+    if (locals.isAnonymous || locals.isApiKeyRoute) {
       return next.handle();
     }
     const { logger, moduleRef, reflector } = this;

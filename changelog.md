@@ -1,18 +1,32 @@
 # 1.0.0-beta8
+- Common
+  - Removed NestJS CLI as a dev depdendency - it's not used and it has unaddressed vulnerabilities.
 - `packages/core`
   - Removed excess data from the httpRequest utility's full and error responses.
   - Config changes for allowing the usage of external tokens as local tokens in the domain-iam package.
-  - Config changes for setting up the new authorization service for working with other NodeC apps.
+  - Config changes for setting up the new authentication service for working with other NodeC apps.
   - Changes to the httpRequest utility - new feature for apiKey + apiSecret authorization using an encrypted query & body.
+  - External access and refresh token expiry time multiplier config options.
+  - Config changes for taking users in authentication steps using the external access token payloads.
+  - Config changes for allowing the running of both Bearer-based and ApiKey-based endpoints in the same API.
+  - ConfigProviderService - fixed an issue where the loading of env vars from a file overwrites vars that are not present in the file, but are in the template, with "undefined" in the end object.
 - `packages/domain-iam`
   - The TTL of access and ID tokens now matches the TTL of refresh tokens, when refresh tokens available.
   - New functionality for allowing the usage of external tokens as local tokens in the domain-iam package.
-  - New base authorization service for working with other NodeC apps.
-  - New userLocal and oauth2 authorization services for working with other NodeC apps, building on top of the base service.
-  - Cleanup of unsued inheritance and dependencies in the AuthorizationService.
+  - New base authentication service for working with other NodeC apps.
+  - New userLocal and oauth2 authentication services for working with other NodeC apps, building on top of the base service.
+  - New authentication service for direct passthrough, so that the user can be found and their tokens can be issued.
+  - BREAKING: Cleanup of unsued inheritance and dependencies in the AuthorizationService.
+  - BREAKING: UserManager.createAccessToken is now UserManager.authenticate.
+  - BREAKING: AuthenticationService.getUserCreateAccessTokenConfig is now AuthenticationService.getUserAuthenticationConfig.
+  - External access and refresh token expiry time multiplier implementation.
+  - Functionality for taking users in authentication steps using the external access token payloads in the UserManager service.
+  - BREAKING: AUTHENTICATION_MIDDLEWARE_USERS_SERVICE is now AUTHORIZATION_MIDDLEWARE_USERS_SERVICE.
+  - BREAKING: AUTHORIZATION_MIDDLEWARE_USERS_SERVICE is now expected to be added as a provider in the HTTP API Modules and doesn't get used as the injection token for the IAMUserManagerService.
 - `packages/api-http`
   - Better status codes for unauthorized vs forbidden.
   - Updates to the ApiKey authorization signatureContent assignment, mirroring the changes in the core package and widening the suppport for different kinds of bodies.
+  - Changes to the API key authorization in the authorization middleware and the accessControl interceptor to allow running both Bearer-based and ApiKey-based endpoints in the same API.
 - `apps/test`
   - Changes to test the above.
 

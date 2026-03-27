@@ -17,8 +17,8 @@ import {
 import ld from 'lodash';
 
 import {
-  IAMUserManagerCreateAccessTokenOptions,
-  IAMUserManagerCreateAccessTokenReturnData,
+  IAMUserManagerAuthenticateOptions,
+  IAMUserManagerAuthenticateReturnData,
   IAMUserManagerExecuteStepData,
   IAMUserManagerExecuteStepOptions,
   IAMUserManagerExecuteStepResult,
@@ -78,9 +78,9 @@ export class IAMUserManagerService<
 
   // TODO: clear the cache from the previous steps
   // TODO: make the issuing of local tokens work with purgeOldFromStore = false
-  async createAccessToken<AuthData = unknown>(
-    options: IAMUserManagerCreateAccessTokenOptions<AuthData>
-  ): Promise<IAMUserManagerCreateAccessTokenReturnData<User>> {
+  async authenticate<AuthData = unknown>(
+    options: IAMUserManagerAuthenticateOptions<AuthData>
+  ): Promise<IAMUserManagerAuthenticateReturnData<User>> {
     const { configProvider, logger, moduleName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInHours } = moduleConfig;
@@ -91,14 +91,14 @@ export class IAMUserManagerService<
     logger.info(
       `[Domain.${moduleName}.UserManager]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
     );
-    // 1. Make sure the auth service actually exists - local, oauth2, etc.
+    // 1. Make sure the authentication service actually exists - local, oauth2, etc.
     const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
     if (!authService) {
       logger.info(`[Domain.${moduleName}.UserManager]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
     }
     // 2. Get the user-specific configuration from the authService.
-    const authServiceBehaviorConfig = authService.getUserCreateAccessTokenConfig();
+    const authServiceBehaviorConfig = authService.getUserAuthenticationConfig();
     let externalAccessToken: string | undefined;
     let externalRefreshToken: string | undefined;
     let issueTokens = false;
@@ -178,7 +178,8 @@ export class IAMUserManagerService<
         refreshTokenExppiresIn =
           (externalRefreshToken &&
             'refreshTokenExpiresIn' in actualStepResult &&
-            actualStepResult.refreshTokenExpiresIn) ||
+            actualStepResult.refreshTokenExpiresIn &&
+            actualStepResult.refreshTokenExpiresIn * (moduleConfig.externalRefreshTokenExpiryMultiplier || 1)) ||
           (rememberUser || !refreshTokenExpiryTimeInHours ? undefined : refreshTokenExpiryTimeInHours * 60);
         const {
           result: { token: localRefreshToken }
@@ -207,7 +208,10 @@ export class IAMUserManagerService<
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
       const accessTokenExpiresIn =
         refreshTokenExppiresIn ||
-        (externalAccessToken && 'accessTokenExpiresIn' in actualStepResult && actualStepResult.accessTokenExpiresIn) ||
+        (externalAccessToken &&
+          'accessTokenExpiresIn' in actualStepResult &&
+          actualStepResult.accessTokenExpiresIn &&
+          actualStepResult.accessTokenExpiresIn * (moduleConfig.externalAccessTokenExpiryMultiplier || 1)) ||
         accessTokenExpiryTimeInMinutes;
       const {
         result: { token: accessToken }
@@ -256,7 +260,7 @@ export class IAMUserManagerService<
       );
       return { accessToken, idToken, refreshToken, user };
     }
-    const returnData: IAMUserManagerCreateAccessTokenReturnData<User> = { nextStepsRequired: true };
+    const returnData: IAMUserManagerAuthenticateReturnData<User> = { nextStepsRequired: true };
     if (stepConfig.stepResultPublicFields?.length) {
       stepConfig.stepResultPublicFields.forEach(fieldName => {
         setNested(
@@ -286,6 +290,7 @@ export class IAMUserManagerService<
     const { cache: cacheSettings, findUser, findUserBeforeAuth, validWithoutUser } = stepConfig;
     const hasFilters = userFilters && Object.keys(userFilters).length;
     const stepInputData: { data: unknown; options?: unknown } = { data: ld.cloneDeep(authData) };
+    let runFindUserInExternalTokenPayloads = false;
     let user: IAMUserManagerUserWithPermissionsData<User, unknown> | null = null;
     let userFilterField: string | undefined;
     let userFilterValue: unknown | undefined;
@@ -309,7 +314,7 @@ export class IAMUserManagerService<
       context: user || ({} as IAMUserManagerUserWithPermissionsData<User, unknown>),
       contextIdentifierField: defaultUserIdentifierField
     };
-    // 2. Restore the cache, if configured
+    // 2. Restore the cache, if configured.
     if (cacheSettings && 'use' in cacheSettings && cacheSettings.use) {
       const cacheInput: { data: unknown; options: unknown } = {
         data: stepInputData.data,
@@ -348,7 +353,7 @@ export class IAMUserManagerService<
       logger.info(`[Domain.${moduleName}.UserManager]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
-    // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads
+    // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads.
     if ('decodeReturnedTokens' in stepConfig && stepConfig.decodeReturnedTokens) {
       const tokensForDecoding: Record<string, string> = {};
       const tokenKeys = ['accessToken', 'idToken', 'refreshToken'];
@@ -362,7 +367,7 @@ export class IAMUserManagerService<
       const externalTokenPayloads = await authService.getPayloadsFromExternalTokens(tokensForDecoding);
       stepResult = { ...stepResult, ...externalTokenPayloads };
     }
-    // 6. Find the user based on either the provided filters, or on the stepResult data, if enabled
+    // 6. Find the user based on either the provided filters, or on the stepResult data, if enabled.
     if (findUser && !findUserBeforeAuth) {
       if ('findUserInAuthResultBy' in stepConfig && stepConfig.findUserInAuthResultBy) {
         const { userFieldName, resultFieldName } = stepConfig.findUserInAuthResultBy;
@@ -379,6 +384,8 @@ export class IAMUserManagerService<
             mainFilterField: userFieldName
           });
         }
+      } else if ('findUserInExternalTokenPayloads' in stepConfig && stepConfig.findUserInExternalTokenPayloads) {
+        runFindUserInExternalTokenPayloads = true;
       } else if (hasFilters) {
         userFilterField = mainFilterField;
         userFilterValue = userFilters[userFilterField];
@@ -389,11 +396,12 @@ export class IAMUserManagerService<
       }
     }
     // 7. Create a user using the data from the tokens returned by the step execution, if enabled and there is no user found.
-    if (!user && 'createUser' in stepConfig && stepConfig.createUser) {
+    const createUser = 'createUser' in stepConfig && stepConfig.createUser;
+    if (!user && (createUser || runFindUserInExternalTokenPayloads)) {
       const userData = await authService.getUserDataFromExternalTokenPayloads(
         stepResult as IAMAuthenticationGetUserDataFromExternalTokenPayloadsData
       );
-      if (userData) {
+      if (createUser && userData) {
         const { result: createdUser } = await domainUsersEntityService.create(userData as unknown as Data['Create']);
         user = await this.getUserWithPermissionsData(
           {
@@ -403,6 +411,8 @@ export class IAMUserManagerService<
           },
           { keepPassword: false }
         );
+      } else if (runFindUserInExternalTokenPayloads) {
+        user = userData as unknown as IAMUserManagerUserWithPermissionsData<User, unknown>;
       }
     }
     if (validWithoutUser !== true && !user) {
@@ -458,6 +468,9 @@ export class IAMUserManagerService<
     let filters: GenericObject = options.filters;
     let user: IAMUserManagerUserWithPermissionsData<User, unknown> | null = null;
     if (mainFilterField !== defaultUserIdentifierField) {
+      // Allow search by an extended range of filters, directly in the database.
+      // This is needed because getUserWithPermissionsData will usually query the cache, where a
+      // prmary key filter is mandatory.
       const mainFilterFieldResult = await this.domainUsersEntityService.findOne({ filters });
       if (!mainFilterFieldResult.result) {
         return null;

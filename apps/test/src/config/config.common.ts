@@ -11,22 +11,26 @@ export const appConfigCommon: AppConfigCommon = {
       localSearchForUsersEnabledOnAuthorization: false
     },
     sso: {
+      allowedApiKeyRoutes: {
+        '/users/tokens/passthrough': [HttpMethod.POST]
+      },
+      apiSecretAlgorigthm: 'sha256',
       anonymousAccessRoutes: {
-        '/users/accessToken': [HttpMethod.POST],
-        '/users/accessToken/callback/:authType': [HttpMethod.GET]
+        '/users/tokens': [HttpMethod.POST],
+        '/users/tokens/callback/:authType': [HttpMethod.GET]
       }
     }
   },
   domain: {
     coursePlatform: {
       authServiceSettings: {
-        oktaNodeC: {
+        oktaConsumer: {
           apiSecretHashingAlgorithm: 'sha256',
           completeEndpoint: '/okta/steps/complete',
           initiateEndpoint: '/okta/steps/initiate',
           refreshExternalAccessTokenEndpoint: '/okta/tokens/access/refresh'
         },
-        userLocalNodeC: {
+        userLocalConsumer: {
           apiSecretHashingAlgorithm: 'sha256',
           completeEndpoint: '/okta/steps/complete',
           initiateEndpoint: '/okta/steps/initiate',

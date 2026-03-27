@@ -28,10 +28,7 @@ export const appConfigProfileLocal: AppConfigProfile = {
             accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
             authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
             issuerUri: 'https://integrator-4933645.okta.com',
-            // direct URL
-            // redirectUri: 'http://localhost:2080/users/accessToken/callback/okta',
-            // URL for testing nodec-over-http
-            redirectUri: 'http://localhost:2070/users/accessToken/callback/okta'
+            redirectUri: 'http://localhost:2080/users/tokens/callback/okta'
           }
         },
         userLocal: {

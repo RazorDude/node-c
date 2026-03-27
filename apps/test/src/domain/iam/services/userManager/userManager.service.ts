@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Constants } from '@node-c/api-http';
 import {
   ConfigProviderService,
   Constants as CoreConstants,
@@ -15,11 +14,14 @@ import {
   IAMUserManagerGetUserWithPermissionsDataOptions
 } from '@node-c/domain-iam';
 
+import { Constants } from '../../../../common/definitions';
+
 import { CacheUser } from '../../../../data/cache';
 import { CacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth';
 import { User as DBUser, UsersDataEntityServiceData as DBUsersDataEntityServiceData } from '../../../../data/db';
 
 import { IAMAuthenticationOktaService } from '../authenticationOkta';
+import { IAMAuthenticationPassthroughService } from '../authenticationPassthrough';
 import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 import { IAMTokenManagerService } from '../tokenManager';
 import { IAMUsersDomainEntityServiceData, IAMUsersService } from '../users';
@@ -30,21 +32,26 @@ export class IAMUserManagerService extends BaseIAMUserManagerService<
   IAMUsersDomainEntityServiceData<DBUser>,
   DBUsersDataEntityServiceData<DBUser>
 > {
-  static injectionToken = Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE;
+  static injectionToken = Constants.DOMAIN_IAM_USER_MANAGER_SERVICE;
 
   constructor(
     protected authenticationOktaService: IAMAuthenticationOktaService,
+    protected authenticationPassthroughService: IAMAuthenticationPassthroughService,
     protected authenticationUserLocalService: IAMAuthenticationUserLocalService,
-    protected configProvider: ConfigProviderService,
+    configProvider: ConfigProviderService,
     protected dataUserStepDataItemsService: CacheAuthUserStepDataItemsEntityService,
-    protected domainUsersEntityService: IAMUsersService,
-    protected logger: LoggerService,
+    domainUsersEntityService: IAMUsersService,
+    logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
-    protected moduleName: string,
-    protected tokenManager: IAMTokenManagerService
+    moduleName: string,
+    tokenManager: IAMTokenManagerService
   ) {
     super(
-      { okta: authenticationOktaService, [IAMAuthenticationType.UserLocal]: authenticationUserLocalService },
+      {
+        okta: authenticationOktaService,
+        passthrough: authenticationPassthroughService,
+        [IAMAuthenticationType.UserLocal]: authenticationUserLocalService
+      },
       configProvider,
       dataUserStepDataItemsService,
       domainUsersEntityService,

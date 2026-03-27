@@ -1,2 +1,3 @@
-export * from './createAccessToken.dto';
-export * from './createAccessTokenOAuth2Callback.dto';
+export * from './authenticate.dto';
+export * from './authenticatePassthrough.dto';
+export * from './authenticateOAuth2Callback.dto';

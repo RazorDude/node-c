@@ -1,14 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import { IAMAuthenticationUserLocalService as BaseIAMAuthenticationUserLocalService } from '@node-c/domain-iam';
+
 import {
-  IAMAuthenticationUserLocalService as BaseIAMAuthenticationUserLocalService,
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
-  IAMAuthenticationUserLocalCompleteResult
-} from '@node-c/domain-iam';
-
-import { IAMAuthenticationUserLocalUserFields } from './authenticationUserLocal.definitions';
+  IAMAuthenticationUserLocalCompleteResult,
+  IAMAuthenticationUserLocalUserFields
+} from './authenticationUserLocal.definitions';
 
 import { Constants } from '../../../../common/definitions';
 import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
@@ -19,10 +19,10 @@ export class IAMAuthenticationUserLocalService extends BaseIAMAuthenticationUser
   IAMAuthenticationUserLocalUserFields
 > {
   constructor(
-    protected configProvider: ConfigProviderService,
-    protected logger: LoggerService,
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
-    protected moduleName: string,
+    moduleName: string,
     // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: AuditUserLoginLogsService
   ) {

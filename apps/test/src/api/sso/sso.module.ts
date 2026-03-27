@@ -21,6 +21,10 @@ export class SSOAPIModule extends BaseHTTPAPIModule {
       {
         provide: NodeCConstants.API_MODULE_AUTHORIZATION_SERVICE,
         useExisting: IAMAuthorizationService
+      },
+      {
+        provide: NodeCConstants.AUTHORIZATION_MIDDLEWARE_USERS_SERVICE,
+        useExisting: Constants.DOMAIN_IAM_USER_MANAGER_SERVICE
       }
     ]
   };

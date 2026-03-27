@@ -110,6 +110,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       }
       token = data.externalToken;
     } else {
+      // console.log('====>', data);
       token = await new Promise<string>((resolve, reject) => {
         jwt.sign({ data }, secret, signOptions, (err, token) => {
           if (err) {
@@ -164,12 +165,17 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       refreshTokenAccessTokenIdentifierDataField
     } = options || {};
     // decode the token
+    // console.log('=======>', moduleConfig, moduleName);
     const { error, externalTokenData, ...accessTokenData } = await this.verify(token, moduleConfig.jwtAccessSecret, {
       // TODO: make this configurable
       verifyExternal: true
     });
     const externalAccessTokenExpired = !!externalTokenData?.error;
     const internalAccessTokenExpired = error === Constants.TOKEN_EXPIRED_ERROR;
+    if (error && !internalAccessTokenExpired) {
+      logger.error(error);
+      throw new ApplicationError('Invalid access token.');
+    }
     let content = accessTokenData.content;
     let errorMessageToLog: string | undefined;
     let externalRenewEnabled = false;
@@ -383,6 +389,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
         resolve({ content: decoded as DecodedTokenContent<TokenEntityFields> });
       });
     });
+    // console.log('=========>', data);
     // TODO: move this logic to the verifyAccessToken method.
     const returnData: TokenManagerVerifyResult<TokenEntityFields> = { ...data };
     const tokenPayload = data.content?.data;

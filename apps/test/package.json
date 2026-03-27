@@ -10,8 +10,8 @@
     "generate:datasource-files:local": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} node ../../packages/core/dist/scripts/generateDatasourceFiles.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "start:dev": "nest start src/main.ts --watch",
-    "start:test": "NODE_ENV=endToEndTests nest start src/main.ts",
+    "start:dev": "ts-node src/main.ts --watch",
+    "start:test": "NODE_ENV=endToEndTests ts-node src/main.ts",
     "start:test:nyc": "NODE_ENV=endToEndTests nyc ts-node src/main.ts",
     "test": "NODE_ENV=endToEndTests vitest --config test/vitest.config.ts",
     "test:coverage": "NODE_ENV=endToEndTests vitest --config test/vitest.config.ts --coverage",
@@ -29,7 +29,6 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.16",
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
     "ajv": "^8.18.0",

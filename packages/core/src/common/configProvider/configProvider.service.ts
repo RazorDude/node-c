@@ -194,6 +194,10 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           for (const fieldName in moduleFieldsForType) {
             const configKey = `${categoryConfigKey}.${moduleConfigKey}.${moduleFieldsForType[fieldName]}`;
             const envKey = `${moduleCategory}_${moduleName}_${fieldName}`;
+            const envValue = envVars[envKey];
+            if (typeof envValue === 'undefined') {
+              continue;
+            }
             setNested(config, configKey, envVars[envKey]);
           }
         });

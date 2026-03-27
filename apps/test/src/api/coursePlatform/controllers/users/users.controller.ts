@@ -10,12 +10,10 @@ import {
   LoggerService
 } from '@node-c/core';
 
-import { IAMUserManagerService } from '@node-c/domain-iam';
-
-import { CoursePlatformUsersCreateAccessTokenDto, CoursePlatformUsersCreateAccessTokenOAuth2CallbackDto } from './dto';
+import { CoursePlatformUsersAuthenticateDto, CoursePlatformUsersAuthenticateOAuth2CallbackDto } from './dto';
 
 import { User as DBUser, UsersCreateUserData, UsersUpdateUserData } from '../../../../data/db';
-import { CoursePlatformUsersService } from '../../../../domain/coursePlatform';
+import { CoursePlatformUserManagerService, CoursePlatformUsersService } from '../../../../domain/coursePlatform';
 
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
@@ -28,28 +26,32 @@ export class CoursePlatformUsersEntityController extends RESTAPIEntityControler<
   DataDefaultData<DBUser> & { Create: UsersCreateUserData; Update: UsersUpdateUserData }
 > {
   constructor(
-    protected domainEntityService: CoursePlatformUsersService,
-    protected logger: LoggerService
+    domainEntityService: CoursePlatformUsersService,
+    // eslint-disable-next-line no-unused-vars
+    protected domainUserManagerService: CoursePlatformUserManagerService,
+    logger: LoggerService
   ) {
     super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DBUser>(), logger, ['find', 'findOne', 'update']);
   }
 
-  @Post('accessToken')
-  async createAccessToken(
+  // Standalone authentication with passthrough (as a consumer)
+  @Post('tokens')
+  async authenticate(
     @Body()
-    body: CoursePlatformUsersCreateAccessTokenDto
-  ): ReturnType<IAMUserManagerService<DBUser>['createAccessToken']> {
-    return this.domainUserManagerService.createAccessToken({ ...body, mainFilterField: 'email' });
+    body: CoursePlatformUsersAuthenticateDto
+  ): ReturnType<CoursePlatformUserManagerService['authenticate']> {
+    return this.domainUserManagerService.authenticate({ ...body, mainFilterField: 'email' });
   }
 
-  @Get('accessToken/callback/:authType')
-  async createAccessTokenOAuth2Callback(
+  // Standalone authentication - ouath2 callbacks
+  @Get('tokens/callback/:authType')
+  async authenticateOAuth2Callback(
     @Param()
     params: { authType: string },
     @Query()
-    query: CoursePlatformUsersCreateAccessTokenOAuth2CallbackDto
-  ): ReturnType<IAMUserManagerService<DBUser>['createAccessToken']> {
-    return this.domainUserManagerService.createAccessToken({
+    query: CoursePlatformUsersAuthenticateOAuth2CallbackDto
+  ): ReturnType<CoursePlatformUserManagerService['authenticate']> {
+    return this.domainUserManagerService.authenticate({
       auth: { ...query, type: params.authType },
       mainFilterField: 'email',
       step: AppConfigDomainIAMAuthenticationStep.Complete

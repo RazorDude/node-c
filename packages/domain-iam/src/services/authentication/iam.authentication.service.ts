@@ -6,7 +6,7 @@ import {
   IAMAuthenticationCompleteResult,
   IAMAuthenticationGetPayloadsFromExternalTokensData,
   IAMAuthenticationGetPayloadsFromExternalTokensResult,
-  IAMAuthenticationGetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationGetUserAuthenticationConfigResult,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationInitiateData,
@@ -31,7 +31,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
   ) {}
 
   /*
-   * Step 2 of the auth process. Mandatory.
+   * Step 2 of the authentication process. Mandatory.
    */
   async complete(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,7 +42,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     throw new ApplicationError(`[${this.moduleName}][IAMAuthenticationService]: Method "complete" not implemented.`);
   }
 
-  getUserCreateAccessTokenConfig(): IAMAuthenticationGetUserCreateAccessTokenConfigResult {
+  getUserAuthenticationConfig(): IAMAuthenticationGetUserAuthenticationConfigResult {
     throw new ApplicationError(
       `[${this.moduleName}][IAMAuthenticationService]: Method "getUserAccessTokenConfig" not implemented.`
     );
@@ -74,7 +74,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
   }
 
   /*
-   * Step 1 of the auth process. Mandatory.
+   * Step 1 of the authentication process. Mandatory.
    */
   async initiate(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

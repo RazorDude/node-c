@@ -10,7 +10,7 @@ import { Constants as NodeCDomainIAMConstants } from '@node-c/domain-iam';
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
-import { IAMAuthorizationService } from '../../domain/iam';
+import { CoursePlatformAuthorizationService } from '../../domain/coursePlatform';
 
 @Module({})
 export class CoursePlatformAPIModule extends BaseHTTPAPIModule {
@@ -25,7 +25,11 @@ export class CoursePlatformAPIModule extends BaseHTTPAPIModule {
       },
       {
         provide: NodeCAPIHTTPConstants.API_MODULE_AUTHORIZATION_SERVICE,
-        useExisting: IAMAuthorizationService
+        useExisting: CoursePlatformAuthorizationService
+      },
+      {
+        provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_USERS_SERVICE,
+        useExisting: Constants.DOMAIN_COURSE_PLATFORM_USER_MANAGER_SERVICE
       }
     ]
   };

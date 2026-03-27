@@ -36,24 +36,24 @@ export class AppModuleBase {
     envKeysParentNames: {
       API: {
         children: {
-          HTTP: 'http',
-          REST: 'rest'
+          COURSE_PLATFORM: 'coursePlatform', // _MODULE_TYPE - REST
+          SSO: 'sso' // _MODULE_TYPE - REST
         },
         name: 'api'
       },
       DOMAIN: {
         children: {
-          IAM: 'iam' // add another key to the .env file _MODULE_TYPE - IAM
+          IAM: 'iam' // _MODULE_TYPE - IAM
         },
         name: 'domain'
       },
       DATA: {
         children: {
-          AUDIT: 'audit', // add another key to the .env file _MODULE_TYPE - RDB
-          CACHE: 'cache', // add another key to the .env file _MODULE_TYPE - NOSQL
-          CACHE_AUTH: 'cacheAuth', // add another key to the .env file _MODULE_TYPE - NOSQL
-          DB: 'db', // add another key to the .env file _MODULE_TYPE - RDB
-          DB_CONFIGS: 'dbConfigs' // add another key to the .env file _MODULE_TYPE - RDB
+          AUDIT: 'audit', // _MODULE_TYPE - RDB
+          CACHE: 'cache', // _MODULE_TYPE - NOSQL
+          CACHE_AUTH: 'cacheAuth', // _MODULE_TYPE - NOSQL
+          DB: 'db', // _MODULE_TYPE - RDB
+          DB_CONFIGS: 'dbConfigs' // _MODULE_TYPE - RDB
         },
         name: 'data'
       }

@@ -6,6 +6,7 @@ import { IAMTokenManagerService as BaseIAMTokenManagerService, IAMAuthentication
 
 import { CacheAuthToken } from '../../../../data/cacheAuth';
 import { IAMAuthenticationOktaService } from '../authenticationOkta';
+import { IAMAuthenticationPassthroughService } from '../authenticationPassthrough';
 import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 import { IAMTokensService } from '../tokens';
 
@@ -15,6 +16,7 @@ export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuth
 
   constructor(
     protected authenticationOktaService: IAMAuthenticationOktaService,
+    protected authenticationPassthroughService: IAMAuthenticationPassthroughService,
     protected authenticationUserLocalService: IAMAuthenticationUserLocalService,
     configProvider: ConfigProviderService,
     domainTokensEntityService: IAMTokensService,
@@ -23,7 +25,11 @@ export class IAMTokenManagerService extends BaseIAMTokenManagerService<CacheAuth
     moduleName: string
   ) {
     super(
-      { okta: authenticationOktaService, [IAMAuthenticationType.UserLocal]: authenticationUserLocalService },
+      {
+        okta: authenticationOktaService,
+        passthrough: authenticationPassthroughService,
+        [IAMAuthenticationType.UserLocal]: authenticationUserLocalService
+      },
       configProvider,
       domainTokensEntityService,
       logger,

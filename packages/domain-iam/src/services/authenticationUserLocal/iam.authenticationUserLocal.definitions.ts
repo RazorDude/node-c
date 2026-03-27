@@ -2,7 +2,7 @@ import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
-  IAMAuthenticationGetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationGetUserAuthenticationConfigResult,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
   IAMAuthenticationInitiateResult
@@ -15,8 +15,8 @@ export type IAMAuthenticationUserLocalCompleteOptions<Context extends object> =
 
 export type IAMAuthenticationUserLocalCompleteResult = IAMAuthenticationCompleteResult;
 
-export type IAMAuthenticationUserLocalGetUserCreateAccessTokenConfigResult =
-  IAMAuthenticationGetUserCreateAccessTokenConfigResult;
+export type IAMAuthenticationUserLocalGetUserAuthenticationConfigResult =
+  IAMAuthenticationGetUserAuthenticationConfigResult;
 
 export interface IAMAuthenticationUserLocalInitiateData extends IAMAuthenticationInitiateData {
   password: string;

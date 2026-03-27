@@ -15,7 +15,7 @@ import {
 import { AuthorizationUser } from '../authorization';
 import { IAMMFAType } from '../mfa';
 
-export interface IAMUserManagerCreateAccessTokenOptions<AuthData = unknown> {
+export interface IAMUserManagerAuthenticateOptions<AuthData = unknown> {
   auth: {
     mfaType?: IAMMFAType;
     type: IAMAuthenticationType | string;
@@ -26,7 +26,7 @@ export interface IAMUserManagerCreateAccessTokenOptions<AuthData = unknown> {
   step?: AppConfigDomainIAMAuthenticationStep;
 }
 
-export type IAMUserManagerCreateAccessTokenReturnData<UserData> =
+export type IAMUserManagerAuthenticateReturnData<UserData> =
   | {
       accessToken: string;
       idToken: string;
@@ -36,7 +36,7 @@ export type IAMUserManagerCreateAccessTokenReturnData<UserData> =
   | { nextStepsRequired: boolean };
 
 export type IAMUserManagerExecuteStepData<AuthData = unknown> = Omit<
-  IAMUserManagerCreateAccessTokenOptions<AuthData>,
+  IAMUserManagerAuthenticateOptions<AuthData>,
   'rememberUser' | 'step'
 >;
 

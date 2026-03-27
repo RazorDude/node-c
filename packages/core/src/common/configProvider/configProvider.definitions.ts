@@ -8,14 +8,12 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
     HTTP: {
       API_KEY: 'apiKey',
       API_SECRET: 'apiSecret',
-      API_SECRET_ALGORITHM: 'apiSecretAlgorithm',
       HOSTNAME: 'hostname',
       PORT: 'port'
     },
     REST: {
       API_KEY: 'apiKey',
       API_SECRET: 'apiSecret',
-      API_SECRET_ALGORITHM: 'apiSecretAlgorithm',
       HOSTNAME: 'hostname',
       PORT: 'port'
     }
@@ -78,7 +76,12 @@ type AppConfigIntermediate = AppConfigCommon & AppConfigProfile & AppConfigFromE
 export type AppConfig = AppConfigIntermediate & Required<Pick<AppConfigIntermediate, 'api'>>;
 type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPIHTTP;
 export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
-  Required<Pick<AppConfigAPIHTTPIntermediate, 'allowedOrigins' | 'anonymousAccessRoutes' | 'hostname' | 'port'>>;
+  Required<
+    Pick<
+      AppConfigAPIHTTPIntermediate,
+      'allowedOrigins' | 'allowedApiKeyRoutes' | 'anonymousAccessRoutes' | 'hostname' | 'port'
+    >
+  >;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM & AppConfigProfileDomainIAM;
@@ -121,6 +124,8 @@ export interface AppConfigCommon {
 
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
+  allowedApiKeyRoutes?: Record<string, HttpMethod[]>;
+  apiSecretAlgorigthm?: string;
   anonymousAccessRoutes?: Record<string, HttpMethod[]>;
   endpointSecurityMode?: EndpointSecurityMode;
   hostname?: string;
@@ -158,6 +163,8 @@ export interface AppConfigCommonDomainIAM {
   }>;
   checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField: string;
+  externalAccessTokenExpiryMultiplier?: number;
+  externalRefreshTokenExpiryMultiplier?: number;
   refreshTokenExpiryTimeInHours?: number;
 }
 
@@ -199,6 +206,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings exten
   createUser?: boolean;
   decodeReturnedTokens?: boolean;
   findUserInAuthResultBy?: { userFieldName: string; resultFieldName: string };
+  findUserInExternalTokenPayloads?: boolean;
   useReturnedTokens?: boolean;
   useReturnedTokensAsLocal?: boolean;
 }
@@ -280,7 +288,6 @@ export interface AppConfigFromEnv {
 export interface AppConfigFromEnvAPIHTTP extends AppConfigCommonAPIHTTP {
   apiKey?: string;
   apiSecret?: string;
-  apiSecretAlgorithm?: string;
 }
 
 export type AppConfigFromEnvAPIREST = AppConfigFromEnvAPIHTTP;
@@ -384,6 +391,8 @@ export interface AppConfigProfileDomainIAM {
   }>;
   checkAccessTokenExistanceLocally?: boolean;
   defaultUserIdentifierField?: string;
+  externalAccessTokenExpiryMultiplier?: number;
+  externalRefreshTokenExpiryMultiplier?: number;
   refreshTokenExpiryTimeInHours?: number;
 }
 

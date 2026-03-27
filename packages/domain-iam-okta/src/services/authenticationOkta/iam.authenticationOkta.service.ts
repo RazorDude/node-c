@@ -13,7 +13,7 @@ import {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
-  IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationOktaGetUserAuthenticationConfigResult,
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationOktaInitiateData,
@@ -53,11 +53,11 @@ export class IAMAuthenticationOktaService<
   }
 
   // Okta Auth via OIDC
-  getUserCreateAccessTokenConfig(): IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult {
+  getUserAuthenticationConfig(): IAMAuthenticationOktaGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult = {
+    const defaultConfig: IAMAuthenticationOktaGetUserAuthenticationConfigResult = {
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
         authReturnsTokens: true,
         cache: {

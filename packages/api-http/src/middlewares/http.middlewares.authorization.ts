@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@
 
 import { AppConfigAPIHTTP, ConfigProviderService, HttpMethod, LoggerService } from '@node-c/core';
 import {
-  AuthorizationPoint,
   IAMAuthorizationService,
   IAMTokenManagerService,
   IAMUserManagerService,
@@ -24,7 +23,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
   constructor(
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected authorizationService: IAMAuthorizationService<AuthorizationPoint<unknown>>,
+    protected authorizationService: IAMAuthorizationService,
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
@@ -35,7 +34,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected tokenManager?: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>,
-    @Inject(Constants.AUTHENTICATION_MIDDLEWARE_USERS_SERVICE)
+    @Inject(Constants.AUTHORIZATION_MIDDLEWARE_USERS_SERVICE)
     // eslint-disable-next-line no-unused-vars
     protected usersService?: IAMUserManagerService<User>
   ) {}
@@ -44,7 +43,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     const { configProvider, logger, moduleName, tokenManager, usersService } = this;
     (async () => {
       const moduleConfig = configProvider.config.api![moduleName] as AppConfigAPIHTTP;
-      const { anonymousAccessRoutes } = moduleConfig;
+      const { allowedApiKeyRoutes, anonymousAccessRoutes } = moduleConfig;
       const requestMethod = req.method.toLowerCase();
       if (!req.locals) {
         req.locals = {};
@@ -100,6 +99,27 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
             HttpStatus.FORBIDDEN
           );
         }
+        // check the allowedApiKeyRoutes
+        if (allowedApiKeyRoutes && Object.keys(allowedApiKeyRoutes).length) {
+          const originalUrl = req.originalUrl.split('?')[0];
+          let isAllowed = false;
+          for (const route in allowedApiKeyRoutes) {
+            if (
+              checkRoutes(originalUrl, [route]) &&
+              allowedApiKeyRoutes[route].find(method => method === requestMethod)
+            ) {
+              isAllowed = true;
+              break;
+            }
+          }
+          if (!isAllowed) {
+            throw new HttpException(
+              { message: ErrorCodes.ROUTE_NOT_ALLOWED, statusCode: HttpStatus.FORBIDDEN },
+              HttpStatus.FORBIDDEN
+            );
+          }
+        }
+        req.locals.isApiKeyRoute = true;
         next();
         return;
       } else if (!tokenManager) {

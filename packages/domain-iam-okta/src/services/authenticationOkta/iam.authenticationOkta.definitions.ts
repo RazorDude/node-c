@@ -4,7 +4,7 @@ import {
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,
-  IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult,
+  IAMAuthenticationOAuth2GetUserAuthenticationConfigResult,
   IAMAuthenticationOAuth2InitiateData,
   IAMAuthenticationOAuth2InitiateOptions,
   IAMAuthenticationOAuth2InitiateResult,
@@ -22,8 +22,8 @@ export interface IAMAuthenticationOktaCompleteResult extends IAMAuthenticationOA
   refreshToken: string;
 }
 
-export type IAMAuthenticationOktaGetUserCreateAccessTokenConfigResult =
-  IAMAuthenticationOAuth2GetUserCreateAccessTokenConfigResult;
+export type IAMAuthenticationOktaGetUserAuthenticationConfigResult =
+  IAMAuthenticationOAuth2GetUserAuthenticationConfigResult;
 
 export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData;
