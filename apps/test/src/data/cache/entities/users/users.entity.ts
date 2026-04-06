@@ -1,13 +1,13 @@
 import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import { IAMUserManagerUserWithPermissionsData } from '@node-c/domain-iam';
+import { IAMUserWithPermissionsData } from '@node-c/domain-iam';
 
 import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
-import { User as DBUser } from '../../../db';
+import { DataDBUser } from '../../../db';
 
 const defaultSchema = getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'user');
 
-export type CacheUser = RedisEntity<number> & IAMUserManagerUserWithPermissionsData<DBUser, number>;
-export const CacheUserSchema: EntitySchema = {
+export type DataCacheUser = RedisEntity<number> & IAMUserWithPermissionsData<DataDBUser, number>;
+export const DataCacheUserSchema: EntitySchema = {
   ...defaultSchema,
   columns: {
     ...defaultSchema.columns,

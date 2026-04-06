@@ -27,7 +27,6 @@ export const loadDynamicModules = (
           provide: FolderDataItem.injectionToken,
           useClass: FolderDataItem as ClassProvider['useClass']
         });
-        // continue;
       }
       controllers.push(FolderDataItem);
       continue;
@@ -54,7 +53,6 @@ export const loadDynamicModules = (
           provide: FolderDataItem.injectionToken,
           useClass: FolderDataItem as ClassProvider['useClass']
         });
-        // continue;
       }
       services.push(FolderDataItem);
       continue;

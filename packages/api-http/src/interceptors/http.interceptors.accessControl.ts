@@ -4,7 +4,7 @@ import { ModuleRef, Reflector } from '@nestjs/core';
 import { GenericObject, LoggerService, Constants as NodeCCoreConstants, setNested } from '@node-c/core';
 import {
   IAMAuthorizationService,
-  IAMUserManagerUserWithPermissionsData,
+  IAMUserWithPermissionsData,
   Constants as NodeCDomainIAMConstants
 } from '@node-c/domain-iam';
 
@@ -13,12 +13,12 @@ import { Observable, map } from 'rxjs';
 import { RequestWithLocals } from '../common/definitions';
 import { AccessControlContext, AccessControlResource } from '../decorators';
 
-/*
- * Authorization interceptor - used for role-based and fine-grained access control.
+/**
+ * Access control interceptor - used for both role-based and fine-grained access control.
  */
 @Injectable()
 export class HTTPAccessControlInterceptor<
-  User extends IAMUserManagerUserWithPermissionsData<unknown, unknown>
+  User extends IAMUserWithPermissionsData<unknown, unknown>
 > implements NestInterceptor {
   constructor(
     // eslint-disable-next-line no-unused-vars
@@ -64,10 +64,10 @@ export class HTTPAccessControlInterceptor<
     };
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
     const {
-      authorizationPoints: usedAuthorizationPoints,
       errorCode,
       hasAccess,
-      inputDataToBeMutated
+      inputDataToBeMutated,
+      permissions: usedPermissions
     } = IAMAuthorizationService.checkAccess(
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user,
@@ -88,10 +88,7 @@ export class HTTPAccessControlInterceptor<
           return data;
         }
         const actualData = data as GenericObject;
-        const { outputDataToBeMutated } = IAMAuthorizationService.processOutputData(
-          usedAuthorizationPoints,
-          actualData
-        );
+        const { outputDataToBeMutated } = IAMAuthorizationService.processOutputData(usedPermissions, actualData);
         for (const key in outputDataToBeMutated) {
           setNested(actualData, key, outputDataToBeMutated[key]);
         }

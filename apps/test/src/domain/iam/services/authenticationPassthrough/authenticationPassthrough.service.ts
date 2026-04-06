@@ -1,22 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
-import { IAMAuthenticationPassthroughService as BaseIAMAuthenticationPassthroughService } from '@node-c/domain-iam';
+import { IAMAuthenticationPassthroughService } from '@node-c/domain-iam';
 
 import {
-  IAMAuthenticationPassthroughCompleteData,
-  IAMAuthenticationPassthroughCompleteOptions,
-  IAMAuthenticationPassthroughCompleteResult,
-  IAMAuthenticationPassthroughUserFields
+  DomainIAMAuthenticationPassthroughCompleteData,
+  DomainIAMAuthenticationPassthroughCompleteOptions,
+  DomainIAMAuthenticationPassthroughCompleteResult,
+  DomainIAMAuthenticationPassthroughUserFields
 } from './authenticationPassthrough.definitions';
 
 import { Constants } from '../../../../common/definitions';
-import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
 
 @Injectable()
-export class IAMAuthenticationPassthroughService extends BaseIAMAuthenticationPassthroughService<
-  IAMAuthenticationPassthroughUserFields,
-  IAMAuthenticationPassthroughUserFields
+export class DomainIAMAuthenticationPassthroughService extends IAMAuthenticationPassthroughService<
+  DomainIAMAuthenticationPassthroughUserFields,
+  DomainIAMAuthenticationPassthroughUserFields
 > {
   constructor(
     configProvider: ConfigProviderService,
@@ -24,15 +24,15 @@ export class IAMAuthenticationPassthroughService extends BaseIAMAuthenticationPa
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected userLoginLogsService: AuditUserLoginLogsService
+    protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
     super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_PASSTHROUGH_SERVICE_NAME);
   }
 
   async complete(
-    data: IAMAuthenticationPassthroughCompleteData,
-    options: IAMAuthenticationPassthroughCompleteOptions<IAMAuthenticationPassthroughUserFields>
-  ): Promise<IAMAuthenticationPassthroughCompleteResult> {
+    data: DomainIAMAuthenticationPassthroughCompleteData,
+    options: DomainIAMAuthenticationPassthroughCompleteOptions<DomainIAMAuthenticationPassthroughUserFields>
+  ): Promise<DomainIAMAuthenticationPassthroughCompleteResult> {
     const result = await super.complete(data, options);
     await this.userLoginLogsService.create({
       datetime: new Date()

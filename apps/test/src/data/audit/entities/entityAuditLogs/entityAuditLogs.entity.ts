@@ -1,7 +1,7 @@
 import { GenericObject } from '@node-c/core';
 import { ClickHouseDBEntitySchema, ClickHouseDBEntitySchemaColumnType } from '@node-c/data-clickhouse';
 
-export interface EntityAuditLog extends GenericObject {
+export interface DataAuditEntityAuditLog extends GenericObject {
   dataBefore?: GenericObject;
   dataAfter: GenericObject;
   datetime: string;
@@ -11,7 +11,7 @@ export interface EntityAuditLog extends GenericObject {
   userId: number;
 }
 
-export const EntityAuditLogEntity: ClickHouseDBEntitySchema<EntityAuditLog> = {
+export const DataAuditEntityAuditLogEntity: ClickHouseDBEntitySchema<DataAuditEntityAuditLog> = {
   options: {
     columns: {
       dataBefore: { type: ClickHouseDBEntitySchemaColumnType.JSON },

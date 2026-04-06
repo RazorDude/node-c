@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/data-redis';
 
-import { CacheAuthTokenSchema } from './tokens.entity';
-import { CacheAuthTokensEntityService } from './tokens.service';
+import { DataCacheAuthTokenSchema } from './tokens.entity';
+import { DataCacheAuthTokensEntityService } from './tokens.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,10 +11,10 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     RedisRepositoryModule.register({
       dataModuleName: Constants.DATA_CACHE_AUTH_MODULE_NAME,
-      schema: CacheAuthTokenSchema
+      schema: DataCacheAuthTokenSchema
     })
   ],
-  providers: [CacheAuthTokensEntityService],
-  exports: [CacheAuthTokensEntityService]
+  providers: [DataCacheAuthTokensEntityService],
+  exports: [DataCacheAuthTokensEntityService]
 })
-export class CacheAuthTokensEntityModule {}
+export class DataCacheAuthTokensEntityModule {}

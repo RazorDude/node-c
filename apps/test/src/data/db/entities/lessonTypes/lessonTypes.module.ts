@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { LessonTypeEntity } from './lessonTypes.entity';
-import { LessonTypesService } from './lessonTypes.service';
+import { DataDBLessonTypeEntity } from './lessonTypes.entity';
+import { DataDBLessonTypesService } from './lessonTypes.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,11 +11,11 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     TypeORMDBRepositoryModule.register({
       connectionName: Constants.DATA_DB_MODULE_CONNECTION_NAME,
-      entityClass: LessonTypeEntity,
+      entityClass: DataDBLessonTypeEntity,
       dataModuleName: Constants.DATA_DB_MODULE_NAME
     })
   ],
-  providers: [LessonTypesService],
-  exports: [LessonTypesService]
+  providers: [DataDBLessonTypesService],
+  exports: [DataDBLessonTypesService]
 })
-export class LessonTypesModule {}
+export class DataDBLessonTypesModule {}

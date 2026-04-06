@@ -5,21 +5,21 @@ import { Constants } from '@node-c/data-rdb';
 
 import { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 
-import { User } from './users.entity';
-import { UsersService } from './users.service';
+import { DataDBUser } from './users.entity';
+import { DataDBUsersService } from './users.service';
 
 // TODO: move the password properties logic away and into the domain
 @Injectable()
-export class UserSubscriber implements EntitySubscriberInterface<User> {
+export class DataDBUserSubscriber implements EntitySubscriberInterface<DataDBUser> {
   constructor(
     @Inject(ConfigProviderService)
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
     protected readonly dataSource: DataSource,
-    @Inject(UsersService)
+    @Inject(DataDBUsersService)
     // eslint-disable-next-line no-unused-vars
-    protected usersService: UsersService
+    protected usersService: DataDBUsersService
   ) {
     dataSource.subscribers.push(this);
   }
@@ -28,7 +28,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     return (this.usersService.getEntityTarget() as string) || '';
   }
 
-  async beforeInsert(event: InsertEvent<User & { plainTextPassword?: string }>): Promise<void> {
+  async beforeInsert(event: InsertEvent<DataDBUser & { plainTextPassword?: string }>): Promise<void> {
     const { plainTextPassword } = event.entity;
     if (plainTextPassword) {
       // validate password length and content password
@@ -40,7 +40,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     }
   }
 
-  async beforeUpdate(event: UpdateEvent<User & { plainTextPassword?: string }>): Promise<void> {
+  async beforeUpdate(event: UpdateEvent<DataDBUser & { plainTextPassword?: string }>): Promise<void> {
     const { plainTextPassword } = event.entity || {};
     if (plainTextPassword) {
       // validate password length and content password

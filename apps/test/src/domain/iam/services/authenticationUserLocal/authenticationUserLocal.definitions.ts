@@ -1,16 +1,16 @@
 import {
-  IAMAuthenticationUserLocalCompleteData as BaseIAMAuthenticationUserLocalCompleteData,
-  IAMAuthenticationUserLocalCompleteOptions as BaseIAMAuthenticationUserLocalCompleteOptions,
-  IAMAuthenticationUserLocalCompleteResult as BaseIAMAuthenticationUserLocalCompleteResult
+  IAMAuthenticationUserLocalCompleteData,
+  IAMAuthenticationUserLocalCompleteOptions,
+  IAMAuthenticationUserLocalCompleteResult
 } from '@node-c/domain-iam';
 
-import { CacheUser } from '../../../../data/cache';
+import { DataCacheUser } from '../../../../data/cache';
 
-export type IAMAuthenticationUserLocalCompleteData = BaseIAMAuthenticationUserLocalCompleteData;
+export type DomainIAMAuthenticationUserLocalCompleteData = IAMAuthenticationUserLocalCompleteData;
 
-export type IAMAuthenticationUserLocalCompleteOptions<Context extends object> =
-  BaseIAMAuthenticationUserLocalCompleteOptions<Context>;
+export type DomainIAMAuthenticationUserLocalCompleteOptions<Context extends object> =
+  IAMAuthenticationUserLocalCompleteOptions<Context>;
 
-export type IAMAuthenticationUserLocalCompleteResult = BaseIAMAuthenticationUserLocalCompleteResult;
+export type DomainIAMAuthenticationUserLocalCompleteResult = IAMAuthenticationUserLocalCompleteResult;
 
-export type IAMAuthenticationUserLocalUserFields = CacheUser & { password: string };
+export type DomainIAMAuthenticationUserLocalUserFields = DataCacheUser & { password: string };

@@ -23,7 +23,7 @@ import {
   IAMAuthenticationOktaRefreshExternalAccessTokenResult
 } from './iam.authenticationOkta.definitions';
 
-/*
+/**
  * A service for integrating Okta OIDC auth. It extends the Domain-IAM-OAuth2.
  */
 export class IAMAuthenticationOktaService<

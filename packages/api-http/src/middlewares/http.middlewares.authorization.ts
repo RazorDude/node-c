@@ -2,10 +2,10 @@ import { HttpException, HttpStatus, Inject, Injectable, NestMiddleware } from '@
 
 import { AppConfigAPIHTTP, ConfigProviderService, HttpMethod, LoggerService } from '@node-c/core';
 import {
+  IAMAuthenticationManagerService,
+  IAMAuthenticationManagerUserTokenEnityFields,
   IAMAuthorizationService,
-  IAMTokenManagerService,
-  IAMUserManagerService,
-  IAMUserManagerUserTokenEnityFields
+  IAMTokenManagerService
 } from '@node-c/domain-iam';
 
 import { NextFunction, Response } from 'express';
@@ -15,7 +15,7 @@ import { Constants, RequestWithLocals } from '../common/definitions';
 import { ErrorCodes } from '../common/definitions/common.errors';
 import { checkRoutes } from '../common/utils';
 
-/*
+/**
  * Authorization middleware - used for general authorization of the HTTP resource.
  */
 @Injectable()
@@ -31,16 +31,16 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
     @Inject(Constants.API_MODULE_NAME)
     // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
+    @Inject(Constants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE)
+    // eslint-disable-next-line no-unused-vars
+    protected authenticationManager?: IAMAuthenticationManagerService<User>,
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     // eslint-disable-next-line no-unused-vars
-    protected tokenManager?: IAMTokenManagerService<IAMUserManagerUserTokenEnityFields>,
-    @Inject(Constants.AUTHORIZATION_MIDDLEWARE_USERS_SERVICE)
-    // eslint-disable-next-line no-unused-vars
-    protected usersService?: IAMUserManagerService<User>
+    protected tokenManager?: IAMTokenManagerService<IAMAuthenticationManagerUserTokenEnityFields>
   ) {}
 
   use(req: RequestWithLocals<unknown>, res: Response, next: NextFunction): void {
-    const { configProvider, logger, moduleName, tokenManager, usersService } = this;
+    const { authenticationManager, configProvider, logger, moduleName, tokenManager } = this;
     (async () => {
       const moduleConfig = configProvider.config.api![moduleName] as AppConfigAPIHTTP;
       const { allowedApiKeyRoutes, anonymousAccessRoutes } = moduleConfig;
@@ -144,9 +144,9 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         useCookie = true;
       }
       const { newAccessToken, newRefreshToken, tokenContent, valid } =
-        await this.authorizationService.authorizeBearer<IAMUserManagerUserTokenEnityFields>(
+        await this.authorizationService.authorizeBearer<IAMAuthenticationManagerUserTokenEnityFields>(
           { authToken, refreshToken },
-          { identifierDataField: usersService ? 'userId' : undefined }
+          { identifierDataField: authenticationManager ? 'userId' : undefined }
         );
       if (!valid) {
         throw new HttpException(
@@ -154,7 +154,7 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
           HttpStatus.UNAUTHORIZED
         );
       }
-      if (usersService) {
+      if (authenticationManager) {
         const userId = tokenContent?.data?.userId;
         if (!userId) {
           logger.error('Missing userId in the tokenContent data.');
@@ -168,14 +168,16 @@ export class HTTPAuthorizationMiddleware<User extends object> implements NestMid
         if (user) {
           req.locals!.user = user;
         } else if (moduleConfig.localSearchForUsersEnabledOnAuthorization) {
-          req.locals!.user = await usersService.getUserWithPermissionsData({ filters: { id: userId } });
-        }
-        if (!userId) {
-          logger.error('Missing user data in the session.');
-          throw new HttpException(
-            { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.UNAUTHORIZED },
-            HttpStatus.UNAUTHORIZED
-          );
+          req.locals!.user = await authenticationManager.domainUsersEntityService?.getUserWithPermissionsData({
+            filters: { id: userId }
+          });
+          if (!req.locals!.user) {
+            logger.error('Missing user data in the session.');
+            throw new HttpException(
+              { message: ErrorCodes.AUTH_INVALID, statusCode: HttpStatus.UNAUTHORIZED },
+              HttpStatus.UNAUTHORIZED
+            );
+          }
         }
       }
       if (newAccessToken) {

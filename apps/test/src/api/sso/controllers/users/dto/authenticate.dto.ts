@@ -1,15 +1,16 @@
-import { AppConfigDomainIAMAuthenticationStep, GenericObjectClass } from '@node-c/core';
-import { IAMMFAType, IAMUserManagerAuthenticateOptions } from '@node-c/domain-iam';
+import { GenericObjectClass } from '@node-c/core';
+import { IAMAuthenticationManagerAuthenticateOptions, IAMMFAType } from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
 import { IsDefined, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-export class SSOUsersAuthenticateAuthDto extends GenericObjectClass {
-  @IsDefined()
-  @IsString()
-  @IsNotEmpty()
-  type: string;
+interface AuthenticateAuthWithoutType {
+  auth: Omit<IAMAuthenticationManagerAuthenticateOptions['auth'], 'type'>;
+}
+type AuthenticateOptionsCustom = Omit<IAMAuthenticationManagerAuthenticateOptions, 'auth' | 'mainFilterField'>;
+type AuthenticateOptionsCustomFinal = AuthenticateOptionsCustom & AuthenticateAuthWithoutType;
 
+export class SSOUsersAuthenticateAuthDto extends GenericObjectClass {
   @IsOptional()
   @IsString()
   mfaType?: IAMMFAType;
@@ -32,7 +33,7 @@ export class SSOUsersAuthenticateFiltersDto extends GenericObjectClass {
   email: string;
 }
 
-export class SSOUsersAuthenticateDto implements Omit<IAMUserManagerAuthenticateOptions, 'mainFilterField'> {
+export class SSOUsersAuthenticateDto implements AuthenticateOptionsCustomFinal {
   @IsDefined()
   @IsObject()
   @Type(() => SSOUsersAuthenticateAuthDto)
@@ -44,8 +45,4 @@ export class SSOUsersAuthenticateDto implements Omit<IAMUserManagerAuthenticateO
   @Type(() => SSOUsersAuthenticateFiltersDto)
   @ValidateNested()
   filters?: SSOUsersAuthenticateFiltersDto;
-
-  @IsOptional()
-  @IsString()
-  step?: AppConfigDomainIAMAuthenticationStep;
 }

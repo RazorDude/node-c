@@ -15,7 +15,7 @@ export interface IAMAuthenticationCompleteOptions<Context> {
 
 export enum IAMAuthenticationType {
   // eslint-disable-next-line no-unused-vars
-  OAuth2 = 'ouath2',
+  OAuth2 = 'oauth2',
   // eslint-disable-next-line no-unused-vars
   UserLocal = 'userLocal'
 }

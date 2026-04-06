@@ -2,12 +2,12 @@ import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
-export interface Category<Course extends DBEntity = DBEntity> extends DBEntity {
+export interface DataDBCategory<Course extends DBEntity = DBEntity> extends DBEntity {
   courses?: Course[];
   name: string;
 }
 
-export const CategoryEntity = new EntitySchema<Category<DBEntity>>({
+export const DataDBCategoryEntity = new EntitySchema<DataDBCategory<DBEntity>>({
   columns: {
     ...DBEntitySchema.columns,
     name: { type: 'varchar', unique: true }

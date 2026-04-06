@@ -30,13 +30,12 @@ import { IAMAuthenticationService, IAMAuthenticationType } from '../authenticati
 import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
 import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
 
-/*
+/**
  * Service for managing local access and refresh JWTs.
  */
 export class IAMTokenManagerService<TokenEntityFields extends object> {
   constructor(
     // eslint-disable-next-line no-unused-vars
-    // protected authServices: Record<string, IAMAuthenticationService<object, object>>,
     // eslint-disable-next-line no-unused-vars
     protected authServices: {
       [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
@@ -45,14 +44,14 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     // eslint-disable-next-line no-unused-vars
-    public domainTokensEntityService: DomainEntityService<
-      TokenEntity<TokenEntityFields>,
-      DataEntityService<TokenEntity<TokenEntityFields>>
-    >,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
-    protected moduleName: string
+    protected moduleName: string,
+    // eslint-disable-next-line no-unused-vars
+    public domainTokensEntityService?: DomainEntityService<
+      TokenEntity<TokenEntityFields>,
+      DataEntityService<TokenEntity<TokenEntityFields>>
+    >
   ) {}
 
   async create(
@@ -110,7 +109,6 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       }
       token = data.externalToken;
     } else {
-      // console.log('====>', data);
       token = await new Promise<string>((resolve, reject) => {
         jwt.sign({ data }, secret, signOptions, (err, token) => {
           if (err) {
@@ -131,6 +129,9 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     // save the token in the data system of choice
     // TODO: multi-data isn't handled well here (or, actually, at all)
     if (persist) {
+      if (!domainTokensEntityService) {
+        throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+      }
       if (purgeOldFromData && identifierDataField) {
         const identifierValue = ld.get(data, identifierDataField);
         if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
@@ -165,7 +166,6 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       refreshTokenAccessTokenIdentifierDataField
     } = options || {};
     // decode the token
-    // console.log('=======>', moduleConfig, moduleName);
     const { error, externalTokenData, ...accessTokenData } = await this.verify(token, moduleConfig.jwtAccessSecret, {
       // TODO: make this configurable
       verifyExternal: true
@@ -202,6 +202,9 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
             errorMessageToLog = refreshTokenError as string;
             // delete the refresh token from the store
             if (deleteFromStoreIfExpired && refreshTokenContent.data) {
+              if (!domainTokensEntityService) {
+                throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+              }
               const identifierValue = ld.get(refreshTokenContent.data, refreshTokenAccessTokenIdentifierDataField);
               if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
                 await domainTokensEntityService.delete(
@@ -237,6 +240,9 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
           errorMessageToLog =
             '[IAMTokenManagerService.verifyAccessToken]: Access token expired & no refresh token data present or configured.';
           if (deleteFromStoreIfExpired) {
+            if (!domainTokensEntityService) {
+              throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+            }
             const identifierValue = ld.get(content.data, identifierDataField);
             if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
               await domainTokensEntityService.delete(
@@ -264,7 +270,10 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
           errorMessageToLog = 'Content.data is required when checkAccessTokenExistanceLocally is set to true.';
           throwError = true;
         } else {
-          const accessTokenResult = await this.domainTokensEntityService.findOne({
+          if (!domainTokensEntityService) {
+            throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+          }
+          const accessTokenResult = await domainTokensEntityService.findOne({
             filters: { [identifierDataField]: ld.get(content.data, identifierDataField), token, type: TokenType.Access }
           });
           if (!accessTokenResult.result) {
@@ -287,8 +296,11 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       let identifierValue: unknown | undefined;
       // find and decode the id token, and add its data to the content
       if (identifierDataField) {
+        if (!domainTokensEntityService) {
+          throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+        }
         identifierValue = ld.get(content.data, identifierDataField);
-        const idToken = await this.domainTokensEntityService.findOne({
+        const idToken = await domainTokensEntityService.findOne({
           filters: { [identifierDataField]: identifierValue, token, type: TokenType.Id }
         });
         if (idToken.result) {
@@ -389,7 +401,6 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
         resolve({ content: decoded as DecodedTokenContent<TokenEntityFields> });
       });
     });
-    // console.log('=========>', data);
     // TODO: move this logic to the verifyAccessToken method.
     const returnData: TokenManagerVerifyResult<TokenEntityFields> = { ...data };
     const tokenPayload = data.content?.data;

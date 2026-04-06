@@ -1,6 +1,6 @@
 import { GenericObject, HttpMethod } from '../definitions';
 
-/*
+/**
  * This object contains the names of the fields within the modules, by module category.
  */
 export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
@@ -42,10 +42,13 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
   }
 };
 
-/*
+/**
  * This object contains the names of the module categories and the modules themselves.
+ *
  * The module names here are examples, corresponding to the object above.
+ *
  * In order for this to work, each module in the .env files should have a key ending with
+ *
  * _MODULE_TYPE, whose value correesponds to the values define in the 'children' here.
  */
 export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNames = {
@@ -101,7 +104,7 @@ export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
   AppConfigProfileDataClickHouse &
   AppConfigProfileDataRDB;
 
-/*
+/**
  * Config data held in the common config file.
  */
 
@@ -139,15 +142,18 @@ export interface AppConfigCommonDomainIAM {
   authServiceSettings?: GenericObject<{
     nodeC?: {
       apiSecretHashingAlgorithm?: string;
-      baseUrl?: string;
       completeEndpoint?: string;
+      completeEndpointMethod?: HttpMethod;
       initiateEndpoint?: string;
+      initiateEndpointMethod?: HttpMethod;
       refreshExternalAccessTokenEndpoint?: string;
+      refreshExternalAccessTokenEndpointMethod?: HttpMethod;
     };
     oauth2?: {
       accessTokenAudiences?: string[];
       accessTokenEmailField?: string;
       accessTokenGrantUrl?: string;
+      allowedIncomingRedirectUris?: string[];
       authorizationUrl?: string;
       codeChallengeMethod: string; // code_challenge_method
       defaultScope?: string;
@@ -273,7 +279,7 @@ export interface AppConfigCommonDataRDB extends AppConfigCommonData {
   type: RDBType;
 }
 
-/*
+/**
  * Config data coming from env files.
  */
 
@@ -339,7 +345,7 @@ export interface AppConfigFromEnvDataRDB {
   user: string;
 }
 
-/*
+/**
  * Config data coming from configProfile files.
  */
 
@@ -370,13 +376,17 @@ export interface AppConfigProfileDomainIAM {
       apiSecretHashingAlgorithm?: string;
       baseUrl?: string;
       completeEndpoint?: string;
+      completeEndpointMethod?: HttpMethod;
       initiateEndpoint?: string;
+      initiateEndpointMethod?: HttpMethod;
       refreshExternalAccessTokenEndpoint?: string;
+      refreshExternalAccessTokenEndpointMethod?: HttpMethod;
     };
     oauth2?: {
       accessTokenAudiences?: string[];
       accessTokenEmailField?: string;
       accessTokenGrantUrl?: string;
+      allowedIncomingRedirectUris?: string[];
       authorizationUrl?: string;
       codeChallengeMethod: string; // code_challenge_method
       defaultScope?: string;
@@ -417,7 +427,7 @@ export enum AppEnvironment {
   Test = 'endToEndTests'
 }
 
-/*
+/**
  * Other config-related definitions.
  */
 

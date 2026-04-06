@@ -1,24 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
-import { IAMAuthenticationOktaService as BaseIAMAuthenticationOktaService } from '@node-c/domain-iam-okta';
+import { IAMAuthenticationOktaService } from '@node-c/domain-iam-okta';
 
 import {
-  IAMAuthenticationOktaCompleteData,
-  IAMAuthenticationOktaCompleteOptions,
-  IAMAuthenticationOktaCompleteResult,
-  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
-  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
-  IAMAuthenticationOktaUserFields
+  DomainIAMAuthenticationOktaCompleteData,
+  DomainIAMAuthenticationOktaCompleteOptions,
+  DomainIAMAuthenticationOktaCompleteResult,
+  DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
+  DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
+  DomainIAMAuthenticationOktaUserFields
 } from './authenticationOkta.definitions';
 
 import { Constants } from '../../../../common/definitions';
-import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
 
 @Injectable()
-export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaService<
-  IAMAuthenticationOktaUserFields,
-  IAMAuthenticationOktaUserFields
+export class DomainIAMAuthenticationOktaService extends IAMAuthenticationOktaService<
+  DomainIAMAuthenticationOktaUserFields,
+  DomainIAMAuthenticationOktaUserFields
 > {
   constructor(
     configProvider: ConfigProviderService,
@@ -26,15 +26,15 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected userLoginLogsService: AuditUserLoginLogsService
+    protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
     super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME);
   }
 
   async complete(
-    data: IAMAuthenticationOktaCompleteData,
-    options: IAMAuthenticationOktaCompleteOptions<IAMAuthenticationOktaUserFields>
-  ): Promise<IAMAuthenticationOktaCompleteResult> {
+    data: DomainIAMAuthenticationOktaCompleteData,
+    options: DomainIAMAuthenticationOktaCompleteOptions<DomainIAMAuthenticationOktaUserFields>
+  ): Promise<DomainIAMAuthenticationOktaCompleteResult> {
     const result = await super.complete(data, options);
     await this.userLoginLogsService.create({
       datetime: new Date()
@@ -47,8 +47,8 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
   }
 
   async getUserDataFromExternalTokenPayloads(
-    data: IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData
-  ): Promise<IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult | null> {
+    data: DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData
+  ): Promise<DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult | null> {
     const parentResult = await super.getUserDataFromExternalTokenPayloads(data);
     if (!parentResult) {
       return null;
@@ -58,6 +58,6 @@ export class IAMAuthenticationOktaService extends BaseIAMAuthenticationOktaServi
       accountStatusId: 1,
       assignedUserTypes: [{ id: 2 }],
       initialPassword: this.generateUrlEncodedString(30)
-    } as unknown as IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
+    } as unknown as DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
   }
 }

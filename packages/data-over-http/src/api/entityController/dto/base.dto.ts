@@ -2,7 +2,7 @@ import { DomainBaseAdditionalServiceOptionsOverrides, DomainDataServicesKey, Gen
 
 import { IsArray, IsObject, IsOptional } from 'class-validator';
 
-/*
+/**
  * We need the Options type here, so we can easily extend overriden classes' BaseDto
  */
 export class BaseDto<Options> {

@@ -1,16 +1,16 @@
 import {
-  IAMAuthenticationPassthroughCompleteData as BaseIAMAuthenticationPassthroughCompleteData,
-  IAMAuthenticationPassthroughCompleteOptions as BaseIAMAuthenticationPassthroughCompleteOptions,
-  IAMAuthenticationPassthroughCompleteResult as BaseIAMAuthenticationPassthroughCompleteResult
+  IAMAuthenticationPassthroughCompleteData,
+  IAMAuthenticationPassthroughCompleteOptions,
+  IAMAuthenticationPassthroughCompleteResult
 } from '@node-c/domain-iam';
 
-import { CacheUser } from '../../../../data/cache';
+import { DataCacheUser } from '../../../../data/cache';
 
-export type IAMAuthenticationPassthroughCompleteData = BaseIAMAuthenticationPassthroughCompleteData;
+export type DomainIAMAuthenticationPassthroughCompleteData = IAMAuthenticationPassthroughCompleteData;
 
-export type IAMAuthenticationPassthroughCompleteOptions<Context extends object> =
-  BaseIAMAuthenticationPassthroughCompleteOptions<Context>;
+export type DomainIAMAuthenticationPassthroughCompleteOptions<Context extends object> =
+  IAMAuthenticationPassthroughCompleteOptions<Context>;
 
-export type IAMAuthenticationPassthroughCompleteResult = BaseIAMAuthenticationPassthroughCompleteResult;
+export type DomainIAMAuthenticationPassthroughCompleteResult = IAMAuthenticationPassthroughCompleteResult;
 
-export type IAMAuthenticationPassthroughUserFields = CacheUser & { password: string };
+export type DomainIAMAuthenticationPassthroughUserFields = DataCacheUser;

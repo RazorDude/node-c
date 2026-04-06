@@ -4,19 +4,19 @@ import { ConfigProviderService, Constants as CoreConstants, LoggerService } from
 import { IAMAuthenticationUserLocalService as BaseIAMAuthenticationUserLocalService } from '@node-c/domain-iam';
 
 import {
-  IAMAuthenticationUserLocalCompleteData,
-  IAMAuthenticationUserLocalCompleteOptions,
-  IAMAuthenticationUserLocalCompleteResult,
-  IAMAuthenticationUserLocalUserFields
+  DomainIAMAuthenticationUserLocalCompleteData,
+  DomainIAMAuthenticationUserLocalCompleteOptions,
+  DomainIAMAuthenticationUserLocalCompleteResult,
+  DomainIAMAuthenticationUserLocalUserFields
 } from './authenticationUserLocal.definitions';
 
 import { Constants } from '../../../../common/definitions';
-import { AuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
 
 @Injectable()
-export class IAMAuthenticationUserLocalService extends BaseIAMAuthenticationUserLocalService<
-  IAMAuthenticationUserLocalUserFields,
-  IAMAuthenticationUserLocalUserFields
+export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticationUserLocalService<
+  DomainIAMAuthenticationUserLocalUserFields,
+  DomainIAMAuthenticationUserLocalUserFields
 > {
   constructor(
     configProvider: ConfigProviderService,
@@ -24,15 +24,15 @@ export class IAMAuthenticationUserLocalService extends BaseIAMAuthenticationUser
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
     // eslint-disable-next-line no-unused-vars
-    protected userLoginLogsService: AuditUserLoginLogsService
+    protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
     super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_USER_LOCAL_SERVICE_NAME);
   }
 
   async complete(
-    data: IAMAuthenticationUserLocalCompleteData,
-    options: IAMAuthenticationUserLocalCompleteOptions<IAMAuthenticationUserLocalUserFields>
-  ): Promise<IAMAuthenticationUserLocalCompleteResult> {
+    data: DomainIAMAuthenticationUserLocalCompleteData,
+    options: DomainIAMAuthenticationUserLocalCompleteOptions<DomainIAMAuthenticationUserLocalUserFields>
+  ): Promise<DomainIAMAuthenticationUserLocalCompleteResult> {
     const result = await super.complete(data, options);
     await this.userLoginLogsService.create({
       datetime: new Date()

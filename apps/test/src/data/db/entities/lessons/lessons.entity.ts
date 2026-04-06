@@ -1,17 +1,17 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { Course } from '../courses';
-import { LessonType } from '../lessonTypes';
+import { DataDBCourse } from '../courses';
+import { DataDBLessonType } from '../lessonTypes';
 
-export interface Lesson extends DBEntity {
-  courses?: Course[];
-  lessonType?: LessonType;
+export interface DataDBLesson extends DBEntity {
+  courses?: DataDBCourse[];
+  lessonType?: DataDBLessonType;
   lessonTypeId: number;
   name: string;
 }
 
-export const LessonEntity = new EntitySchema<Lesson>({
+export const DataDBLessonEntity = new EntitySchema<DataDBLesson>({
   columns: {
     ...DBEntitySchema.columns,
     lessonTypeId: { type: 'integer' },

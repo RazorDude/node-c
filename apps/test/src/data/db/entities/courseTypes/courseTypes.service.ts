@@ -4,17 +4,17 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { CourseType, CourseTypeEntity } from './courseTypes.entity';
+import { DataDBCourseType, DataDBCourseTypeEntity } from './courseTypes.entity';
 
 @Injectable()
-export class CourseTypesService extends TypeORMDBEntityService<CourseType> {
+export class DataDBCourseTypesService extends TypeORMDBEntityService<DataDBCourseType> {
   constructor(
     configProvider: ConfigProviderService,
     logger: LoggerService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
-    repository: TypeORMDBRepository<CourseType>
+    repository: TypeORMDBRepository<DataDBCourseType>
   ) {
-    super(configProvider, logger, qb, repository, CourseTypeEntity);
+    super(configProvider, logger, qb, repository, DataDBCourseTypeEntity);
   }
 }

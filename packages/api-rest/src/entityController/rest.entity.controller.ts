@@ -140,9 +140,11 @@ export class RESTAPIEntityControlerWithoutDto<
   }
 }
 
-/*
+/**
  * For reference on why the dto validation was done in this way - it's a limitation of Typescript itself:
+ *
  * the compiler doesn't emit generic type metadata, making it impossible to achieve a DRY OOP base class with schema validation.
+ *
  * At this point, it's a decade-old issue.
  */
 export class RESTAPIEntityControler<

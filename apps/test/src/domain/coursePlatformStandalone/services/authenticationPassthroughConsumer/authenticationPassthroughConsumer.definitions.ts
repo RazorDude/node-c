@@ -1,0 +1,42 @@
+import {
+  IAMAuthenticationPassthroughConsumerCompleteData,
+  IAMAuthenticationPassthroughConsumerCompleteOptions,
+  IAMAuthenticationPassthroughConsumerCompleteResult,
+  // IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult,
+  IAMAuthenticationPassthroughConsumerInitiateData,
+  IAMAuthenticationPassthroughConsumerInitiateOptions,
+  IAMAuthenticationPassthroughConsumerInitiateResult,
+  IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData,
+  IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult
+} from '@node-c/domain-iam';
+
+import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone';
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteData =
+  IAMAuthenticationPassthroughConsumerCompleteData;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteOptions<Context extends object> =
+  IAMAuthenticationPassthroughConsumerCompleteOptions<Context>;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteResult =
+  IAMAuthenticationPassthroughConsumerCompleteResult;
+
+// export type CoursePlatformStandaloneAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult =
+//   IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateData =
+  IAMAuthenticationPassthroughConsumerInitiateData;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateOptions<Context extends object> =
+  IAMAuthenticationPassthroughConsumerInitiateOptions<Context>;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateResult =
+  IAMAuthenticationPassthroughConsumerInitiateResult;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenData =
+  IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult =
+  IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult;
+
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields = DataCacheStandaloneUser;

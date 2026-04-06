@@ -11,8 +11,9 @@ import {
 
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
 
-/*
+/**
  * A service for integrating UserLocal authentication via other Node-C Apps as a consumer.
+ *
  * This service is intended for use by the consumer environment.
  */
 export class IAMAuthenticationUserLocalConsumerService<

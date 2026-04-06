@@ -1,6 +1,7 @@
 # 1.0.0-beta8
 - Common
   - Removed NestJS CLI as a dev depdendency - it's not used and it has unaddressed vulnerabilities.
+  - Commnets fixes accross the board, so that descriptions appear on method and classes.
 - `packages/core`
   - Removed excess data from the httpRequest utility's full and error responses.
   - Config changes for allowing the usage of external tokens as local tokens in the domain-iam package.
@@ -17,18 +18,26 @@
   - New userLocal and oauth2 authentication services for working with other NodeC apps, building on top of the base service.
   - New authentication service for direct passthrough, so that the user can be found and their tokens can be issued.
   - BREAKING: Cleanup of unsued inheritance and dependencies in the AuthorizationService.
-  - BREAKING: UserManager.createAccessToken is now UserManager.authenticate.
   - BREAKING: AuthenticationService.getUserCreateAccessTokenConfig is now AuthenticationService.getUserAuthenticationConfig.
   - External access and refresh token expiry time multiplier implementation.
   - Functionality for taking users in authentication steps using the external access token payloads in the UserManager service.
   - BREAKING: AUTHENTICATION_MIDDLEWARE_USERS_SERVICE is now AUTHORIZATION_MIDDLEWARE_USERS_SERVICE.
   - BREAKING: AUTHORIZATION_MIDDLEWARE_USERS_SERVICE is now expected to be added as a provider in the HTTP API Modules and doesn't get used as the injection token for the IAMUserManagerService.
+  - BREAKING: UserManager's dependencies have been rearranged to allow for usage in a module where there's no user management, token management and module config necessary.
+  - BREAKING: UserManager.createAccessToken is now UserManager.authenticate.
+  - BREAKING: Moved UserManager.getUserWithPermissionsData to the newly-restored Users service.
+  - BREAKING: UserManager is now AuthenticationManager.
+  - BREAKING: reordered TokenManager's depdencies to allow for the service's usage in setups where Node-C isn't used for entity management.
+  - BREAKING: Renamed AuthorizationPoints to Permissions.
+  - BREAKING: Added the IAM prefix to the authorization definitions.
 - `packages/api-http`
   - Better status codes for unauthorized vs forbidden.
   - Updates to the ApiKey authorization signatureContent assignment, mirroring the changes in the core package and widening the suppport for different kinds of bodies.
   - Changes to the API key authorization in the authorization middleware and the accessControl interceptor to allow running both Bearer-based and ApiKey-based endpoints in the same API.
 - `apps/test`
   - Changes to test the above.
+  - Renamed userTypes to roles and authorizationPoints to permissions.
+  - Naming convention unification across the board.
 
 # 1.0.0-beta7
 - Common

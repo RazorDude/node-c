@@ -4,12 +4,12 @@ import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
-export interface GlobalConfigItem extends DBEntity {
+export interface DataDBConfigsGlobalConfigItem extends DBEntity {
   data: GenericObject;
   name: string;
 }
 
-export const GlobalConfigItemEntity = new EntitySchema<GlobalConfigItem>({
+export const DataDBConfigsGlobalConfigItemEntity = new EntitySchema<DataDBConfigsGlobalConfigItem>({
   columns: {
     ...DBEntitySchema.columns,
     data: { type: 'json' },

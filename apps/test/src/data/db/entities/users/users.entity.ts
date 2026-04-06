@@ -1,18 +1,18 @@
-import { AuthorizationPoint as BaseIAMAuthorizationPoint } from '@node-c/domain-iam';
+import { IAMPermission as BaseIAMPermission } from '@node-c/domain-iam';
 
 import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { Course } from '../courses';
-import { UserAccountStatus } from '../userAccountStatuses';
-import { UserType } from '../userTypes';
+import { DataDBCourse } from '../courses';
+import { DataDBRole } from '../roles';
+import { DataDBUserAccountStatus } from '../userAccountStatuses';
 
-export interface User extends DBEntity {
-  accountStatus?: UserAccountStatus;
+export interface DataDBUser extends DBEntity {
+  accountStatus?: DataDBUserAccountStatus;
   accountStatusId: number;
-  assignedCourses?: Course[];
-  assignedUserTypes?: UserType[];
-  currentAuthorizationPoints?: { [authorizationPointId: string]: BaseIAMAuthorizationPoint<number> };
+  assignedCourses?: DataDBCourse[];
+  assignedRoles?: DataDBRole[];
+  currentPermissions?: { [permissionId: string]: BaseIAMPermission<number> };
   email: string;
   firstName: string;
   hasTakenIntro: boolean;
@@ -25,7 +25,7 @@ export interface User extends DBEntity {
   profileImageUrl?: string;
 }
 
-export const UserEntity = new EntitySchema<User>({
+export const DataDBUserEntity = new EntitySchema<DataDBUser>({
   columns: {
     ...DBEntitySchema.columns,
     accountStatusId: { type: 'integer' },
@@ -60,9 +60,9 @@ export const UserEntity = new EntitySchema<User>({
       target: 'course',
       inverseSide: 'users'
     },
-    assignedUserTypes: {
+    assignedRoles: {
       type: 'many-to-many',
-      target: 'userType',
+      target: 'role',
       inverseSide: 'assignedUsers'
     }
   },

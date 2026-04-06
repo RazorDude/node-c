@@ -6,39 +6,82 @@ import { Constants } from '../common/definitions';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
-    coursePlatform: {
+    coursePlatformDelegated: {
       endpointSecurityMode: EndpointSecurityMode.Strict,
       localSearchForUsersEnabledOnAuthorization: false
     },
+    coursePlatformFederated: {
+      anonymousAccessRoutes: {
+        '/users/auth/okta': [
+          // special allowance for testing the oauth2 callback directly, since we don't have a UI
+          HttpMethod.GET,
+          // only the initiate step here is needed, since the complete step is via the GET above
+          HttpMethod.POST
+        ],
+        '/users/auth/userLocal': [HttpMethod.PATCH, HttpMethod.POST]
+      }
+    },
+    coursePlatformStandalone: {
+      anonymousAccessRoutes: {
+        '/users/auth/okta': [
+          // special allowance for testing the oauth2 callback directly, since we don't have a UI
+          HttpMethod.GET,
+          // only the initiate step here is needed, since the complete step is via the GET above
+          HttpMethod.POST
+        ],
+        '/users/auth/userLocal': [HttpMethod.PATCH, HttpMethod.POST]
+      }
+    },
     sso: {
       allowedApiKeyRoutes: {
-        '/users/tokens/passthrough': [HttpMethod.POST]
+        '/users/auth/passthrough': [HttpMethod.PATCH, HttpMethod.POST]
       },
       apiSecretAlgorigthm: 'sha256',
       anonymousAccessRoutes: {
-        '/users/tokens': [HttpMethod.POST],
-        '/users/tokens/callback/:authType': [HttpMethod.GET]
+        '/users/auth/okta': [
+          // special allowance for testing the oauth2 callback directly, since we don't have a UI
+          HttpMethod.GET,
+          // "complete" step  when acting as an authentication provider
+          HttpMethod.PATCH,
+          // "initiate step"
+          HttpMethod.POST
+        ],
+        '/users/auth/userLocal': [HttpMethod.PATCH, HttpMethod.POST]
       }
     }
   },
   domain: {
-    coursePlatform: {
+    coursePlatformFederated: {
+      accessTokenExpiryTimeInMinutes: 120,
       authServiceSettings: {
         oktaConsumer: {
-          apiSecretHashingAlgorithm: 'sha256',
-          completeEndpoint: '/okta/steps/complete',
-          initiateEndpoint: '/okta/steps/initiate',
-          refreshExternalAccessTokenEndpoint: '/okta/tokens/access/refresh'
+          nodeC: {
+            apiSecretHashingAlgorithm: 'sha256',
+            completeEndpoint: '/users/auth/okta',
+            completeEndpointMethod: HttpMethod.PATCH,
+            initiateEndpoint: '/users/auth/okta',
+            initiateEndpointMethod: HttpMethod.POST,
+            refreshExternalAccessTokenEndpoint: '/users/auth/okta',
+            refreshExternalAccessTokenEndpointMethod: HttpMethod.PUT
+          }
         },
         userLocalConsumer: {
-          apiSecretHashingAlgorithm: 'sha256',
-          completeEndpoint: '/okta/steps/complete',
-          initiateEndpoint: '/okta/steps/initiate',
-          refreshExternalAccessTokenEndpoint: '/okta/tokens/access/refresh'
+          nodeC: {
+            apiSecretHashingAlgorithm: 'sha256',
+            completeEndpoint: '/users/auth/userLocal',
+            completeEndpointMethod: HttpMethod.PATCH,
+            initiateEndpoint: '/users/auth/userLocal',
+            initiateEndpointMethod: HttpMethod.POST,
+            refreshExternalAccessTokenEndpoint: '/users/auth/userLocal',
+            refreshExternalAccessTokenEndpointMethod: HttpMethod.PUT
+          }
         }
-      }
+      },
+      checkAccessTokenExistanceLocally: true,
+      defaultUserIdentifierField: 'id',
+      refreshTokenExpiryTimeInHours: 24
     },
-    iam: {
+    coursePlatformStandalone: {
       accessTokenExpiryTimeInMinutes: 120,
       authServiceSettings: {
         okta: {
@@ -46,6 +89,17 @@ export const appConfigCommon: AppConfigCommon = {
             codeChallengeMethod: 'S256',
             defaultScope: 'openid profile email groups offline_access',
             verifyTokensLocally: true
+          }
+        },
+        passthroughConsumer: {
+          nodeC: {
+            apiSecretHashingAlgorithm: 'sha256',
+            completeEndpoint: '/users/auth/passthrough',
+            completeEndpointMethod: HttpMethod.PATCH,
+            initiateEndpoint: '/users/auth/passthrough',
+            initiateEndpointMethod: HttpMethod.POST,
+            refreshExternalAccessTokenEndpoint: '/users/auth/passthrough',
+            refreshExternalAccessTokenEndpointMethod: HttpMethod.PUT
           }
         },
         userLocal: {
@@ -57,9 +111,34 @@ export const appConfigCommon: AppConfigCommon = {
       checkAccessTokenExistanceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
+    },
+    iam: {
+      accessTokenExpiryTimeInMinutes: 120,
+      authServiceSettings: {
+        okta: {
+          oauth2: {
+            codeChallengeMethod: 'S256',
+            defaultScope: 'openid profile email groups offline_access',
+            verifyTokensLocally: true
+          }
+        },
+        passthrough: {},
+        userLocal: {
+          secretKey: {
+            secretKeyHMACAlgorithm: 'sha256'
+          }
+        }
+      },
+      checkAccessTokenExistanceLocally: true,
+      defaultUserIdentifierField: 'id',
+      refreshTokenExpiryTimeInHours: 24
     }
   },
-  general: { projectName: 'node-c-app', projectRootPath: path.resolve(__dirname, '../../'), projectVersion: '1.0.0' },
+  general: {
+    projectName: 'node-c-test-app',
+    projectRootPath: path.resolve(__dirname, '../../'),
+    projectVersion: '1.0.0'
+  },
   data: {
     audit: { type: RDBType.ClickHouse },
     cache: {
@@ -78,6 +157,22 @@ export const appConfigCommon: AppConfigCommon = {
       // sentinelMode: true,
       storeDelimiter: ':',
       storeKey: Constants.DATA_CACHE_AUTH_STORE_KEY,
+      type: NoSQLType.Valkey,
+      useHashmap: false
+    },
+    cacheFederated: {
+      defaultTTL: 3600,
+      defaultIndividualSearchEnabled: true,
+      storeKey: Constants.DATA_CACHE_FEDERATED_STORE_KEY,
+      ttlPerEntity: { users: 60000 },
+      type: NoSQLType.Valkey,
+      useHashmap: false
+    },
+    cacheStandalone: {
+      defaultTTL: 3600,
+      defaultIndividualSearchEnabled: true,
+      storeKey: Constants.DATA_CACHE_STANDALONE_STORE_KEY,
+      ttlPerEntity: { users: 60000 },
       type: NoSQLType.Valkey,
       useHashmap: false
     },

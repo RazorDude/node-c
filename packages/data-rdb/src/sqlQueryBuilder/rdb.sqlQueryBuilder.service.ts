@@ -280,27 +280,46 @@ export class SQLQueryBuilderService {
 
   // TODO: fieldAliases for nested fields
   // TODO: top-level operators are not working!!
-  /*
+  /**
    * This method is a tid bit complex, so it requires a proper explanation. The idea is that you can pass a deeply nested filters object (example below)
+   *
    * and receive back two objects - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder,
+   *
    * and an 'include' object, containing the relations that need to be joined for the parsed where clause partials, provided there are any. This effectively
+   *
    * enables search by deeply nested fields, for example relatedEntity.deepRelatedEntity.deeperRelatedEntity.field = 'test'.
+   *
    * For further low-level details, check these issues: https://github.com/typeorm/typeorm/issues/2707, https://github.com/typeorm/typeorm/issues/3890
+   *
    * Example object:
+   *
    * {
    *   field0: null,
+   *
    *   field1: { $not: null },
+   *
    *   field2: { $not: [ 1, new Date(), 2, null, 3, true, 'test' ] },
+   *
    *   field3: [ 1, 2, 3 ],
+   *
    *   field4: 10,
+   *
    *   field5: 'test',
+   *
    *   field6: false,
+   *
    *   field7: new Date(),
+   *
    *   field8: [ 1, new Date(), 2, null, 3, true, 'test' ],
+   *
    *   field9: { $like: '%test%' },
+   *
    *   entityName.innerEntityName.field10: { $between: [ 10, 20 ] },
+   *
    *   field11: { $or: [ { $not: null }, 20, [ false, { $ilike: '%test' } ] ] },
+   *
    *   field12: undefined,
+   *
    *   $or: { ... }
    * }
    */

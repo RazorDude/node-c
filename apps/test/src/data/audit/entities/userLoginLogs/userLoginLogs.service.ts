@@ -4,17 +4,17 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { ClickHouseDBEntityService, ClickHouseDBRepository } from '@node-c/data-clickhouse';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { UserLoginLog, UserLoginLogEntity } from './userLoginLogs.entity';
+import { DataAuditUserLoginLog, DataAuditUserLoginLogEntity } from './userLoginLogs.entity';
 
 @Injectable()
-export class AuditUserLoginLogsService extends ClickHouseDBEntityService<UserLoginLog> {
+export class DataAuditUserLoginLogsService extends ClickHouseDBEntityService<DataAuditUserLoginLog> {
   constructor(
     configProvider: ConfigProviderService,
     logger: LoggerService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
-    repository: ClickHouseDBRepository<UserLoginLog>
+    repository: ClickHouseDBRepository<DataAuditUserLoginLog>
   ) {
-    super(configProvider, logger, qb, repository, UserLoginLogEntity);
+    super(configProvider, logger, qb, repository, DataAuditUserLoginLogEntity);
   }
 }

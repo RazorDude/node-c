@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { UserAccountStatusEntity } from './userAccountStatuses.entity';
-import { UserAccountStatusesService } from './userAccountStatuses.service';
+import { DataDBUserAccountStatusEntity } from './userAccountStatuses.entity';
+import { DataDBUserAccountStatusesService } from './userAccountStatuses.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,11 +11,11 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     TypeORMDBRepositoryModule.register({
       connectionName: Constants.DATA_DB_MODULE_CONNECTION_NAME,
-      entityClass: UserAccountStatusEntity,
+      entityClass: DataDBUserAccountStatusEntity,
       dataModuleName: Constants.DATA_DB_MODULE_NAME
     })
   ],
-  providers: [UserAccountStatusesService],
-  exports: [UserAccountStatusesService]
+  providers: [DataDBUserAccountStatusesService],
+  exports: [DataDBUserAccountStatusesService]
 })
-export class UserAccountStatusesModule {}
+export class DataDBUserAccountStatusesModule {}

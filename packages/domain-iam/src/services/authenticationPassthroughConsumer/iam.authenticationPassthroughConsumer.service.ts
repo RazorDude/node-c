@@ -22,8 +22,9 @@ import {
 
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
 
-/*
+/**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.
+ *
  * This service is intended for use by the consumer environment.
  */
 export class IAMAuthenticationPassthroughConsumerService<
@@ -41,11 +42,15 @@ export class IAMAuthenticationPassthroughConsumerService<
     return super.complete(data, options) as Promise<IAMAuthenticationPassthroughConsumerCompleteResult>;
   }
 
-  /*
+  /**
    * This config is intended for use by the consumer environment.
+   *
    * User data from: provider
+   *
    * Internal tokens from: provider
+   *
    * External tokens from: consumer (optional)
+   *
    * Authentication happens in: consumer
    */
   getUserAuthenticationConfig(): IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult {

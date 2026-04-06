@@ -23,8 +23,9 @@ import {
 import { IAMAuthenticationService } from '../authentication';
 import { IAMMFAService, IAMMFAType } from '../mfa';
 
-/*
+/**
  * A service for authentication using a local user and password.
+ *
  * This service is intended for use by the consumer environment.
  */
 export class IAMAuthenticationUserLocalService<

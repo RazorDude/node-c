@@ -1,6 +1,6 @@
 import { GenericObject } from '@node-c/core';
 
-export enum AuthorizationCheckErrorCode {
+export enum IAMAuthorizationCheckErrorCode {
   // eslint-disable-next-line no-unused-vars
   FGANoAccessToModule = 'FGA_NO_ACCESS',
   // eslint-disable-next-line no-unused-vars
@@ -9,7 +9,35 @@ export enum AuthorizationCheckErrorCode {
   RBACNoAccessToResource = 'RBAC_NO_ACCESS_TO_RESOURCE'
 }
 
-export interface AuthorizationPoint<Id> {
+export interface IAMAuthorizationStaticCheckAccessOptions {
+  moduleName: string;
+  resource?: string;
+  resourceContext?: string;
+}
+
+export interface IAMAuthorizationStaticCheckAccessResult {
+  errorCode?: IAMAuthorizationCheckErrorCode;
+  hasAccess: boolean;
+  inputDataToBeMutated: GenericObject;
+  noMatchForResource: boolean;
+  permissions: GenericObject<IAMPermission<unknown>>;
+}
+
+export interface IAMAuthorizationUser<PermissionId> {
+  currentPermissions: GenericObject<IAMPermission<PermissionId>>;
+}
+
+export interface IAMAuthorizeApiKeyData {
+  apiKey: string;
+  signature?: string;
+  signatureContent?: string;
+}
+
+export interface IAMAuthorizeApiKeyOptions {
+  config: { apiKey?: string; apiSecret?: string; apiSecretAlgorithm?: string };
+}
+
+export interface IAMPermission<Id> {
   allowedInputData?: GenericObject;
   allowedOutputData?: GenericObject;
   forbiddenInputData?: GenericObject;
@@ -23,33 +51,4 @@ export interface AuthorizationPoint<Id> {
   // required when resources is set
   resourceContext?: string;
   userFieldName?: string;
-  // userTypes: GenericObject[];
-}
-
-export interface AuthorizationStaticCheckAccessOptions {
-  moduleName: string;
-  resource?: string;
-  resourceContext?: string;
-}
-
-export interface AuthorizationStaticCheckAccessResult {
-  authorizationPoints: GenericObject<AuthorizationPoint<unknown>>;
-  errorCode?: AuthorizationCheckErrorCode;
-  hasAccess: boolean;
-  inputDataToBeMutated: GenericObject;
-  noMatchForResource: boolean;
-}
-
-export interface AuthorizationUser<AuthorizationPointId> {
-  currentAuthorizationPoints: GenericObject<AuthorizationPoint<AuthorizationPointId>>;
-}
-
-export interface AuthorizeApiKeyData {
-  apiKey: string;
-  signature?: string;
-  signatureContent?: string;
-}
-
-export interface AuthorizeApiKeyOptions {
-  config: { apiKey?: string; apiSecret?: string; apiSecretAlgorithm?: string };
 }

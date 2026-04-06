@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common';
 
 import { ClickHouseDBRepositoryModule } from '@node-c/data-clickhouse';
 
-import { UserLoginLogEntity } from './userLoginLogs.entity';
-import { AuditUserLoginLogsService } from './userLoginLogs.service';
+import { DataAuditUserLoginLogEntity } from './userLoginLogs.entity';
+import { DataAuditUserLoginLogsService } from './userLoginLogs.service';
 
 import { Constants } from '../../../../common/definitions';
 
 @Module({
   imports: [
     ClickHouseDBRepositoryModule.register({
-      entitySchema: UserLoginLogEntity,
+      entitySchema: DataAuditUserLoginLogEntity,
       dataModuleName: Constants.DATA_AUDIT_MODULE_NAME
     })
   ],
-  providers: [AuditUserLoginLogsService],
-  exports: [AuditUserLoginLogsService]
+  providers: [DataAuditUserLoginLogsService],
+  exports: [DataAuditUserLoginLogsService]
 })
-export class UserLoginLogsModule {}
+export class DataAuditUserLoginLogsModule {}

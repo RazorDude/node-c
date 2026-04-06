@@ -25,7 +25,7 @@ import {
 import { ApplicationError } from '../../common/definitions';
 import { LoggerService } from '../../common/logger';
 
-/*
+/**
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
  * to define classes that are agnostic of the type of persitance.
  */

@@ -2,17 +2,17 @@ import { Injectable } from '@nestjs/common';
 
 import { DataDefaultData, DomainEntityService, DomainEntityServiceDefaultData, LoggerService } from '@node-c/core';
 
-import { CacheAuthToken, CacheAuthTokensEntityService } from '../../../../data/cacheAuth';
+import { DataCacheAuthToken, DataCacheAuthTokensEntityService } from '../../../../data/cacheAuth';
 
 @Injectable()
-export class IAMTokensService extends DomainEntityService<
-  CacheAuthToken,
-  CacheAuthTokensEntityService,
-  DomainEntityServiceDefaultData<CacheAuthToken>,
+export class DomainIAMTokensService extends DomainEntityService<
+  DataCacheAuthToken,
+  DataCacheAuthTokensEntityService,
+  DomainEntityServiceDefaultData<DataCacheAuthToken>,
   undefined,
-  DataDefaultData<CacheAuthToken>
+  DataDefaultData<DataCacheAuthToken>
 > {
-  constructor(dataEntityService: CacheAuthTokensEntityService, logger: LoggerService) {
+  constructor(dataEntityService: DataCacheAuthTokensEntityService, logger: LoggerService) {
     super(dataEntityService, ['create', 'findOne', 'delete'], logger);
   }
 }

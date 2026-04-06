@@ -18,8 +18,9 @@ import {
 } from './iam.authenticationPassthrough.definitions';
 
 import { IAMAuthenticationService } from '../authentication';
-/*
- * A service for skipping authentication in order to use the rest of the UserManager.authenticate functionality (passthrough).
+/**
+ * A service for skipping authentication in order to use the rest of the AuthenticationManager.authenticate functionality (passthrough).
+ *
  * This service is intended for use by the provider environment.
  */
 export class IAMAuthenticationPassthroughService<
@@ -61,11 +62,15 @@ export class IAMAuthenticationPassthroughService<
     return returnData;
   }
 
-  /*
+  /**
    * This config is intended for use by the provider environment.
+   *
    * User data from: provider
+   *
    * Internal tokens from: provider
+   *
    * External tokens from: consumer (optional)
+   *
    * Authentication happens in: consumer
    */
   getUserAuthenticationConfig(): IAMAuthenticationPassthroughGetUserAuthenticationConfigResult {

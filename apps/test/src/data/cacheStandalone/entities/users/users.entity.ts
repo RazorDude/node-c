@@ -1,0 +1,54 @@
+import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import { IAMUserWithPermissionsData } from '@node-c/domain-iam';
+
+import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
+import { DataDBUser } from '../../../db';
+
+const defaultSchema = getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'user');
+
+export type DataCacheStandaloneUser = RedisEntity<number> & IAMUserWithPermissionsData<DataDBUser, number>;
+export const DataCacheStandaloneUserSchema: EntitySchema = {
+  ...defaultSchema,
+  columns: {
+    ...defaultSchema.columns,
+    accountStatus: {
+      type: EntitySchemaColumnType.Object
+    },
+    accountStatusId: {
+      type: EntitySchemaColumnType.Integer
+    },
+    assignedUserTypes: {
+      type: EntitySchemaColumnType.Object
+    },
+    currentAuthorizationPoints: {
+      type: EntitySchemaColumnType.Object
+    },
+    email: {
+      type: EntitySchemaColumnType.String
+    },
+    firstName: {
+      type: EntitySchemaColumnType.String
+    },
+    hasTakenIntro: {
+      type: EntitySchemaColumnType.Boolean
+    },
+    isVerified: {
+      type: EntitySchemaColumnType.Boolean
+    },
+    lastName: {
+      type: EntitySchemaColumnType.String
+    },
+    mfaIsEnabled: {
+      type: EntitySchemaColumnType.Boolean
+    },
+    password: {
+      type: EntitySchemaColumnType.String
+    },
+    phoneNumber: {
+      type: EntitySchemaColumnType.String
+    },
+    profileImageKey: {
+      type: EntitySchemaColumnType.String
+    }
+  }
+};

@@ -2,14 +2,14 @@ import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
 
-export interface UserAccountStatus<User extends DBEntity = DBEntity> extends DBEntity {
+export interface DataDBUserAccountStatus<User extends DBEntity = DBEntity> extends DBEntity {
   label: string;
   name: string;
   userLoginAllowed: boolean;
   users?: User[];
 }
 
-export const UserAccountStatusEntity = new EntitySchema<UserAccountStatus>({
+export const DataDBUserAccountStatusEntity = new EntitySchema<DataDBUserAccountStatus>({
   columns: {
     ...DBEntitySchema.columns,
     label: { type: 'varchar', unique: true },

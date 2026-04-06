@@ -5,13 +5,13 @@ import ld from 'lodash';
 
 import { getDefaultEntitySchema } from '../../../cacheBase';
 
-export interface CacheAuthUserStepDataItem extends GenericObject<unknown> {
+export interface DataCacheAuthUserStepDataItem extends GenericObject<unknown> {
   codeVerifier: string;
   state: string;
 }
 
 const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'userStepDataItem');
-export const CacheAuthUserStepDataItemSchema: EntitySchema = {
+export const DataCacheAuthUserStepDataItemSchema: EntitySchema = {
   ...ld.omit(baseSchema, 'columns'),
   columns: {
     codeVerifier: {

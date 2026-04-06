@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Injectable, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Param, Patch, Post, Query } from '@nestjs/common';
 
 import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 
@@ -10,51 +10,78 @@ import {
   SSOUsersAuthenticatePassthroughDto
 } from './dto';
 
-import { User as DBUser, UsersDataEntityServiceData as DBUsersDataEntityServiceData } from '../../../../data/db';
-import { IAMUserManagerService, IAMUsersDomainEntityServiceData, IAMUsersService } from '../../../../domain/iam';
+import { DataDBUser, DataDBUsersDataEntityServiceData } from '../../../../data/db';
+import {
+  DomainIAMAuthenticationManagerService,
+  DomainIAMUsersDomainEntityServiceData,
+  DomainIAMUsersService
+} from '../../../../domain/iam';
 
 // TODO: create user (signup)
 // TODO: logout
-/*
+/**
  * This controller is part of the authentication setup as a provider. Its authentication endpoints are used either
  * in standalone mode or as the provider endpoints for other node-c apps' authentication (consumers).
  */
 @Injectable()
 @Controller('users')
 export class SSOUsersEntityController extends RESTAPIEntityControler<
-  DBUser,
-  IAMUsersService,
-  DefaultDtos<DBUser>,
-  IAMUsersDomainEntityServiceData<DBUser>,
-  DBUsersDataEntityServiceData<DBUser>
+  DataDBUser,
+  DomainIAMUsersService,
+  DefaultDtos<DataDBUser>,
+  DomainIAMUsersDomainEntityServiceData<DataDBUser>,
+  DataDBUsersDataEntityServiceData<DataDBUser>
 > {
   constructor(
-    domainEntityService: IAMUsersService,
+    domainEntityService: DomainIAMUsersService,
     // eslint-disable-next-line no-unused-vars
-    protected domainUserManagerService: IAMUserManagerService,
+    protected domainAuthenticationManagerService: DomainIAMAuthenticationManagerService,
     logger: LoggerService
   ) {
     super(domainEntityService, {}, logger, ['find', 'findOne']);
   }
 
-  // Standalone authentication
-  @Post('tokens')
-  async authenticate(
+  // Delegated or federated authentication - completion step
+  @Patch('auth/:authType')
+  async authenticateComplete(
     @Body()
-    body: SSOUsersAuthenticateDto
-  ): ReturnType<IAMUserManagerService['authenticate']> {
-    return this.domainUserManagerService.authenticate({ ...body, mainFilterField: 'email' });
+    body: SSOUsersAuthenticateDto,
+    @Param()
+    params: { authType: string }
+  ): ReturnType<DomainIAMAuthenticationManagerService['authenticate']> {
+    return this.domainAuthenticationManagerService.authenticate({
+      ...body,
+      auth: { ...body.auth, type: params.authType },
+      mainFilterField: 'email',
+      step: AppConfigDomainIAMAuthenticationStep.Complete
+    });
   }
 
-  // Standalone authentication - ouath2 callbacks
-  @Get('tokens/callback/:authType')
-  async authenticateOAuth2Callback(
+  // Delegated or federated authentication - initiation step
+  @Post('auth/:authType')
+  async authenticateInitiate(
+    @Body()
+    body: SSOUsersAuthenticateDto,
     @Param()
-    params: { authType: string },
+    params: { authType: string }
+  ): ReturnType<DomainIAMAuthenticationManagerService['authenticate']> {
+    return this.domainAuthenticationManagerService.authenticate({
+      ...body,
+      auth: { ...body.auth, type: params.authType },
+      mainFilterField: 'email',
+      step: AppConfigDomainIAMAuthenticationStep.Initiate
+    });
+  }
+
+  // Delegated authentication - completion step (direct oauth2 callbacks)
+  @Get('auth/:authType')
+  async authenticateOAuth2Callback(
     @Query()
-    query: SSOUsersAuthenticateOAuth2CallbackDto
-  ): ReturnType<IAMUserManagerService['authenticate']> {
-    return this.domainUserManagerService.authenticate({
+    query: SSOUsersAuthenticateOAuth2CallbackDto,
+    @Param()
+    params: { authType: string }
+  ): ReturnType<DomainIAMAuthenticationManagerService['authenticate']> {
+    return this.domainAuthenticationManagerService.authenticate({
       auth: { ...query, type: params.authType },
       mainFilterField: 'email',
       step: AppConfigDomainIAMAuthenticationStep.Complete
@@ -62,12 +89,13 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
   }
 
   // Passthrough authentication (as a provider)
-  @Post('tokens/passthrough')
+  @Patch('auth/passthrough')
+  @Post('auth/passthrough')
   async authenticateWithPassthrough(
     @Body()
     body: SSOUsersAuthenticatePassthroughDto
-  ): ReturnType<IAMUserManagerService['authenticate']> {
-    return this.domainUserManagerService.authenticate({
+  ): ReturnType<DomainIAMAuthenticationManagerService['authenticate']> {
+    return this.domainAuthenticationManagerService.authenticate({
       ...body,
       auth: { ...body.auth, type: 'passthrough' },
       mainFilterField: 'email'

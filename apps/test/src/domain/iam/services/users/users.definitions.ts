@@ -1,15 +1,20 @@
 import { DomainCreateData, DomainEntityServiceDefaultData, DomainUpdateData } from '@node-c/core';
-
 import {
-  UsersCreateUserData as DBUsersCreateUserData,
-  UsersUpdateUserData as DBUsersUpdateUserData
-} from '../../../../data/db';
+  IAMUsersGetUserWithPermissionsDataOptions,
+  IAMUsersGetUserWithPermissionsDataPrivateOptions
+} from '@node-c/domain-iam';
 
-export type IAMUsersDomainEntityServiceCreateData<User> = DomainCreateData<User> & DBUsersCreateUserData;
+import { DataDBUsersCreateUserData, DataDBUsersUpdateUserData } from '../../../../data/db';
 
-export type IAMUsersDomainEntityServiceData<User> = DomainEntityServiceDefaultData<User> & {
-  Create: IAMUsersDomainEntityServiceCreateData<User>;
-  Update: IAMUsersDomainEntityServiceUpdateData<User>;
+export type DomainIAMUsersDomainEntityServiceCreateData<User> = DomainCreateData<User> & DataDBUsersCreateUserData;
+
+export type DomainIAMUsersDomainEntityServiceData<User> = DomainEntityServiceDefaultData<User> & {
+  Create: DomainIAMUsersDomainEntityServiceCreateData<User>;
+  Update: DomainIAMUsersDomainEntityServiceUpdateData<User>;
 };
 
-export type IAMUsersDomainEntityServiceUpdateData<User> = DomainUpdateData<User> & DBUsersUpdateUserData;
+export type DomainIAMUsersDomainEntityServiceUpdateData<User> = DomainUpdateData<User> & DataDBUsersUpdateUserData;
+
+export type DomainIAMUsersGetUserWithPermissionsDataOptions = IAMUsersGetUserWithPermissionsDataOptions;
+
+export type DomainIAMUsersGetUserWithPermissionsDataPrivateOptions = IAMUsersGetUserWithPermissionsDataPrivateOptions;

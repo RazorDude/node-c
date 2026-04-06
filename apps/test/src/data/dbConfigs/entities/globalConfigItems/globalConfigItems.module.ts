@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { GlobalConfigItemEntity } from './globalConfigItems.entity';
-import { GlobalConfigItemsService } from './globalConfigItems.service';
+import { DataDBConfigsGlobalConfigItemEntity } from './globalConfigItems.entity';
+import { DataDBConfigsGlobalConfigItemsService } from './globalConfigItems.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,11 +11,11 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     TypeORMDBRepositoryModule.register({
       connectionName: Constants.DATA_DB_CONFIGS_MODULE_CONNECTION_NAME,
-      entityClass: GlobalConfigItemEntity,
+      entityClass: DataDBConfigsGlobalConfigItemEntity,
       dataModuleName: Constants.DATA_DB_CONFIGS_MODULE_NAME
     })
   ],
-  providers: [GlobalConfigItemsService],
-  exports: [GlobalConfigItemsService]
+  providers: [DataDBConfigsGlobalConfigItemsService],
+  exports: [DataDBConfigsGlobalConfigItemsService]
 })
-export class GlobalConfigItemsModule {}
+export class DataDBConfigsGlobalConfigItemsModule {}

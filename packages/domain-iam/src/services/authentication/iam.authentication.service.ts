@@ -30,7 +30,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     protected moduleName: string
   ) {}
 
-  /*
+  /**
    * Step 2 of the authentication process. Mandatory.
    */
   async complete(
@@ -48,8 +48,9 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     );
   }
 
-  /*
+  /**
    * Method for decoding JWTs and returning their payloads.
+   *
    * If the tokens aren't JWTs, other ways for retreiving the payloads can be implemented, such as the OAuth introspection endpoint.
    */
   async getPayloadsFromExternalTokens(
@@ -61,7 +62,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     );
   }
 
-  /*
+  /**
    * Method for mapping token payload data, such as username and scopes, to local user data, such as email and roles.
    */
   async getUserDataFromExternalTokenPayloads(
@@ -73,7 +74,7 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     );
   }
 
-  /*
+  /**
    * Step 1 of the authentication process. Mandatory.
    */
   async initiate(

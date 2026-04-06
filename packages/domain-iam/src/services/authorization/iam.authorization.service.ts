@@ -5,13 +5,13 @@ import { ApplicationError, GenericObject, LoggerService, getNested, setNested } 
 import ld from 'lodash';
 
 import {
-  AuthorizationCheckErrorCode,
-  AuthorizationStaticCheckAccessOptions,
-  AuthorizationStaticCheckAccessResult,
-  AuthorizationUser,
-  AuthorizeApiKeyData,
-  AuthorizeApiKeyOptions,
-  AuthorizationPoint as BaseAuthorizationPoint
+  IAMAuthorizationCheckErrorCode,
+  IAMAuthorizationStaticCheckAccessOptions,
+  IAMAuthorizationStaticCheckAccessResult,
+  IAMAuthorizationUser,
+  IAMAuthorizeApiKeyData,
+  IAMAuthorizeApiKeyOptions,
+  IAMPermission
 } from './iam.authorization.definitions';
 
 import { DecodedTokenContent, IAMTokenManagerService } from '../tokenManager';
@@ -26,7 +26,7 @@ export class IAMAuthorizationService<
     protected tokenManager?: TokenManager
   ) {}
 
-  async authorizeApiKey(data: AuthorizeApiKeyData, options: AuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
+  async authorizeApiKey(data: IAMAuthorizeApiKeyData, options: IAMAuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
     const { logger } = this;
     const { apiKey, signature, signatureContent } = data;
     const {
@@ -118,9 +118,9 @@ export class IAMAuthorizationService<
 
   static checkAccess<InputData = GenericObject>(
     inputData: InputData,
-    user: AuthorizationUser<unknown>,
-    options: AuthorizationStaticCheckAccessOptions
-  ): AuthorizationStaticCheckAccessResult {
+    user: IAMAuthorizationUser<unknown>,
+    options: IAMAuthorizationStaticCheckAccessOptions
+  ): IAMAuthorizationStaticCheckAccessResult {
     const { moduleName, resourceContext, resource } = options;
     let hasResource = false;
     if (resource) {
@@ -131,22 +131,22 @@ export class IAMAuthorizationService<
       }
       hasResource = true;
     }
-    // check the access to the found authorization points
+    // check the access to the found permissions
     const mutatedInputData = ld.cloneDeep(inputData);
-    const usedAuthorizationPoints: GenericObject<BaseAuthorizationPoint<unknown>> = {};
-    const { currentAuthorizationPoints } = user;
-    let authorizationPointsCount = 0;
-    let authorizationPointsForDifferentModules = 0;
-    let authorizationPointsForDifferentContexts = 0;
+    const usedPermissions: GenericObject<IAMPermission<unknown>> = {};
+    const { currentPermissions } = user;
     let hasAccess = false;
     let inputDataToBeMutated: GenericObject = {};
     let noMatchForResource = false;
-    for (const apId in currentAuthorizationPoints) {
-      const apData = currentAuthorizationPoints[apId];
-      authorizationPointsCount++;
+    let permissionsCount = 0;
+    let permissionsForDifferentModules = 0;
+    let permissionsForDifferentContexts = 0;
+    for (const apId in currentPermissions) {
+      const apData = currentPermissions[apId];
+      permissionsCount++;
       // RBAC - check whether the user has general access to the module.
       if (moduleName !== apData.moduleName) {
-        authorizationPointsForDifferentModules++;
+        permissionsForDifferentModules++;
         continue;
       }
       // RBAC - check whether the user has general access to the resource.
@@ -156,7 +156,7 @@ export class IAMAuthorizationService<
           apData.resourceContext !== resourceContext ||
           !apData.resources?.includes(resource!))
       ) {
-        authorizationPointsForDifferentContexts++;
+        permissionsForDifferentContexts++;
         continue;
       }
       // FGA - check whether the user has access based on specific input and user fields.
@@ -239,22 +239,22 @@ export class IAMAuthorizationService<
         }
       }
       inputDataToBeMutated = ld.merge(inputDataToBeMutated, innerInputDataToBeMutated);
-      usedAuthorizationPoints[apId] = apData;
+      usedPermissions[apId] = apData;
       break;
     }
-    const returnData: AuthorizationStaticCheckAccessResult = {
-      authorizationPoints: usedAuthorizationPoints,
+    const returnData: IAMAuthorizationStaticCheckAccessResult = {
       hasAccess,
       inputDataToBeMutated,
-      noMatchForResource
+      noMatchForResource,
+      permissions: usedPermissions
     };
     if (!hasAccess) {
-      if (authorizationPointsForDifferentModules === authorizationPointsCount) {
-        returnData.errorCode = AuthorizationCheckErrorCode.RBACNoAccessToModule;
-      } else if (authorizationPointsForDifferentContexts === authorizationPointsCount) {
-        returnData.errorCode = AuthorizationCheckErrorCode.RBACNoAccessToResource;
+      if (permissionsForDifferentModules === permissionsCount) {
+        returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToModule;
+      } else if (permissionsForDifferentContexts === permissionsCount) {
+        returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToResource;
       } else {
-        returnData.errorCode = AuthorizationCheckErrorCode.FGANoAccessToModule;
+        returnData.errorCode = IAMAuthorizationCheckErrorCode.FGANoAccessToModule;
       }
     }
     return returnData;
@@ -313,15 +313,15 @@ export class IAMAuthorizationService<
   }
 
   static processOutputData(
-    authorizationPoints: { [id: number]: BaseAuthorizationPoint<unknown> },
+    permissions: { [id: number]: IAMPermission<unknown> },
     outputData: GenericObject
   ): {
     outputDataToBeMutated: GenericObject;
   } {
     const mutatedOutputData = ld.cloneDeep(outputData);
     let outputDataToBeMutated: GenericObject = {};
-    for (const apId in authorizationPoints) {
-      const apData = authorizationPoints[apId];
+    for (const apId in permissions) {
+      const apData = permissions[apId];
       const { allowedOutputData, forbiddenOutputData } = apData;
       const innerMutatedOutputData = ld.cloneDeep(mutatedOutputData);
       const innerOutputDataToBeMutated: GenericObject = {};

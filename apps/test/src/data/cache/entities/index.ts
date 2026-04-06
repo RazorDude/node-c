@@ -1,3 +1,2 @@
-export * from './authorizationPoints';
-export * from './tokens';
+export * from './permissions';
 export * from './users';

@@ -17,8 +17,9 @@ import {
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
 import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
 
-/*
+/**
  * A service for integrating OAuth2 via other Node-C Apps as a consumer.
+ *
  * This service is intended for use by the consumer environment.
  */
 export class IAMAuthenticationOAuth2ConsumerService<

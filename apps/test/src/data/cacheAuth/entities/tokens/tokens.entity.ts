@@ -5,17 +5,17 @@ import ld from 'lodash';
 
 import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
 
-export type TokenType = TokenTypeBase;
+export type DataCacheAuthTokenType = TokenTypeBase;
 
-export interface CacheAuthToken extends RedisEntity<string> {
+export interface DataCacheAuthToken extends RedisEntity<string> {
   refreshToken?: string;
   token: string;
-  type: TokenType;
+  type: DataCacheAuthTokenType;
   userId: string;
 }
 
 const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'token');
-export const CacheAuthTokenSchema: EntitySchema = {
+export const DataCacheAuthTokenSchema: EntitySchema = {
   ...baseSchema,
   columns: {
     ...ld.omit(baseSchema.columns, ['id']),

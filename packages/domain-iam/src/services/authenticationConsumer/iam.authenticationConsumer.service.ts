@@ -25,8 +25,9 @@ import {
 
 import { IAMAuthenticationService } from '../authentication';
 
-/*
+/**
  * The base service for integrating authenticationServices via other Node-C Apps as a consumer.
+ *
  * This service is intended to be extended by services that will be used in the consumer environment.
  */
 export class IAMAuthenticationConsumerService<
@@ -53,11 +54,15 @@ export class IAMAuthenticationConsumerService<
     });
   }
 
-  /*
+  /**
    * This config is intended for use by the consumer environment.
+   *
    * User data from: provider
+   *
    * Internal tokens from: provider
+   *
    * External tokens from: provider
+   *
    * Authentication happens in: provider
    */
   getUserAuthenticationConfig(): IAMAuthenticationConsumerGetUserAuthenticationConfigResult {
@@ -103,22 +108,28 @@ export class IAMAuthenticationConsumerService<
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const { apiKey, apiSecret, apiSecretHashingAlgorithm, baseUrl, ...configData } =
       moduleConfig.authServiceSettings![serviceName].nodeC!;
+    const endpointMethod = configData[`${endpoint}EndpointMethod`];
     const endpointUri = configData[`${endpoint}Endpoint`];
+    console.log('====>', configData);
     if (!baseUrl) {
       logger.error(`[${moduleName}][${serviceName}]: Base URL not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     if (!endpointUri) {
-      logger.error(`[${moduleName}][${serviceName}]: Endpoint URI not configured.`);
+      logger.error(`[${moduleName}][${serviceName}]: Endpoint URI for "${endpoint}" not configured.`);
+      throw new ApplicationError('Authentication failed.');
+    }
+    if (!endpointMethod) {
+      logger.error(`[${moduleName}][${serviceName}]: Endpoint method for "${endpoint}" not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     const { data: responseData, hasError } = await httpRequest<ReturnData>(`${baseUrl}${endpointUri}`, {
       apiKey,
       apiSecret,
       apiSecretHashingAlgorithm,
-      body: data,
       isJSON: true,
-      method: HttpMethod.POST
+      method: endpointMethod,
+      ...(endpointMethod === HttpMethod.GET ? { query: data } : { body: data })
     });
     if (hasError || !responseData) {
       logger.error(`[${moduleName}][${serviceName}]: Endpoint ${endpointUri} failed.`, responseData);

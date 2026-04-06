@@ -1,10 +1,10 @@
 import { DataDefaultData, DataFindOnePrivateOptions, DataFindPrivateOptions, DataRelationItem } from '@node-c/core';
 
-export interface UsersBaseSerachPrivateOptions {
+export interface DataDBUsersBaseSerachPrivateOptions {
   withPassword?: boolean;
 }
 
-export interface UsersCreateUserData {
+export interface DataDBUsersCreateUserData {
   assignedUserTypes: DataRelationItem<{ id: number }>[];
   email: string;
   firstName: string;
@@ -13,22 +13,22 @@ export interface UsersCreateUserData {
   phoneNumber?: string;
 }
 
-export type UsersDataEntityServiceData<User> = DataDefaultData<User> & {
-  Create: UsersCreateUserData;
-  Update: UsersUpdateUserData;
+export type DataDBUsersDataEntityServiceData<User> = DataDefaultData<User> & {
+  Create: DataDBUsersCreateUserData;
+  Update: DataDBUsersUpdateUserData;
 };
 
-export type UsersFindOnePrivateOptions = UsersBaseSerachPrivateOptions & DataFindPrivateOptions;
+export type DataDBUsersFindOnePrivateOptions = DataDBUsersBaseSerachPrivateOptions & DataFindPrivateOptions;
 
-export type UsersFindPrivateOptions = UsersBaseSerachPrivateOptions & DataFindOnePrivateOptions;
+export type DataDBUsersFindPrivateOptions = DataDBUsersBaseSerachPrivateOptions & DataFindOnePrivateOptions;
 
-export interface UsersUpdatePasswordData {
+export interface DataDBUsersUpdatePasswordData {
   currentPassword: string;
   newPassword: string;
   userId: number;
 }
 
-export interface UsersUpdateUserData {
+export interface DataDBUsersUpdateUserData {
   assignedUserTypes?: DataRelationItem<{ id: number }>[];
   firstName?: string;
   hasTakenIntro?: boolean;

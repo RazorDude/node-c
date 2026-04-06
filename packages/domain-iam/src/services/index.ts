@@ -1,5 +1,6 @@
 export * from './authentication';
 export * from './authenticationConsumer';
+export * from './authenticationManager';
 export * from './authenticationOAuth2';
 export * from './authenticationOAuth2Consumer';
 export * from './authenticationPassthrough';
@@ -9,4 +10,4 @@ export * from './authenticationUserLocalConsumer';
 export * from './authorization';
 export * from './mfa';
 export * from './tokenManager';
-export * from './userManager';
+export * from './users';

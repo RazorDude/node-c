@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { CategoryEntity } from './categories.entity';
-import { CategoriesService } from './categories.service';
+import { DataDBCategoryEntity } from './categories.entity';
+import { DataDBCategoriesService } from './categories.service';
 
 import { Constants } from '../../../../common/definitions';
 
@@ -11,11 +11,11 @@ import { Constants } from '../../../../common/definitions';
   imports: [
     TypeORMDBRepositoryModule.register({
       connectionName: Constants.DATA_DB_MODULE_CONNECTION_NAME,
-      entityClass: CategoryEntity,
+      entityClass: DataDBCategoryEntity,
       dataModuleName: Constants.DATA_DB_MODULE_NAME
     })
   ],
-  providers: [CategoriesService],
-  exports: [CategoriesService]
+  providers: [DataDBCategoriesService],
+  exports: [DataDBCategoriesService]
 })
-export class CategoriesModule {}
+export class DataDBCategoriesModule {}

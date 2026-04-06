@@ -1,24 +1,24 @@
 import {
-  IAMAuthenticationOktaCompleteData as BaseIAMAuthenticationOktaCompleteData,
-  IAMAuthenticationOktaCompleteOptions as BaseIAMAuthenticationOktaCompleteOptions,
-  IAMAuthenticationOktaCompleteResult as BaseIAMAuthenticationOktaCompleteResult,
-  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData as BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
-  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult as BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
+  IAMAuthenticationOktaCompleteData,
+  IAMAuthenticationOktaCompleteOptions,
+  IAMAuthenticationOktaCompleteResult,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import { CacheUser } from '../../../../data/cache';
+import { DataCacheUser } from '../../../../data/cache';
 
-export type IAMAuthenticationOktaCompleteData = BaseIAMAuthenticationOktaCompleteData;
+export type DomainIAMAuthenticationOktaCompleteData = IAMAuthenticationOktaCompleteData;
 
-export type IAMAuthenticationOktaCompleteOptions<Context extends object> =
-  BaseIAMAuthenticationOktaCompleteOptions<Context>;
+export type DomainIAMAuthenticationOktaCompleteOptions<Context extends object> =
+  IAMAuthenticationOktaCompleteOptions<Context>;
 
-export type IAMAuthenticationOktaCompleteResult = BaseIAMAuthenticationOktaCompleteResult;
+export type DomainIAMAuthenticationOktaCompleteResult = IAMAuthenticationOktaCompleteResult;
 
-export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
-  BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData;
+export type DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData;
 
-export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
-  BaseIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
+export type DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
+  IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
 
-export type IAMAuthenticationOktaUserFields = CacheUser & { password: string };
+export type DomainIAMAuthenticationOktaUserFields = DataCacheUser;

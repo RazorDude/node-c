@@ -1,5 +1,5 @@
 import { AppConfigDomainIAMAuthenticationStep, GenericObjectClass } from '@node-c/core';
-import { IAMUserManagerAuthenticateOptions } from '@node-c/domain-iam';
+import { IAMAuthenticationManagerAuthenticateOptions } from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
 import { IsDefined, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -34,7 +34,7 @@ export class SSOUsersAuthenticatePassthroughFiltersDto extends GenericObjectClas
 }
 
 export class SSOUsersAuthenticatePassthroughDto implements Omit<
-  IAMUserManagerAuthenticateOptions,
+  IAMAuthenticationManagerAuthenticateOptions,
   'auth' | 'mainFilterField'
 > {
   @IsDefined()

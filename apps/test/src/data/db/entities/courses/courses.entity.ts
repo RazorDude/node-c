@@ -1,20 +1,20 @@
 import { EntitySchema } from 'typeorm';
 
 import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { Category } from '../categories';
-import { CourseType } from '../courseTypes';
+import { DataDBCategory } from '../categories';
+import { DataDBCourseType } from '../courseTypes';
 
-export interface Course<Lesson extends DBEntity = DBEntity, User extends DBEntity = DBEntity> extends DBEntity {
-  category?: Category;
+export interface DataDBCourse<Lesson extends DBEntity = DBEntity, User extends DBEntity = DBEntity> extends DBEntity {
+  category?: DataDBCategory;
   categoryId?: number;
-  courseType?: CourseType;
+  courseType?: DataDBCourseType;
   courseTypeId: number;
   lessons?: Lesson[];
   name: string;
   users?: User[];
 }
 
-export const CourseEntity = new EntitySchema<Course>({
+export const DataDBCourseEntity = new EntitySchema<DataDBCourse>({
   columns: {
     ...DBEntitySchema.columns,
     categoryId: { name: 'category_id', nullable: true, type: 'integer' },

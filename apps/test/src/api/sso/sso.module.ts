@@ -9,22 +9,22 @@ import {
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
-import { IAMAuthorizationService } from '../../domain/iam';
+import { DomainIAMAuthenticationManagerService, DomainIAMAuthorizationService } from '../../domain/iam';
 
 @Module({})
-export class SSOAPIModule extends BaseHTTPAPIModule {
+export class APISSOModule extends BaseHTTPAPIModule {
   static readonly moduleOptions: HTTPAPIModuleOptions = {
     folderData: FolderData,
-    moduleClass: SSOAPIModule,
+    moduleClass: APISSOModule,
     moduleName: Constants.API_SSO_MODULE_NAME,
     providers: [
       {
         provide: NodeCConstants.API_MODULE_AUTHORIZATION_SERVICE,
-        useExisting: IAMAuthorizationService
+        useExisting: DomainIAMAuthorizationService
       },
       {
-        provide: NodeCConstants.AUTHORIZATION_MIDDLEWARE_USERS_SERVICE,
-        useExisting: Constants.DOMAIN_IAM_USER_MANAGER_SERVICE
+        provide: NodeCConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
+        useExisting: DomainIAMAuthenticationManagerService
       }
     ]
   };

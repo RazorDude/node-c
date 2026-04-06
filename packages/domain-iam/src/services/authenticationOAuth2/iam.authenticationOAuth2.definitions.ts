@@ -44,6 +44,7 @@ export type IAMAuthenticationOAuth2GetUserAuthenticationConfigResult =
   IAMAuthenticationGetUserAuthenticationConfigResult;
 
 export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationInitiateData {
+  redirectUri?: string;
   scope?: string;
 }
 

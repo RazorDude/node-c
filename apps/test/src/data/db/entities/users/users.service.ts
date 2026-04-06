@@ -22,35 +22,45 @@ import ld from 'lodash';
 import { EntityManager } from 'typeorm';
 
 import {
-  UsersCreateUserData,
-  UsersDataEntityServiceData,
-  UsersFindOnePrivateOptions,
-  UsersFindPrivateOptions,
-  UsersUpdatePasswordData,
-  UsersUpdateUserData
+  DataDBUsersCreateUserData,
+  DataDBUsersDataEntityServiceData,
+  DataDBUsersFindOnePrivateOptions,
+  DataDBUsersFindPrivateOptions,
+  DataDBUsersUpdatePasswordData,
+  DataDBUsersUpdateUserData
 } from './users.definitions';
 
-import { User, UserEntity } from './users.entity';
+import { DataDBUser, DataDBUserEntity } from './users.entity';
 
 // TODO: move all of the "omit password" logic to a new UsersDataEntityService in the core module
 @Injectable()
-export class UsersService extends TypeORMDBEntityService<User, UsersDataEntityServiceData<User>> {
+export class DataDBUsersService extends TypeORMDBEntityService<
+  DataDBUser,
+  DataDBUsersDataEntityServiceData<DataDBUser>
+> {
   constructor(
     configProvider: ConfigProviderService,
     logger: LoggerService,
     qb: SQLQueryBuilderService,
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
-    repository: TypeORMDBRepository<User>
+    repository: TypeORMDBRepository<DataDBUser>
   ) {
-    super(configProvider, logger, qb, repository, UserEntity);
+    super(configProvider, logger, qb, repository, DataDBUserEntity);
   }
 
-  async create(data: UsersCreateUserData, options: CreateOptions, privateOptions: CreatePrivateOptions): Promise<User> {
+  async create(
+    data: DataDBUsersCreateUserData,
+    options: CreateOptions,
+    privateOptions: CreatePrivateOptions
+  ): Promise<DataDBUser> {
     const createResult = await TypeORMDBEntityService.prototype.create.call(this, { ...data }, options, privateOptions);
     return createResult;
   }
 
-  async find(options: FindOptions, privateOptions?: UsersFindPrivateOptions): Promise<DataFindResults<User>> {
+  async find(
+    options: FindOptions,
+    privateOptions?: DataDBUsersFindPrivateOptions
+  ): Promise<DataFindResults<DataDBUser>> {
     const findResults = await super.find(options);
     if (privateOptions?.withPassword) {
       return findResults;
@@ -61,7 +71,10 @@ export class UsersService extends TypeORMDBEntityService<User, UsersDataEntitySe
     };
   }
 
-  async findOne(options: FindOneOptions, privateOptions?: UsersFindOnePrivateOptions): Promise<User | null> {
+  async findOne(
+    options: FindOneOptions,
+    privateOptions?: DataDBUsersFindOnePrivateOptions
+  ): Promise<DataDBUser | null> {
     const item = await super.findOne(options);
     if (privateOptions?.withPassword) {
       return item;
@@ -69,7 +82,7 @@ export class UsersService extends TypeORMDBEntityService<User, UsersDataEntitySe
     return item ? ld.omit(item, ['password']) : item;
   }
 
-  async update(data: UsersUpdateUserData, options: UpdateOptions): Promise<DataUpdateResult<User>> {
+  async update(data: DataDBUsersUpdateUserData, options: UpdateOptions): Promise<DataUpdateResult<DataDBUser>> {
     const { transactionManager } = options || {};
     if (!transactionManager) {
       return this.repository.manager.transaction(tm =>
@@ -78,7 +91,7 @@ export class UsersService extends TypeORMDBEntityService<User, UsersDataEntitySe
     }
     const updateResult = await TypeORMDBEntityService.prototype.update.call(
       this,
-      { ...ld.omit(data, ['assignedUserTypes', 'password'] as unknown as (keyof UsersUpdateUserData)[]) },
+      { ...ld.omit(data, ['assignedUserTypes', 'password'] as unknown as (keyof DataDBUsersUpdateUserData)[]) },
       options
     );
     if (updateResult.items?.length === 1 && data.assignedUserTypes?.length) {
@@ -98,7 +111,7 @@ export class UsersService extends TypeORMDBEntityService<User, UsersDataEntitySe
 
   // TODO: move the logic of this method to the domain-iam package
   async updatePassword(
-    data: UsersUpdatePasswordData,
+    data: DataDBUsersUpdatePasswordData,
     options?: { transactionManager?: EntityManager }
   ): Promise<{ success: true }> {
     const { transactionManager } = options || {};

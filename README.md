@@ -1,7 +1,7 @@
 # Node-C
-An end-to-end NodeJS framework for building DDD apps on top of NestJS.
+A NodeJS meta-framework for developing Domain-Driven Design applications, built on top of NestJS.
 
-The goal of this module is to speed up development as much as possible. It provides a clean, reliable and customizable back-end setup out of the box, at the cost of some opinionation.
+The goal of this family of packages is to speed up development as much as possible. It provides a clean, reliable and customizable back-end setup out of the box, at the cost of some opinionation.
 
 By using Node-C, you get to focus on what your project does, instead of worrying about how it does it.
 
