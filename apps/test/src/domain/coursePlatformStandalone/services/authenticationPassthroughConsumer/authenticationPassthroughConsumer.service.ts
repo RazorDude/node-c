@@ -1,4 +1,5 @@
-import { ApplicationError, ConfigProviderService, LoggerService } from '@node-c/core';
+import { Inject } from '@nestjs/common';
+import { ApplicationError, ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import { IAMAuthenticationPassthroughConsumerService } from '@node-c/domain-iam';
 
 import {
@@ -13,6 +14,8 @@ import {
   CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields
 } from './authenticationPassthroughConsumer.definitions';
 
+import { Constants } from '../../../../common/definitions';
+
 /**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.
  * This service is intended for use by the consumer environment.
@@ -21,8 +24,12 @@ export class CoursePlatformStandaloneAuthenticationPassthroughConsumerService ex
   CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields
 > {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
-    super(configProvider, logger, moduleName, serviceName);
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    @Inject(CoreConstants.DOMAIN_MODULE_NAME) moduleName: string
+  ) {
+    super(configProvider, logger, moduleName, Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME);
   }
 
   async complete(

@@ -54,6 +54,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     >
   ) {}
 
+  // TODO: issuer and audience
   async create(
     data: TokenManagerCreateData<TokenEntityFields>,
     options: TokenManagerCreateOptions
@@ -110,7 +111,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       token = data.externalToken;
     } else {
       token = await new Promise<string>((resolve, reject) => {
-        jwt.sign({ data }, secret, signOptions, (err, token) => {
+        jwt.sign({ /*aud: moduleName,*/ data, iss: moduleName }, secret, signOptions, (err, token) => {
           if (err) {
             logger.error(err);
             reject(new ApplicationError('Failed to sign token.'));
@@ -261,20 +262,20 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       }
     } else {
       // check whether the local access token exists in the cache
-      if (moduleConfig.checkAccessTokenExistanceLocally) {
+      if (moduleConfig.checkAccessTokenExistenceLocally) {
         if (!identifierDataField) {
           errorMessageToLog =
-            'The identifierDataField is required when checkAccessTokenExistanceLocally is set to true.';
+            'The identifierDataField is required when checkAccessTokenExistenceLocally is set to true.';
           throwError = true;
         } else if (!content?.data) {
-          errorMessageToLog = 'Content.data is required when checkAccessTokenExistanceLocally is set to true.';
+          errorMessageToLog = 'Content.data is required when checkAccessTokenExistenceLocally is set to true.';
           throwError = true;
         } else {
           if (!domainTokensEntityService) {
             throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
           }
           const accessTokenResult = await domainTokensEntityService.findOne({
-            filters: { [identifierDataField]: ld.get(content.data, identifierDataField), token, type: TokenType.Access }
+            filters: { [identifierDataField]: ld.get(content.data, identifierDataField), type: TokenType.Access }
           });
           if (!accessTokenResult.result) {
             errorMessageToLog = 'Access token not found locally.';
@@ -301,10 +302,14 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
         }
         identifierValue = ld.get(content.data, identifierDataField);
         const idToken = await domainTokensEntityService.findOne({
-          filters: { [identifierDataField]: identifierValue, token, type: TokenType.Id }
+          filters: { [identifierDataField]: identifierValue, type: TokenType.Id }
         });
         if (idToken.result) {
           const idTokenData = await this.verify(idToken.result.token, moduleConfig.jwtAccessSecret);
+          if (idTokenData.error) {
+            logger.error(idTokenData.error);
+            throw new ApplicationError('Invalid or expired id token.');
+          }
           if (idTokenData.content) {
             idTokenContent = idTokenData.content;
             content = ld.merge(content, idTokenContent);

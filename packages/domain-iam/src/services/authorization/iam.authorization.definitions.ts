@@ -2,7 +2,7 @@ import { GenericObject } from '@node-c/core';
 
 export enum IAMAuthorizationCheckErrorCode {
   // eslint-disable-next-line no-unused-vars
-  FGANoAccessToModule = 'FGA_NO_ACCESS',
+  FGANoAccess = 'FGA_NO_ACCESS',
   // eslint-disable-next-line no-unused-vars
   RBACNoAccessToModule = 'RBAC_NO_ACCESS_TO_MODULE',
   // eslint-disable-next-line no-unused-vars

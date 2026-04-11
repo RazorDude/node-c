@@ -24,6 +24,7 @@ export interface IAMAuthenticationOAuth2AccessTokenProviderResponseData {
 export interface IAMAuthenticationOAuth2CompleteData extends IAMAuthenticationCompleteData {
   code: string;
   codeVerifier: string;
+  redirectUri?: string;
   state: string;
 }
 
@@ -61,6 +62,7 @@ export interface IAMAuthenticationOAuth2InitiateResult extends IAMAuthentication
   codeVerifier?: string;
   nonce?: string;
   state: string;
+  redirectUri: string;
 }
 
 export type IAMAuthenticationOAuth2VerifyExternalAccessTokenData = Pick<
@@ -71,9 +73,3 @@ export type IAMAuthenticationOAuth2VerifyExternalAccessTokenResult = Pick<
   IAMAuthenticationVerifyExternalAccessTokenResult,
   'accessTokenPayload' | 'error'
 >;
-
-export interface IAMAuthenticationOAuth2VerifyTokenOptions {
-  audiences?: string[];
-  issuer?: string;
-  secret?: string;
-}

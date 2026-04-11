@@ -4,6 +4,7 @@ import {
 } from '../authentication';
 import {
   IAMAuthenticationConsumerCompleteResult,
+  IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult,
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
 } from '../authenticationConsumer';
@@ -16,8 +17,7 @@ import {
   IAMAuthenticationOAuth2InitiateOptions,
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
-  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult,
-  IAMAuthenticationOAuth2VerifyTokenOptions
+  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
 } from '../authenticationOAuth2';
 
 export type IAMAuthenticationOAuth2ConsumerCompleteData = IAMAuthenticationOAuth2CompleteData;
@@ -30,6 +30,9 @@ export type IAMAuthenticationOAuth2ConsumerCompleteResult = IAMAuthenticationOAu
     idToken?: string;
     refreshToken?: string;
   };
+
+export type IAMAuthenticationOAuth2ConsumerGetUserAuthenticationConfigResult =
+  IAMAuthenticationConsumerGetUserAuthenticationConfigResult;
 
 export interface IAMAuthenticationOAuth2ConsumerInitiateData extends IAMAuthenticationOAuth2InitiateData {
   scope: string;
@@ -51,5 +54,3 @@ export type IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenData =
 
 export type IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenResult =
   IAMAuthenticationOAuth2VerifyExternalAccessTokenResult;
-
-export type IAMAuthenticationOAuth2ConsumerVerifyTokenOptions = IAMAuthenticationOAuth2VerifyTokenOptions;

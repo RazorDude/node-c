@@ -86,12 +86,12 @@ export class IAMAuthenticationManagerService<
       rememberUser
     } = options;
     logger.info(
-      `[Domain.${moduleName}.AuthenticationManager]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
+      `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
     );
     // 1. Make sure the authentication service actually exists - local, oauth2, etc.
     const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
     if (!authService) {
-      logger.info(`[Domain.${moduleName}.AuthenticationManager]: No authService ${authType} found.`);
+      logger.info(`[Domain.${moduleName}.AuthenticationManager][${authType}]: No authService ${authType} found.`);
       throw new ApplicationError('Authentication failed.');
     }
     // 2. Get the user-specific configuration from the authService.
@@ -123,17 +123,27 @@ export class IAMAuthenticationManagerService<
     // 4. Run the final step, if this is the first step no mfa has been used.
     if (step === AppConfigDomainIAMAuthenticationStep.Initiate && !stepResult.mfaUsed) {
       issueTokens = true;
-      step = AppConfigDomainIAMAuthenticationStep.Complete;
-      stepConfig = authServiceBehaviorConfig[step];
-      const finalStepData = await this.executeStep(options, {
-        authService,
-        name: step,
-        stepConfig: ld.omit(stepConfig, 'cache')
-      });
-      stepResult = finalStepData.stepResult;
-      user = user ?? finalStepData.user;
-      userFilterField = finalStepData.userFilterField;
-      userFilterValue = finalStepData.userFilterValue;
+      // check whether skipping the complete step if mfaUsed is allowed and run the complete step if it isn't
+      if (!('skipCompleteStepAllowedOnNoMFA' in stepConfig && stepConfig.skipCompleteStepAllowedOnNoMFA)) {
+        step = AppConfigDomainIAMAuthenticationStep.Complete;
+        stepConfig = authServiceBehaviorConfig[step];
+        const finalStepData = await this.executeStep(options, {
+          authService,
+          name: step,
+          stepConfig: ld.omit(stepConfig, 'cache')
+        });
+        stepResult = ld.merge(ld.omit(stepResult, ['mfaUsed', 'mfaValid', 'valid']), finalStepData.stepResult);
+        user = user ?? finalStepData.user;
+        userFilterField = finalStepData.userFilterField;
+        userFilterValue = finalStepData.userFilterValue;
+      } else {
+        if ('userFilterField' in stepResult) {
+          userFilterField = stepResult.userFilterField as string;
+        }
+        if ('userFilterValue' in stepResult) {
+          userFilterValue = stepResult.userFilterValue as string;
+        }
+      }
     }
     // 5. Process the external access, refresh and, optionally, id tokens that are returned by the step execution.
     const actualStepResult = stepResult as
@@ -149,7 +159,7 @@ export class IAMAuthenticationManagerService<
       // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
       if (!actualStepResult.accessToken) {
         logger.info(
-          `[Domain.${moduleName}.AuthenticationManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
+          `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -165,7 +175,7 @@ export class IAMAuthenticationManagerService<
       }
       if (!user) {
         logger.info(
-          `[Domain.${moduleName}.AuthenticationManager]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
+          `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt failed at step ${step} - user is required when issueTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -251,12 +261,11 @@ export class IAMAuthenticationManagerService<
           identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
-          tokenContentOnlyFields: ['accessToken', 'user'],
-          useExternalTokenAsLocal
+          tokenContentOnlyFields: ['accessToken', 'user']
         }
       );
       logger.info(
-        `[Domain.${moduleName}.AuthenticationManager]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
+        `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
       );
       return { accessToken, idToken, refreshToken, user };
     }
@@ -281,14 +290,14 @@ export class IAMAuthenticationManagerService<
     const { configProvider, dataUsersAuthCacheService, domainUsersEntityService, logger, moduleName } = this;
     const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
     const {
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      auth: { type: _authType, ...authData },
+      auth: { type: authType, ...authData },
       filters: userFilters,
       mainFilterField
     } = data;
     const { authService, stepConfig, name: stepName } = options;
     const { cache: cacheSettings, findUser, findUserBeforeAuth, validWithoutUser } = stepConfig;
     const hasFilters = userFilters && Object.keys(userFilters).length;
+    const logPrefix = `[Domain.${moduleName}.AuthenticationManager][executeStep][${authType}][${stepName}]`;
     const stepInputData: { data: unknown; options?: unknown } = { data: ld.cloneDeep(authData) };
     let runFindUserInExternalTokenPayloads = false;
     let user: IAMUserWithPermissionsData<User, unknown> | null = null;
@@ -297,7 +306,7 @@ export class IAMAuthenticationManagerService<
     // 1. Find the user based on the provided filters, if enabled.
     if (findUser && findUserBeforeAuth) {
       if (!hasFilters) {
-        logger.info(`[Domain.${moduleName}.AuthenticationManager]: No filters provided for findUserBeforeToken=true.`);
+        logger.info(`${logPrefix}[Part 1]: No filters provided for findUserBeforeToken=true.`);
         throw new ApplicationError('Authentication failed.');
       }
       userFilterField = mainFilterField;
@@ -305,19 +314,27 @@ export class IAMAuthenticationManagerService<
       user = await this.getUserForStepExecution({ filters: userFilters, mainFilterField: userFilterField });
       if (!user) {
         logger.info(
-          `[Domain.${moduleName}.AuthenticationManager]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
+          `${logPrefix}[Part 1]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
         );
         throw new ApplicationError('Authentication failed.');
       }
     }
-    stepInputData.options = {
-      context: user || ({} as IAMUserWithPermissionsData<User, unknown>),
-      contextIdentifierField: defaultUserIdentifierField
-    };
+    if (user) {
+      stepInputData.options = {
+        context: user,
+        contextIdentifierField: defaultUserIdentifierField
+      };
+    } else if (userFilters) {
+      stepInputData.options = {
+        context: userFilters,
+        contextIdentifierField: mainFilterField
+      };
+    }
     // 2. Restore the cache, if configured.
     if (cacheSettings && 'use' in cacheSettings && cacheSettings.use) {
       if (!dataUsersAuthCacheService) {
-        throw new ApplicationError(`[${moduleName}][AuthenticationManager] dataUsersAuthCacheService not configured.`);
+        logger.info(`${logPrefix}[Part 2]: dataUsersAuthCacheService not configured.`);
+        throw new ApplicationError('Authentication failed.');
       }
       const cacheInput: { data: unknown; options: unknown } = {
         data: stepInputData.data,
@@ -352,8 +369,11 @@ export class IAMAuthenticationManagerService<
       stepInputData.options as IAMAuthenticationCompleteOptions<User>
     );
     // 4. Process the step result
-    if (!stepResult.valid || (stepResult.mfaUsed && !stepResult.mfaValid)) {
-      logger.info(`[Domain.${moduleName}.AuthenticationManager]: Bad step result:`, stepResult);
+    if (
+      (!stepResult.valid && !(stepResult as unknown as { nextStepsRequired: boolean }).nextStepsRequired) ||
+      (stepResult.mfaUsed && !stepResult.mfaValid)
+    ) {
+      logger.info(`${logPrefix}[Part 4]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
     // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads.
@@ -406,7 +426,8 @@ export class IAMAuthenticationManagerService<
       );
       if (createUser && userData) {
         if (!domainUsersEntityService) {
-          throw new ApplicationError(`[${moduleName}][AuthenticationManager] domainUsersEntityService not configured.`);
+          logger.info(`${logPrefix}[Part 7]: domainUsersEntityService not configured.`);
+          throw new ApplicationError('Authentication failed.');
         }
         const { result: createdUser } = await domainUsersEntityService.create(userData as unknown as Data['Create']);
         user = await domainUsersEntityService.getUserWithPermissionsData(
@@ -423,7 +444,7 @@ export class IAMAuthenticationManagerService<
     }
     if (validWithoutUser !== true && !user) {
       logger.info(
-        `[Domain.${moduleName}.AuthenticationManager]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
+        `${logPrefix}[Part 7]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
       );
       throw new ApplicationError('Authentication failed.');
     }
@@ -431,9 +452,10 @@ export class IAMAuthenticationManagerService<
       delete user.password;
     }
     // 8. Populate the cache, if configured
-    if (stepResult.mfaUsed && cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
+    if (cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
       if (!dataUsersAuthCacheService) {
-        throw new ApplicationError(`[${moduleName}][AuthenticationManager] dataUsersAuthCacheService not configured.`);
+        logger.info(`${logPrefix}[Part 7]: dataUsersAuthCacheService not configured.`);
+        throw new ApplicationError('Authentication failed.');
       }
       const cacheInput: GenericObject = {
         data: stepInputData.data,

@@ -24,9 +24,9 @@ export class DomainIAMTokenManagerService extends IAMTokenManagerService<DataCac
   ) {
     super(
       {
-        [Constants.DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME]: authenticationOktaService,
-        [Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_SERVICE_NAME]: authenticationPassthroughService,
-        [Constants.DOMAIN_COURSE_PLATFORM_AUTH_USER_LOCAL_SERVICE_NAME]: authenticationUserLocalService
+        [Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME]: authenticationOktaService,
+        [Constants.DOMAIN_IAM_AUTH_PASSTHROUGH_SERVICE_NAME]: authenticationPassthroughService,
+        [Constants.DOMAIN_IAM_AUTH_USER_LOCAL_SERVICE_NAME]: authenticationUserLocalService
       },
       configProvider,
       logger,

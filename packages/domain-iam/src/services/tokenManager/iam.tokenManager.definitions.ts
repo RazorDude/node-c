@@ -8,8 +8,10 @@ export interface BaseTokenEntityFields {
 }
 
 export type DecodedTokenContent<TokenEntityFields> = {
+  aud: string;
   exp?: number;
   iat: number;
+  iss: string;
   data?: TokenEntityFields & BaseTokenEntityFields;
 };
 

@@ -31,10 +31,6 @@ export class AppModuleBase {
     appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
     envKeys: ld.merge(APP_CONFIG_FROM_ENV_KEYS, {
       DOMAIN: {
-        COURSE_PLATFORM_DELEGATED: {
-          JWT_ACCESS_SECRET: 'jwtAccessSecret',
-          JWT_REFRESH_SECRET: 'jwtRefreshSecret'
-        },
         COURSE_PLATFORM_FEDERATED: {
           JWT_ACCESS_SECRET: 'jwtAccessSecret',
           JWT_REFRESH_SECRET: 'jwtRefreshSecret',
@@ -71,9 +67,9 @@ export class AppModuleBase {
       },
       DOMAIN: {
         children: {
-          COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE -
-          COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE -
-          COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE -
+          COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE - COURSE_PLATFORM_DELEGATED
+          COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE - COURSE_PLATFORM_FEDERATED
+          COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE - COURSE_PLATFORM_STANDALONE
           IAM: 'iam' // _MODULE_TYPE - IAM
         },
         name: 'domain'

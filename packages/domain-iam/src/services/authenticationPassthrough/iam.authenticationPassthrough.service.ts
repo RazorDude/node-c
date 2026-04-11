@@ -27,14 +27,8 @@ export class IAMAuthenticationPassthroughService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(
-    configProvider: ConfigProviderService,
-    logger: LoggerService,
-    moduleName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected serviceName: string
-  ) {
-    super(configProvider, logger, moduleName);
+  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+    super(configProvider, logger, moduleName, serviceName);
     this.isLocal = true;
   }
 

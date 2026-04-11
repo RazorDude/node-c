@@ -167,7 +167,7 @@ export interface AppConfigCommonDomainIAM {
     processExternalTokensOnVerify?: boolean;
     steps: AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
   }>;
-  checkAccessTokenExistanceLocally?: boolean;
+  checkAccessTokenExistenceLocally?: boolean;
   defaultUserIdentifierField: string;
   externalAccessTokenExpiryMultiplier?: number;
   externalRefreshTokenExpiryMultiplier?: number;
@@ -222,6 +222,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings exten
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
   };
+  skipCompleteStepAllowedOnNoMFA?: boolean;
 }
 
 export interface AppConfigCommonDomainIAMAuthServiceConfigStepSettings {
@@ -399,7 +400,7 @@ export interface AppConfigProfileDomainIAM {
       secretKeyHMACAlgorithm?: string;
     };
   }>;
-  checkAccessTokenExistanceLocally?: boolean;
+  checkAccessTokenExistenceLocally?: boolean;
   defaultUserIdentifierField?: string;
   externalAccessTokenExpiryMultiplier?: number;
   externalRefreshTokenExpiryMultiplier?: number;

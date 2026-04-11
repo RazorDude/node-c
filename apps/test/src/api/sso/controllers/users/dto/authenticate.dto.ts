@@ -11,6 +11,18 @@ type AuthenticateOptionsCustom = Omit<IAMAuthenticationManagerAuthenticateOption
 type AuthenticateOptionsCustomFinal = AuthenticateOptionsCustom & AuthenticateAuthWithoutType;
 
 export class SSOUsersAuthenticateAuthDto extends GenericObjectClass {
+  // This is needed for Federated authentication
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  code?: string;
+
+  // This is needed for Federated authentication
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  codeVerifier?: string;
+
   @IsOptional()
   @IsString()
   mfaType?: IAMMFAType;
@@ -20,10 +32,21 @@ export class SSOUsersAuthenticateAuthDto extends GenericObjectClass {
   @IsNotEmpty()
   password?: string;
 
+  // This is needed for Federated authentication
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  redirectUri?: string;
+
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   scope?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  state?: string;
 }
 
 export class SSOUsersAuthenticateFiltersDto extends GenericObjectClass {

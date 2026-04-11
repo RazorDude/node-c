@@ -10,7 +10,8 @@
     "generate:datasource-files:local": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} node ../../packages/core/dist/scripts/generateDatasourceFiles.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "start:dev": "ts-node src/main.ts --watch",
+    "start:dev": "nodemon --watch src --exec ts-node src/main.ts",
+    "start:dev:debug": "nodemon --watch src --exec node --inspect-brk -r ts-node/register src/main.ts",
     "start:test": "NODE_ENV=endToEndTests ts-node src/main.ts",
     "start:test:nyc": "NODE_ENV=endToEndTests nyc ts-node src/main.ts",
     "test": "NODE_ENV=endToEndTests vitest --config test/vitest.config.ts",
@@ -35,6 +36,7 @@
     "ajv-formats": "^3.0.1",
     "madge": "^8.0.0",
     "nestjs-spelunker": "^1.3.2",
+    "nodemon": "^3.1.14",
     "nyc": "^18.0.0",
     "ts-node": "^10.9.2"
   },

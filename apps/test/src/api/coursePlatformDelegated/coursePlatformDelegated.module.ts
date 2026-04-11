@@ -10,7 +10,11 @@ import { Constants as NodeCDomainIAMConstants } from '@node-c/domain-iam';
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
-import { DomainIAMAuthenticationManagerService, DomainIAMAuthorizationService } from '../../domain/iam';
+import {
+  DomainIAMAuthenticationManagerService,
+  DomainIAMAuthorizationService,
+  DomainIAMTokenManagerService
+} from '../../domain/iam';
 
 @Module({})
 export class APICoursePlatformDelegatedModule extends BaseHTTPAPIModule {
@@ -30,6 +34,10 @@ export class APICoursePlatformDelegatedModule extends BaseHTTPAPIModule {
       {
         provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
         useExisting: DomainIAMAuthenticationManagerService
+      },
+      {
+        provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE,
+        useExisting: DomainIAMTokenManagerService
       }
     ]
   };

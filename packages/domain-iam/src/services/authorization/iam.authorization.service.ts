@@ -249,12 +249,12 @@ export class IAMAuthorizationService<
       permissions: usedPermissions
     };
     if (!hasAccess) {
-      if (permissionsForDifferentModules === permissionsCount) {
+      if (!permissionsCount || permissionsForDifferentModules === permissionsCount) {
         returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToModule;
       } else if (permissionsForDifferentContexts === permissionsCount) {
         returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToResource;
       } else {
-        returnData.errorCode = IAMAuthorizationCheckErrorCode.FGANoAccessToModule;
+        returnData.errorCode = IAMAuthorizationCheckErrorCode.FGANoAccess;
       }
     }
     return returnData;

@@ -2,6 +2,7 @@
 - Common
   - Removed NestJS CLI as a dev depdendency - it's not used and it has unaddressed vulnerabilities.
   - Commnets fixes accross the board, so that descriptions appear on method and classes.
+  - BREAKING: Renamed checkAccessTokenExistanceLocally to checkAccessTokenExistenceLocally.
 - `packages/core`
   - Removed excess data from the httpRequest utility's full and error responses.
   - Config changes for allowing the usage of external tokens as local tokens in the domain-iam package.
@@ -34,6 +35,7 @@
   - Better status codes for unauthorized vs forbidden.
   - Updates to the ApiKey authorization signatureContent assignment, mirroring the changes in the core package and widening the suppport for different kinds of bodies.
   - Changes to the API key authorization in the authorization middleware and the accessControl interceptor to allow running both Bearer-based and ApiKey-based endpoints in the same API.
+  - Error handling improvements.
 - `apps/test`
   - Changes to test the above.
   - Renamed userTypes to roles and authorizationPoints to permissions.

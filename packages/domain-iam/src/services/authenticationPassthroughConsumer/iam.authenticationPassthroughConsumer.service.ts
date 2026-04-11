@@ -64,7 +64,8 @@ export class IAMAuthenticationPassthroughConsumerService<
         findUser: true,
         findUserBeforeAuth: false,
         findUserInExternalTokenPayloads: true,
-        useReturnedTokensAsLocal: true,
+        useReturnedTokens: true,
+        useReturnedTokensAsLocal: false,
         validWithoutUser: false
       },
       // this step simply does nothing

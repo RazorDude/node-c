@@ -12,7 +12,8 @@ import * as FolderData from './controllers';
 import { Constants } from '../../common/definitions';
 import {
   DomainCoursePlatformFederatedAuthenticationManagerService,
-  DomainCoursePlatformFederatedAuthorizationService
+  DomainCoursePlatformFederatedAuthorizationService,
+  DomainCoursePlatformFederatedTokenManagerService
 } from '../../domain/coursePlatformFederated';
 
 @Module({})
@@ -33,6 +34,10 @@ export class APICoursePlatformFederatedModule extends BaseHTTPAPIModule {
       {
         provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
         useExisting: DomainCoursePlatformFederatedAuthenticationManagerService
+      },
+      {
+        provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE,
+        useExisting: DomainCoursePlatformFederatedTokenManagerService
       }
     ]
   };

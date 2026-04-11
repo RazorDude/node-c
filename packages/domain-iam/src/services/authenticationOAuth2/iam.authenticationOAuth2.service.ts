@@ -11,7 +11,6 @@ import {
   httpRequest
 } from '@node-c/core';
 
-import * as jwt from 'jsonwebtoken';
 import ld from 'lodash';
 
 import {
@@ -26,8 +25,7 @@ import {
   IAMAuthenticationOAuth2InitiateOptions,
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
-  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult,
-  IAMAuthenticationOAuth2VerifyTokenOptions
+  IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
 } from './iam.authenticationOAuth2.definitions';
 
 import { Constants } from '../../common/definitions';
@@ -64,14 +62,8 @@ export class IAMAuthenticationOAuth2Service<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(
-    configProvider: ConfigProviderService,
-    logger: LoggerService,
-    moduleName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected serviceName: string
-  ) {
-    super(configProvider, logger, moduleName);
+  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+    super(configProvider, logger, moduleName, serviceName);
     this.isLocal = false;
   }
 
@@ -94,17 +86,37 @@ export class IAMAuthenticationOAuth2Service<
   ): Promise<IAMAuthenticationOAuth2CompleteResult> {
     const { configProvider, logger, moduleName, serviceName } = this;
     const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { accessTokenGrantUrl, clientId, clientSecret, redirectUri } =
-      moduleConfig.authServiceSettings![serviceName].oauth2!;
+    const {
+      accessTokenGrantUrl,
+      allowedIncomingRedirectUris,
+      clientId,
+      clientSecret,
+      redirectUri: configRedirectUri
+    } = moduleConfig.authServiceSettings![serviceName].oauth2!;
+    const logsPrefix = `[${moduleName}][${serviceName}][complete]`;
     if (!accessTokenGrantUrl) {
-      logger.error(`[${moduleName}][${serviceName}]: Access token grant URL not configured.`);
+      logger.error(`${logsPrefix}: Access token grant URL not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
-    if (!redirectUri) {
-      logger.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
-      throw new ApplicationError('Authentication failed.');
+    const { code, codeVerifier, redirectUri: incomingRedirectUri } = data;
+    let redirectUri: string | undefined;
+    if (incomingRedirectUri) {
+      if (!allowedIncomingRedirectUris) {
+        logger.error(`${logsPrefix}: Allowed incoming Redirect URIs not configured.`);
+        throw new ApplicationError('Authentication failed.');
+      }
+      if (!allowedIncomingRedirectUris.includes(incomingRedirectUri)) {
+        logger.error(`${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`);
+        throw new ApplicationError('Authentication failed.');
+      }
+      redirectUri = incomingRedirectUri;
+    } else {
+      if (!configRedirectUri) {
+        logger.error(`${logsPrefix}: Redirect URI not configured.`);
+        throw new ApplicationError('Authentication failed.');
+      }
+      redirectUri = configRedirectUri;
     }
-    const { code, codeVerifier } = data;
     const { data: providerResponseData, hasError } =
       await httpRequest<IAMAuthenticationOAuth2AccessTokenProviderResponseData>(accessTokenGrantUrl, {
         body: {
@@ -119,10 +131,7 @@ export class IAMAuthenticationOAuth2Service<
         method: HttpMethod.POST
       });
     if (hasError || !providerResponseData) {
-      logger.error(
-        `[${moduleName}][${serviceName}]: Auhorization grant attempt failed for code "${code}".`,
-        providerResponseData
-      );
+      logger.error(`${logsPrefix}: Auhorization grant attempt failed for code "${code}".`, providerResponseData);
       throw new ApplicationError('Authentication failed.');
     }
     return {
@@ -208,7 +217,10 @@ export class IAMAuthenticationOAuth2Service<
       [AppConfigDomainIAMAuthenticationStep.Initiate]: {
         cache: {
           populate: {
-            data: [{ cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' }]
+            data: [
+              { cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' },
+              { cacheFieldName: 'redirectUri', inputFieldName: 'result.redirectUri' }
+            ]
           },
           settings: {
             cacheFieldName: 'state',
@@ -255,32 +267,31 @@ export class IAMAuthenticationOAuth2Service<
     const { redirectUri: incomingRedirectUri, scope } = data;
     const { generateNonce, withPCKE } = options;
     const finalScope = scope || defaultScope;
+    const logsPrefix = `[${moduleName}][${serviceName}][initiate]`;
     let redirectUri: string | undefined;
     if (!authorizationUrl) {
-      logger.error(`[${moduleName}][${serviceName}]: Authorization URL not configured.`);
+      logger.error(`${logsPrefix}: Authorization URL not configured.`);
       throw new ApplicationError('Authentication failed.');
     }
     if (incomingRedirectUri) {
       if (!allowedIncomingRedirectUris) {
-        logger.error(`[${moduleName}][${serviceName}]: Allowed incoming Redirect URIs not configured.`);
+        logger.error(`${logsPrefix}: Allowed incoming Redirect URIs not configured.`);
         throw new ApplicationError('Authentication failed.');
       }
       if (!allowedIncomingRedirectUris.includes(incomingRedirectUri)) {
-        logger.error(`[${moduleName}][${serviceName}]: Incoming redirect URI ${incomingRedirectUri} is not allowed.`);
+        logger.error(`${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`);
         throw new ApplicationError('Authentication failed.');
       }
       redirectUri = incomingRedirectUri;
     } else {
       if (!configRedirectUri) {
-        logger.error(`[${moduleName}][${serviceName}]: Redirect URI not configured.`);
+        logger.error(`${logsPrefix}: Redirect URI not configured.`);
         throw new ApplicationError('Authentication failed.');
       }
       redirectUri = configRedirectUri;
     }
     if (!finalScope) {
-      logger.error(
-        `[${moduleName}][${serviceName}]: Either a scope in thwe input, or a configured default scope, is required..`
-      );
+      logger.error(`${logsPrefix}: Either a scope in thwe input, or a configured default scope, is required..`);
       throw new ApplicationError('Authentication failed.');
     }
     const state = this.generateUrlEncodedString(16);
@@ -310,6 +321,7 @@ export class IAMAuthenticationOAuth2Service<
       mfaUsed: true,
       mfaValid: true,
       nonce,
+      redirectUri,
       state,
       valid: true
     };
@@ -348,46 +360,5 @@ export class IAMAuthenticationOAuth2Service<
     throw new ApplicationError(
       `[${moduleName}][${serviceName}]:  In method "verifyExternalAccessToken": verification via external endpoint not configured.`
     );
-  }
-
-  async verifyToken<DecodedTokenContent = unknown>(
-    token: string,
-    options?: IAMAuthenticationOAuth2VerifyTokenOptions
-  ): Promise<{ content?: DecodedTokenContent; error?: unknown }> {
-    const { audiences, issuer, secret } = options || {};
-    let returnData: { content?: DecodedTokenContent; error?: unknown } = {};
-    if (secret) {
-      returnData = await new Promise<{ content?: DecodedTokenContent; error?: unknown }>(resolve => {
-        jwt.verify(token, secret, (err, decoded) => {
-          if (err) {
-            resolve({ content: decoded as DecodedTokenContent, error: err });
-          }
-          resolve({ content: decoded as DecodedTokenContent });
-        });
-      });
-    } else {
-      const tokenContent = jwt.decode(token) as DecodedTokenContent & { aud?: string; exp?: number; iss?: string };
-      if (tokenContent.exp) {
-        // tokenContent.exp < new Date().valueOf()
-        let currentTimeStamp = `${new Date().valueOf()}`;
-        let expString = `${tokenContent.exp}`;
-        if (expString.length < currentTimeStamp.length) {
-          currentTimeStamp = currentTimeStamp.substring(0, expString.length);
-        } else if (expString.length > currentTimeStamp.length) {
-          expString = expString.substring(0, currentTimeStamp.length);
-        }
-        if (parseInt(expString, 10) < parseInt(currentTimeStamp, 10)) {
-          returnData.error = Constants.TOKEN_EXPIRED_ERROR;
-        }
-      }
-      if (tokenContent.aud && audiences && !audiences.includes(tokenContent.aud)) {
-        returnData.error = Constants.TOKEN_MISMATCHED_AUDIENCES_ERROR;
-      }
-      if (tokenContent.iss && issuer && issuer !== tokenContent.iss) {
-        returnData.error = Constants.TOKEN_MISMATCHED_ISSUER_ERROR;
-      }
-      returnData.content = tokenContent;
-    }
-    return returnData;
   }
 }

@@ -83,7 +83,10 @@ export class IAMAuthenticationOktaService<
       [AppConfigDomainIAMAuthenticationStep.Initiate]: {
         cache: {
           populate: {
-            data: [{ cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' }]
+            data: [
+              { cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' },
+              { cacheFieldName: 'redirectUri', inputFieldName: 'result.redirectUri' }
+            ]
           },
           settings: {
             cacheFieldName: 'state',

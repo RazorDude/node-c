@@ -54,7 +54,7 @@ export const appConfigCommon: AppConfigCommon = {
     coursePlatformFederated: {
       accessTokenExpiryTimeInMinutes: 120,
       authServiceSettings: {
-        oktaConsumer: {
+        okta: {
           nodeC: {
             apiSecretHashingAlgorithm: 'sha256',
             completeEndpoint: '/users/auth/okta',
@@ -65,7 +65,7 @@ export const appConfigCommon: AppConfigCommon = {
             refreshExternalAccessTokenEndpointMethod: HttpMethod.PUT
           }
         },
-        userLocalConsumer: {
+        userLocal: {
           nodeC: {
             apiSecretHashingAlgorithm: 'sha256',
             completeEndpoint: '/users/auth/userLocal',
@@ -77,7 +77,7 @@ export const appConfigCommon: AppConfigCommon = {
           }
         }
       },
-      checkAccessTokenExistanceLocally: true,
+      checkAccessTokenExistenceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
     },
@@ -108,7 +108,7 @@ export const appConfigCommon: AppConfigCommon = {
           }
         }
       },
-      checkAccessTokenExistanceLocally: true,
+      checkAccessTokenExistenceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
     },
@@ -129,7 +129,7 @@ export const appConfigCommon: AppConfigCommon = {
           }
         }
       },
-      checkAccessTokenExistanceLocally: true,
+      checkAccessTokenExistenceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
     }

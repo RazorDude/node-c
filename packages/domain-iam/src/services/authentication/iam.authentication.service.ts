@@ -1,5 +1,7 @@
 import { ApplicationError, ConfigProviderService, LoggerService } from '@node-c/core';
 
+import * as jwt from 'jsonwebtoken';
+
 import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
@@ -15,8 +17,11 @@ import {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult,
   IAMAuthenticationVerifyExternalAccessTokenData,
-  IAMAuthenticationVerifyExternalAccessTokenResult
+  IAMAuthenticationVerifyExternalAccessTokenResult,
+  IAMAuthenticationVerifyTokenOptions
 } from './iam.authentication.definitions';
+
+import { Constants } from '../../common/definitions';
 
 export class IAMAuthenticationService<CompleteContext extends object, InitiateContext extends object> {
   protected isLocal: boolean;
@@ -27,7 +32,9 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
     // eslint-disable-next-line no-unused-vars
-    protected moduleName: string
+    protected moduleName: string,
+    // eslint-disable-next-line no-unused-vars
+    protected serviceName: string
   ) {}
 
   /**
@@ -54,12 +61,27 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
    * If the tokens aren't JWTs, other ways for retreiving the payloads can be implemented, such as the OAuth introspection endpoint.
    */
   async getPayloadsFromExternalTokens(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _data: IAMAuthenticationGetPayloadsFromExternalTokensData
+    data: IAMAuthenticationGetPayloadsFromExternalTokensData
   ): Promise<IAMAuthenticationGetPayloadsFromExternalTokensResult> {
-    throw new ApplicationError(
-      `[${this.moduleName}][IAMAuthenticationService]: Method "getPayloadsFromExternalTokens" not implemented.`
-    );
+    const { logger, moduleName, serviceName } = this;
+    const { accessToken, idToken } = data;
+    const returnData: IAMAuthenticationGetPayloadsFromExternalTokensResult = {};
+    if (accessToken) {
+      const { content: accessTokenPayload, error } = await this.verifyToken(accessToken);
+      if (error) {
+        logger.error(
+          `[${moduleName}][${serviceName}]: Method "getPayloadsFromExternalTokens" has produced an error:`,
+          error
+        );
+        throw new ApplicationError(`[${moduleName}][${serviceName}]: Error getting data from external tokens.`);
+      }
+      returnData.accessTokenPayload = accessTokenPayload;
+    }
+    if (idToken) {
+      const idTokenData = await this.verifyToken(idToken);
+      returnData.idTokenPayload = idTokenData.content;
+    }
+    return returnData;
   }
 
   /**
@@ -102,5 +124,46 @@ export class IAMAuthenticationService<CompleteContext extends object, InitiateCo
     throw new ApplicationError(
       `[${this.moduleName}][IAMAuthenticationService]: Method "verifyExternalAccessToken" not implemented.`
     );
+  }
+
+  async verifyToken<DecodedTokenContent = unknown>(
+    token: string,
+    options?: IAMAuthenticationVerifyTokenOptions
+  ): Promise<{ content?: DecodedTokenContent; error?: unknown }> {
+    const { audiences, issuer, secret } = options || {};
+    let returnData: { content?: DecodedTokenContent; error?: unknown } = {};
+    if (secret) {
+      returnData = await new Promise<{ content?: DecodedTokenContent; error?: unknown }>(resolve => {
+        jwt.verify(token, secret, (err, decoded) => {
+          if (err) {
+            resolve({ content: decoded as DecodedTokenContent, error: err });
+          }
+          resolve({ content: decoded as DecodedTokenContent });
+        });
+      });
+    } else {
+      const tokenContent = jwt.decode(token) as DecodedTokenContent & { aud?: string; exp?: number; iss?: string };
+      if (tokenContent.exp) {
+        // tokenContent.exp < new Date().valueOf()
+        let currentTimeStamp = `${new Date().valueOf()}`;
+        let expString = `${tokenContent.exp}`;
+        if (expString.length < currentTimeStamp.length) {
+          currentTimeStamp = currentTimeStamp.substring(0, expString.length);
+        } else if (expString.length > currentTimeStamp.length) {
+          expString = expString.substring(0, currentTimeStamp.length);
+        }
+        if (parseInt(expString, 10) < parseInt(currentTimeStamp, 10)) {
+          returnData.error = Constants.TOKEN_EXPIRED_ERROR;
+        }
+      }
+      if (tokenContent.aud && audiences && !audiences.includes(tokenContent.aud)) {
+        returnData.error = Constants.TOKEN_MISMATCHED_AUDIENCES_ERROR;
+      }
+      if (tokenContent.iss && issuer && issuer !== tokenContent.iss) {
+        returnData.error = Constants.TOKEN_MISMATCHED_ISSUER_ERROR;
+      }
+      returnData.content = tokenContent;
+    }
+    return returnData;
   }
 }

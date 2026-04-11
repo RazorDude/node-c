@@ -48,7 +48,8 @@ export class DomainCoursePlatformStandaloneAuthenticationManagerService extends 
     super(
       {
         [Constants.DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME]: authenticationOktaService,
-        [Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_SERVICE_NAME]: authenticationPassthroughConsumerService,
+        [Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME]:
+          authenticationPassthroughConsumerService,
         [Constants.DOMAIN_COURSE_PLATFORM_AUTH_USER_LOCAL_SERVICE_NAME]: authenticationUserLocalService
       },
       configProvider,
@@ -64,13 +65,22 @@ export class DomainCoursePlatformStandaloneAuthenticationManagerService extends 
     options: IAMAuthenticationManagerAuthenticateOptions<AuthData>
   ): Promise<IAMAuthenticationManagerAuthenticateReturnData<DataDBUser>> {
     const authenticateResult = await super.authenticate(options);
+    if (
+      (options.step === AppConfigDomainIAMAuthenticationStep.Initiate &&
+        options.auth.type === Constants.DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME) ||
+      options.auth.type === Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME
+    ) {
+      return authenticateResult;
+    }
     if ('accessToken' in authenticateResult && authenticateResult.accessToken && authenticateResult.user) {
+      // Here, the local tokens are intentionally set as "external", so that they're used as such by the
+      // passthrough provider. It'll then decode them and find the user based on the idToken data.
       const passthroughResult = await this.authenticate({
         auth: {
           externalAccessToken: authenticateResult.accessToken,
           externalIdToken: authenticateResult.idToken,
           externalRefreshToken: authenticateResult.refreshToken,
-          type: Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_SERVICE_NAME
+          type: Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME
         },
         filters: { email: authenticateResult.user.email },
         mainFilterField: 'email',
@@ -80,7 +90,7 @@ export class DomainCoursePlatformStandaloneAuthenticationManagerService extends 
         return { ...passthroughResult, user: ld.merge(authenticateResult.user, passthroughResult.user) };
       }
       throw new ApplicationError(
-        `Authentication failed (type ${Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_SERVICE_NAME}).`
+        `Authentication failed (type ${Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME}).`
       );
     }
     throw new ApplicationError(`Authentication failed (type ${options.auth.type}).`);

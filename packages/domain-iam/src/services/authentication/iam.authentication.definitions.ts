@@ -47,7 +47,9 @@ export interface IAMAuthenticationGetPayloadsFromExternalTokensResult {
 
 export interface IAMAuthenticationGetUserDataFromExternalTokenPayloadsData {
   accessTokenPayload?: GenericObject;
-  idTokenPayload?: { email: string; name: string } & GenericObject;
+  idTokenPayload?: { email: string; name: string } & {
+    data?: { user?: GenericObject } & GenericObject;
+  } & GenericObject;
   refreshTokenPayload?: GenericObject;
 }
 
@@ -96,4 +98,10 @@ export interface IAMAuthenticationVerifyExternalAccessTokenResult {
   newAccessToken?: string;
   newRefreshToken?: string;
   refreshTokenPayload?: unknown;
+}
+
+export interface IAMAuthenticationVerifyTokenOptions {
+  audiences?: string[];
+  issuer?: string;
+  secret?: string;
 }

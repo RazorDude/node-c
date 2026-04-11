@@ -16,6 +16,8 @@ import {
   IAMAuthenticationConsumerCompleteOptions,
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
+  IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationConsumerInitiateData,
   IAMAuthenticationConsumerInitiateOptions,
   IAMAuthenticationConsumerInitiateResult,
@@ -34,24 +36,34 @@ export class IAMAuthenticationConsumerService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(
-    configProvider: ConfigProviderService,
-    logger: LoggerService,
-    moduleName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected serviceName: string
-  ) {
-    super(configProvider, logger, moduleName);
+  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+    super(configProvider, logger, moduleName, serviceName);
+    this.isLocal = false;
   }
 
   async complete(
     data: IAMAuthenticationConsumerCompleteData,
     options: IAMAuthenticationConsumerCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationConsumerCompleteResult> {
-    return await this.runRequest<IAMAuthenticationConsumerCompleteResult>('complete', {
-      data,
-      options
-    });
+    const responseData = await this.runRequest<IAMAuthenticationConsumerCompleteResult>(
+      AppConfigDomainIAMAuthenticationStep.Complete,
+      {
+        auth: { ...data, type: this.serviceName },
+        step: AppConfigDomainIAMAuthenticationStep.Complete,
+        ...(options?.contextIdentifierField
+          ? {
+              filters: {
+                [options.contextIdentifierField]:
+                  options.context[options.contextIdentifierField as keyof CompleteContext]
+              }
+            }
+          : {})
+      }
+    );
+    return {
+      ...responseData,
+      valid: typeof responseData.valid !== 'undefined' ? responseData.valid : !!responseData.accessToken?.length
+    };
   }
 
   /**
@@ -78,6 +90,7 @@ export class IAMAuthenticationConsumerService<
         findUser: true,
         findUserBeforeAuth: false,
         findUserInExternalTokenPayloads: true,
+        useReturnedTokens: true,
         useReturnedTokensAsLocal: true,
         validWithoutUser: false
       },
@@ -90,18 +103,47 @@ export class IAMAuthenticationConsumerService<
     return ld.merge(defaultConfig, steps || {});
   }
 
+  async getUserDataFromExternalTokenPayloads(
+    data: IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData
+  ): Promise<IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult | null> {
+    const { idTokenPayload } = data;
+    if (!idTokenPayload?.data?.user) {
+      return null;
+    }
+    return idTokenPayload.data.user as unknown as IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult;
+  }
+
   async initiate(
     data: IAMAuthenticationConsumerInitiateData,
     options: IAMAuthenticationConsumerInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationConsumerInitiateResult> {
-    return await this.runRequest<IAMAuthenticationConsumerInitiateResult>('initiate', {
-      data,
-      options
+    const responseData = await this.runRequest<
+      IAMAuthenticationConsumerInitiateResult | IAMAuthenticationConsumerCompleteResult
+    >(AppConfigDomainIAMAuthenticationStep.Initiate, {
+      auth: { ...data, type: this.serviceName },
+      step: AppConfigDomainIAMAuthenticationStep.Initiate,
+      ...(options?.contextIdentifierField
+        ? {
+            filters: {
+              [options.contextIdentifierField]: options.context[options.contextIdentifierField as keyof InitiateContext]
+            }
+          }
+        : {})
     });
+    return {
+      ...responseData,
+      valid:
+        typeof responseData.valid !== 'undefined'
+          ? responseData.valid
+          : 'accessToken' in responseData && !!responseData.accessToken?.length,
+      ...('nextStepsRequired' in responseData && responseData.nextStepsRequired
+        ? { mfaUsed: true, mfaValid: true }
+        : { mfaUsed: false })
+    };
   }
 
   protected async runRequest<ReturnData>(
-    endpoint: 'complete' | 'initiate' | 'refreshExternalAccessToken',
+    endpoint: AppConfigDomainIAMAuthenticationStep | 'refreshExternalAccessToken',
     data: GenericObject
   ): Promise<ReturnData> {
     const { configProvider, logger, moduleName, serviceName } = this;
@@ -110,7 +152,6 @@ export class IAMAuthenticationConsumerService<
       moduleConfig.authServiceSettings![serviceName].nodeC!;
     const endpointMethod = configData[`${endpoint}EndpointMethod`];
     const endpointUri = configData[`${endpoint}Endpoint`];
-    console.log('====>', configData);
     if (!baseUrl) {
       logger.error(`[${moduleName}][${serviceName}]: Base URL not configured.`);
       throw new ApplicationError('Authentication failed.');

@@ -27,6 +27,9 @@ export const appConfigProfileLocal: AppConfigProfile = {
     coursePlatformFederated: {
       authServiceSettings: {
         okta: {
+          oauth2: {
+            redirectUri: 'http://localhost:2060/users/auth/okta'
+          },
           nodeC: {
             baseUrl: 'http://localhost:2080'
           }
@@ -40,6 +43,16 @@ export const appConfigProfileLocal: AppConfigProfile = {
     },
     coursePlatformStandalone: {
       authServiceSettings: {
+        okta: {
+          oauth2: {
+            accessTokenAudiences: ['https://integrator-4933645.okta.com'],
+            accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
+            allowedIncomingRedirectUris: ['http://localhost:2050/users/auth/okta'],
+            authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
+            issuerUri: 'https://integrator-4933645.okta.com',
+            redirectUri: 'http://localhost:2050/users/auth/okta'
+          }
+        },
         passthroughConsumer: {
           nodeC: {
             baseUrl: 'http://localhost:2080'
@@ -53,10 +66,13 @@ export const appConfigProfileLocal: AppConfigProfile = {
           oauth2: {
             accessTokenAudiences: ['https://integrator-4933645.okta.com'],
             accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
+            allowedIncomingRedirectUris: [
+              'http://localhost:2060/users/auth/okta',
+              'http://localhost:2080/users/auth/okta'
+            ],
             authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
             issuerUri: 'https://integrator-4933645.okta.com',
             redirectUri: 'http://localhost:2080/users/auth/okta'
-            // redirectUri: 'http://localhost:2080/authn/okta/steps/complete'
           }
         },
         userLocal: {

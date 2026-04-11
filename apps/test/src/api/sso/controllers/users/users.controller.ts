@@ -19,6 +19,7 @@ import {
 
 // TODO: create user (signup)
 // TODO: logout
+// TODO: separate endpoints for delegated and federated authentication
 /**
  * This controller is part of the authentication setup as a provider. Its authentication endpoints are used either
  * in standalone mode or as the provider endpoints for other node-c apps' authentication (consumers).

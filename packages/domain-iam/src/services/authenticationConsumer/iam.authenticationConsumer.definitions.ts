@@ -3,6 +3,8 @@ import {
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
   IAMAuthenticationGetUserAuthenticationConfigResult,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationInitiateData,
   IAMAuthenticationInitiateOptions,
   IAMAuthenticationInitiateResult,
@@ -22,6 +24,12 @@ export interface IAMAuthenticationConsumerCompleteResult extends IAMAuthenticati
 
 export type IAMAuthenticationConsumerGetUserAuthenticationConfigResult =
   IAMAuthenticationGetUserAuthenticationConfigResult;
+
+export type IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData =
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsData;
+
+export type IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult =
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult;
 
 export type IAMAuthenticationConsumerInitiateData = IAMAuthenticationInitiateData;
 

@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { ServerError } from '../common/definitions/common.errors';
+import { cleanUpAxiosError } from '../common/utils';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {
@@ -17,7 +18,8 @@ export class HTTPErrorInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       catchError(error => {
-        this.logger.error(error);
+        const loggableException = cleanUpAxiosError(error);
+        this.logger.error(loggableException);
         let message: string | string[] = 'An error has occurred.';
         let status = 500;
         if (error instanceof ApplicationError || error instanceof ServerError) {

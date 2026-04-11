@@ -9,7 +9,11 @@ import {
 import * as FolderData from './controllers';
 
 import { Constants } from '../../common/definitions';
-import { DomainIAMAuthenticationManagerService, DomainIAMAuthorizationService } from '../../domain/iam';
+import {
+  DomainIAMAuthenticationManagerService,
+  DomainIAMAuthorizationService,
+  DomainIAMTokenManagerService
+} from '../../domain/iam';
 
 @Module({})
 export class APISSOModule extends BaseHTTPAPIModule {
@@ -25,6 +29,10 @@ export class APISSOModule extends BaseHTTPAPIModule {
       {
         provide: NodeCConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
         useExisting: DomainIAMAuthenticationManagerService
+      },
+      {
+        provide: NodeCConstants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE,
+        useExisting: DomainIAMTokenManagerService
       }
     ]
   };

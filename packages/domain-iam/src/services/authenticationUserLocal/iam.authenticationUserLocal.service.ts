@@ -36,12 +36,11 @@ export class IAMAuthenticationUserLocalService<
     configProvider: ConfigProviderService,
     logger: LoggerService,
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
-    protected serviceName: string,
+    serviceName: string,
     // eslint-disable-next-line no-unused-vars
     protected mfaServices?: Record<IAMMFAType, IAMMFAService<object, object>>
   ) {
-    super(configProvider, logger, moduleName);
+    super(configProvider, logger, moduleName, serviceName);
     this.isLocal = true;
   }
 
@@ -86,7 +85,8 @@ export class IAMAuthenticationUserLocalService<
       [AppConfigDomainIAMAuthenticationStep.Complete]: {
         cache: {
           settings: {
-            cacheFieldName: 'userId',
+            // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
+            cacheFieldName: 'state',
             inputFieldName: 'options.context.id'
           },
           use: {
@@ -103,7 +103,8 @@ export class IAMAuthenticationUserLocalService<
             options: [{ cacheFieldName: 'context', inputFieldName: 'options.context' }]
           },
           settings: {
-            cacheFieldName: 'userId',
+            // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
+            cacheFieldName: 'state',
             inputFieldName: 'options.context.id'
           }
         },

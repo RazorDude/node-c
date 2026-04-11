@@ -36,13 +36,13 @@ export class DomainCoursePlatformStandaloneAuthenticationUserLocalService extend
     options: DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteOptions<DomainCoursePlatformStandaloneAuthenticationUserLocalUserFields>
   ): Promise<DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteResult> {
     const result = await super.complete(data, options);
-    await this.userLoginLogsService.create({
-      datetime: new Date()
-        .toISOString()
-        .replace('T', ' ')
-        .replace(/\.\d+Z$/, ''),
-      userId: options.context.id
-    });
+    // await this.userLoginLogsService.create({
+    //   datetime: new Date()
+    //     .toISOString()
+    //     .replace('T', ' ')
+    //     .replace(/\.\d+Z$/, ''),
+    //   userId: options.context.id
+    // });
     return result;
   }
 }
