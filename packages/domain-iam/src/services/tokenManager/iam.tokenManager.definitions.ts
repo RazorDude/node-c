@@ -51,13 +51,13 @@ export interface TokenManagerVerifyResult<TokenEntityFields> {
 }
 
 export interface VerifyAccessTokenOptions {
+  accessTokenDataRefreshTokenField?: string;
   deleteFromStoreIfExpired?: boolean;
   identifierDataField?: string;
   newAccessTokenExpiresInMinutes?: number;
   persistNewToken?: boolean;
   purgeStoreOnRenew?: boolean;
   refreshToken?: string;
-  refreshTokenAccessTokenIdentifierDataField?: string;
 }
 
 export interface VerifyAccessTokenReturnData<TokenEntityFields> {

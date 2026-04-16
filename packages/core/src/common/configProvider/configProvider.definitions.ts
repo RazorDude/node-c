@@ -138,6 +138,7 @@ export interface AppConfigCommonAPIHTTP {
 export type AppConfigCommonAPIREST = AppConfigCommonAPIHTTP;
 
 export interface AppConfigCommonDomainIAM {
+  accessTokenExpiryStorageTTLMultiplier?: number;
   accessTokenExpiryTimeInMinutes?: number;
   authServiceSettings?: GenericObject<{
     nodeC?: {
@@ -169,8 +170,7 @@ export interface AppConfigCommonDomainIAM {
   }>;
   checkAccessTokenExistenceLocally?: boolean;
   defaultUserIdentifierField: string;
-  externalAccessTokenExpiryMultiplier?: number;
-  externalRefreshTokenExpiryMultiplier?: number;
+  refreshTokenExpiryStorageTTLMultiplier?: number;
   refreshTokenExpiryTimeInHours?: number;
 }
 
@@ -371,6 +371,7 @@ export type AppConfigProfileAPIHTTP = AppConfigCommonAPIHTTP;
 export type AppConfigProfileAPIREST = AppConfigProfileAPIHTTP;
 
 export interface AppConfigProfileDomainIAM {
+  accessTokenExpiryStorageTTLMultiplier?: number;
   accessTokenExpiryTimeInMinutes?: number;
   authServiceSettings?: GenericObject<{
     nodeC?: {
@@ -402,8 +403,7 @@ export interface AppConfigProfileDomainIAM {
   }>;
   checkAccessTokenExistenceLocally?: boolean;
   defaultUserIdentifierField?: string;
-  externalAccessTokenExpiryMultiplier?: number;
-  externalRefreshTokenExpiryMultiplier?: number;
+  refreshTokenExpiryStorageTTLMultiplier?: number;
   refreshTokenExpiryTimeInHours?: number;
 }
 

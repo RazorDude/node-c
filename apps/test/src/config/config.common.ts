@@ -52,7 +52,7 @@ export const appConfigCommon: AppConfigCommon = {
   },
   domain: {
     coursePlatformFederated: {
-      accessTokenExpiryTimeInMinutes: 120,
+      accessTokenExpiryTimeInMinutes: 1,
       authServiceSettings: {
         okta: {
           nodeC: {
@@ -82,7 +82,7 @@ export const appConfigCommon: AppConfigCommon = {
       refreshTokenExpiryTimeInHours: 24
     },
     coursePlatformStandalone: {
-      accessTokenExpiryTimeInMinutes: 120,
+      accessTokenExpiryTimeInMinutes: 1,
       authServiceSettings: {
         okta: {
           oauth2: {
@@ -113,7 +113,7 @@ export const appConfigCommon: AppConfigCommon = {
       refreshTokenExpiryTimeInHours: 24
     },
     iam: {
-      accessTokenExpiryTimeInMinutes: 120,
+      accessTokenExpiryTimeInMinutes: 1,
       authServiceSettings: {
         okta: {
           oauth2: {

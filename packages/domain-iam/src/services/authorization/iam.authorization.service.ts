@@ -88,12 +88,12 @@ export class IAMAuthorizationService<
     let tokenContent: DecodedTokenContent<UserTokenEnityFields> | undefined;
     try {
       const tokenRes = await tokenManager.verifyAccessToken(authToken, {
+        accessTokenDataRefreshTokenField: 'refreshToken',
         deleteFromStoreIfExpired: true,
         identifierDataField,
         persistNewToken: true,
         purgeStoreOnRenew: true,
-        refreshToken,
-        refreshTokenAccessTokenIdentifierDataField: 'accessToken'
+        refreshToken
       });
       tokenContent = tokenRes.content as unknown as DecodedTokenContent<UserTokenEnityFields>;
       if (tokenRes.newAccessToken) {

@@ -24,6 +24,7 @@ import {
   IAMAuthenticationManagerUserTokenUserIdentifier
 } from './iam.authenticationManager.definitions';
 
+import { Constants } from '../../common/definitions';
 import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
@@ -73,6 +74,7 @@ export class IAMAuthenticationManagerService<
     protected tokenManager?: IAMTokenManagerService<IAMAuthenticationManagerUserTokenEnityFields>
   ) {}
 
+  // TODO: fix expiry vs TTL
   // TODO: clear the cache from the previous steps
   // TODO: make the issuing of local tokens work with purgeOldFromStore = false
   async authenticate<AuthData = unknown>(
@@ -182,34 +184,48 @@ export class IAMAuthenticationManagerService<
       const useExternalTokenAsLocal = 'useReturnedTokensAsLocal' in stepConfig && stepConfig.useReturnedTokensAsLocal;
       const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
       let refreshToken: string | undefined;
-      let refreshTokenExppiresIn: number | undefined;
+      let refreshTokenExpiresIn: number | undefined;
+      let refreshTokenTTL: number | undefined;
       // 6.1. Create a local refresh token and save it. The payload contains the external refresh token, if it exists.
       if (externalRefreshToken || !externalAccessToken) {
-        refreshTokenExppiresIn =
-          (externalRefreshToken &&
-            'refreshTokenExpiresIn' in actualStepResult &&
-            actualStepResult.refreshTokenExpiresIn &&
-            actualStepResult.refreshTokenExpiresIn * (moduleConfig.externalRefreshTokenExpiryMultiplier || 1)) ||
-          (rememberUser || !refreshTokenExpiryTimeInHours ? undefined : refreshTokenExpiryTimeInHours * 60);
+        let externalTokenData: GenericObject = {};
+        if (
+          externalRefreshToken &&
+          'refreshTokenExpiresIn' in actualStepResult &&
+          actualStepResult.refreshTokenExpiresIn
+        ) {
+          externalTokenData = {
+            externalToken: externalRefreshToken,
+            externalTokenAuthService: authType as IAMAuthenticationType
+          };
+          refreshTokenExpiresIn = actualStepResult.refreshTokenExpiresIn;
+        } else if (!rememberUser) {
+          refreshTokenExpiresIn =
+            (refreshTokenExpiryTimeInHours
+              ? refreshTokenExpiryTimeInHours
+              : Constants.DEFAULT_REFRESH_TOKEN_EXPIRY_TIME_IN_HOURS) * 60;
+        }
+        if (refreshTokenExpiresIn) {
+          refreshTokenTTL =
+            refreshTokenExpiresIn *
+            (moduleConfig.refreshTokenExpiryStorageTTLMultiplier ||
+              Constants.DEFAULT_REFRESH_TOKEN_STORAGE_TTL_MULTIPLIER);
+        }
         const {
           result: { token: localRefreshToken }
         } = await tokenManager.create(
           {
             type: TokenType.Refresh,
             [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
-            ...(externalRefreshToken
-              ? {
-                  externalToken: externalRefreshToken,
-                  externalTokenAuthService: authType as IAMAuthenticationType
-                }
-              : {})
+            ...externalTokenData
           },
           {
-            expiresInMinutes: refreshTokenExppiresIn,
+            expiresInMinutes: refreshTokenExpiresIn,
             identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
             persist: true,
             purgeOldFromData: true,
             tokenContentOnlyFields: ['externalToken'],
+            ttl: refreshTokenTTL,
             useExternalTokenAsLocal
           }
         );
@@ -217,12 +233,13 @@ export class IAMAuthenticationManagerService<
       }
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
       const accessTokenExpiresIn =
-        refreshTokenExppiresIn ||
-        (externalAccessToken &&
-          'accessTokenExpiresIn' in actualStepResult &&
-          actualStepResult.accessTokenExpiresIn &&
-          actualStepResult.accessTokenExpiresIn * (moduleConfig.externalAccessTokenExpiryMultiplier || 1)) ||
-        accessTokenExpiryTimeInMinutes;
+        (externalAccessToken && 'accessTokenExpiresIn' in actualStepResult && actualStepResult.accessTokenExpiresIn) ||
+        accessTokenExpiryTimeInMinutes ||
+        Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS;
+      const accessTokenTTL =
+        refreshTokenExpiresIn ||
+        accessTokenExpiresIn *
+          (moduleConfig.accessTokenExpiryStorageTTLMultiplier || Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER);
       const {
         result: { token: accessToken }
       } = await tokenManager.create(
@@ -243,6 +260,7 @@ export class IAMAuthenticationManagerService<
           persist: true,
           purgeOldFromData: true,
           tokenContentOnlyFields: ['externalToken', 'refreshToken'],
+          ttl: accessTokenTTL,
           useExternalTokenAsLocal
         }
       );
@@ -261,7 +279,8 @@ export class IAMAuthenticationManagerService<
           identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
-          tokenContentOnlyFields: ['accessToken', 'user']
+          tokenContentOnlyFields: ['accessToken', 'user'],
+          ttl: accessTokenTTL
         }
       );
       logger.info(
