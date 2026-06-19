@@ -1,13 +1,17 @@
+import path from 'path';
+
 import { Module } from '@nestjs/common';
 
 import {
   APP_CONFIG_FROM_ENV_KEYS,
   ConfigProviderModule,
   ConfigProviderModuleOptions,
+  DEFAULT_PINO_PARAMS,
   LoggerModule
 } from '@node-c/core';
 
 import ld from 'lodash';
+import { Params } from 'nestjs-pino';
 
 import { APICoursePlatformDelegatedModule } from './api/coursePlatformDelegated';
 import { APICoursePlatformFederatedModule } from './api/coursePlatformFederated';
@@ -92,7 +96,30 @@ export class AppModuleBase {
   };
   static readonly imports = [
     ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
-    LoggerModule.register(),
+    LoggerModule.register({
+      pinoParams: {
+        ...DEFAULT_PINO_PARAMS,
+        pinoHttp: {
+          ...DEFAULT_PINO_PARAMS.pinoHttp,
+          transport: {
+            targets: [
+              {
+                options: {
+                  destination: path.resolve(process.cwd(), `logs/app_logs_${process.env.NODE_ENV}.txt`),
+                  sync: false
+                },
+                target: 'pino/file'
+              },
+              {
+                // level: 'info',
+                options: { destination: 1, sync: false },
+                target: 'pino-pretty'
+              }
+            ]
+          }
+        }
+      } as Params
+    }),
     DataAuditModule.register(),
     DataCacheAuthModule.register(),
     DataCacheFederatedModule.register(),

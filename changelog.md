@@ -1,3 +1,10 @@
+# 1.0.0-beta9
+- Common
+  - Moderate severity vulnerability fixes.
+  - End-to-end test fixes.
+- `packages/core`
+  - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
+
 # 1.0.0-beta8
 - Common
   - Removed NestJS CLI as a dev depdendency - it's not used and it has unaddressed vulnerabilities.

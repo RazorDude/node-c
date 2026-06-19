@@ -63,6 +63,8 @@ export class HTTPAccessControlInterceptor<
         contextClass.name
     };
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
+    logger.info('===>');
+    logger.info(user);
     const {
       errorCode,
       hasAccess,
@@ -71,7 +73,7 @@ export class HTTPAccessControlInterceptor<
     } = IAMAuthorizationService.checkAccess(
       { body: req.body, headers: req.headers, params: req.params, query: req.query },
       user,
-      accessControlOptions
+      { ...accessControlOptions, logger }
     );
     if (!hasAccess) {
       logger.error(

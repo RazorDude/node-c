@@ -2,10 +2,20 @@ import { AppConfigProfile, AppEnvironment } from '@node-c/core';
 
 export const appConfigProfileEndToEndTests: AppConfigProfile = {
   api: {
-    coursePlatform: {
+    coursePlatformDelegated: {
       allowedOrigins: ['localhost'],
       hostname: '0.0.0.0',
       port: 2071
+    },
+    coursePlatformFederated: {
+      allowedOrigins: ['localhost'],
+      hostname: '0.0.0.0',
+      port: 2061
+    },
+    coursePlatformStandalone: {
+      allowedOrigins: ['localhost'],
+      hostname: '0.0.0.0',
+      port: 2051
     },
     sso: {
       allowedOrigins: ['localhost'],

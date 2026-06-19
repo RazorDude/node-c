@@ -2,7 +2,7 @@ import { HttpMethod } from '@node-c/core';
 
 import { describe, expect, it } from 'vitest';
 
-const BASE_URL_COURSE_PLATFORM = 'http://localhost:2071';
+const BASE_URL_COURSE_PLATFORM_DELEGATED = 'http://localhost:2071';
 const BASE_URL_SSO = 'http://localhost:2081';
 
 describe('NodeC.Apps.Test', () => {
@@ -24,11 +24,10 @@ describe('NodeC.Apps.Test', () => {
   // -- start of admin cases
   // log in as admin
   it('should log the admin user in successfully', async () => {
-    const response = await fetch(`${BASE_URL_SSO}/users/accessToken`, {
+    const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
       body: JSON.stringify({
         auth: {
-          password: 'AdminPassword',
-          type: 'userLocal'
+          password: 'AdminPassword'
         },
         filters: { email: 'admin@node-c.com' }
       }),
@@ -48,7 +47,7 @@ describe('NodeC.Apps.Test', () => {
   // find users - full range of options - filters, included relations, ordering, multi-data-service search
   it('should find users: full range of options - filters, included relations, ordering, multi-data-service search', async () => {
     const response = await fetch(
-      `${BASE_URL_COURSE_PLATFORM}/users?` +
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
         'persistanceServices[]=main&persistanceServices[]=cache&' +
         'optionsOverridesByService[cache][filterByFirstServiceResultFields][id]=id&' +
         'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=false&' +

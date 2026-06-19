@@ -11,40 +11,30 @@ import mysql from 'mysql2';
 process.env.NODE_ENV = 'endToEndTests';
 
 export async function teardown(): Promise<void> {
-  let commandData = await new Promise<string>((resolve, reject) => {
-    exec('netstat -tulpn | grep 2071', (err, data, stderr) => {
-      let error: ExecException | string | null = err;
-      if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
-        error = stderr;
-      }
-      if (error) {
-        console.error('[TestLog]: Teardown error at netstat:', error);
-        reject();
-        return;
-      }
-      resolve(data || '');
+  let coursePlatformDelegatedMatches: RegExpMatchArray | null = null;
+  try {
+    const commandData = await new Promise<string>((resolve, reject) => {
+      exec('netstat -tulpn | grep 2071', (err, data, stderr) => {
+        let error: ExecException | string | null = err;
+        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+          error = stderr;
+        }
+        if (error) {
+          console.error('[TestLog]: Teardown error at netstat:', error);
+          reject();
+          return;
+        }
+        resolve(data || '');
+      });
     });
-  });
-  const apiServerMatches = commandData.match(/:2081.+\s(\d+)\/_node/);
-  commandData = await new Promise<string>((resolve, reject) => {
-    exec('netstat -tulpn | grep 2081', (err, data, stderr) => {
-      let error: ExecException | string | null = err;
-      if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
-        error = stderr;
-      }
-      if (error) {
-        console.error('[TestLog]: Teardown error at netstat:', error);
-        reject();
-        return;
-      }
-      resolve(data || '');
-    });
-  });
-  const ssoServerMatches = commandData.match(/:2081.+\s(\d+)\/_node/);
-  if (apiServerMatches) {
+    coursePlatformDelegatedMatches = commandData.match(/:2071.+\s(\d+)\/_node/);
+  } catch (e) {
+    console.info(e);
+  }
+  if (coursePlatformDelegatedMatches) {
     console.info('[TestLog]: Killing the server process at port 2071...');
     await new Promise<void>((resolve, reject) => {
-      exec(`kill -INT ${apiServerMatches[1]}`, (err, _data, stderr) => {
+      exec(`kill -INT ${coursePlatformDelegatedMatches[1]}`, (err, _data, stderr) => {
         const error = err || stderr;
         if (error) {
           console.error('[TestLog]: Teardown error at kill:', error);
@@ -55,6 +45,28 @@ export async function teardown(): Promise<void> {
       });
     });
     console.info('[TestLog]: Server process at port 2071 killed successfully.');
+  }
+  await teardownProcess(2061);
+  await teardownProcess(2051);
+  let ssoServerMatches: RegExpMatchArray | null = null;
+  try {
+    const commandData = await new Promise<string>((resolve, reject) => {
+      exec('netstat -tulpn | grep 2081', (err, data, stderr) => {
+        let error: ExecException | string | null = err;
+        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+          error = stderr;
+        }
+        if (error) {
+          console.error('[TestLog]: Teardown error at netstat:', error);
+          reject();
+          return;
+        }
+        resolve(data || '');
+      });
+    });
+    ssoServerMatches = commandData.match(/:2081.+\s(\d+)\/_node/);
+  } catch (e) {
+    console.info(e);
   }
   if (ssoServerMatches) {
     console.info('[TestLog]: Killing the server process at port 2081...');
@@ -72,6 +84,44 @@ export async function teardown(): Promise<void> {
     console.info('[TestLog]: Server process at port 2081 killed successfully.');
   }
   console.info('[TestLog]: Teardown completed.');
+}
+
+async function teardownProcess(port: number): Promise<void> {
+  let serverProcessMatches: RegExpMatchArray | null = null;
+  try {
+    const commandData = await new Promise<string>((resolve, reject) => {
+      exec(`netstat -tulpn | grep ${port}`, (err, data, stderr) => {
+        let error: ExecException | string | null = err;
+        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+          error = stderr;
+        }
+        if (error) {
+          console.error('[TestLog]: Teardown error at netstat:', error);
+          reject();
+          return;
+        }
+        resolve(data || '');
+      });
+    });
+    serverProcessMatches = commandData.match(new RegExp(`/:${port}.+\s(\d+)\/_node/`));
+  } catch (e) {
+    console.info(e);
+  }
+  if (serverProcessMatches) {
+    console.info(`[TestLog]: Killing the server process at port ${port}...`);
+    await new Promise<void>((resolve, reject) => {
+      exec(`kill -INT ${serverProcessMatches[1]}`, (err, _data, stderr) => {
+        const error = err || stderr;
+        if (error) {
+          console.error('[TestLog]: Teardown error at kill:', error);
+          reject();
+          return;
+        }
+        resolve();
+      });
+    });
+    console.info('[TestLog]: Server process at port 2071 killed successfully.');
+  }
 }
 
 export async function setup(): Promise<void> {
@@ -255,50 +305,79 @@ export async function setup(): Promise<void> {
       'userId bigint unsigned not null' +
       ') engine Log'
   });
-  if (true) {
-    console.info('[TestLogs]: Audit DB set up. Starting apps...');
-    let appPromiseFulfilled = false;
-    await new Promise<void>((resolve, reject) => {
-      const appsProcess = spawn('npm', ['run', 'start:apps-test:nyc'], {
-        env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
-      });
-      appsProcess.on('exit', () => {
-        if (appPromiseFulfilled) {
-          return;
-        }
-        appPromiseFulfilled = true;
-        reject();
-      });
-      appsProcess.on('error', data => {
-        if (appPromiseFulfilled) {
-          return;
-        }
-        console.error(data);
-        appPromiseFulfilled = true;
-        reject();
-      });
-      appsProcess.stdout.on('data', data => {
-        // if (appPromiseFulfilled) {
-        //   return;
-        // }
-        const dataText = data?.toString() || '';
-        console.info(dataText);
-        if (dataText?.match(/App\sstarted/)) {
-          appPromiseFulfilled = true;
-          resolve();
-        }
-      });
-      appsProcess.stderr.on('data', data => {
-        // if (appPromiseFulfilled) {
-        //   return;
-        // }
-        const dataText = data?.toString() || '';
-        console.error(dataText);
-        // appPromiseFulfilled = true;
-        // reject();
-      });
-    });
+  console.info('[TestLogs]: Audit DB set up. Starting apps...');
+  const logsFilePath = path.resolve(__dirname, `../logs/app_logs_${process.env.NODE_ENV}.txt`);
+  let appPromiseFulfilled = false;
+  try {
+    await fs.rm(logsFilePath);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
+    // console.info(e);
   }
-  // await import('../apps/test/dist/main');
+  await new Promise<void>((resolve, reject) => {
+    const appsProcess = spawn('npm', ['run', 'start:apps-test:nyc:direct'], {
+      env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
+    });
+    appsProcess.on('exit', () => {
+      if (appPromiseFulfilled) {
+        return;
+      }
+      appPromiseFulfilled = true;
+      reject();
+    });
+    appsProcess.on('error', data => {
+      if (appPromiseFulfilled) {
+        return;
+      }
+      console.error(data);
+      appPromiseFulfilled = true;
+      reject();
+    });
+    appsProcess.on('message', data => {
+      const dataText = data?.toString() || '';
+      if (dataText.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
+        appPromiseFulfilled = true;
+        resolve();
+      }
+    });
+    appsProcess.stdout.on('data', data => {
+      const dataText = data?.toString() || '';
+      if (dataText.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
+        appPromiseFulfilled = true;
+        resolve();
+      }
+    });
+    appsProcess.stderr.on('data', data => {
+      if (appPromiseFulfilled) {
+        return;
+      }
+      const dataText = data?.toString() || '';
+      console.error(dataText);
+      appPromiseFulfilled = true;
+      reject();
+    });
+    const appLogsInterval = setInterval(() => {
+      (async () => {
+        try {
+          const fileData = (await fs.readFile(logsFilePath)).toString();
+          if (fileData.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
+            console.info('App started.');
+            resolve();
+            clearInterval(appLogsInterval);
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_e) {
+          // console.info(e);
+        }
+      })().then(
+        () => true,
+        err => {
+          console.error(err);
+          clearInterval(appLogsInterval);
+          reject();
+        }
+      );
+    }, 500);
+  });
   console.info('[TestLogs]: Global setup completed.');
 }

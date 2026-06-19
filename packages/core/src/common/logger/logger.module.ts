@@ -1,6 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import ld from 'lodash';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 
 import { LoggerModuleOptions } from './logger.definitions';
@@ -13,7 +12,7 @@ export class LoggerModule {
     return {
       global: true,
       module: LoggerModule,
-      imports: [PinoLoggerModule.forRoot(ld.merge(DEFAULT_PINO_PARAMS, pinoParams || {}))],
+      imports: [PinoLoggerModule.forRoot(pinoParams || DEFAULT_PINO_PARAMS)],
       providers: [LoggerService],
       exports: [LoggerService]
     };
