@@ -4,7 +4,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  LoggerService,
   Param,
   Patch,
   Post,
@@ -16,7 +15,7 @@ import {
 
 import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
 
-import {
+import type {
   DataDefaultData,
   DomainBulkCreateResult,
   DomainCreateResult,
@@ -27,7 +26,8 @@ import {
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult
+  DomainUpdateResult,
+  LoggerService
 } from '@node-c/core';
 
 import {
@@ -38,7 +38,7 @@ import {
   FindOneDto as BaseFindOneDto,
   UpdateDto as BaseUpdateDto
 } from './dto';
-import {
+import type {
   BulkCreateBody,
   CreateBody,
   DefaultDomainEntityService,

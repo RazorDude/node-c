@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import * as EntityClassOrSchemaType from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 import { Constants } from '@node-c/data-rdb';
 
@@ -11,7 +11,7 @@ export class TypeORMDBRepository<Entity extends ObjectLiteral> extends Repositor
     @Inject(Constants.RDB_REPOSITORY_DATASOURCE)
     protected dataSource: DataSource,
     @Inject(Constants.RDB_REPOSITORY_ENTITY_CLASS)
-    protected entityClass: EntityClassOrSchema
+    protected entityClass: EntityClassOrSchemaType.EntityClassOrSchema
   ) {
     super(entityClass, dataSource.createEntityManager());
   }

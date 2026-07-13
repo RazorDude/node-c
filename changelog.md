@@ -1,9 +1,13 @@
 # 1.0.0-beta9
 - Common
-  - Moderate severity vulnerability fixes.
-  - End-to-end test fixes.
+  - BREAKING: Moved to ESM in praparation for TypeScript 7.
+  - Vulnerability fixes.
+  - End-to-end test fixes & more end-to-end tests.
+  - Upgrade to vitest v4.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
+- `packages/data-rdb`
+  - Fix for the SQLQueryBuilder's parseRelations allowed include method.
 
 # 1.0.0-beta8
 - Common

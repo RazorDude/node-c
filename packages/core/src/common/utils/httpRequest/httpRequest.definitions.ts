@@ -1,4 +1,4 @@
-import { AxiosHeaders, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse, RawAxiosHeaders } from 'axios';
 
 import { GenericObject, HttpMethod } from '../../definitions';
 
@@ -21,7 +21,7 @@ export interface HTTPRequestResponseData<Data = unknown> {
   data?: Data;
   fullResponse?: {
     body: Pick<AxiosResponse, 'data'>;
-    headers: AxiosHeaders;
+    headers: RawAxiosHeaders;
     status: number;
   };
   hasError: boolean;

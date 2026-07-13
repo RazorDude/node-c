@@ -1,4 +1,4 @@
-import { GenericObject } from '@node-c/core';
+import type { GenericObject } from '@node-c/core';
 
 import { IsBoolean, IsDefined, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 

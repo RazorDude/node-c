@@ -1,14 +1,17 @@
-import { DomainDeleteOptions, GenericObject } from '@node-c/core';
+import * as NodeCCore from '@node-c/core';
 
 import { IsBoolean, IsDefined, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
 import { BaseDto } from './base.dto';
 
-export class DeleteDto<Options extends DomainDeleteOptions> extends BaseDto<Options> implements DomainDeleteOptions {
+export class DeleteDto<Options extends NodeCCore.DomainDeleteOptions>
+  extends BaseDto<Options>
+  implements NodeCCore.DomainDeleteOptions
+{
   @IsDefined()
   @IsNotEmptyObject()
   @IsObject()
-  filters: GenericObject<unknown>;
+  filters: NodeCCore.GenericObject<unknown>;
 
   @IsBoolean()
   @IsOptional()

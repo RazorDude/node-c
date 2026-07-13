@@ -3,7 +3,7 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { GenericObject } from '@node-c/core';
 import { Constants as RDBConstants, RDBRepository } from '@node-c/data-rdb';
 
-import { ClickHouseDBEntitySchema } from './clickhouse.repository.definitions';
+import * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions';
 
 import { ClickHouseEntityManager } from '../entityManager';
 import { ClickHouseSelectQueryBuilder } from '../ormQueryBuilder';
@@ -17,7 +17,7 @@ export class ClickHouseDBRepository<Entity extends GenericObject<unknown>> imple
 
   constructor(
     @Inject(RDBConstants.RDB_REPOSITORY_ENTITY_CLASS)
-    protected entitySchema: ClickHouseDBEntitySchema<Entity>,
+    protected entitySchema: ClickhouseRepositoryDefinitions.ClickHouseDBEntitySchema<Entity>,
     @Inject(forwardRef(() => ClickHouseEntityManager))
     // eslint-disable-next-line no-unused-vars
     public readonly manager: ClickHouseEntityManager

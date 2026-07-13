@@ -7,6 +7,7 @@ import {
   DataOrderByDirection,
   DataSelectOperator,
   GenericObject,
+  LoggerService,
   RDBType
 } from '@node-c/core';
 
@@ -32,7 +33,9 @@ export class SQLQueryBuilderService {
     public dbConfigPath: string,
     @Inject(CoreConstants.DATA_MODULE_NAME)
     // eslint-disable-next-line no-unused-vars
-    public dataModuleName: string
+    public dataModuleName: string,
+    // eslint-disable-next-line no-unused-vars
+    public logger: LoggerService
   ) {
     const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;
@@ -592,7 +595,7 @@ export class SQLQueryBuilderService {
     if (newIncludeItems) {
       for (const includeItemPath in newIncludeItems) {
         const includeItemAlias = newIncludeItems[includeItemPath];
-        if (!allowedIncludeMap[includeItemPath.replace(`${entityName}.`, '')]) {
+        if (!allowedIncludeMap[includeItemPath.replace(/__/g, '.').replace(`${entityName}.`, '')]) {
           if (throwErrorOnForbiddenInclude) {
             throw new ApplicationError(
               `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItemPath} (${includeItemAlias}).`

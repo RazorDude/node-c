@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import axios, { AxiosHeaders } from 'axios';
+import axios, { RawAxiosHeaders } from 'axios';
 import qs from 'qs';
 
 import { HTTPRequestData, HTTPRequestResponseData } from './httpRequest.definitions';
@@ -55,13 +55,13 @@ export const httpRequest = async <ResponseData = unknown>(
       headers.Authorization += ` ${crypto.createHmac(apiSecretHashingAlgorithm, apiSecret).update(signatureContent).digest('hex')}`;
     }
   }
-  requestConfig.headers = headers as AxiosHeaders;
+  requestConfig.headers = headers as RawAxiosHeaders;
   const response = await axios(requestConfig);
   const { status } = response;
   const hasError = status >= 400;
   const usefulResponse = {
     body: response.data,
-    headers: response.headers as AxiosHeaders,
+    headers: response.headers as RawAxiosHeaders,
     status
   };
   if (hasError && data.throwOnError) {

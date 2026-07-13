@@ -141,8 +141,8 @@ export class IAMAuthorizationService<
     let permissionsCount = 0;
     let permissionsForDifferentModules = 0;
     let permissionsForDifferentContexts = 0;
-    options.logger?.info('====>');
-    options.logger?.info({ moduleName, resourceContext, resource });
+    // options.logger?.info('====>');
+    // options.logger?.info({ moduleName, resourceContext, resource });
     for (const apId in currentPermissions) {
       const apData = currentPermissions[apId];
       permissionsCount++;

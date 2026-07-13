@@ -11,7 +11,7 @@ import {
 (async () => {
   const logPrefix = '[Node-C][generateDatasourceFiles]';
   console.info(`${logPrefix}: Loading configurations...`);
-  const appModule = await import(path.resolve(process.cwd(), './dist/app.module'));
+  const appModule = await import(path.resolve(process.cwd(), './dist/app.module.js'));
   const { appConfigs, envKeys, envKeysParentNames, useEnvFile, useEnvFileWithPriority } = appModule.AppModuleBase
     .configProviderModuleRegisterOptions as ConfigProviderModuleOptions;
   const envName = process.env['DATASOURCE_ENV'] as AppEnvironment;

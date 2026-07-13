@@ -15,17 +15,7 @@ import { ValidationSchema, registerSchema, validate } from 'class-validator';
 import ld from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import {
-  EntitySchema,
-  EntitySchemaColumnType,
-  FilterItemOptions,
-  GetValuesFromResultsOptions,
-  PrepareOptions,
-  RepositoryFindOptions,
-  RepositoryFindPrivateOptions,
-  SaveOptions,
-  SaveOptionsOnConflict
-} from './redis.repository.definitions';
+import * as RedisRepositoryDefinitions from './redis.repository.definitions';
 
 import { Constants } from '../common/definitions';
 import { RedisStoreService } from '../store';
@@ -71,7 +61,7 @@ export class RedisRepositoryService<Entity> {
     @Inject(CoreConstants.DATA_MODULE_NAME)
     protected _dataModuleName: string,
     @Inject(Constants.REDIS_REPOSITORY_SCHEMA)
-    protected schema: EntitySchema,
+    protected schema: RedisRepositoryDefinitions.EntitySchema,
     // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
@@ -126,8 +116,8 @@ export class RedisRepositoryService<Entity> {
   // protected async delete
 
   async find<ResultItem extends Entity | string = Entity>(
-    options: RepositoryFindOptions,
-    privateOptions?: RepositoryFindPrivateOptions
+    options: RedisRepositoryDefinitions.RepositoryFindOptions,
+    privateOptions?: RedisRepositoryDefinitions.RepositoryFindPrivateOptions
   ): Promise<{ items: ResultItem[]; more: boolean }> {
     const { primaryKeys, schema, store, storeDelimiter } = this;
     const { name: entityName, storeKey: entityStoreKey } = schema;
@@ -314,7 +304,11 @@ export class RedisRepositoryService<Entity> {
     return { items: results, more };
   }
 
-  protected filterItem<Item>(item: Item, filters: GenericObject<unknown>, options?: FilterItemOptions): boolean {
+  protected filterItem<Item>(
+    item: Item,
+    filters: GenericObject<unknown>,
+    options?: RedisRepositoryDefinitions.FilterItemOptions
+  ): boolean {
     if (typeof item === 'undefined' || item === null) {
       return false;
     }
@@ -346,7 +340,7 @@ export class RedisRepositoryService<Entity> {
   // here into a big for-loop
   protected getValuesFromResults<ResultItem>(
     inputData: ResultItem[],
-    options?: GetValuesFromResultsOptions
+    options?: RedisRepositoryDefinitions.GetValuesFromResultsOptions
   ): { indexes: number[]; resultItems: ResultItem[] } {
     const { primaryKeysMap, schema } = this;
     const { isArray, nestedObjectContainerPath } = schema;
@@ -391,13 +385,13 @@ export class RedisRepositoryService<Entity> {
 
   protected async prepare(
     data: Entity | Entity[],
-    options?: PrepareOptions
+    options?: RedisRepositoryDefinitions.PrepareOptions
   ): Promise<{ data: Entity | Entity[]; storeEntityKey: string }> {
     const { columnNames, primaryKeys, schema, store, storeDelimiter } = this;
     const { columns, isArray, name: entityName, storeKey: entityStoreKey } = schema;
-    const opt = options || ({} as PrepareOptions);
+    const opt = options || ({} as RedisRepositoryDefinitions.PrepareOptions);
     const { generatePrimaryKeys, onConflict: optOnConflict, validate: optValidate } = opt;
-    const onConflict = optOnConflict || SaveOptionsOnConflict.ThrowError;
+    const onConflict = optOnConflict || RedisRepositoryDefinitions.SaveOptionsOnConflict.ThrowError;
     let allPKValuesExist = true;
     let preparedData = ld.cloneDeep(data) as GenericObject | GenericObject[];
     let storeEntityKey = '';
@@ -427,7 +421,7 @@ export class RedisRepositoryService<Entity> {
               'or isArray is set to true.'
           );
         }
-        if (type === EntitySchemaColumnType.Integer) {
+        if (type === RedisRepositoryDefinitions.EntitySchemaColumnType.Integer) {
           let currentMaxValue =
             (await store.get<number>(`${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`, {
               parseToJSON: true
@@ -438,7 +432,7 @@ export class RedisRepositoryService<Entity> {
           storeEntityKey += `${currentMaxValue}${storeDelimiter}`;
           continue;
         }
-        if (type === EntitySchemaColumnType.UUIDV4) {
+        if (type === RedisRepositoryDefinitions.EntitySchemaColumnType.UUIDV4) {
           let newValue = uuid();
           if (storeDelimiter === '-') {
             newValue = newValue.replace(/-/g, '_');
@@ -472,10 +466,10 @@ export class RedisRepositoryService<Entity> {
       }
     }
     // TODO: make cases other than SaveOptionsOnConflict.DoNothing work with isArray
-    if ((onConflict !== SaveOptionsOnConflict.DoNothing || isArray) && allPKValuesExist) {
+    if ((onConflict !== RedisRepositoryDefinitions.SaveOptionsOnConflict.DoNothing || isArray) && allPKValuesExist) {
       const hasValue = await store.get<string | undefined>(storeEntityKey, { withValues: false });
       if (hasValue) {
-        if (onConflict === SaveOptionsOnConflict.ThrowError) {
+        if (onConflict === RedisRepositoryDefinitions.SaveOptionsOnConflict.ThrowError) {
           throw new ApplicationError(
             `[RedisRepositoryService ${entityName}][Unique Error]: An entry already exists for key ${storeEntityKey}.`
           );
@@ -483,10 +477,10 @@ export class RedisRepositoryService<Entity> {
         const existingData = await store.get<GenericObject<unknown> | GenericObject<unknown>[]>(storeEntityKey, {
           parseToJSON: true
         });
-        if (onConflict === SaveOptionsOnConflict.Update) {
+        if (onConflict === RedisRepositoryDefinitions.SaveOptionsOnConflict.Update) {
           // TODO: make this work using getValuesFromResults
           preparedData = ld.merge(existingData, preparedData);
-        } else if (onConflict === SaveOptionsOnConflict.DoNothing && isArray) {
+        } else if (onConflict === RedisRepositoryDefinitions.SaveOptionsOnConflict.DoNothing && isArray) {
           if (existingData instanceof Array && existingData.length) {
             const innerFilters: GenericObject = {};
             columnNames.forEach(fieldName => {
@@ -535,7 +529,7 @@ export class RedisRepositoryService<Entity> {
 
   async save<ResultItem extends Entity | string = Entity>(
     data: Entity | Entity[],
-    options?: SaveOptions
+    options?: RedisRepositoryDefinitions.SaveOptions
   ): Promise<ResultItem[]> {
     const { defaultTTL, experimentalDeletionEnabled, innerPrimaryKeys, primaryKeysMap, schema, store, storeDelimiter } =
       this;
@@ -547,12 +541,12 @@ export class RedisRepositoryService<Entity> {
       transactionId,
       ttl,
       validate
-    } = options || ({} as SaveOptions);
+    } = options || ({} as RedisRepositoryDefinitions.SaveOptions);
     const actualData = data instanceof Array ? data : [data];
     if (optDelete) {
-      const prepareOptions: PrepareOptions = {
+      const prepareOptions: RedisRepositoryDefinitions.PrepareOptions = {
         generatePrimaryKeys: false,
-        onConflict: SaveOptionsOnConflict.DoNothing,
+        onConflict: RedisRepositoryDefinitions.SaveOptionsOnConflict.DoNothing,
         validate: false
       };
       const deleteKeys: string[] = [];
@@ -629,7 +623,7 @@ export class RedisRepositoryService<Entity> {
     }
     // TODO: create and update in arrays and nestedObjects
     // TODO: differenatiate between create and update based on generatePrimaryKeys
-    const prepareOptions: PrepareOptions = {
+    const prepareOptions: RedisRepositoryDefinitions.PrepareOptions = {
       generatePrimaryKeys,
       onConflict,
       validate

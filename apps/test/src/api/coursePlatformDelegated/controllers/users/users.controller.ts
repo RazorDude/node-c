@@ -1,13 +1,13 @@
 import { Controller, Get, Injectable, Req } from '@nestjs/common';
 
-import { AccessControlContext, AccessControlResource, RequestWithLocals } from '@node-c/api-http';
+import * as NodeCApiHttp from '@node-c/api-http';
 import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 import { DataDefaultData, DomainEntityServiceDefaultData, GenericObject, LoggerService } from '@node-c/core';
 
 import { DataDBUser, DataDBUsersCreateUserData, DataDBUsersUpdateUserData } from '../../../../data/db';
 import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated';
 
-@AccessControlContext('CoursePlatformUsersEntityController')
+@NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
 export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEntityControler<
@@ -25,10 +25,10 @@ export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEnti
     ]);
   }
 
-  @AccessControlResource('findLoginLogs')
+  @NodeCApiHttp.AccessControlResource('findLoginLogs')
   @Get('loginLogs')
   async findLoginLogs(
-    @Req() req: RequestWithLocals<DataDBUser>
+    @Req() req: NodeCApiHttp.RequestWithLocals<DataDBUser>
   ): ReturnType<DomainCoursePlatformDelegatedUsersService['findLoginLogs']> {
     return this.domainEntityService.findLoginLogs({
       ...req.query,

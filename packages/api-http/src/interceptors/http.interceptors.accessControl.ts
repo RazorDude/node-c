@@ -63,8 +63,6 @@ export class HTTPAccessControlInterceptor<
         contextClass.name
     };
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
-    logger.info('===>');
-    logger.info(user);
     const {
       errorCode,
       hasAccess,

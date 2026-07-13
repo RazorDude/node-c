@@ -2,10 +2,10 @@ import path from 'path';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Logger, PARAMS_PROVIDER_TOKEN, Params, PinoLogger } from 'nestjs-pino';
+import * as NestjsPino from 'nestjs-pino';
 import { v4 as uuid } from 'uuid';
 
-export const DEFAULT_PINO_PARAMS: Params = {
+export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
   pinoHttp: {
     // autoLogging: false,
     genReqId: () => uuid(),
@@ -28,8 +28,8 @@ export const DEFAULT_PINO_PARAMS: Params = {
 };
 
 @Injectable()
-export class LoggerService extends Logger {
-  constructor(logger: PinoLogger, @Inject(PARAMS_PROVIDER_TOKEN) params: Params) {
+export class LoggerService extends NestjsPino.Logger {
+  constructor(logger: NestjsPino.PinoLogger, @Inject(NestjsPino.PARAMS_PROVIDER_TOKEN) params: NestjsPino.Params) {
     super(logger, params);
   }
 
