@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/data-redis';
 
-import { DataCacheUserSchema } from './users.entity';
-import { DataCacheUsersEntityService } from './users.service';
+import { DataCacheUserSchema } from './users.entity.js';
+import { DataCacheUsersEntityService } from './users.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

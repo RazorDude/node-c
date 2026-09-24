@@ -2,9 +2,9 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import { TypeORMDBModule } from '@node-c/data-typeorm';
 
-import * as FolderData from './entities';
+import * as FolderData from './entities/dbConfigs.entities.js';
 
-import { Constants } from '../../common/definitions';
+import { Constants } from '../../common/definitions/common.constants.js';
 
 @Module({})
 export class DataDBConfigsModule extends TypeORMDBModule {

@@ -8,10 +8,10 @@ import {
   DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteOptions,
   DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteResult,
   DomainCoursePlatformFederatedAuthenticationOktaConsumerUserFields
-} from './authenticationOktaConsumer.definitions';
+} from './authenticationOktaConsumer.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 /**
  * Okta OIDC Auth via another Node-C service that acts as the provider.

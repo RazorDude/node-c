@@ -1,4 +1,4 @@
-import { SetNestedOptions } from './setNested.definitions';
+import { SetNestedOptions } from './setNested.definitions.js';
 
 // TODO: implement setNestedArraysPerIndex
 /**

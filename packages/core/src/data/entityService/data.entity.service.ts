@@ -15,15 +15,15 @@ import {
   DataUpdatePrivateOptions,
   DataUpdateResult,
   ProcessObjectAllowedFieldsOptions
-} from './data.entity.service.definitions';
+} from './data.entity.service.definitions.js';
 
 import {
   AppConfigCommonData,
-  AppConfigCommonDataEntityServiceSettings,
-  ConfigProviderService
-} from '../../common/configProvider';
-import { ApplicationError } from '../../common/definitions';
-import { LoggerService } from '../../common/logger';
+  AppConfigCommonDataEntityServiceSettings
+} from '../../common/configProvider/configProvider.definitions.js';
+import { ConfigProviderService } from '../../common/configProvider/configProvider.service.js';
+import { ApplicationError } from '../../common/definitions/common.errors.js';
+import { LoggerService } from '../../common/logger/logger.service.js';
 
 /**
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used

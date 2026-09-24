@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { ClickHouseDBEntityService, ClickHouseDBRepository } from '@node-c/data-clickhouse';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { DataAuditUserLoginLog, DataAuditUserLoginLogEntity } from './userLoginLogs.entity';
+import { DataAuditUserLoginLog, DataAuditUserLoginLogEntity } from './userLoginLogs.entity.js';
 
 @Injectable()
 export class DataAuditUserLoginLogsService extends ClickHouseDBEntityService<DataAuditUserLoginLog> {

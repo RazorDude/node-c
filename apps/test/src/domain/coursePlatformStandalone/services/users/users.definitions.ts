@@ -4,7 +4,10 @@ import {
   IAMUsersGetUserWithPermissionsDataPrivateOptions
 } from '@node-c/domain-iam';
 
-import { DataDBUsersCreateUserData, DataDBUsersUpdateUserData } from '../../../../data/db';
+import {
+  DataDBUsersCreateUserData,
+  DataDBUsersUpdateUserData
+} from '../../../../data/db/entities/users/users.definitions.js';
 
 export type DomainCoursePlatformStandaloneUsersServiceCreateData<User> = DomainCreateData<User> &
   DataDBUsersCreateUserData;

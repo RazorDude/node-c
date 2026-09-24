@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { DataDBRole, DataDBRoleEntity } from './roles.entity';
+import { DataDBRole, DataDBRoleEntity } from './roles.entity.js';
 
 @Injectable()
 export class DataDBRolesService extends TypeORMDBEntityService<DataDBRole> {

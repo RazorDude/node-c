@@ -11,7 +11,7 @@ import {
   setNested
 } from '@node-c/core';
 
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import ld from 'lodash';
 
 import {
@@ -23,12 +23,13 @@ import {
   TokenType,
   VerifyAccessTokenOptions,
   VerifyAccessTokenReturnData
-} from './iam.tokenManager.definitions';
+} from './iam.tokenManager.definitions.js';
 
-import { Constants } from '../../common/definitions';
-import { IAMAuthenticationService, IAMAuthenticationType } from '../authentication';
-import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
-import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal';
+import { Constants } from '../../common/definitions/common.constants.js';
+import { IAMAuthenticationType } from '../authentication/iam.authentication.definitions.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
 
 /**
  * Service for managing local access and refresh JWTs.

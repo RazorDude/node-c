@@ -3,11 +3,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
-import { DomainCoursePlatformFederatedAuthenticationOktaConsumerService } from '../authenticationOktaConsumer';
-import { DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService } from '../authenticationUserLocalConsumer';
-import { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManager';
+import { DomainCoursePlatformFederatedAuthenticationOktaConsumerService } from '../authenticationOktaConsumer/authenticationOktaConsumer.service.js';
+import { DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService } from '../authenticationUserLocalConsumer/authenticationUserLocalConsumer.service.js';
+import { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()
 export class DomainCoursePlatformFederatedAuthenticationManagerService extends IAMAuthenticationManagerService {

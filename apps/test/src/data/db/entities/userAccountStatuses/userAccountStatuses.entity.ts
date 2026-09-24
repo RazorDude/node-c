@@ -1,6 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase';
+import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
 
 export interface DataDBUserAccountStatus<User extends DBEntity = DBEntity> extends DBEntity {
   label: string;

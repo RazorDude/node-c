@@ -8,10 +8,10 @@ import {
   DomainCoursePlatformFederatedAuthenticationUserLocalConsumerCompleteOptions,
   DomainCoursePlatformFederatedAuthenticationUserLocalConsumerCompleteResult,
   DomainCoursePlatformFederatedAuthenticationUserLocalConsumerUserFields
-} from './authenticationUserLocalConsumer.definitions';
+} from './authenticationUserLocalConsumer.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 /**
  * User & Password Auth via another Node-C service that acts as the provider.

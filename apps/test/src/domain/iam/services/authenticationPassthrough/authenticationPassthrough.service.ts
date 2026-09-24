@@ -8,10 +8,10 @@ import {
   DomainIAMAuthenticationPassthroughCompleteOptions,
   DomainIAMAuthenticationPassthroughCompleteResult,
   DomainIAMAuthenticationPassthroughUserFields
-} from './authenticationPassthrough.definitions';
+} from './authenticationPassthrough.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationPassthroughService extends IAMAuthenticationPassthroughService<

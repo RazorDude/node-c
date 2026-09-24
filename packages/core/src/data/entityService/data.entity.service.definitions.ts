@@ -1,4 +1,4 @@
-import { GenericObject } from '../../common/definitions';
+import { GenericObject } from '../../common/definitions/common.definitions.js';
 
 export interface DataBulkCreatePrivateOptions extends GenericObject {
   processInputAllowedFieldsEnabled?: boolean;

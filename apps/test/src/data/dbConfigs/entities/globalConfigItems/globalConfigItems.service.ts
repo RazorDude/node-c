@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { DataDBConfigsGlobalConfigItem, DataDBConfigsGlobalConfigItemEntity } from './globalConfigItems.entity';
+import { DataDBConfigsGlobalConfigItem, DataDBConfigsGlobalConfigItemEntity } from './globalConfigItems.entity.js';
 
 @Injectable()
 export class DataDBConfigsGlobalConfigItemsService extends TypeORMDBEntityService<DataDBConfigsGlobalConfigItem> {

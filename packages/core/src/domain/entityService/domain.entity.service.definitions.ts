@@ -1,4 +1,4 @@
-import { GenericObject } from '../../common/definitions';
+import { GenericObject } from '../../common/definitions/common.definitions.js';
 
 import {
   DataBulkCreatePrivateOptions,
@@ -14,7 +14,7 @@ import {
   DataUpdateOptions,
   DataUpdatePrivateOptions,
   DataUpdateResult
-} from '../../data/entityService';
+} from '../../data/entityService/data.entity.service.definitions.js';
 
 export interface DomainBaseAdditionalServiceOptionsOverrides {
   filterByFirstServiceResultFields?: GenericObject<string>;

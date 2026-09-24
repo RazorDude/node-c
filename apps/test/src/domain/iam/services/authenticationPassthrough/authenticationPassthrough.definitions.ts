@@ -4,7 +4,7 @@ import {
   IAMAuthenticationPassthroughCompleteResult
 } from '@node-c/domain-iam';
 
-import { DataCacheUser } from '../../../../data/cache';
+import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 
 export type DomainIAMAuthenticationPassthroughCompleteData = IAMAuthenticationPassthroughCompleteData;
 

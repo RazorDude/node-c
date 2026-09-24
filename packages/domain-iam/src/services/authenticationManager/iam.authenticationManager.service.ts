@@ -22,23 +22,24 @@ import {
   IAMAuthenticationManagerExecuteStepResult,
   IAMAuthenticationManagerUserTokenEnityFields,
   IAMAuthenticationManagerUserTokenUserIdentifier
-} from './iam.authenticationManager.definitions';
+} from './iam.authenticationManager.definitions.js';
 
-import { Constants } from '../../common/definitions';
+import { Constants } from '../../common/definitions/common.constants.js';
 import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
-  IAMAuthenticationService,
   IAMAuthenticationType
-} from '../authentication';
-import { IAMAuthenticationOAuth2CompleteResult, IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
-import {
-  IAMAuthenticationUserLocalCompleteResult,
-  IAMAuthenticationUserLocalService
-} from '../authenticationUserLocal';
-import { IAMTokenManagerService, TokenType } from '../tokenManager';
-import { IAMUserWithPermissionsData, IAMUsersService } from '../users';
+} from '../authentication/iam.authentication.definitions.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import { TokenType } from '../tokenManager/iam.tokenManager.definitions.js';
+import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
+import { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
+import { IAMUsersService } from '../users/iam.users.service.js';
 
 // TODO: create user (signup); this should include password hashing
 // TODO: update password (incl. hashing)
@@ -149,8 +150,7 @@ export class IAMAuthenticationManagerService<
     }
     // 5. Process the external access, refresh and, optionally, id tokens that are returned by the step execution.
     const actualStepResult = stepResult as
-      | IAMAuthenticationOAuth2CompleteResult
-      | IAMAuthenticationUserLocalCompleteResult;
+      IAMAuthenticationOAuth2CompleteResult | IAMAuthenticationUserLocalCompleteResult;
     if (!userFilterField && otherStepData.userFilterField) {
       userFilterField = otherStepData.userFilterField;
     }

@@ -1,6 +1,6 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase';
+import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
 
 export interface DataDBLessonType<Lesson extends DBEntity = DBEntity> extends DBEntity {
   isActive: boolean;

@@ -1,13 +1,21 @@
 # 1.0.0-beta9
 - Common
   - BREAKING: Moved to ESM in praparation for TypeScript 7.
-  - Vulnerability fixes.
+  - BREAKING: Upgraded to TypeScript 7.
+  - BREAKING: Removed of most barrel files. The only ones left are because the folder contents are imported as *, and in these places, they have been renamed to not be "index.ts".
+  - Dependecy vulnerability fixes.
   - End-to-end test fixes & more end-to-end tests.
   - Upgrade to vitest v4.
+  - Cleanup of old, unused unit tests.
+- `apps/test`
+  - The package now uses `@node-c/nestjs-pino`.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
+  - Vendored in nestjs-pino due to its lack of ESM support.
 - `packages/data-rdb`
   - Fix for the SQLQueryBuilder's parseRelations allowed include method.
+- `packages/nestjs-pino`
+  - New package, identical copy of nestjs-pino, but with an ESM build.
 
 # 1.0.0-beta8
 - Common

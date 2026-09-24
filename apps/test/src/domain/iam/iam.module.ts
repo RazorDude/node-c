@@ -2,9 +2,9 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import { DomainIAMModule as BaseDomainIAMModule } from '@node-c/domain-iam';
 
-import * as FolderData from './services';
+import * as FolderData from './services/iam.services.js';
 
-import { Constants } from '../../common/definitions';
+import { Constants } from '../../common/definitions/common.constants.js';
 
 @Module({})
 export class DomainIAMModule extends BaseDomainIAMModule {

@@ -2,7 +2,7 @@ import type { DataOrderByDirection, DomainFindOneOptions, GenericObject } from '
 
 import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
-import { BaseDto } from './base.dto';
+import { BaseDto } from './base.dto.js';
 
 type DomainFindOneOptionsWithOptionalFilters = Omit<DomainFindOneOptions, 'filters'> &
   Partial<Pick<DomainFindOneOptions, 'filters'>>;

@@ -12,9 +12,9 @@ import {
   CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenData,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields
-} from './authenticationPassthroughConsumer.definitions';
+} from './authenticationPassthroughConsumer.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 /**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.

@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { DataDBCategory, DataDBCategoryEntity } from './categories.entity';
+import { DataDBCategory, DataDBCategoryEntity } from './categories.entity.js';
 
 @Injectable()
 export class DataDBCategoriesService extends TypeORMDBEntityService<DataDBCategory> {

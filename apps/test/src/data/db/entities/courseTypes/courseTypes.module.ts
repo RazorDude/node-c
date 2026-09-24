@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { DataDBCourseTypeEntity } from './courseTypes.entity';
-import { DataDBCourseTypesService } from './courseTypes.service';
+import { DataDBCourseTypeEntity } from './courseTypes.entity.js';
+import { DataDBCourseTypesService } from './courseTypes.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

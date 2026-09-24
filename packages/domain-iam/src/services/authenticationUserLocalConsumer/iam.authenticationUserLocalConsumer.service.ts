@@ -7,9 +7,9 @@ import {
   IAMAuthenticationUserLocalConsumerInitiateData,
   IAMAuthenticationUserLocalConsumerInitiateOptions,
   IAMAuthenticationUserLocalConsumerInitiateResult
-} from './iam.authenticationUserLocalConsumer.definitions';
+} from './iam.authenticationUserLocalConsumer.definitions.js';
 
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
 
 /**
  * A service for integrating UserLocal authentication via other Node-C Apps as a consumer.

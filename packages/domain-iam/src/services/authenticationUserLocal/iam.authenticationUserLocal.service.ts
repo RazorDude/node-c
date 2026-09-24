@@ -18,10 +18,11 @@ import {
   IAMAuthenticationUserLocalInitiateData,
   IAMAuthenticationUserLocalInitiateOptions,
   IAMAuthenticationUserLocalInitiateResult
-} from './iam.authenticationUserLocal.definitions';
+} from './iam.authenticationUserLocal.definitions.js';
 
-import { IAMAuthenticationService } from '../authentication';
-import { IAMMFAService, IAMMFAType } from '../mfa';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import { IAMMFAService } from '../mfa/iam.mfa.service.js';
 
 /**
  * A service for authentication using a local user and password.

@@ -5,8 +5,8 @@ import { Constants } from '@node-c/data-rdb';
 
 import { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 
-import { DataDBUser } from './users.entity';
-import { DataDBUsersService } from './users.service';
+import { DataDBUser } from './users.entity.js';
+import { DataDBUsersService } from './users.service.js';
 
 // TODO: move the password properties logic away and into the domain
 @Injectable()

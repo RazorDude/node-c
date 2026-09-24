@@ -8,11 +8,11 @@ import {
 import {
   IAMAuthenticationCompleteResult,
   IAMAuthenticationInitiateResult,
-  IAMAuthenticationService,
   IAMAuthenticationType
-} from '../authentication';
-import { IAMMFAType } from '../mfa';
-import { IAMUserWithPermissionsData } from '../users';
+} from '../authentication/iam.authentication.definitions.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
 
 export interface IAMAuthenticationManagerAuthenticateOptions<AuthData = unknown> {
   auth: {

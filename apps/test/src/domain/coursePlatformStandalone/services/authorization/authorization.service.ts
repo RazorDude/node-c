@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@node-c/core';
 import { IAMAuthorizationService } from '@node-c/domain-iam';
 
-import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager';
+import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneAuthorizationService extends IAMAuthorizationService {

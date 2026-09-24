@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { DataDBUserEntity } from './users.entity';
-import { DataDBUsersService } from './users.service';
-import { DataDBUserSubscriber } from './users.subscriber';
+import { DataDBUserEntity } from './users.entity.js';
+import { DataDBUsersService } from './users.service.js';
+import { DataDBUserSubscriber } from './users.subscriber.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

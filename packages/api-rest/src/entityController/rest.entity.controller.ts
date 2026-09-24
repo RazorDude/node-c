@@ -30,23 +30,22 @@ import type {
   LoggerService
 } from '@node-c/core';
 
-import {
-  BulkCreateDto as BaseBulkCreateDto,
-  CreateDto as BaseCreateDto,
-  DeleteDto as BaseDeleteDto,
-  FindDto as BaseFindDto,
-  FindOneDto as BaseFindOneDto,
-  UpdateDto as BaseUpdateDto
-} from './dto';
+import { BulkCreateDto as BaseBulkCreateDto } from './dto/bulkCreate.dto.js';
+import { CreateDto as BaseCreateDto } from './dto/create.dto.js';
+import { DeleteDto as BaseDeleteDto } from './dto/delete.dto.js';
+import { FindDto as BaseFindDto } from './dto/find.dto.js';
+import { FindOneDto as BaseFindOneDto } from './dto/findOne.dto.js';
+import { UpdateDto as BaseUpdateDto } from './dto/update.dto.js';
 import type {
   BulkCreateBody,
   CreateBody,
   DefaultDomainEntityService,
   UpdateBody
-} from './rest.entity.controller.definitions';
-import { DefaultDtos } from './rest.entity.controller.dto.definitions';
+} from './rest.entity.controller.definitions.js';
+import { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
 
 // TODO: a middleware for converting string booleans to booleans
+// TODO: add the ability to specify which dataServices are exposed by the domainService and for which methods
 @UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
   Entity,
@@ -154,7 +153,6 @@ export class RESTAPIEntityControler<
   DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
   DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
-  protected defaultRouteMethods: string[];
   protected settings: { validationWhitelist?: boolean } = { validationWhitelist: true };
   protected validationPipe: ValidationPipe;
 

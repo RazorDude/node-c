@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { DataDBUserAccountStatus, DataDBUserAccountStatusEntity } from './userAccountStatuses.entity';
+import { DataDBUserAccountStatus, DataDBUserAccountStatusEntity } from './userAccountStatuses.entity.js';
 
 @Injectable()
 export class DataDBUserAccountStatusesService extends TypeORMDBEntityService<DataDBUserAccountStatus> {

@@ -10,8 +10,8 @@ import {
 
 import { Observable, map } from 'rxjs';
 
-import { RequestWithLocals } from '../common/definitions';
-import { AccessControlContext, AccessControlResource } from '../decorators';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { AccessControlContext, AccessControlResource } from '../decorators/http.decorators.accessControl.js';
 
 /**
  * Access control interceptor - used for both role-based and fine-grained access control.

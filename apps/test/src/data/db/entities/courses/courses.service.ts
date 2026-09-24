@@ -4,7 +4,7 @@ import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
 
-import { DataDBCourse, DataDBCourseEntity } from './courses.entity';
+import { DataDBCourse, DataDBCourseEntity } from './courses.entity.js';
 
 @Injectable()
 export class DataDBCoursesService extends TypeORMDBEntityService<DataDBCourse> {

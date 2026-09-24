@@ -1,4 +1,4 @@
-import { GenericObject } from './common.definitions';
+import { GenericObject } from './common.definitions.js';
 
 export class ApplicationError implements Error {
   data?: { errorCode?: number } | GenericObject;

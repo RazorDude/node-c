@@ -9,7 +9,9 @@ const BASE_URL_SSO = 'http://localhost:2081';
 // TODO: other apps' suites
 describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   let adminAccessToken = '';
+  // ----
   // -- start of general checks
+  // ----
   // TODO: make this error 404 in the future
   it('should return an error with status 401 when calling non-existent routes', async () => {
     const response = await fetch(BASE_URL_SSO);
@@ -22,8 +24,12 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: make sure query params are ignored in originalUrl
   // TODO: issue an access token - bad request on invalid body vs dto
   // TODO: issue an access token - invalid email & password (all cases)
+  // ----
   // -- end of general checks
-  // -- start of admin cases
+  // ----
+  // ----
+  // -- start of admin cases - login and single-service find
+  // ----
   // log in as admin
   it('should log the admin user in successfully', async () => {
     const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
@@ -184,6 +190,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(responseBody.result.items[i - 1].id).toEqual(6 - i);
     }
   });
+  // TODO: sorting on multiple fields, including aliased ones
+  // TODO: filters on aliased fields
   // find users (filters - simple)
   it('should find users (filters - simple)', async () => {
     const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id]=1`, {
@@ -626,11 +634,10 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       });
     }
   });
-  // TODO: this should be Bad Request instead
   // (forbidden relation error) find lessons (included relations with filters on relations - shallow, include not added)
   it('should throw an error on an attempt to find courses (included relations with filters on relations - shallow, include not added)', async () => {
     const response = await fetch(
-      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?filters[courseType.id]=1&'include[]=lessons.lessonType`,
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?filters[courseType.id]=1&include[]=lessons.lessonType`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -640,12 +647,14 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(400);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('error');
-    expect(responseBody.error).toEqual("Unknown column 'course__courseType.id' in 'where clause'");
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilder][course]: Forbidden include item course.courseType (course__courseType).'
+    );
     expect(responseBody).toHaveProperty('statusCode');
-    expect(responseBody.statusCode).toEqual(500);
+    expect(responseBody.statusCode).toEqual(400);
   });
   // (forbidden relation error) find courses (included relations with filters on relations - deep, include not added)
   it('should throw an error on an attempt to find courses (included relations with filters on relations - deep, include not added)', async () => {
@@ -707,12 +716,260 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       });
     }
   });
-  // TODO: find users - full range of options (filters, included relations, ordering), NO multi-data-service search
+  // TODO: find courses - select specific fields only, including aliased fields
+  // TODO: add select to the test case below
+  // find courses - full range of options (filters, included relations, ordering), NO multi-data-service search
+  it('should find courses - full range of options (filters, included relations, ordering), NO multi-data-service search', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+        'filters[courseType.id]=1&' +
+        'filters[id][$gte]=1&' +
+        'filters[id][$lte]=5&' +
+        'include[]=courseType&include[]=lessons&include[]=lessons.lessonType&' +
+        'orderBy[id]=desc',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(200);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(2);
+    expect(responseBody.result.items[0].id).toEqual(2);
+    expect(responseBody.result.items[0]).toHaveProperty('courseType');
+    expect(responseBody.result.items[0].courseType.id).toEqual(1);
+    expect(responseBody.result.items[0]).toHaveProperty('lessons');
+    expect(responseBody.result.items[0].lessons).toHaveLength(2);
+    expect(responseBody.result.items[0].lessons[0].id).toEqual(5);
+    expect(responseBody.result.items[0].lessons[1].id).toEqual(6);
+    expect(responseBody.result.items[1].id).toEqual(1);
+    expect(responseBody.result.items[1]).toHaveProperty('courseType');
+    expect(responseBody.result.items[1].courseType.id).toEqual(1);
+    expect(responseBody.result.items[1]).toHaveProperty('lessons');
+    expect(responseBody.result.items[1].lessons).toHaveLength(4);
+    expect(responseBody.result.items[1].lessons[0].id).toEqual(1);
+    expect(responseBody.result.items[1].lessons[1].id).toEqual(2);
+    expect(responseBody.result.items[1].lessons[2].id).toEqual(3);
+    expect(responseBody.result.items[1].lessons[3].id).toEqual(4);
+  });
+  // ----
+  // -- end of admin cases - login and single-service find
+  // ----
+  // ----
+  // -- start of admin cases - bulkCreate
+  // ----
+  // ----
+  // -- end of admin cases - bulkCreate
+  // ----
+  // ----
+  // -- start of admin cases - create and multi-service find
+  // ----
+  // create a course in the DB
+  it('should create a course in the DB', async () => {
+    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
+      headers: {
+        authorization: `Bearer ${adminAccessToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          courseTypeId: 1,
+          name: 'Test create course'
+        }
+      }),
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(201);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.id).toEqual(5);
+    expect(responseBody.result.courseTypeId).toEqual(1);
+    expect(responseBody.result.name).toEqual('Test create course');
+  });
+  // fail to create a course in the cache directly because a non-generated PK has not been provided
+  it('should fail to create a course in the cache directly because a non-generated PK has not been provided', async () => {
+    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
+      headers: {
+        authorization: `Bearer ${adminAccessToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          courseTypeId: 2,
+          name: 'Test create course 2'
+        },
+        dataServices: ['cache']
+      }),
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[RedisRepositoryService course][Validation Error]: A value is required for generated PK column id when the generatePrimaryKeys is set to false or isArray is set to true.'
+    );
+  });
+  // create a course in the cache directly
+  it('should create a course in the cache directly if all data has been provided correctly', async () => {
+    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
+      headers: {
+        authorization: `Bearer ${adminAccessToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          id: 4,
+          categoryId: 1,
+          courseTypeId: 3,
+          name: 'Cooking: A Day In Hell With Gordon Ramsey'
+        },
+        dataServices: ['cache']
+      }),
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(201);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.id).toEqual(4);
+    expect(responseBody.result.courseTypeId).toEqual(3);
+    expect(responseBody.result.name).toEqual('Cooking: A Day In Hell With Gordon Ramsey');
+  });
+  // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)
+  it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+        'dataServices[]=cache&dataServices[]=main&' +
+        'filters[id][]=1&filters[id][]=2&' +
+        'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true' +
+        'optionsOverridesByService[cache][individualSearch]=true&' +
+        'saveAdditionalResultsInFirstService[serviceName]=main' +
+        'saveAdditionalResultsInFirstService[useResultsForFirstService]=true',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    console.log('==> [1]:', responseBody);
+    console.log('==> [2]:', responseBody.result.items);
+    expect(response.status).toEqual(200);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(2);
+    expect(responseBody.result.items[0].id).toEqual(1);
+    expect(responseBody.result.items[1].id).toEqual(2);
+    expect(responseBody).toHaveProperty('resultsByService');
+    expect(responseBody.resultsByService).toHaveProperty('main');
+    expect(responseBody.resultsByService.main).toHaveProperty('items');
+    expect(responseBody.resultsByService.main.items).toHaveLength(2);
+    expect(responseBody.resultsByService.main.items[0].id).toEqual(1);
+    expect(responseBody.resultsByService.main.items[1].id).toEqual(2);
+    // we expect only 2 new items to be created; we do the search with a 2nd request here on purpose,
+    // because the previous request is explicitly filtered by id=[1,2], whereas this one has findAll=true;
+    // this way, we also kinda test findAll on the redis service :)
+    const responseCheck = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?dataServices[]=cache&findAll=true`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseCheckBody = await responseCheck.json();
+    expect(responseCheckBody.result.items).toHaveLength(2);
+    expect(responseCheckBody.result.items[0].id).toEqual(1);
+    expect(responseCheckBody.result.items[1].id).toEqual(2);
+  });
+  // throw an error
+  // it('should throw an error when searching for courses in the cache using the db if findAll=true and filterByFirstServiceResultFields is not set (runOnFirstServiceResultOnly=false)', async () => {
+  //   const response = await fetch(
+  //     `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+  //       'dataServices[]=cache&dataServices[]=main&' +
+  //       'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true&' +
+  //       'findAll=true',
+  //     {
+  //       headers: {
+  //         authorization: `Bearer ${adminAccessToken}`,
+  //         'content-type': 'application/json'
+  //       },
+  //       method: HttpMethod.GET
+  //     }
+  //   );
+  //   // we expect multiple new items to be created
+  //   const responseBody = await response.json();
+  //   console.log('==> [3]:', responseBody);
+  //   console.log('==> [4]:', responseBody.result.items);
+  //   console.log('==> [5]:', responseBody.resultsByService.items);
+  //   expect(response.status).toEqual(200);
+  //   expect(responseBody).toHaveProperty('result');
+  //   expect(responseBody.result).toHaveProperty('items');
+  //   expect(responseBody.result.items).toHaveLength(8);
+  //   expect(responseBody.result.items[0].id).toEqual(7);
+  //   expect(responseBody.result.items[1].id).toEqual(8);
+  //   expect(responseBody.result.items[2].id).toEqual(6);
+  //   expect(responseBody).toHaveProperty('resultsByService');
+  //   expect(responseBody.resultsByService).toHaveProperty('main');
+  //   expect(responseBody.resultsByService.main).toHaveProperty('items');
+  //   expect(responseBody.resultsByService.main.items).toHaveLength(7);
+  //   expect(responseBody.resultsByService.main.items[0].id).toEqual(7);
+  //   expect(responseBody.resultsByService.main.items[1].id).toEqual(6);
+  //   expect(responseBody.resultsByService.main.items[1].id).toEqual(5);
+  // });
+  // search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false)
+  // TODO: finish this
+  it('should search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+        'dataServices[]=cache&dataServices[]=main&' +
+        'optionsOverridesByService[cache][filterByFirstServiceResultFields][id]=id&' +
+        'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true&' +
+        'findAll=true',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    // we expect multiple new items to be created
+    const responseBody = await response.json();
+    console.log('==> [3]:', responseBody);
+    console.log('==> [4]:', responseBody.result.items);
+    console.log('==> [5]:', responseBody.resultsByService.items);
+    expect(response.status).toEqual(200);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(8);
+    expect(responseBody.result.items[0].id).toEqual(7);
+    expect(responseBody.result.items[1].id).toEqual(8);
+    expect(responseBody.result.items[2].id).toEqual(6);
+    expect(responseBody).toHaveProperty('resultsByService');
+    expect(responseBody.resultsByService).toHaveProperty('main');
+    expect(responseBody.resultsByService.main).toHaveProperty('items');
+    expect(responseBody.resultsByService.main.items).toHaveLength(7);
+    expect(responseBody.resultsByService.main.items[0].id).toEqual(7);
+    expect(responseBody.resultsByService.main.items[1].id).toEqual(6);
+    expect(responseBody.resultsByService.main.items[1].id).toEqual(5);
+  });
   // find users - full range of options (filters, included relations, ordering), multi-data-service search: filterByFirstServiceResultFields.id, runOnNoFirstServiceResultOnly=false, individualSearch=true
+  // TODO: finish this
   it('should find users: full range of options (filters, included relations, ordering), multi-data-service search', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
-        'persistanceServices[]=main&persistanceServices[]=cache&' +
+        'dataServices[]=main&dataServices[]=cache&' +
         'optionsOverridesByService[cache][filterByFirstServiceResultFields][id]=id&' +
         'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=false&' +
         'optionsOverridesByService[cache][individualSearch]=true&' +
@@ -727,12 +984,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
+    console.log('==> [6]:', responseBody.result.items);
     expect(response.status).toEqual(200);
-    console.log(responseBody.result.items);
   });
-  // TODO: create, update and delete
+  // TODO: update (incl. processManyToMany) and delete
   // TODO: refresh token flow
+  // #######
+  // ----
   // -- end of admin cases
+  // ----
+  // #######
   // -- start of user 0 cases - CRUD functionality, mutation of input and output data
   // TODO: log in as user 0
   // TODO: find courses (no options)

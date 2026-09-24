@@ -15,9 +15,9 @@ import {
   IAMAuthenticationPassthroughInitiateData,
   IAMAuthenticationPassthroughInitiateOptions,
   IAMAuthenticationPassthroughInitiateResult
-} from './iam.authenticationPassthrough.definitions';
+} from './iam.authenticationPassthrough.definitions.js';
 
-import { IAMAuthenticationService } from '../authentication';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 /**
  * A service for skipping authentication in order to use the rest of the AuthenticationManager.authenticate functionality (passthrough).
  *

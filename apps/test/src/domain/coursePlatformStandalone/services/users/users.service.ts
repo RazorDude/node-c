@@ -13,11 +13,15 @@ import {
   DomainCoursePlatformStandaloneUsersGetUserWithPermissionsDataOptions,
   DomainCoursePlatformStandaloneUsersGetUserWithPermissionsDataPrivateOptions,
   DomainCoursePlatformStandaloneUsersServiceData
-} from './users.definitions';
+} from './users.definitions.js';
 
-import { DataAuditUserLoginLog, DataAuditUserLoginLogsService } from '../../../../data/audit';
-import { DataCacheStandaloneUser, DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone';
-import { DataDBUser, DataDBUsersDataEntityServiceData, DataDBUsersService } from '../../../../data/db';
+import { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import { DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone/entities/users/users.service.js';
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneUsersService extends DomainEntityService<

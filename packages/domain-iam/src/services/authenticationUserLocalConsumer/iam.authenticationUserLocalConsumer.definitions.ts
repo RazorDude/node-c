@@ -1,7 +1,7 @@
 import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerInitiateResult
-} from '../authenticationConsumer';
+} from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
 import {
   IAMAuthenticationUserLocalCompleteData,
@@ -10,7 +10,7 @@ import {
   IAMAuthenticationUserLocalInitiateData,
   IAMAuthenticationUserLocalInitiateOptions,
   IAMAuthenticationUserLocalInitiateResult
-} from '../authenticationUserLocal';
+} from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
 
 export type IAMAuthenticationUserLocalConsumerCompleteData = IAMAuthenticationUserLocalCompleteData;
 

@@ -1,13 +1,13 @@
 import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+// import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 import { AppConfigDataRDB, ConfigProviderService, LoggerService, RDBType, loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 
 import { DataSource } from 'typeorm';
 
-import { TypeORMDBModuleOptions } from './typeorm.module.definitions';
+import { TypeORMDBModuleOptions } from './typeorm.module.definitions.js';
 
 export class TypeORMDBModule {
   static register(options: TypeORMDBModuleOptions): DynamicModule {
@@ -64,7 +64,8 @@ export class TypeORMDBModule {
             return {
               ...dataSourceOptions,
               database,
-              entities: entities as EntityClassOrSchema[],
+              // entities: entities as EntityClassOrSchema[],
+              entities,
               failOnConnectionError,
               host,
               manualInitialization: true,

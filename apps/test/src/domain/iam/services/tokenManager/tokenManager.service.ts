@@ -3,12 +3,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import { IAMTokenManagerService } from '@node-c/domain-iam';
 
-import { Constants } from '../../../../common/definitions';
-import { DataCacheAuthToken } from '../../../../data/cacheAuth';
-import { DomainIAMAuthenticationOktaService } from '../authenticationOkta';
-import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough';
-import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal';
-import { DomainIAMTokensService } from '../tokens';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataCacheAuthToken } from '../../../../data/cacheAuth/entities/tokens/tokens.entity.js';
+import { DomainIAMAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough/authenticationPassthrough.service.js';
+import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+import { DomainIAMTokensService } from '../tokens/tokens.service.js';
 
 @Injectable()
 export class DomainIAMTokenManagerService extends IAMTokenManagerService<DataCacheAuthToken> {

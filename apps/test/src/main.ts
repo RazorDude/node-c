@@ -8,8 +8,8 @@ import {
   AppModuleCoursePlatformFederated,
   AppModuleCoursePlatformStandalone,
   AppModuleSSO
-} from './app.module';
-import { Constants } from './common/definitions';
+} from './app.module.js';
+import { Constants } from './common/definitions/common.constants.js';
 
 (async function () {
   await NodeCApp.start(

@@ -13,11 +13,11 @@ import {
 
 import ld from 'lodash';
 
-import { BuildQueryOptions, IncludeItems, ParsedFilter } from './rdb.sqlQueryBuilder.definitions';
+import { BuildQueryOptions, IncludeItems, ParsedFilter } from './rdb.sqlQueryBuilder.definitions.js';
 
-import { Constants } from '../common/definitions';
-import { OrmBaseQueryBuilder, OrmSelectQueryBuilder } from '../ormQueryBuilder';
-import { RDBEntityManager } from '../repository';
+import { Constants } from '../common/definitions/common.constants.js';
+import { OrmBaseQueryBuilder, OrmSelectQueryBuilder } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import { RDBEntityManager } from '../repository/rdb.repository.js';
 
 @Injectable()
 export class SQLQueryBuilderService {

@@ -7,10 +7,13 @@ import {
   DomainIAMUsersDomainEntityServiceData,
   DomainIAMUsersGetUserWithPermissionsDataOptions,
   DomainIAMUsersGetUserWithPermissionsDataPrivateOptions
-} from './users.definitions';
+} from './users.definitions.js';
 
-import { DataCacheUser, DataCacheUsersEntityService } from '../../../../data/cache';
-import { DataDBUser, DataDBUsersDataEntityServiceData, DataDBUsersService } from '../../../../data/db';
+import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
+import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainIAMUsersService extends IAMUsersService<

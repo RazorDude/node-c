@@ -1,8 +1,8 @@
 import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase';
-import { DataDBCourse } from '../courses';
-import { DataDBLessonType } from '../lessonTypes';
+import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
+import { DataDBCourse } from '../courses/courses.entity.js';
+import { DataDBLessonType } from '../lessonTypes/lessonTypes.entity.js';
 
 export interface DataDBLesson extends DBEntity {
   courses?: DataDBCourse[];

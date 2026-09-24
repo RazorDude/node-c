@@ -26,10 +26,10 @@ import {
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
-} from './iam.authenticationOAuth2.definitions';
+} from './iam.authenticationOAuth2.definitions.js';
 
-import { Constants } from '../../common/definitions';
-import { IAMAuthenticationService } from '../authentication';
+import { Constants } from '../../common/definitions/common.constants.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
 // TODO: provider param name mapping, in case a specific provider has custom parameter names
 // TODO: validate access_token flow - endpont

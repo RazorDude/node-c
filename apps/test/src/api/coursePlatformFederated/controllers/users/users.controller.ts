@@ -3,12 +3,10 @@ import { Body, Controller, Get, Injectable, Param, Patch, Post, Query } from '@n
 import { AccessControlContext } from '@node-c/api-http';
 import { AppConfigDomainIAMAuthenticationStep, LoggerService } from '@node-c/core';
 
-import {
-  APICoursePlatformFederatedUsersAuthenticateDto,
-  APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto
-} from './dto';
+import { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 
-import { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated';
+import { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
 
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

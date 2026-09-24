@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { GenericObject } from '@node-c/core';
 import { Constants as RDBConstants, RDBEntityManager, RDBRepository } from '@node-c/data-rdb';
 
-import { Constants } from '../common/definitions';
+import { Constants } from '../common/definitions/common.constants.js';
 
 @Injectable()
 export class ClickHouseEntityManager implements RDBEntityManager {

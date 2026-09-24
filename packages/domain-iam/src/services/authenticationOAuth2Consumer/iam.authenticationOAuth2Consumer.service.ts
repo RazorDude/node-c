@@ -19,10 +19,10 @@ import {
   IAMAuthenticationOAuth2ConsumerRefreshExternalAccessTokenResult,
   IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenData,
   IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenResult
-} from './iam.authenticationOAuth2Consumer.definitions';
+} from './iam.authenticationOAuth2Consumer.definitions.js';
 
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
-import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2';
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
 
 /**
  * A service for integrating OAuth2 via other Node-C Apps as a consumer.

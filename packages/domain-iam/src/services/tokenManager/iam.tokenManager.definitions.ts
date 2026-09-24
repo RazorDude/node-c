@@ -1,6 +1,9 @@
 import { DomainCreateOptions } from '@node-c/core';
 
-import { IAMAuthenticationType, IAMAuthenticationVerifyExternalAccessTokenResult } from '../authentication';
+import {
+  IAMAuthenticationType,
+  IAMAuthenticationVerifyExternalAccessTokenResult
+} from '../authentication/iam.authentication.definitions.js';
 
 export interface BaseTokenEntityFields {
   externalToken?: string;

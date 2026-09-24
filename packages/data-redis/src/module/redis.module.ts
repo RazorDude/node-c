@@ -2,9 +2,9 @@ import { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 
-import { RedisModuleOptions } from './redis.module.definitions';
+import { RedisModuleOptions } from './redis.module.definitions.js';
 
-import { RedisStoreModule } from '../store';
+import { RedisStoreModule } from '../store/redis.store.module.js';
 
 export class RedisModule {
   static register(options: RedisModuleOptions): DynamicModule {

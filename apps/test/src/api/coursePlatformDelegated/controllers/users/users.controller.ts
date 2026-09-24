@@ -4,8 +4,12 @@ import * as NodeCApiHttp from '@node-c/api-http';
 import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 import { DataDefaultData, DomainEntityServiceDefaultData, GenericObject, LoggerService } from '@node-c/core';
 
-import { DataDBUser, DataDBUsersCreateUserData, DataDBUsersUpdateUserData } from '../../../../data/db';
-import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated';
+import {
+  DataDBUsersCreateUserData,
+  DataDBUsersUpdateUserData
+} from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
 
 @NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

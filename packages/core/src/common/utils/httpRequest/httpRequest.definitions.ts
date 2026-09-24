@@ -1,6 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse, RawAxiosHeaders } from 'axios';
 
-import { GenericObject, HttpMethod } from '../../definitions';
+import { HttpMethod } from '../../definitions/common.constants.js';
+import { GenericObject } from '../../definitions/common.definitions.js';
 
 export interface HTTPRequestData {
   apiKey?: string;

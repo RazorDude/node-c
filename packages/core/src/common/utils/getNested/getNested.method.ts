@@ -1,6 +1,6 @@
-import { GetNestedOptions } from './getNested.definitions';
+import { GetNestedOptions } from './getNested.definitions.js';
 
-import { GenericObject } from '../../definitions';
+import { GenericObject } from '../../definitions/common.definitions.js';
 
 /**
  * Extracts a value from a deeply nested object, for example foo.bar.0.baz from {foo: {bar: [{baz: 'test'}]}}.

@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { DataDefaultData, DomainEntityService, DomainEntityServiceDefaultData, LoggerService } from '@node-c/core';
 
-import { DataCacheFederatedToken, DataCacheFederatedTokensEntityService } from '../../../../data/cacheFederated';
+import { DataCacheFederatedToken } from '../../../../data/cacheFederated/entities/tokens/tokens.entity.js';
+import { DataCacheFederatedTokensEntityService } from '../../../../data/cacheFederated/entities/tokens/tokens.service.js';
 
 @Injectable()
 export class DomainCoursePlatformFederatedTokensService extends DomainEntityService<

@@ -1,4 +1,5 @@
-import { GenericObject, HttpMethod } from '../definitions';
+import { HttpMethod } from '../definitions/common.constants.js';
+import { GenericObject } from '../definitions/common.definitions.js';
 
 /**
  * This object contains the names of the fields within the modules, by module category.

@@ -15,10 +15,10 @@ import { ValidationSchema, registerSchema, validate } from 'class-validator';
 import ld from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import * as RedisRepositoryDefinitions from './redis.repository.definitions';
+import * as RedisRepositoryDefinitions from './redis.repository.definitions.js';
 
-import { Constants } from '../common/definitions';
-import { RedisStoreService } from '../store';
+import { Constants } from '../common/definitions/common.constants.js';
+import { RedisStoreService } from '../store/redis.store.service.js';
 
 // TODO: support "paranoid" mode
 // TODO: support complex filtering, not just equality

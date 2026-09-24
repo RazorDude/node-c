@@ -10,7 +10,7 @@ import {
   IAMAuthenticationInitiateResult,
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
-} from '../authentication';
+} from '../authentication/iam.authentication.definitions.js';
 
 export type IAMAuthenticationConsumerCompleteData = IAMAuthenticationCompleteData;
 

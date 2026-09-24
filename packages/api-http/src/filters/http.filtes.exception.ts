@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/co
 import { LoggerService } from '@node-c/core';
 import { Response } from 'express';
 
-import { cleanUpAxiosError } from '../common/utils';
+import { cleanUpAxiosError } from '../common/utils/utils.cleanUpAxiosError.js';
 
 // The purpose of the class is to handle HttpExceptions that are not caught by the HTTPErrorInterceptor.
 // @Catch(HttpException)

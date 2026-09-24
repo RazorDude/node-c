@@ -8,10 +8,10 @@ import {
   DomainIAMAuthenticationUserLocalCompleteOptions,
   DomainIAMAuthenticationUserLocalCompleteResult,
   DomainIAMAuthenticationUserLocalUserFields
-} from './authenticationUserLocal.definitions';
+} from './authenticationUserLocal.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticationUserLocalService<

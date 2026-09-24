@@ -11,9 +11,10 @@ import {
 import { NextFunction, Response } from 'express';
 import qs from 'qs';
 
-import { Constants, RequestWithLocals } from '../common/definitions';
-import { ErrorCodes } from '../common/definitions/common.errors';
-import { checkRoutes } from '../common/utils';
+import { Constants } from '../common/definitions/common.constants.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { ErrorCodes } from '../common/definitions/common.errors.js';
+import { checkRoutes } from '../common/utils/utils.checkRoutes.js';
 
 /**
  * Authorization middleware - used for general authorization of the HTTP resource.

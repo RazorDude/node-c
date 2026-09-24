@@ -28,9 +28,9 @@ import {
   DataDBUsersFindPrivateOptions,
   DataDBUsersUpdatePasswordData,
   DataDBUsersUpdateUserData
-} from './users.definitions';
+} from './users.definitions.js';
 
-import { DataDBUser, DataDBUserEntity } from './users.entity';
+import { DataDBUser, DataDBUserEntity } from './users.entity.js';
 
 // TODO: move all of the "omit password" logic to a new UsersDataEntityService in the core module
 @Injectable()

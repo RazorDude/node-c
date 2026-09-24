@@ -12,9 +12,10 @@ import {
   IAMAuthorizeApiKeyData,
   IAMAuthorizeApiKeyOptions,
   IAMPermission
-} from './iam.authorization.definitions';
+} from './iam.authorization.definitions.js';
 
-import { DecodedTokenContent, IAMTokenManagerService } from '../tokenManager';
+import { DecodedTokenContent } from '../tokenManager/iam.tokenManager.definitions.js';
+import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
 
 export class IAMAuthorizationService<
   TokenManager extends IAMTokenManagerService<object> = IAMTokenManagerService<object>
@@ -141,8 +142,6 @@ export class IAMAuthorizationService<
     let permissionsCount = 0;
     let permissionsForDifferentModules = 0;
     let permissionsForDifferentContexts = 0;
-    // options.logger?.info('====>');
-    // options.logger?.info({ moduleName, resourceContext, resource });
     for (const apId in currentPermissions) {
       const apData = currentPermissions[apId];
       permissionsCount++;

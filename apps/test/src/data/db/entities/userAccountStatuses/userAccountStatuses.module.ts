@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { DataDBUserAccountStatusEntity } from './userAccountStatuses.entity';
-import { DataDBUserAccountStatusesService } from './userAccountStatuses.service';
+import { DataDBUserAccountStatusEntity } from './userAccountStatuses.entity.js';
+import { DataDBUserAccountStatusesService } from './userAccountStatuses.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

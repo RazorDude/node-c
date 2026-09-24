@@ -5,5 +5,5 @@
     "rootDir": "."
   },
   "include": ["src", "test"],
-  "exclude": ["node_modules", "dist", "dist-tests"]
+  "exclude": ["node_modules", "dist", "dist-tests", "src/**/*/migrations/*"]
 }

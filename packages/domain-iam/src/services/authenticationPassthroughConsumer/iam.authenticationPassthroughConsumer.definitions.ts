@@ -1,13 +1,13 @@
 import {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
-} from '../authentication';
+} from '../authentication/iam.authentication.definitions.js';
 
 import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult
-} from '../authenticationConsumer';
+} from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
 import {
   IAMAuthenticationPassthroughCompleteData,
@@ -17,7 +17,7 @@ import {
   IAMAuthenticationPassthroughInitiateData,
   IAMAuthenticationPassthroughInitiateOptions,
   IAMAuthenticationPassthroughInitiateResult
-} from '../authenticationPassthrough';
+} from '../authenticationPassthrough/iam.authenticationPassthrough.definitions.js';
 
 export type IAMAuthenticationPassthroughConsumerCompleteData = IAMAuthenticationPassthroughCompleteData & {
   externalAccessToken?: string;

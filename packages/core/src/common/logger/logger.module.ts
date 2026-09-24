@@ -1,9 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
+import { LoggerModule as PinoLoggerModule } from '@node-c/nestjs-pino';
 
-import { LoggerModuleOptions } from './logger.definitions';
-import { DEFAULT_PINO_PARAMS, LoggerService } from './logger.service';
+import { LoggerModuleOptions } from './logger.definitions.js';
+import { DEFAULT_PINO_PARAMS, LoggerService } from './logger.service.js';
 
 @Module({})
 export class LoggerModule {

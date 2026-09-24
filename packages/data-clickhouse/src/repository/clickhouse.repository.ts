@@ -3,10 +3,10 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { GenericObject } from '@node-c/core';
 import { Constants as RDBConstants, RDBRepository } from '@node-c/data-rdb';
 
-import * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions';
+import * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions.js';
 
-import { ClickHouseEntityManager } from '../entityManager';
-import { ClickHouseSelectQueryBuilder } from '../ormQueryBuilder';
+import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
+import { ClickHouseSelectQueryBuilder } from '../ormQueryBuilder/clickhouse.selectQueryBuilder.js';
 
 // TODO: save method
 @Injectable()

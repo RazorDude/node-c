@@ -3,7 +3,8 @@ import { HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
 import { NextFunction, Response } from 'express';
 
-import { Constants, RequestWithLocals } from '../common/definitions';
+import { Constants } from '../common/definitions/common.constants.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 
 @Injectable()
 export class HTTPCORSMiddleware implements NestMiddleware {

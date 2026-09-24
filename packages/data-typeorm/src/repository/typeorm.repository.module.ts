@@ -5,8 +5,8 @@ import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
 import { DataSource, ObjectLiteral } from 'typeorm';
 
-import { TypeORMDBRepository } from './typeorm.repository';
-import { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions';
+import { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions.js';
+import { TypeORMDBRepository } from './typeorm.repository.js';
 
 @Module({})
 export class TypeORMDBRepositoryModule {

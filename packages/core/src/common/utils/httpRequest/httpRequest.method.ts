@@ -3,9 +3,11 @@ import crypto from 'crypto';
 import axios, { RawAxiosHeaders } from 'axios';
 import qs from 'qs';
 
-import { HTTPRequestData, HTTPRequestResponseData } from './httpRequest.definitions';
+import { HTTPRequestData, HTTPRequestResponseData } from './httpRequest.definitions.js';
 
-import { ApplicationError, GenericObject, HttpMethod } from '../../definitions';
+import { HttpMethod } from '../../definitions/common.constants.js';
+import { GenericObject } from '../../definitions/common.definitions.js';
+import { ApplicationError } from '../../definitions/common.errors.js';
 
 export const httpRequest = async <ResponseData = unknown>(
   url: string,

@@ -1,8 +1,9 @@
 {
   "name": "@node-c/domain-iam-okta",
-  "version": "1.0.0-beta8",
+  "version": "1.0.0-beta9",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/domainIAMOkta.js",
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
@@ -15,8 +16,8 @@
     "test:coverage": "vitest --config src/vitest.config.ts --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.16",
-    "@node-c/core": "^1.0.0-beta8",
-    "@node-c/domain-iam": "^1.0.0-beta8"
+    "@nestjs/common": "^12.0.3",
+    "@node-c/core": "^1.0.0-beta9",
+    "@node-c/domain-iam": "^1.0.0-beta9"
   }
 }

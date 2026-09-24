@@ -10,7 +10,7 @@ import {
   IAMAuthenticationInitiateResult,
   IAMAuthenticationVerifyExternalAccessTokenData,
   IAMAuthenticationVerifyExternalAccessTokenResult
-} from '../authentication';
+} from '../authentication/iam.authentication.definitions.js';
 
 export interface IAMAuthenticationOAuth2AccessTokenProviderResponseData {
   access_token: string;

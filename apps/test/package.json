@@ -1,7 +1,8 @@
 {
   "name": "@node-c/app-test",
-  "version": "1.0.0-beta8",
+  "version": "1.0.0-beta9",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
@@ -14,14 +15,26 @@
     "start:dev:debug": "nodemon --watch src --exec node --inspect-brk -r ts-node/register src/main.ts",
     "start:test:nyc": "NODE_ENV=endToEndTests nyc ts-node src/main.ts",
     "test": "NODE_ENV=endToEndTests nyc vitest --config test/vitest.config.ts",
-    "typeorm": "typeorm-ts-node-commonjs",
-    "typeorm:migration:generate:db": "npm run typeorm -- migration:generate -d datasource-db-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
-    "typeorm:migration:generate:dbConfigs": "npm run typeorm -- migration:generate -d datasource-dbConfigs-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
-    "typeorm:migration:run:db": "npm run typeorm -- migration:run -d datasource-db-${DATASOURCE_ENV}.ts",
-    "typeorm:migration:run:dbConfigs": "npm run typeorm -- migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.ts"
+    "typeorm": "typeorm-ts-node-esm",
+    "typeorm:migration:generate:db": "npx @node-c/data-typeorm migration:generate -d datasource-db-${DATASOURCE_ENV}.js ${MIGRATION_NAME}",
+    "typeorm:migration:generate:db:directCli": "npm run typeorm -- migration:generate -d datasource-db-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
+    "typeorm:migration:generate:dbConfigs": "npx @node-c/data-typeorm migration:generate -d datasource-dbConfigs-${DATASOURCE_ENV}.js ${MIGRATION_NAME}",
+    "typeorm:migration:generate:dbConfigs:directCli": "npm run typeorm -- migration:generate -d datasource-dbConfigs-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
+    "typeorm:migration:run:db": "npx @node-c/data-typeorm migration:run -d datasource-db-${DATASOURCE_ENV}.js",
+    "typeorm:migration:run:db:directCli": "npm run typeorm -- migration:run -d datasource-db-${DATASOURCE_ENV}.ts",
+    "typeorm:migration:run:dbConfigs": "npx @node-c/data-typeorm migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.js",
+    "typeorm:migration:run:dbConfigs:directCli": "npm run typeorm -- migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.ts"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.16",
+    "@nestjs/common": "^12.0.3",
+    "@node-c/api-http": "^1.0.0-beta9",
+    "@node-c/api-rest": "^1.0.0-beta9",
+    "@node-c/core": "^1.0.0-beta9",
+    "@node-c/data-clickhouse": "^1.0.0-beta9",
+    "@node-c/data-redis": "^1.0.0-beta9",
+    "@node-c/data-typeorm": "^1.0.0-beta9",
+    "@node-c/domain-iam": "^1.0.0-beta9",
+    "@node-c/domain-iam-okta": "^1.0.0-beta9",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
     "mysql2": "^3.14.2",
@@ -30,22 +43,12 @@
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
+    "@types/yargs": "^17.0.35",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "madge": "^8.0.0",
-    "nestjs-spelunker": "^1.3.2",
     "nodemon": "^3.1.14",
     "nyc": "^18.0.0",
-    "ts-node": "^10.9.2"
-  },
-  "peerDependencies": {
-    "@node-c/api-http": "^1.0.0-beta8",
-    "@node-c/api-rest": "^1.0.0-beta8",
-    "@node-c/core": "^1.0.0-beta8",
-    "@node-c/data-clickhouse": "^1.0.0-beta8",
-    "@node-c/data-redis": "^1.0.0-beta8",
-    "@node-c/data-typeorm": "^1.0.0-beta8",
-    "@node-c/domain-iam": "^1.0.0-beta8",
-    "@node-c/domain-iam-okta": "^1.0.0-beta8"
+    "ts-node": "^10.9.2",
+    "yargs": "^18.2.0"
   }
 }

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
-import { DataDBRoleEntity } from './roles.entity';
-import { DataDBRolesService } from './roles.service';
+import { DataDBRoleEntity } from './roles.entity.js';
+import { DataDBRolesService } from './roles.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

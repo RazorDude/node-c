@@ -5,7 +5,9 @@ import * as path from 'path';
 import clickHouse from '@clickhouse/client';
 
 import { AppEnvironment } from '@node-c/core';
+
 import dotenv from 'dotenv';
+// import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
 import mysql from 'mysql2';
 
 process.env.NODE_ENV = 'endToEndTests';
@@ -128,7 +130,7 @@ export async function setup(): Promise<void> {
   // set the test server up and run the tests
   // parse the env vars
   const envVars = dotenv.parse(
-    (await fs.readFile(path.resolve(__dirname, '../apps/test/envFiles/.endToEndTests.env'))).toString()
+    (await fs.readFile(path.resolve(import.meta.dirname, '../apps/test/envFiles/.endToEndTests.env'))).toString()
   );
   // TODO: generate ormconfig and datasource files
   // set up the main DB, empty it and seed the test data
@@ -305,8 +307,10 @@ export async function setup(): Promise<void> {
       'userId bigint unsigned not null' +
       ') engine Log'
   });
-  console.info('[TestLogs]: Audit DB set up. Starting apps...');
-  const logsFilePath = path.resolve(__dirname, `../logs/app_logs_${process.env.NODE_ENV}.txt`);
+  console.info('[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs...');
+  
+  console.info('[TestLogs]: Valkey cleaned up. Starting apps...');
+  const logsFilePath = path.resolve(import.meta.dirname, `../logs/app_logs_${process.env.NODE_ENV}.txt`);
   let appPromiseFulfilled = false;
   try {
     await fs.rm(logsFilePath);
@@ -315,7 +319,8 @@ export async function setup(): Promise<void> {
     // console.info(e);
   }
   await new Promise<void>((resolve, reject) => {
-    const appsProcess = spawn('npm', ['run', 'start:apps-test:nyc:direct'], {
+    // used to be start:apps-test:nyc:direct
+    const appsProcess = spawn('npm', ['run', 'start:apps-test:direct'], {
       env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
     });
     appsProcess.on('exit', () => {

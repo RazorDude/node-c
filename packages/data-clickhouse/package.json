@@ -1,8 +1,9 @@
 {
   "name": "@node-c/data-clickhouse",
-  "version": "1.0.0-beta8",
+  "version": "1.0.0-beta9",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/dataClickhouse.js",
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
@@ -16,12 +17,13 @@
   },
   "dependencies": {
     "@clickhouse/client": "^1.12.1",
-    "@nestjs/common": "^11.1.16",
-    "@nestjs/typeorm": "^11.0.0",
-    "@node-c/core": "^1.0.0-beta8",
-    "@node-c/data-rdb": "^1.0.0-beta8",
+    "@nestjs/common": "^12.0.3",
+    "@nestjs/core": "12.0.3",
+    "@nestjs/platform-express": "12.0.3",
+    "@nestjs/testing": "12.0.3",
+    "@node-c/core": "^1.0.0-beta9",
+    "@node-c/data-rdb": "^1.0.0-beta9",
     "class-validator": "^0.14.1",
-    "typeorm": "^0.3.20",
     "uuid": "^11.0.5"
   }
 }

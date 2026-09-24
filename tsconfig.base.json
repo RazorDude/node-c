@@ -3,17 +3,16 @@
   "compilerOptions": {
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "declaration": true,
-    "downlevelIteration": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
+    "inlineSources": true,
     "isolatedModules": true,
-    "moduleResolution": "node16",
-    "module": "node16",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -21,15 +20,15 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@node-c/api-http": ["packages/api-http/dist/index"],
-      "@node-c/api-rest": ["packages/api-rest/dist/index"],
-      "@node-c/core": ["packages/core/dist/index"],
-      "@node-c/domain-iam": ["packages/domain-iam/dist/index"],
-      "@node-c/domain-iam-okta": ["packages/domain-iam-okta/dist/index"],
-      "@node-c/data-clickhouse": ["packages/data-clickhouse/dist/index"],
-      "@node-c/data-rdb": ["packages/data-rdb/dist/index"],
-      "@node-c/data-redis": ["packages/data-redis/dist/index"],
-      "@node-c/data-typeorm": ["packages/data-typeorm/dist/index"]
+      "@node-c/api-http": ["./packages/api-http/dist/index"],
+      "@node-c/api-rest": ["./packages/api-rest/dist/index"],
+      "@node-c/core": ["./packages/core/dist/index"],
+      "@node-c/domain-iam": ["./packages/domain-iam/dist/index"],
+      "@node-c/domain-iam-okta": ["./packages/domain-iam-okta/dist/index"],
+      "@node-c/data-clickhouse": ["./packages/data-clickhouse/dist/index"],
+      "@node-c/data-rdb": ["./packages/data-rdb/dist/index"],
+      "@node-c/data-redis": ["./packages/data-redis/dist/index"],
+      "@node-c/data-typeorm": ["./packages/data-typeorm/dist/index"]
     },
     "preserveConstEnums": true,
     "removeComments": true,
@@ -39,10 +38,14 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "sourceMap": true,
-    "target": "ES2016",
+    "sourceMap": true, 
+    "target": "esnext",
     "typeRoots": [
       "./node_modules/@types"
     ]
+  },
+  "ts-node": {
+    "logError": true,
+    "pretty": true
   }
 }

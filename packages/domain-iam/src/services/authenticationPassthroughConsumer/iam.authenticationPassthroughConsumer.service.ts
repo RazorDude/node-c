@@ -18,9 +18,9 @@ import {
   IAMAuthenticationPassthroughConsumerInitiateResult,
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData,
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult
-} from './iam.authenticationPassthroughConsumer.definitions';
+} from './iam.authenticationPassthroughConsumer.definitions.js';
 
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer';
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
 
 /**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.

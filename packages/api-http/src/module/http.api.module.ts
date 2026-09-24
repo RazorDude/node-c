@@ -6,12 +6,16 @@ import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 import cookieParser from 'cookie-parser';
 import express, { Response } from 'express';
 
-import { HTTPAPIModuleOptions } from './http.api.module.definitions';
+import { HTTPAPIModuleOptions } from './http.api.module.definitions.js';
 
-import { Constants, RequestWithLocals } from '../common/definitions';
-import { HttpExceptionFilter } from '../filters';
-import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '../interceptors';
-import { HTTPAuthorizationMiddleware, HTTPCORSMiddleware, HTTPRequestLoggingMiddleware } from '../middlewares';
+import { Constants } from '../common/definitions/common.constants.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { HttpExceptionFilter } from '../filters/http.filtes.exception.js';
+import { HTTPAccessControlInterceptor } from '../interceptors/http.interceptors.accessControl.js';
+import { HTTPErrorInterceptor } from '../interceptors/http.interceptors.error.js';
+import { HTTPAuthorizationMiddleware } from '../middlewares/http.middlewares.authorization.js';
+import { HTTPCORSMiddleware } from '../middlewares/http.middlewares.cors.js';
+import { HTTPRequestLoggingMiddleware } from '../middlewares/http.middlewares.requestLogging.js';
 
 export class HTTPAPIModule {
   constructor(

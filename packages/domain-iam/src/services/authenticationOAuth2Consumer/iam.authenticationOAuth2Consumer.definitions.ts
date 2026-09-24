@@ -1,13 +1,13 @@
 import {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
-} from '../authentication';
+} from '../authentication/iam.authentication.definitions.js';
 import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult,
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
-} from '../authenticationConsumer';
+} from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
 import {
   IAMAuthenticationOAuth2CompleteData,
@@ -18,7 +18,7 @@ import {
   IAMAuthenticationOAuth2InitiateResult,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
-} from '../authenticationOAuth2';
+} from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
 
 export type IAMAuthenticationOAuth2ConsumerCompleteData = IAMAuthenticationOAuth2CompleteData;
 

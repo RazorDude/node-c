@@ -4,18 +4,17 @@ import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 
 import { AppConfigDomainIAMAuthenticationStep, LoggerService } from '@node-c/core';
 
-import {
-  SSOUsersAuthenticateDto,
-  SSOUsersAuthenticateOAuth2CallbackDto,
-  SSOUsersAuthenticatePassthroughDto
-} from './dto';
+import { SSOUsersAuthenticateDto } from './dto/authenticate.dto.js';
 
-import { DataDBUser, DataDBUsersDataEntityServiceData } from '../../../../data/db';
-import {
-  DomainIAMAuthenticationManagerService,
-  DomainIAMUsersDomainEntityServiceData,
-  DomainIAMUsersService
-} from '../../../../domain/iam';
+import { SSOUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
+
+import { SSOUsersAuthenticatePassthroughDto } from './dto/authenticatePassthrough.dto.js';
+
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DomainIAMAuthenticationManagerService } from '../../../../domain/iam/services/authenticationManager/authenticationManager.service.js';
+import { DomainIAMUsersDomainEntityServiceData } from '../../../../domain/iam/services/users/users.definitions.js';
+import { DomainIAMUsersService } from '../../../../domain/iam/services/users/users.service.js';
 
 // TODO: create user (signup)
 // TODO: logout

@@ -6,7 +6,7 @@ import {
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import { DataCacheUser } from '../../../../data/cache';
+import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 
 export type DomainIAMAuthenticationOktaCompleteData = IAMAuthenticationOktaCompleteData;
 

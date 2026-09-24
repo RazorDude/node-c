@@ -1,7 +1,7 @@
-import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { EntitySchema } from 'typeorm';
 
 export interface TypeORMDBRepositoryModuleOptions {
   connectionName: string;
-  entityClass: EntityClassOrSchema;
+  entityClass: EntitySchema<unknown>;
   dataModuleName: string;
 }

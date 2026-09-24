@@ -5,8 +5,8 @@ import { ApplicationError, LoggerService } from '@node-c/core';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { ServerError } from '../common/definitions/common.errors';
-import { cleanUpAxiosError } from '../common/utils';
+import { ServerError } from '../common/definitions/common.errors.js';
+import { cleanUpAxiosError } from '../common/utils/utils.cleanUpAxiosError.js';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {

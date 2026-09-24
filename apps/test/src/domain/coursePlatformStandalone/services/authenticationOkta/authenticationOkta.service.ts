@@ -10,10 +10,10 @@ import {
   DomainCoursePlatformStandaloneAuthenticationOktaGetUserDataFromExternalTokenPayloadsData,
   DomainCoursePlatformStandaloneAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult,
   DomainCoursePlatformStandaloneAuthenticationOktaUserFields
-} from './authenticationOkta.definitions';
+} from './authenticationOkta.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 /**
  * Okta OIDC authentication as a standalone service. Its output can be used for the Passthrough service.

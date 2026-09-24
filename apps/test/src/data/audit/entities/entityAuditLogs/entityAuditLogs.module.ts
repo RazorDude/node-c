@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { ClickHouseDBRepositoryModule } from '@node-c/data-clickhouse';
 
-import { DataAuditEntityAuditLogEntity } from './entityAuditLogs.entity';
-import { DataAuditEntityAuditLogsService } from './entityAuditLogs.service';
+import { DataAuditEntityAuditLogEntity } from './entityAuditLogs.entity.js';
+import { DataAuditEntityAuditLogsService } from './entityAuditLogs.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

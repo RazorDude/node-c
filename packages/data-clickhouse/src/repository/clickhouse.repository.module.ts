@@ -4,11 +4,11 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { GenericObject } from '@node-c/core';
 import { Constants as RDBConstants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { ClickHouseDBRepository } from './clickhouse.repository';
-import { ClickHouseDBRepositoryModuleOptions } from './clickhouse.repository.definitions';
+import { ClickHouseDBRepositoryModuleOptions } from './clickhouse.repository.definitions.js';
+import { ClickHouseDBRepository } from './clickhouse.repository.js';
 
-import { Constants } from '../common/definitions';
-import { ClickHouseEntityManager } from '../entityManager';
+import { Constants } from '../common/definitions/common.constants.js';
+import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
 
 @Module({})
 export class ClickHouseDBRepositoryModule {

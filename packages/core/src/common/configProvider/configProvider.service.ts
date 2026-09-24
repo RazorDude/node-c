@@ -15,10 +15,10 @@ import {
   LoadConfigAppConfigs,
   LoadConfigOptions,
   RDBType
-} from './configProvider.definitions';
+} from './configProvider.definitions.js';
 
-import { Constants } from '../definitions';
-import { setNested } from '../utils';
+import { Constants } from '../definitions/common.constants.js';
+import { setNested } from '../utils/setNested/setNested.method.js';
 
 @Injectable()
 export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfigDefault> {
@@ -92,9 +92,11 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       )
     );
     // write the Datasource file
-    const entitiesPathInProject = path.join(modulePathInProject, entitiesPathInModule);
+    const entitiesPathInProject = path
+      .join(modulePathInProject, entitiesPathInModule, `${moduleName}.entities.js`)
+      .replace('src/', 'dist/');
     await fs.writeFile(
-      path.join(projectRootPath, `datasource-${moduleName}-${environment}.ts`),
+      path.join(projectRootPath, `datasource-${moduleName}-${environment}.js`),
       "import { loadDynamicModules } from '@node-c/core';\n" +
         '\n' +
         "import { DataSource } from 'typeorm';\n" +
@@ -105,11 +107,16 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         '\n' +
         'export default new DataSource({\n' +
         `  database: '${moduleConfig.database}',\n` +
-        '  entities: entities as unknown as string[],\n' +
+        '  entities,\n' +
         `  host: '${moduleConfig.host}',\n` +
         '  logging: false,\n' +
-        `  migrations: [${ormconfigMigrations.map(item => `'${item.replace(projectRootPath.replace(/\/$/, ''), '.')}'`).join(', ')}],\n` +
-        `  name: '${moduleConfig.connectionName}',\n` +
+        `  migrations: [${ormconfigMigrations
+          .map(
+            item =>
+              `'${item.replace(projectRootPath.replace(/\/$/, ''), '.').replace('src/', 'dist/').replace(/\.ts$/, '.js')}'`
+          )
+          .join(', ')}],\n` +
+        // `  name: '${moduleConfig.connectionName}',\n` +
         `  password: '${moduleConfig.password}',\n` +
         `  port: ${moduleConfig.port},\n` +
         '  subscribers: [],\n' +

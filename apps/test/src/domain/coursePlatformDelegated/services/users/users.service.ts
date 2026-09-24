@@ -10,14 +10,15 @@ import {
   LoggerService
 } from '@node-c/core';
 
-import { DataAuditUserLoginLog, DataAuditUserLoginLogsService } from '../../../../data/audit';
-import { DataCacheUsersEntityService } from '../../../../data/cache';
+import { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
 import {
-  DataDBUser,
   DataDBUsersCreateUserData,
-  DataDBUsersService,
   DataDBUsersUpdateUserData
-} from '../../../../data/db';
+} from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainCoursePlatformDelegatedUsersService extends DomainEntityService<

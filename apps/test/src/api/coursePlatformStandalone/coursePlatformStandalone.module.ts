@@ -7,14 +7,12 @@ import {
 } from '@node-c/api-http';
 import { Constants as NodeCDomainIAMConstants } from '@node-c/domain-iam';
 
-import * as FolderData from './controllers';
+import * as FolderData from './controllers/coursePlatformStandalone.controllers.js';
 
-import { Constants } from '../../common/definitions';
-import {
-  DomainCoursePlatformStandaloneAuthenticationManagerService,
-  DomainCoursePlatformStandaloneAuthorizationService,
-  DomainCoursePlatformStandaloneTokenManagerService
-} from '../../domain/coursePlatformStandalone';
+import { Constants } from '../../common/definitions/common.constants.js';
+import { DomainCoursePlatformStandaloneAuthenticationManagerService } from '../../domain/coursePlatformStandalone/services/authenticationManager/authenticationManager.service.js';
+import { DomainCoursePlatformStandaloneAuthorizationService } from '../../domain/coursePlatformStandalone/services/authorization/authorization.service.js';
+import { DomainCoursePlatformStandaloneTokenManagerService } from '../../domain/coursePlatformStandalone/services/tokenManager/tokenManager.service.js';
 
 @Module({})
 export class APICoursePlatformStandaloneModule extends BaseHTTPAPIModule {

@@ -16,15 +16,17 @@ import {
 
 import ld from 'lodash';
 
-import { Constants } from '../../../../common/definitions';
-import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth';
-import { DataDBUser, DataDBUsersDataEntityServiceData } from '../../../../data/db';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 
-import { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta';
-import { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer';
-import { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal';
-import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager';
-import { DomainCoursePlatformStandaloneUsersService, DomainCoursePlatformStandaloneUsersServiceData } from '../users';
+import { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+import { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer/authenticationPassthroughConsumer.service.js';
+import { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
+import { DomainCoursePlatformStandaloneUsersServiceData } from '../users/users.definitions.js';
+import { DomainCoursePlatformStandaloneUsersService } from '../users/users.service.js';
 
 // TODO: inject passthrough consumer after the standalone authentication finishes
 @Injectable()

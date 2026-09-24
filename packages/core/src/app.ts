@@ -5,10 +5,10 @@ import {
   AppConfig,
   AppConfigDataRDB,
   ConfigProviderModuleOptions,
-  ConfigProviderService,
   RDBType
-} from './common/configProvider';
-import { LoggerService } from './common/logger';
+} from './common/configProvider/configProvider.definitions.js';
+import { ConfigProviderService } from './common/configProvider/configProvider.service.js';
+import { LoggerService } from './common/logger/logger.service.js';
 
 export interface NodeCAppGenerateOrmConfigModuleOptions {
   [moduleName: string]: {

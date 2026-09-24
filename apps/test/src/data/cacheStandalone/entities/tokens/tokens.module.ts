@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/data-redis';
 
-import { DataCacheStandaloneTokenSchema } from './tokens.entity';
-import { DataCacheStandaloneTokensEntityService } from './tokens.service';
+import { DataCacheStandaloneTokenSchema } from './tokens.entity.js';
+import { DataCacheStandaloneTokensEntityService } from './tokens.service.js';
 
-import { Constants } from '../../../../common/definitions';
+import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

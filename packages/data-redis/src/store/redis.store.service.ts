@@ -11,13 +11,13 @@ import {
   NoSQLType
 } from '@node-c/core';
 
-import Redis, { ChainableCommander, Cluster, ClusterOptions, RedisOptions } from 'ioredis';
-import Valkey from 'iovalkey';
+import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
+import Valkey, { ClusterOptions as ValkeyClusterOptions } from 'iovalkey';
 import { v4 as uuid } from 'uuid';
 
-import { GetOptions, ScanOptions, SetOptions, StoreDeleteOptions } from './redis.store.definitions';
+import { GetOptions, ScanOptions, SetOptions, StoreDeleteOptions } from './redis.store.definitions.js';
 
-import { Constants } from '../common/definitions';
+import { Constants } from '../common/definitions/common.constants.js';
 
 // TODO: support switching between hashmap and non-hashmap methods (e.g. hget/get) on the method basis, rather than
 // for the whole store
@@ -34,7 +34,7 @@ export class RedisStoreService {
     protected configProvider: ConfigProviderService,
     @Inject(Constants.REDIS_CLIENT)
     // eslint-disable-next-line no-unused-vars
-    protected client: Redis | Cluster,
+    protected client: Redis.default | Cluster,
     @Inject(CoreConstants.DATA_MODULE_NAME)
     protected dataModuleName: string
   ) {
@@ -51,7 +51,7 @@ export class RedisStoreService {
   static async createClient(
     config: AppConfig,
     options: { dataModuleName: string; logger: LoggerService }
-  ): Promise<Redis | Cluster> {
+  ): Promise<Redis.default | Cluster> {
     const { dataModuleName, logger } = options;
     const {
       clusterMode,
@@ -72,7 +72,7 @@ export class RedisStoreService {
     const actualPort = port || 6379;
     const actualUser = user?.length ? user : undefined;
     const clientOptions: {
-      clusterRetryStrategy?: ClusterOptions['clusterRetryStrategy'];
+      clusterRetryStrategy?: ValkeyClusterOptions['clusterRetryStrategy'];
       maxRetriesPerRequest?: RedisOptions['maxRetriesPerRequest'];
       retryStrategy?: RedisOptions['retryStrategy'];
       sentinelRetryStrategy?: RedisOptions['sentinelRetryStrategy'];
@@ -115,7 +115,7 @@ export class RedisStoreService {
         clientOptions.maxRetriesPerRequest = 0;
         clientOptions.sentinelRetryStrategy = retryMethod;
       }
-      const SentinelConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
+      const SentinelConstructor = type === NoSQLType.Valkey ? Valkey.default : Redis.default;
       const client = new SentinelConstructor({
         ...clientOptions,
         lazyConnect: true,
@@ -144,13 +144,13 @@ export class RedisStoreService {
         }
         client.disconnect();
       }
-      return client as Redis;
+      return client as Redis.default;
     }
     if (!failOnConnectionError) {
       clientOptions.maxRetriesPerRequest = 0;
       clientOptions.retryStrategy = retryMethod;
     }
-    const ClientConstructor = type === NoSQLType.Valkey ? Valkey : Redis;
+    const ClientConstructor = type === NoSQLType.Valkey ? Valkey.default : Redis.default;
     const client = new ClientConstructor({
       ...clientOptions,
       host: actualHost,
@@ -174,7 +174,7 @@ export class RedisStoreService {
       }
       client.disconnect();
     }
-    return client as Redis;
+    return client as Redis.default;
   }
 
   createTransaction(): string {

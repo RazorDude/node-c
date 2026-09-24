@@ -2,7 +2,7 @@ import path from 'path';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import * as NestjsPino from 'nestjs-pino';
+import * as NestjsPino from '@node-c/nestjs-pino';
 import { v4 as uuid } from 'uuid';
 
 export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {

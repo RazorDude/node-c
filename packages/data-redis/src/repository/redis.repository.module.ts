@@ -2,11 +2,11 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import { Constants as CoreConstants } from '@node-c/core';
 
-import { RedisRepositoryModuleOptions } from './redis.repository.definitions';
-import { RedisRepositoryService } from './redis.repository.service';
+import { RedisRepositoryModuleOptions } from './redis.repository.definitions.js';
+import { RedisRepositoryService } from './redis.repository.service.js';
 
-import { Constants } from '../common/definitions';
-import { RedisStoreService } from '../store';
+import { Constants } from '../common/definitions/common.constants.js';
+import { RedisStoreService } from '../store/redis.store.service.js';
 
 @Module({})
 export class RedisRepositoryModule {

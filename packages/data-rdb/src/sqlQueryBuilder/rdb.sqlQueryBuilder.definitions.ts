@@ -1,6 +1,6 @@
 import { DataOrderBy, GenericObject } from '@node-c/core';
 
-import { RDBEntityManager } from '../repository';
+import { RDBEntityManager } from '../repository/rdb.repository.js';
 
 export interface BuildQueryOptions {
   currentEntityName: string;

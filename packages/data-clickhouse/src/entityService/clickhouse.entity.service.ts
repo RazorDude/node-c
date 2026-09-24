@@ -1,7 +1,8 @@
 import { ConfigProviderService, DataDefaultData, GenericObject, LoggerService } from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { ClickHouseDBEntitySchema, ClickHouseDBRepository } from '../repository';
+import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
+import { ClickHouseDBRepository } from '../repository/clickhouse.repository.js';
 
 export class ClickHouseDBEntityService<
   Entity extends GenericObject,

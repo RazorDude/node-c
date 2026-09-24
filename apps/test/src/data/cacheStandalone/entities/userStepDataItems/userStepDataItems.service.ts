@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigProviderService, LoggerService } from '@node-c/core';
 import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/data-redis';
 
-import { DataCacheStandaloneUserStepDataItem } from './userStepDataItems.entity';
+import { DataCacheStandaloneUserStepDataItem } from './userStepDataItems.entity.js';
 
 @Injectable()
 export class DataCacheStandaloneUserStepDataItemsEntityService extends RedisEntityService<DataCacheStandaloneUserStepDataItem> {

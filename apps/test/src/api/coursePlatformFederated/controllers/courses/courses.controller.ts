@@ -5,8 +5,8 @@ import { RESTAPIEntityControler } from '@node-c/api-rest';
 
 import { LoggerService } from '@node-c/core';
 
-import { DataDBCourse } from '../../../../data/db';
-import { DomainCoursePlatformFederatedCoursesService } from '../../../../domain/coursePlatformFederated';
+import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
+import { DomainCoursePlatformFederatedCoursesService } from '../../../../domain/coursePlatformFederated/services/courses/courses.service.js';
 
 @AccessControlContext('CoursePlatformCoursesEntityController')
 @Injectable()

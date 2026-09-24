@@ -8,10 +8,10 @@ import {
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteOptions,
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteResult,
   DomainCoursePlatformStandaloneAuthenticationUserLocalUserFields
-} from './authenticationUserLocal.definitions';
+} from './authenticationUserLocal.definitions.js';
 
-import { Constants } from '../../../../common/definitions';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 /**
  * User & Password authentication as a standalone service. Its output can be used for the Passthrough service.
  */

@@ -21,7 +21,7 @@ import {
   IAMAuthenticationOktaInitiateResult,
   IAMAuthenticationOktaRefreshExternalAccessTokenData,
   IAMAuthenticationOktaRefreshExternalAccessTokenResult
-} from './iam.authenticationOkta.definitions';
+} from './iam.authenticationOkta.definitions.js';
 
 /**
  * A service for integrating Okta OIDC auth. It extends the Domain-IAM-OAuth2.

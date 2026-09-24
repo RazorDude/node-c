@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { AppConfigCommon, EndpointSecurityMode, HttpMethod, NoSQLType, RDBType } from '@node-c/core';
 
-import { Constants } from '../common/definitions';
+import { Constants } from '../common/definitions/common.constants.js';
 
 export const appConfigCommon: AppConfigCommon = {
   api: {
@@ -136,7 +136,7 @@ export const appConfigCommon: AppConfigCommon = {
   },
   general: {
     projectName: 'node-c-test-app',
-    projectRootPath: path.resolve(__dirname, '../../'),
+    projectRootPath: path.resolve(import.meta.dirname, '../../'),
     projectVersion: '1.0.0'
   },
   data: {

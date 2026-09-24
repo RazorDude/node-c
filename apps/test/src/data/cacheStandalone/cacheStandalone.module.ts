@@ -2,9 +2,9 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import { RedisModule } from '@node-c/data-redis';
 
-import * as FolderData from './entities';
+import * as FolderData from './entities/cacheStandalone.entities.js';
 
-import { Constants } from '../../common/definitions';
+import { Constants } from '../../common/definitions/common.constants.js';
 
 @Module({})
 export class DataCacheStandaloneModule extends RedisModule {

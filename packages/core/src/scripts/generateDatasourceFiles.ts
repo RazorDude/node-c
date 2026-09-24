@@ -4,9 +4,9 @@ import {
   AppConfigDataRDB,
   AppEnvironment,
   ConfigProviderModuleOptions,
-  ConfigProviderService,
   RDBType
-} from '../common/configProvider';
+} from '../common/configProvider/configProvider.definitions.js';
+import { ConfigProviderService } from '../common/configProvider/configProvider.service.js';
 
 (async () => {
   const logPrefix = '[Node-C][generateDatasourceFiles]';

@@ -1,2 +1,2 @@
-export * from './config.profile.local';
-export * from './config.profile.endToEndTests';
+export * from './config.profile.local.js';
+export * from './config.profile.endToEndTests.js';

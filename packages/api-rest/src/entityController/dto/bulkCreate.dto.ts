@@ -1,8 +1,8 @@
 import { ArrayNotEmpty, IsArray, IsDefined } from 'class-validator';
 
-import { BaseDto } from './base.dto';
+import { BaseDto } from './base.dto.js';
 
-import { BulkCreateBody, BulkCreateOptions } from '../rest.entity.controller.definitions';
+import { BulkCreateBody, BulkCreateOptions } from '../rest.entity.controller.definitions.js';
 
 export class BulkCreateDto<Entity, Options extends BulkCreateOptions<Entity>>
   extends BaseDto<Options>

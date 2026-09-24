@@ -2,7 +2,7 @@ import type { DataOrderByDirection, DomainFindOptions, GenericObject } from '@no
 
 import { IsArray, IsBooleanString, IsNotEmptyObject, IsNumberString, IsObject, IsOptional } from 'class-validator';
 
-import { BaseDto } from './base.dto';
+import { BaseDto } from './base.dto.js';
 
 export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options> implements DomainFindOptions {
   @IsNotEmptyObject()

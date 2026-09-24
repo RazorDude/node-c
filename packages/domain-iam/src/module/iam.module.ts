@@ -2,9 +2,9 @@ import { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 
-import { DomainIAMModuleOptions } from './iam.definitions';
+import { DomainIAMModuleOptions } from './iam.definitions.js';
 
-import { Constants } from '../common/definitions';
+import { Constants } from '../common/definitions/common.constants.js';
 
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {

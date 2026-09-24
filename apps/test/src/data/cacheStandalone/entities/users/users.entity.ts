@@ -1,8 +1,8 @@
 import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 import { IAMUserWithPermissionsData } from '@node-c/domain-iam';
 
-import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase';
-import { DataDBUser } from '../../../db';
+import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
+import { DataDBUser } from '../../../db/entities/users/users.entity.js';
 
 const defaultSchema = getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'user');
 

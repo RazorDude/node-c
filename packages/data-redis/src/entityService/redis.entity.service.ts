@@ -29,15 +29,15 @@ import {
   ServiceSaveOptions,
   UpdateOptions,
   UpdatePrivateOptions
-} from './redis.entity.service.definitions';
+} from './redis.entity.service.definitions.js';
 
-import { RedisRepositoryService } from '../repository';
-import { RedisStoreService } from '../store';
+import { RedisRepositoryService } from '../repository/redis.repository.service.js';
+import { RedisStoreService } from '../store/redis.store.service.js';
 
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
 export class RedisEntityService<Entity extends object> extends DataEntityService<Entity> {
-  protected settings: AppConfigCommonDataNoSQLEntityServiceSettings;
+  declare protected settings: AppConfigCommonDataNoSQLEntityServiceSettings;
 
   constructor(
     protected configProvider: ConfigProviderService,
@@ -101,13 +101,14 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       return result;
     }
     const { processInputAllowedFieldsEnabled, ttl, validate } = actualPrivateOptions;
-    return await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
+    const saveResult = await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
       generatePrimaryKeys: false,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
       transactionId,
       ttl,
       validate
     });
+    return saveResult instanceof Array ? saveResult[0] : saveResult;
   }
 
   async delete(options: DeleteOptions, privateOptions?: DeletePrivateOptions): Promise<DataDeleteResult<Entity>> {

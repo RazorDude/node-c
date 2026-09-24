@@ -3,7 +3,7 @@ import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 
 import ld from 'lodash';
 
-import { getDefaultEntitySchema } from '../../../cacheBase';
+import { getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
 
 export interface DataCacheAuthUserStepDataItem extends GenericObject<unknown> {
   codeVerifier: string;

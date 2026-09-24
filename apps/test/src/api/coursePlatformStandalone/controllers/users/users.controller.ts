@@ -10,16 +10,16 @@ import {
   LoggerService
 } from '@node-c/core';
 
-import {
-  APICoursePlatformStandaloneUsersAuthenticateDto,
-  APICoursePlatformStandaloneUsersAuthenticateOAuth2CallbackDto
-} from './dto';
+import { APICoursePlatformStandaloneUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import { APICoursePlatformStandaloneUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 
-import { DataDBUser, DataDBUsersCreateUserData, DataDBUsersUpdateUserData } from '../../../../data/db';
 import {
-  DomainCoursePlatformStandaloneAuthenticationManagerService,
-  DomainCoursePlatformStandaloneUsersService
-} from '../../../../domain/coursePlatformStandalone';
+  DataDBUsersCreateUserData,
+  DataDBUsersUpdateUserData
+} from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DomainCoursePlatformStandaloneAuthenticationManagerService } from '../../../../domain/coursePlatformStandalone/services/authenticationManager/authenticationManager.service.js';
+import { DomainCoursePlatformStandaloneUsersService } from '../../../../domain/coursePlatformStandalone/services/users/users.service.js';
 
 @NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

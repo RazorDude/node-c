@@ -1,8 +1,8 @@
 import { ApplicationError, DataOrderByDirection, GenericObject } from '@node-c/core';
 import { OrmDeleteQueryBuilder, OrmSelectQueryBuilder, OrmUpdateQueryBuilder } from '@node-c/data-rdb';
 
-import { ClickHouseEntityManager } from '../entityManager';
-import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions';
+import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
+import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
 
 // TODO: field selection, join, update, delete
 export class ClickHouseSelectQueryBuilder<

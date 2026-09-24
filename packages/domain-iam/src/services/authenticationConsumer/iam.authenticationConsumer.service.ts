@@ -23,9 +23,9 @@ import {
   IAMAuthenticationConsumerInitiateResult,
   IAMAuthenticationConsumerRefreshExternalAccessTokenData,
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
-} from './iam.authenticationConsumer.definitions';
+} from './iam.authenticationConsumer.definitions.js';
 
-import { IAMAuthenticationService } from '../authentication';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
 /**
  * The base service for integrating authenticationServices via other Node-C Apps as a consumer.

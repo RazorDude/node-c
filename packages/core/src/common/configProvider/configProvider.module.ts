@@ -1,9 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigProviderModuleOptions } from './configProvider.definitions';
-import { ConfigProviderService } from './configProvider.service';
+import { ConfigProviderModuleOptions } from './configProvider.definitions.js';
+import { ConfigProviderService } from './configProvider.service.js';
 
-import { Constants } from '../definitions';
+import { Constants } from '../definitions/common.constants.js';
 
 @Module({})
 export class ConfigProviderModule {

@@ -2,7 +2,7 @@ import * as NodeCCore from '@node-c/core';
 
 import { IsBoolean, IsDefined, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 
-import { BaseDto } from './base.dto';
+import { BaseDto } from './base.dto.js';
 
 export class DeleteDto<Options extends NodeCCore.DomainDeleteOptions>
   extends BaseDto<Options>

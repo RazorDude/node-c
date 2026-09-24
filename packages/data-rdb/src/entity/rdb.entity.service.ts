@@ -14,7 +14,7 @@ import {
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
-import { RDBEntitySchema } from './rdb.entity.schema';
+import { RDBEntitySchema } from './rdb.entity.schema.js';
 import {
   BulkCreateOptions,
   BulkCreatePrivateOptions,
@@ -33,15 +33,18 @@ import {
   // ProcessRelationsDataOptions,
   UpdateOptions,
   UpdatePrivateOptions
-} from './rdb.entity.service.definitions';
+} from './rdb.entity.service.definitions.js';
 
-import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder';
-import { RDBEntityManager, RDBRepository } from '../repository';
-import { IncludeItems, ParsedFilter, SQLQueryBuilderService } from '../sqlQueryBuilder';
+import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import { RDBEntityManager, RDBRepository } from '../repository/rdb.repository.js';
+import { IncludeItems, ParsedFilter } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.definitions.js';
+import { SQLQueryBuilderService } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.service.js';
 
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)
 // TODO: enforce the above to be always set to the primary key for the count method
 // TODO: support update of multiple items in the update method
+// TODO: automatic processManyToMany
+// TODO: bulkUpdate and bulkUpsert methods
 export class RDBEntityService<
   Entity extends GenericObject<unknown>,
   Data extends DataDefaultData<Entity> = DataDefaultData<Entity>
@@ -189,6 +192,7 @@ export class RDBEntityService<
     return saveResult;
   }
 
+  // TODO: functionality for preventing delete while certain relations exist
   async delete(options: DeleteOptions, privateOptions?: DeletePrivateOptions): Promise<DataDeleteResult<Entity>> {
     const { filters, forceTransaction, returnOriginalItems, transactionManager, softDelete = true } = options;
     const actualPrivateOptions = privateOptions || {};
@@ -658,7 +662,6 @@ export class RDBEntityService<
       // TODO: consider using generatedMaps, instead of raw (only applies to returningSupported=true)
       dataToReturn.count = (result.raw as Entity[]).length;
       dataToReturn.items = result.raw as Entity[];
-      // TODO: automatic processManyToMany
     } else {
       const result = await queryBuilder.execute();
       dataToReturn.count = typeof result.affected === 'number' ? result.affected : undefined;

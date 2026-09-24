@@ -13,7 +13,7 @@ import {
   DataUpdatePrivateOptions
 } from '@node-c/core';
 
-import { RDBEntityManager } from '../repository';
+import { RDBEntityManager } from '../repository/rdb.repository.js';
 
 export interface BaseOptions {
   forceTransaction?: boolean;

@@ -19,9 +19,9 @@ import {
   IAMAuthenticationVerifyExternalAccessTokenData,
   IAMAuthenticationVerifyExternalAccessTokenResult,
   IAMAuthenticationVerifyTokenOptions
-} from './iam.authentication.definitions';
+} from './iam.authentication.definitions.js';
 
-import { Constants } from '../../common/definitions';
+import { Constants } from '../../common/definitions/common.constants.js';
 
 export class IAMAuthenticationService<CompleteContext extends object, InitiateContext extends object> {
   protected isLocal: boolean;

@@ -3,15 +3,17 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
-import { Constants } from '../../../../common/definitions';
-import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth';
-import { DataDBUser, DataDBUsersDataEntityServiceData } from '../../../../data/db';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 
-import { DomainIAMAuthenticationOktaService } from '../authenticationOkta';
-import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough';
-import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal';
-import { DomainIAMTokenManagerService } from '../tokenManager';
-import { DomainIAMUsersDomainEntityServiceData, DomainIAMUsersService } from '../users';
+import { DomainIAMAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough/authenticationPassthrough.service.js';
+import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+import { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
+import { DomainIAMUsersDomainEntityServiceData } from '../users/users.definitions.js';
+import { DomainIAMUsersService } from '../users/users.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationManagerService extends IAMAuthenticationManagerService<

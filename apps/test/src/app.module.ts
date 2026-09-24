@@ -9,26 +9,26 @@ import {
   DEFAULT_PINO_PARAMS,
   LoggerModule
 } from '@node-c/core';
+import { Params } from '@node-c/nestjs-pino';
 
 import ld from 'lodash';
-import { Params } from 'nestjs-pino';
 
-import { APICoursePlatformDelegatedModule } from './api/coursePlatformDelegated';
-import { APICoursePlatformFederatedModule } from './api/coursePlatformFederated';
-import { APICoursePlatformStandaloneModule } from './api/coursePlatformStandalone';
-import { APISSOModule } from './api/sso';
-import * as AppConfigs from './config';
-import { DataAuditModule } from './data/audit';
-import { DataCacheModule } from './data/cache';
-import { DataCacheAuthModule } from './data/cacheAuth';
-import { DataCacheFederatedModule } from './data/cacheFederated';
-import { DataCacheStandaloneModule } from './data/cacheStandalone';
-import { DataDBModule } from './data/db';
-import { DataDBConfigsModule } from './data/dbConfigs';
-import { DomainCoursePlatformDelegatedModule } from './domain/coursePlatformDelegated';
-import { DomainCoursePlatformFederatedModule } from './domain/coursePlatformFederated';
-import { DomainCoursePlatformStandaloneModule } from './domain/coursePlatformStandalone';
-import { DomainIAMModule } from './domain/iam';
+import { APICoursePlatformDelegatedModule } from './api/coursePlatformDelegated/coursePlatformDelegated.module.js';
+import { APICoursePlatformFederatedModule } from './api/coursePlatformFederated/coursePlatformFederated.module.js';
+import { APICoursePlatformStandaloneModule } from './api/coursePlatformStandalone/coursePlatformStandalone.module.js';
+import { APISSOModule } from './api/sso/sso.module.js';
+import * as AppConfigs from './config/config.js';
+import { DataAuditModule } from './data/audit/audit.module.js';
+import { DataCacheModule } from './data/cache/cache.module.js';
+import { DataCacheAuthModule } from './data/cacheAuth/cacheAuth.module.js';
+import { DataCacheFederatedModule } from './data/cacheFederated/cacheFederated.module.js';
+import { DataCacheStandaloneModule } from './data/cacheStandalone/cacheStandalone.module.js';
+import { DataDBModule } from './data/db/db.module.js';
+import { DataDBConfigsModule } from './data/dbConfigs/dbConfigs.module.js';
+import { DomainCoursePlatformDelegatedModule } from './domain/coursePlatformDelegated/coursePlatformDelegated.module.js';
+import { DomainCoursePlatformFederatedModule } from './domain/coursePlatformFederated/coursePlatformFederated.module.js';
+import { DomainCoursePlatformStandaloneModule } from './domain/coursePlatformStandalone/coursePlatformStandalone.module.js';
+import { DomainIAMModule } from './domain/iam/iam.module.js';
 
 export class AppModuleBase {
   static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {

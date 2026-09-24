@@ -25,12 +25,14 @@ import {
   DomainUpdateOptions,
   DomainUpdatePrivateOptions,
   DomainUpdateResult
-} from './domain.entity.service.definitions';
+} from './domain.entity.service.definitions.js';
 
-import { ApplicationError, GenericObject } from '../../common/definitions';
+import { GenericObject } from '../../common/definitions/common.definitions.js';
+import { ApplicationError } from '../../common/definitions/common.errors.js';
 
-import { LoggerService } from '../../common/logger';
-import { DataDefaultData, DataEntityService, DataFindResults } from '../../data/entityService';
+import { LoggerService } from '../../common/logger/logger.service.js';
+import { DataDefaultData, DataFindResults } from '../../data/entityService/data.entity.service.definitions.js';
+import { DataEntityService } from '../../data/entityService/data.entity.service.js';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<
@@ -38,8 +40,7 @@ export class DomainEntityService<
   EntityService extends DataEntityService<Entity, DataEntityServiceData>,
   Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
   AdditionalEntityServices extends
-    | Record<string, DataEntityService<Partial<Entity>, DataDefaultData<object>>>
-    | undefined = undefined,
+    Record<string, DataEntityService<Partial<Entity>, DataDefaultData<object>>> | undefined = undefined,
   DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
   constructor(
@@ -203,13 +204,21 @@ export class DomainEntityService<
         optionsOverridesByService
       }
     );
+    this.logger.log('DomainEntityService: ====>', { options, privateOptions });
     if (saveAdditionalResultsInFirstService && resultsByService) {
       const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService?.items?.length) {
-        await this.dataEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
+        const bulkCreateResult = await this.dataEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
         if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
+        } else {
+          result = {
+            items: bulkCreateResult,
+            more: false,
+            page: 1,
+            perPage: bulkCreateResult.length
+          }
         }
       }
     }

@@ -7,7 +7,7 @@ import {
   IAMMFAInitiateData,
   IAMMFAInitiateOptions,
   IAMMFAInitiateResult
-} from './iam.mfa.definitions';
+} from './iam.mfa.definitions.js';
 
 // TODO: local MFA implementation
 export class IAMMFAService<CompleteContext extends object, InitiateContext extends object = object> {

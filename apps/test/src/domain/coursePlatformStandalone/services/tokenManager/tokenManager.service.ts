@@ -3,12 +3,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
 import { IAMTokenManagerService as BaseIAMTokenManagerService } from '@node-c/domain-iam';
 
-import { Constants } from '../../../../common/definitions';
-import { DataCacheStandaloneToken } from '../../../../data/cacheStandalone';
-import { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta';
-import { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer';
-import { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal';
-import { DomainCoursePlatformStandaloneTokensService } from '../tokens';
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { DataCacheStandaloneToken } from '../../../../data/cacheStandalone/entities/tokens/tokens.entity.js';
+import { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+import { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer/authenticationPassthroughConsumer.service.js';
+import { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+import { DomainCoursePlatformStandaloneTokensService } from '../tokens/tokens.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneTokenManagerService extends BaseIAMTokenManagerService<DataCacheStandaloneToken> {
