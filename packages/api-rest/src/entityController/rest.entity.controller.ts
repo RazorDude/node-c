@@ -8,12 +8,15 @@ import {
   Patch,
   Post,
   Query,
-  Type,
+  type Type,
   UseInterceptors,
   ValidationPipe
 } from '@nestjs/common';
 
-import { HTTPAccessControlInterceptor, HTTPErrorInterceptor } from '@node-c/api-http';
+import {
+  HTTPAccessControlInterceptor,
+  HTTPErrorInterceptor
+} from '@node-c/api-http';
 
 import type {
   DataDefaultData,
@@ -42,62 +45,85 @@ import type {
   DefaultDomainEntityService,
   UpdateBody
 } from './rest.entity.controller.definitions.js';
-import { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
+import type { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
 
 // TODO: a middleware for converting string booleans to booleans
 // TODO: add the ability to specify which dataServices are exposed by the domainService and for which methods
 @UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)
 export class RESTAPIEntityControlerWithoutDto<
   Entity,
-  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, DataEntityServiceData>,
-  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
+  EntityDomainService extends DefaultDomainEntityService<
+    Entity,
+    DomainEntityServiceData,
+    DataEntityServiceData
+  >,
+  DomainEntityServiceData extends
+    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  DataEntityServiceData extends
+    DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
   inUseDefaultRoutes: { [handlerName: string]: boolean };
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected domainEntityService: EntityDomainService,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected defaultRouteMethods?: string[]
   ) {
     this.refreshDefaultRoutes();
   }
 
   protected checkRoute(handlerName: string): void {
-    if (!this.inUseDefaultRoutes || !this.inUseDefaultRoutes[handlerName]) {
+    if (!this.inUseDefaultRoutes[handlerName]) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
   }
 
-  public bulkCreate(_body: BulkCreateBody<Entity>, ..._args: unknown[]): Promise<DomainBulkCreateResult<Entity> | void>;
+  public bulkCreate(
+    _body: BulkCreateBody<Entity>,
+    ..._args: unknown[]
+  ): Promise<DomainBulkCreateResult<Entity> | void>;
   @Post('bulk')
-  async bulkCreate(@Body() body: BulkCreateBody<Entity>): Promise<DomainBulkCreateResult<Entity>> {
+  async bulkCreate(
+    @Body() body: BulkCreateBody<Entity>
+  ): Promise<DomainBulkCreateResult<Entity>> {
     this.checkRoute('bulkCreate');
     const { data, ...options } = body;
     return await this.domainEntityService.bulkCreate(data, options);
   }
 
-  public create(_body: CreateBody<Entity>, ..._args: unknown[]): Promise<DomainCreateResult<Entity> | void>;
+  public create(
+    _body: CreateBody<Entity>,
+    ..._args: unknown[]
+  ): Promise<DomainCreateResult<Entity> | void>;
   @Post()
-  async create(@Body() body: CreateBody<Entity>): Promise<DomainCreateResult<Entity>> {
+  async create(
+    @Body() body: CreateBody<Entity>
+  ): Promise<DomainCreateResult<Entity>> {
     this.checkRoute('create');
     const { data, ...options } = body;
     return await this.domainEntityService.create(data, options);
   }
 
-  public delete(_body: DomainDeleteOptions, ..._args: unknown[]): Promise<DomainDeleteResult<Entity> | void>;
+  public delete(
+    _body: DomainDeleteOptions,
+    ..._args: unknown[]
+  ): Promise<DomainDeleteResult<Entity> | void>;
   @Delete()
-  async delete(@Body() body: DomainDeleteOptions): Promise<DomainDeleteResult<Entity>> {
+  async delete(
+    @Body() body: DomainDeleteOptions
+  ): Promise<DomainDeleteResult<Entity>> {
     this.checkRoute('delete');
     return await this.domainEntityService.delete(body);
   }
 
-  public find(_query: DomainFindOptions, ..._args: unknown[]): Promise<DomainFindResult<Entity> | void>;
+  public find(
+    _query: DomainFindOptions,
+    ..._args: unknown[]
+  ): Promise<DomainFindResult<Entity> | void>;
   @Get()
-  async find(@Query() query: DomainFindOptions): Promise<DomainFindResult<Entity> | void> {
+  async find(
+    @Query() query: DomainFindOptions
+  ): Promise<DomainFindResult<Entity> | void> {
     this.checkRoute('find');
     return await this.domainEntityService.find(query);
   }
@@ -125,14 +151,21 @@ export class RESTAPIEntityControlerWithoutDto<
   refreshDefaultRoutes(newDefaultRoutes?: string[]): void {
     const defaultRouteMethods = newDefaultRoutes || this.defaultRouteMethods;
     this.inUseDefaultRoutes = {};
-    if (defaultRouteMethods instanceof Array) {
-      defaultRouteMethods.forEach(item => (this.inUseDefaultRoutes[item] = true));
+    if (Array.isArray(defaultRouteMethods)) {
+      defaultRouteMethods.forEach((item) => {
+        this.inUseDefaultRoutes[item] = true;
+      });
     }
   }
 
-  public update(_body: UpdateBody<Entity>, ..._args: unknown[]): Promise<DomainUpdateResult<Entity> | void>;
+  public update(
+    _body: UpdateBody<Entity>,
+    ..._args: unknown[]
+  ): Promise<DomainUpdateResult<Entity> | void>;
   @Patch()
-  async update(@Body() body: UpdateBody<Entity>): Promise<DomainUpdateResult<Entity>> {
+  async update(
+    @Body() body: UpdateBody<Entity>
+  ): Promise<DomainUpdateResult<Entity>> {
     this.checkRoute('update');
     const { data, ...options } = body;
     return await this.domainEntityService.update(data, options);
@@ -148,12 +181,20 @@ export class RESTAPIEntityControlerWithoutDto<
  */
 export class RESTAPIEntityControler<
   Entity,
-  EntityDomainService extends DefaultDomainEntityService<Entity, DomainEntityServiceData, DataEntityServiceData>,
+  EntityDomainService extends DefaultDomainEntityService<
+    Entity,
+    DomainEntityServiceData,
+    DataEntityServiceData
+  >,
   Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>,
-  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
+  DomainEntityServiceData extends
+    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  DataEntityServiceData extends
+    DataDefaultData<Entity> = DataDefaultData<Entity>
 > extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
-  protected settings: { validationWhitelist?: boolean } = { validationWhitelist: true };
+  protected settings: { validationWhitelist?: boolean } = {
+    validationWhitelist: true
+  };
   protected validationPipe: ValidationPipe;
 
   constructor(
@@ -169,11 +210,17 @@ export class RESTAPIEntityControler<
     protected logger: LoggerService,
     defaultRouteMethods?: string[]
   ) {
-    super(domainEntityService, logger, Object.keys(dto || {}).concat(defaultRouteMethods || []));
+    super(
+      domainEntityService,
+      logger,
+      Object.keys(dto).concat(defaultRouteMethods || [])
+    );
     // const finalDto: typeof dto = {};
     // finalDto.bulkCreate = dto?.bulkCreate || BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
     const { validationWhitelist } = this.settings;
-    this.validationPipe = new ValidationPipe({ whitelist: validationWhitelist });
+    this.validationPipe = new ValidationPipe({
+      whitelist: validationWhitelist
+    });
   }
 
   @Post('bulk')
@@ -186,6 +233,7 @@ export class RESTAPIEntityControler<
         metatype: this.dto.bulkCreate as unknown as Type,
         type: 'body'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }
@@ -201,28 +249,37 @@ export class RESTAPIEntityControler<
         metatype: this.dto.create as unknown as Type,
         type: 'body'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }
 
   @Delete()
-  async delete(@Body() body: Dto['Delete'], ...args: unknown[]): Promise<DomainDeleteResult<Entity> | void> {
+  async delete(
+    @Body() body: Dto['Delete'],
+    ...args: unknown[]
+  ): Promise<DomainDeleteResult<Entity> | void> {
     return await super.delete.apply(this, [
       await this.validationPipe.transform(body, {
         metatype: this.dto.delete as unknown as Type,
         type: 'body'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }
 
   @Get()
-  async find(@Query() query: Dto['Find'], ...args: unknown[]): Promise<DomainFindResult<Entity> | void> {
+  async find(
+    @Query() query: Dto['Find'],
+    ...args: unknown[]
+  ): Promise<DomainFindResult<Entity> | void> {
     return await super.find.apply(this, [
       await this.validationPipe.transform(query, {
         metatype: this.dto.find as unknown as Type,
         type: 'query'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }
@@ -239,6 +296,7 @@ export class RESTAPIEntityControler<
         metatype: this.dto.findOne as unknown as Type,
         type: 'query'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }
@@ -252,22 +310,28 @@ export class RESTAPIEntityControler<
     update: DefaultDtos<EntityForDtos>['Update'];
   } {
     return {
-      bulkCreate: BaseBulkCreateDto as unknown as DefaultDtos<EntityForDtos>['BulkCreate'],
+      bulkCreate:
+        BaseBulkCreateDto as unknown as DefaultDtos<EntityForDtos>['BulkCreate'],
       create: BaseCreateDto as unknown as DefaultDtos<EntityForDtos>['Create'],
       delete: BaseDeleteDto as unknown as DefaultDtos<EntityForDtos>['Delete'],
       find: BaseFindDto as unknown as DefaultDtos<EntityForDtos>['Find'],
-      findOne: BaseFindOneDto as unknown as DefaultDtos<EntityForDtos>['FindOne'],
+      findOne:
+        BaseFindOneDto as unknown as DefaultDtos<EntityForDtos>['FindOne'],
       update: BaseUpdateDto as unknown as DefaultDtos<EntityForDtos>['Update']
     };
   }
 
   @Patch()
-  async update(@Body() body: Dto['Update'], ...args: unknown[]): Promise<DomainUpdateResult<Entity> | void> {
+  async update(
+    @Body() body: Dto['Update'],
+    ...args: unknown[]
+  ): Promise<DomainUpdateResult<Entity> | void> {
     return await super.update.apply(this, [
       await this.validationPipe.transform(body, {
         metatype: this.dto.update as unknown as Type,
         type: 'body'
       }),
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
     ]);
   }

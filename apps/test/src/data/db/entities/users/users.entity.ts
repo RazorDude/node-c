@@ -1,11 +1,14 @@
-import { IAMPermission as BaseIAMPermission } from '@node-c/domain-iam';
+import type { IAMPermission as BaseIAMPermission } from '@node-c/domain-iam';
 
 import { EntitySchema } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
-import { DataDBCourse } from '../courses/courses.entity.js';
-import { DataDBRole } from '../roles/roles.entity.js';
-import { DataDBUserAccountStatus } from '../userAccountStatuses/userAccountStatuses.entity.js';
+import {
+  type DBEntity,
+  DBEntitySchema
+} from '../../../dbBase/entity/base.db.entity.js';
+import type { DataDBCourse } from '../courses/courses.entity.js';
+import type { DataDBRole } from '../roles/roles.entity.js';
+import type { DataDBUserAccountStatus } from '../userAccountStatuses/userAccountStatuses.entity.js';
 
 export interface DataDBUser extends DBEntity {
   accountStatus?: DataDBUserAccountStatus;

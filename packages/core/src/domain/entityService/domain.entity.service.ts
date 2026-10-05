@@ -1,73 +1,74 @@
 import ld from 'lodash';
-
+import type { GenericObject } from '../../common/definitions/common.definitions.js';
+import { ApplicationError } from '../../common/definitions/common.errors.js';
+import type { LoggerService } from '../../common/logger/logger.service.js';
+import type {
+  DataDefaultData,
+  DataFindResults
+} from '../../data/entityService/data.entity.service.definitions.js';
+import type { DataEntityService } from '../../data/entityService/data.entity.service.js';
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
-  DomainBaseAdditionalServiceOptionsOverrides,
-  DomainBulkCreateOptions,
-  DomainBulkCreatePrivateOptions,
-  DomainBulkCreateResult,
-  DomainCreateOptions,
-  DomainCreatePrivateOptions,
-  DomainCreateResult,
+  type DomainBaseAdditionalServiceOptionsOverrides,
+  type DomainBulkCreateOptions,
+  type DomainBulkCreatePrivateOptions,
+  type DomainBulkCreateResult,
+  type DomainCreateOptions,
+  type DomainCreatePrivateOptions,
+  type DomainCreateResult,
   DomainDataEntityServiceType,
-  DomainDeleteOptions,
-  DomainDeletePrivateOptions,
-  DomainDeleteResult,
-  DomainEntityServiceDefaultData,
-  DomainFindOneOptions,
-  DomainFindOnePrivateOptions,
-  DomainFindOneResult,
-  DomainFindOptions,
-  DomainFindPrivateOptions,
-  DomainFindResult,
+  type DomainDeleteOptions,
+  type DomainDeletePrivateOptions,
+  type DomainDeleteResult,
+  type DomainEntityServiceDefaultData,
+  type DomainFindOneOptions,
+  type DomainFindOnePrivateOptions,
+  type DomainFindOneResult,
+  type DomainFindOptions,
+  type DomainFindPrivateOptions,
+  type DomainFindResult,
   DomainMethod,
-  DomainRunMethodInAdditionalServicesOptions,
-  DomainUpdateOptions,
-  DomainUpdatePrivateOptions,
-  DomainUpdateResult
+  type DomainRunMethodInAdditionalServicesOptions,
+  type DomainUpdateOptions,
+  type DomainUpdatePrivateOptions,
+  type DomainUpdateResult
 } from './domain.entity.service.definitions.js';
-
-import { GenericObject } from '../../common/definitions/common.definitions.js';
-import { ApplicationError } from '../../common/definitions/common.errors.js';
-
-import { LoggerService } from '../../common/logger/logger.service.js';
-import { DataDefaultData, DataFindResults } from '../../data/entityService/data.entity.service.definitions.js';
-import { DataEntityService } from '../../data/entityService/data.entity.service.js';
 
 // TODO: privateOptionsOverrides by service
 export class DomainEntityService<
   Entity,
   EntityService extends DataEntityService<Entity, DataEntityServiceData>,
-  Data extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  Data extends
+    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
   AdditionalEntityServices extends
-    Record<string, DataEntityService<Partial<Entity>, DataDefaultData<object>>> | undefined = undefined,
-  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
+    | Record<
+        string,
+        DataEntityService<Partial<Entity>, DataDefaultData<object>>
+      >
+    | undefined = undefined,
+  DataEntityServiceData extends
+    DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected dataEntityService: EntityService,
-    // eslint-disable-next-line no-unused-vars
+    // biome-ignore lint/style/useDefaultParameterLast: Rule doesn't apply here.
     protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected additionalDataEntityServices?: AdditionalEntityServices,
-    // eslint-disable-next-line no-unused-vars
     protected defaultAdditionalDataEntityServicesOptions?: {
       [methodName: string]: {
         [serviceName: string]: {
-          serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides & GenericObject<unknown>;
+          serviceOptions?: DomainBaseAdditionalServiceOptionsOverrides &
+            GenericObject<unknown>;
         };
       };
     }
   ) {}
 
   public bulkCreate(
-    // eslint-disable-next-line no-unused-vars
     data: Data['BulkCreate'],
-    // eslint-disable-next-line no-unused-vars
     options?: DomainBulkCreateOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainBulkCreatePrivateOptions
   ): Promise<DomainBulkCreateResult<Entity>>;
   async bulkCreate(
@@ -75,8 +76,10 @@ export class DomainEntityService<
     options?: DomainBulkCreateOptions,
     privateOptions?: DomainBulkCreatePrivateOptions
   ): Promise<DomainBulkCreateResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.BulkCreate)) {
-      throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.BulkCreate)) {
+      throw new ApplicationError(
+        `Method bulkCreate not implemented for class ${typeof this}.`
+      );
     }
     const {
       optionsOverridesByService,
@@ -84,30 +87,34 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).bulkCreate(data, otherOptions, privateOptions);
+    const result = await this.getDataService(firstServiceName).bulkCreate(
+      data,
+      otherOptions,
+      privateOptions
+    );
     let actualOtherServiceNames: string[] = [];
     let actualOptionsOverridesByService: typeof optionsOverridesByService = {};
     actualOtherServiceNames = otherServiceNames || [];
     actualOptionsOverridesByService = optionsOverridesByService;
     return {
       result,
-      resultsByService: await this.runMethodInAdditionalServices(actualOtherServiceNames, {
-        firstServiceResult: result,
-        hasFirstServiceResult: result.length > 0,
-        methodArgs: [result, otherOptions, privateOptions],
-        methodName: 'bulkCreate',
-        optionsArgIndex: 1,
-        optionsOverridesByService: actualOptionsOverridesByService
-      })
+      resultsByService: await this.runMethodInAdditionalServices(
+        actualOtherServiceNames,
+        {
+          firstServiceResult: result,
+          hasFirstServiceResult: result.length > 0,
+          methodArgs: [result, otherOptions, privateOptions],
+          methodName: 'bulkCreate',
+          optionsArgIndex: 1,
+          optionsOverridesByService: actualOptionsOverridesByService
+        }
+      )
     };
   }
 
   public create(
-    // eslint-disable-next-line no-unused-vars
     data: Data['Create'],
-    // eslint-disable-next-line no-unused-vars
     options?: DomainCreateOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainCreatePrivateOptions
   ): Promise<DomainCreateResult<Entity>>;
   async create<Options extends object | undefined = undefined>(
@@ -115,8 +122,10 @@ export class DomainEntityService<
     options?: DomainCreateOptions<Options>,
     privateOptions?: DomainCreatePrivateOptions
   ): Promise<DomainCreateResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.Create)) {
-      throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.Create)) {
+      throw new ApplicationError(
+        `Method create not implemented for class ${typeof this}.`
+      );
     }
     const {
       optionsOverridesByService,
@@ -124,32 +133,40 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).create(data, otherOptions, privateOptions);
+    const result = await this.getDataService(firstServiceName).create(
+      data,
+      otherOptions,
+      privateOptions
+    );
     return {
       result,
-      resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        firstServiceResult: result,
-        hasFirstServiceResult: typeof result !== 'undefined' && result !== null,
-        methodArgs: [result, otherOptions, privateOptions],
-        methodName: 'create',
-        optionsArgIndex: 1,
-        optionsOverridesByService
-      })
+      resultsByService: await this.runMethodInAdditionalServices(
+        otherServiceNames || [],
+        {
+          firstServiceResult: result,
+          hasFirstServiceResult:
+            typeof result !== 'undefined' && result !== null,
+          methodArgs: [result, otherOptions, privateOptions],
+          methodName: 'create',
+          optionsArgIndex: 1,
+          optionsOverridesByService
+        }
+      )
     };
   }
 
   public delete(
-    // eslint-disable-next-line no-unused-vars
     options: DomainDeleteOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainDeletePrivateOptions
   ): Promise<DomainDeleteResult<Entity>>;
   async delete(
     options: DomainDeleteOptions,
     privateOptions?: DomainDeletePrivateOptions
   ): Promise<DomainDeleteResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.Delete)) {
-      throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.Delete)) {
+      throw new ApplicationError(
+        `Method delete not implemented for class ${typeof this}.`
+      );
     }
     const {
       optionsOverridesByService,
@@ -157,32 +174,38 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).delete(otherOptions, privateOptions);
+    const result = await this.getDataService(firstServiceName).delete(
+      otherOptions,
+      privateOptions
+    );
     return {
       result,
-      resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        firstServiceResult: { ...result, items: result.originalItems || [] },
-        hasFirstServiceResult: !!result.count,
-        methodArgs: [otherOptions, privateOptions],
-        methodName: 'delete',
-        optionsArgIndex: 0,
-        optionsOverridesByService
-      })
+      resultsByService: await this.runMethodInAdditionalServices(
+        otherServiceNames || [],
+        {
+          firstServiceResult: { ...result, items: result.originalItems || [] },
+          hasFirstServiceResult: !result.count,
+          methodArgs: [otherOptions, privateOptions],
+          methodName: 'delete',
+          optionsArgIndex: 0,
+          optionsOverridesByService
+        }
+      )
     };
   }
 
   public find(
-    // eslint-disable-next-line no-unused-vars
     options: DomainFindOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainFindOnePrivateOptions
   ): Promise<DomainFindResult<Entity>>;
   async find(
     options: DomainFindOptions,
     privateOptions?: DomainFindOnePrivateOptions
   ): Promise<DomainFindResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.Find)) {
-      throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.Find)) {
+      throw new ApplicationError(
+        `Method find not implemented for class ${typeof this}.`
+      );
     }
     const {
       optionsOverridesByService,
@@ -191,25 +214,31 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    let result = await this.getDataService(firstServiceName).find(otherOptions, privateOptions);
-    const hasFirstServiceResult = result.items.length > 0;
-    const resultsByService = await this.runMethodInAdditionalServices<DataFindResults<Entity>>(
-      otherServiceNames || [],
-      {
-        firstServiceResult: result,
-        hasFirstServiceResult,
-        methodArgs: [otherOptions, privateOptions],
-        methodName: 'find',
-        optionsArgIndex: 0,
-        optionsOverridesByService
-      }
+    let result = await this.getDataService(firstServiceName).find(
+      otherOptions,
+      privateOptions
     );
+    const hasFirstServiceResult = result.items.length > 0;
+    const resultsByService = await this.runMethodInAdditionalServices<
+      DataFindResults<Entity>
+    >(otherServiceNames || [], {
+      firstServiceResult: result,
+      hasFirstServiceResult,
+      methodArgs: [otherOptions, privateOptions],
+      methodName: 'find',
+      optionsArgIndex: 0,
+      optionsOverridesByService
+    });
     this.logger.log('DomainEntityService: ====>', { options, privateOptions });
     if (saveAdditionalResultsInFirstService && resultsByService) {
-      const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
+      const { saveOptions, serviceName, useResultsForFirstService } =
+        saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService?.items?.length) {
-        const bulkCreateResult = await this.dataEntityService.bulkCreate(dataFromAdditionalService.items, saveOptions);
+        const bulkCreateResult = await this.dataEntityService.bulkCreate(
+          dataFromAdditionalService.items,
+          saveOptions
+        );
         if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         } else {
@@ -218,7 +247,7 @@ export class DomainEntityService<
             more: false,
             page: 1,
             perPage: bulkCreateResult.length
-          }
+          };
         }
       }
     }
@@ -229,17 +258,17 @@ export class DomainEntityService<
   }
 
   public findOne(
-    // eslint-disable-next-line no-unused-vars
     options: DomainFindOneOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainFindPrivateOptions
   ): Promise<DomainFindOneResult<Entity>>;
   async findOne(
     options: DomainFindOneOptions,
     privateOptions?: DomainFindPrivateOptions
   ): Promise<DomainFindOneResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.FindOne)) {
-      throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.FindOne)) {
+      throw new ApplicationError(
+        `Method findOne not implemented for class ${typeof this}.`
+      );
     }
     const {
       optionsOverridesByService,
@@ -248,21 +277,32 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    let result: Entity | null = await this.getDataService(firstServiceName).findOne(otherOptions, privateOptions);
-    const hasFirstServiceResult = typeof result !== 'undefined' && result !== null;
-    const resultsByService = await this.runMethodInAdditionalServices<Entity | null>(otherServiceNames || [], {
-      firstServiceResult: result,
-      hasFirstServiceResult,
-      methodArgs: [otherOptions, privateOptions],
-      methodName: 'findOne',
-      optionsArgIndex: 0,
-      optionsOverridesByService
-    });
+    let result: Entity | null = await this.getDataService(
+      firstServiceName
+    ).findOne(otherOptions, privateOptions);
+    const hasFirstServiceResult =
+      typeof result !== 'undefined' && result !== null;
+    const resultsByService =
+      await this.runMethodInAdditionalServices<Entity | null>(
+        otherServiceNames || [],
+        {
+          firstServiceResult: result,
+          hasFirstServiceResult,
+          methodArgs: [otherOptions, privateOptions],
+          methodName: 'findOne',
+          optionsArgIndex: 0,
+          optionsOverridesByService
+        }
+      );
     if (saveAdditionalResultsInFirstService && resultsByService) {
-      const { saveOptions, serviceName, useResultsForFirstService } = saveAdditionalResultsInFirstService;
+      const { saveOptions, serviceName, useResultsForFirstService } =
+        saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService) {
-        await this.dataEntityService.create(dataFromAdditionalService, saveOptions);
+        await this.dataEntityService.create(
+          dataFromAdditionalService,
+          saveOptions
+        );
         if (useResultsForFirstService && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
@@ -274,7 +314,9 @@ export class DomainEntityService<
     };
   }
 
-  protected getDataService(serviceName: DomainDataEntityServiceType.Main | string): DataEntityService<Entity> {
+  protected getDataService(
+    serviceName: DomainDataEntityServiceType.Main | string
+  ): DataEntityService<Entity> {
     if (serviceName === DomainDataEntityServiceType.Main) {
       return this.dataEntityService;
     }
@@ -309,8 +351,10 @@ export class DomainEntityService<
       );
     }
     if (
-      Object.keys(optionsOverridesByService).length &&
-      (typeof optionsArgIndex === 'undefined' || optionsArgIndex < 0 || optionsArgIndex > methodArgs.length - 1)
+      Object.keys(optionsOverridesByService).length > 0 &&
+      (typeof optionsArgIndex === 'undefined' ||
+        optionsArgIndex < 0 ||
+        optionsArgIndex > methodArgs.length - 1)
     ) {
       throw new ApplicationError(
         `Invalid optionsArgIndex value ${optionsArgIndex} provided for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.}.`
@@ -324,7 +368,8 @@ export class DomainEntityService<
           `DataEntityService ${serviceName} does not exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
         );
       }
-      const serviceMethodOptionsOverrides = optionsOverridesByService[serviceName] || {};
+      const serviceMethodOptionsOverrides =
+        optionsOverridesByService[serviceName] || {};
       const {
         filterByFirstServiceResultFields,
         runOnNoFirstServiceResultOnly = true,
@@ -333,7 +378,8 @@ export class DomainEntityService<
       // be extra careful when working with data that has TTL as the main service,
       // since there is no way to check for limited results here.
       if (
-        (runOnNoFirstServiceResultOnly === true || runOnNoFirstServiceResultOnly === 'true') &&
+        (runOnNoFirstServiceResultOnly === true ||
+          runOnNoFirstServiceResultOnly === 'true') &&
         hasFirstServiceResult
       ) {
         continue;
@@ -351,21 +397,25 @@ export class DomainEntityService<
           ...actualMethodOptionsOverrides
         };
       }
-      if (filterByFirstServiceResultFields && Object.keys(filterByFirstServiceResultFields).length) {
+      if (
+        filterByFirstServiceResultFields &&
+        Object.keys(filterByFirstServiceResultFields).length > 0
+      ) {
         if (!hasFirstServiceResult) {
           continue;
         }
         const filters: GenericObject = {};
-        const resultItems: GenericObject[] = (firstServiceResult as { items?: GenericObject[] }).items || [
-          firstServiceResult as GenericObject
-        ];
-        resultItems.forEach(resultItem => {
+        const resultItems: GenericObject[] = (
+          firstServiceResult as { items?: GenericObject[] }
+        ).items || [firstServiceResult as GenericObject];
+        resultItems.forEach((resultItem) => {
           if (!resultItem) {
             return;
           }
           for (const sourceFieldName in filterByFirstServiceResultFields) {
             const fieldValue = resultItem[sourceFieldName];
-            const targetFieldName = filterByFirstServiceResultFields[sourceFieldName];
+            const targetFieldName =
+              filterByFirstServiceResultFields[sourceFieldName];
             if (typeof fieldValue === 'undefined') {
               return;
             }
@@ -375,14 +425,19 @@ export class DomainEntityService<
             (filters[targetFieldName] as unknown[]).push(fieldValue);
           }
         });
-        if (Object.keys(filters).length) {
-          const serviceMethodOptions = serviceMethodArgs[optionsArgIndex!] as GenericObject & {
+        if (Object.keys(filters).length > 0) {
+          const serviceMethodOptions = serviceMethodArgs[
+            optionsArgIndex!
+          ] as GenericObject & {
             filters?: GenericObject;
           };
           serviceMethodArgs[optionsArgIndex!] = {
             ...serviceMethodOptions,
             filters: {
-              ...ld.omit(serviceMethodOptions.filters || {}, ['page', 'perPage']),
+              ...ld.omit(serviceMethodOptions.filters || {}, [
+                'page',
+                'perPage'
+              ]),
               ...filters
             },
             findAll: true
@@ -399,11 +454,8 @@ export class DomainEntityService<
   }
 
   public update(
-    // eslint-disable-next-line no-unused-vars
     data: Data['Update'],
-    // eslint-disable-next-line no-unused-vars
     options: DomainUpdateOptions,
-    // eslint-disable-next-line no-unused-vars
     privateOptions?: DomainUpdatePrivateOptions
   ): Promise<DomainUpdateResult<Entity>>;
   async update(
@@ -411,22 +463,35 @@ export class DomainEntityService<
     options: DomainUpdateOptions,
     privateOptions?: DomainUpdatePrivateOptions
   ): Promise<DomainUpdateResult<Entity>> {
-    if (!this.defaultMethods?.includes(DomainMethod.Update)) {
-      throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
+    if (!this.defaultMethods.includes(DomainMethod.Update)) {
+      throw new ApplicationError(
+        `Method update not implemented for class ${typeof this}.`
+      );
     }
-    const { optionsOverridesByService, dataServices = [DomainDataEntityServiceType.Main], ...otherOptions } = options;
+    const {
+      optionsOverridesByService,
+      dataServices = [DomainDataEntityServiceType.Main],
+      ...otherOptions
+    } = options;
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    const result = await this.getDataService(firstServiceName).update(data, otherOptions, privateOptions);
+    const result = await this.getDataService(firstServiceName).update(
+      data,
+      otherOptions,
+      privateOptions
+    );
     return {
       result,
-      resultsByService: await this.runMethodInAdditionalServices(otherServiceNames || [], {
-        firstServiceResult: result,
-        hasFirstServiceResult: !!result.count,
-        methodArgs: [data, otherOptions, privateOptions],
-        methodName: 'update',
-        optionsArgIndex: 1,
-        optionsOverridesByService
-      })
+      resultsByService: await this.runMethodInAdditionalServices(
+        otherServiceNames || [],
+        {
+          firstServiceResult: result,
+          hasFirstServiceResult: !result.count,
+          methodArgs: [data, otherOptions, privateOptions],
+          methodName: 'update',
+          optionsArgIndex: 1,
+          optionsOverridesByService
+        }
+      )
     };
   }
 }

@@ -1,16 +1,19 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
-import { GenericObject } from '@node-c/core';
-import { Constants as RDBConstants, RDBRepository } from '@node-c/data-rdb';
-
-import * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions.js';
-
+import type { GenericObject } from '@node-c/core';
+import {
+  Constants as RDBConstants,
+  type RDBRepository
+} from '@node-c/data-rdb';
 import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
 import { ClickHouseSelectQueryBuilder } from '../ormQueryBuilder/clickhouse.selectQueryBuilder.js';
+import type * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions.js';
 
 // TODO: save method
 @Injectable()
-export class ClickHouseDBRepository<Entity extends GenericObject<unknown>> implements RDBRepository<Entity> {
+export class ClickHouseDBRepository<Entity extends GenericObject<unknown>>
+  implements RDBRepository<Entity>
+{
   readonly metadata: { name: string; tableName: string };
   readonly primaryKeys: string[];
   readonly target: string;
@@ -19,7 +22,6 @@ export class ClickHouseDBRepository<Entity extends GenericObject<unknown>> imple
     @Inject(RDBConstants.RDB_REPOSITORY_ENTITY_CLASS)
     protected entitySchema: ClickhouseRepositoryDefinitions.ClickHouseDBEntitySchema<Entity>,
     @Inject(forwardRef(() => ClickHouseEntityManager))
-    // eslint-disable-next-line no-unused-vars
     public readonly manager: ClickHouseEntityManager
   ) {
     const {
@@ -35,16 +37,20 @@ export class ClickHouseDBRepository<Entity extends GenericObject<unknown>> imple
     this.primaryKeys = primaryKeys;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createQueryBuilder(_entityName: string, _queryRunner?: unknown): ClickHouseSelectQueryBuilder<Entity> {
+  createQueryBuilder(
+    _entityName: string,
+    _queryRunner?: unknown
+  ): ClickHouseSelectQueryBuilder<Entity> {
     return new ClickHouseSelectQueryBuilder(this.manager, this.entitySchema);
   }
 
   // TODO: update
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  save(data: Partial<Entity> | Partial<Entity[]>, _options?: unknown): Promise<unknown> {
+  save(
+    data: Partial<Entity> | Partial<Entity[]>,
+    _options?: unknown
+  ): Promise<unknown> {
     // throw new ApplicationError('Method ClickHouseDBRepository.save not implemented.');
-    const dataInput = (data instanceof Array ? data : [data]) as Entity[];
+    const dataInput = (Array.isArray(data) ? data : [data]) as Entity[];
     // const {
     //   options: { columns }
     // } = this.entitySchema;

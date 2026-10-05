@@ -1,10 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
-import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
+import { Constants, type SQLQueryBuilderService } from '@node-c/data-rdb';
+import {
+  TypeORMDBEntityService,
+  type TypeORMDBRepository
+} from '@node-c/data-typeorm';
 
-import { DataDBConfigsGlobalConfigItem, DataDBConfigsGlobalConfigItemEntity } from './globalConfigItems.entity.js';
+import {
+  type DataDBConfigsGlobalConfigItem,
+  DataDBConfigsGlobalConfigItemEntity
+} from './globalConfigItems.entity.js';
 
 @Injectable()
 export class DataDBConfigsGlobalConfigItemsService extends TypeORMDBEntityService<DataDBConfigsGlobalConfigItem> {
@@ -15,6 +21,12 @@ export class DataDBConfigsGlobalConfigItemsService extends TypeORMDBEntityServic
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
     repository: TypeORMDBRepository<DataDBConfigsGlobalConfigItem>
   ) {
-    super(configProvider, logger, qb, repository, DataDBConfigsGlobalConfigItemEntity);
+    super(
+      configProvider,
+      logger,
+      qb,
+      repository,
+      DataDBConfigsGlobalConfigItemEntity
+    );
   }
 }

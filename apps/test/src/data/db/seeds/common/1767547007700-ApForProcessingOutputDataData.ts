@@ -1,6 +1,8 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ApForProcessingOutputDataData1767547007700 implements MigrationInterface {
+export class ApForProcessingOutputDataData1767547007700
+  implements MigrationInterface
+{
   name = 'ApForProcessingOutputDataData1767547007700';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -12,6 +14,6 @@ export class ApForProcessingOutputDataData1767547007700 implements MigrationInte
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

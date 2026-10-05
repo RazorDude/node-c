@@ -2,17 +2,16 @@ import { Module } from '@nestjs/common';
 
 import {
   HTTPAPIModule as BaseHTTPAPIModule,
-  HTTPAPIModuleOptions,
+  type HTTPAPIModuleOptions,
   Constants as NodeCAPIHTTPConstants
 } from '@node-c/api-http';
 import { Constants as NodeCDomainIAMConstants } from '@node-c/domain-iam';
-
-import * as FolderData from './controllers/coursePlatformDelegated.controllers.js';
 
 import { Constants } from '../../common/definitions/common.constants.js';
 import { DomainIAMAuthenticationManagerService } from '../../domain/iam/services/authenticationManager/authenticationManager.service.js';
 import { DomainIAMAuthorizationService } from '../../domain/iam/services/authorization/authorization.service.js';
 import { DomainIAMTokenManagerService } from '../../domain/iam/services/tokenManager/tokenManager.service.js';
+import * as FolderData from './controllers/coursePlatformDelegated.controllers.js';
 
 @Module({})
 export class APICoursePlatformDelegatedModule extends BaseHTTPAPIModule {
@@ -30,11 +29,13 @@ export class APICoursePlatformDelegatedModule extends BaseHTTPAPIModule {
         useExisting: DomainIAMAuthorizationService
       },
       {
-        provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
+        provide:
+          NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE,
         useExisting: DomainIAMAuthenticationManagerService
       },
       {
-        provide: NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE,
+        provide:
+          NodeCAPIHTTPConstants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE,
         useExisting: DomainIAMTokenManagerService
       }
     ]

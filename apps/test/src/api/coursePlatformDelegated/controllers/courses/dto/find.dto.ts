@@ -11,7 +11,7 @@ import {
   ValidateNested
 } from 'class-validator';
 
-import { DataDBCourse } from '../../../../../data/db/entities/db.entities.js';
+import type { DataDBCourse } from '../../../../../data/db/entities/db.entities.js';
 
 export class CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions {
   @IsObject()
@@ -32,7 +32,10 @@ export class CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServ
 export class CoursePlatformStandaloneCoursesFindDto extends FindDto<DataDBCourse> {
   @IsOptional()
   @IsObject()
-  @Type(() => CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions)
+  @Type(
+    () =>
+      CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions
+  )
   @ValidateNested()
   saveAdditionalResultsInFirstService?: CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions;
 }

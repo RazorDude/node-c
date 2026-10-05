@@ -1,14 +1,12 @@
 import { Controller, Injectable } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
-import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import type { LoggerService } from '@node-c/core';
 
-import { LoggerService } from '@node-c/core';
-
-import { CoursePlatformStandaloneCoursesFindDto } from './dto/find.dto.js';
-
-import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-import { DomainCoursePlatformDelegatedCoursesService } from '../../../../domain/coursePlatformDelegated/services/courses/courses.service.js';
+import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
+import type { DomainCoursePlatformDelegatedCoursesService } from '../../../../domain/coursePlatformDelegated/services/courses/courses.service.js';
+import type { CoursePlatformStandaloneCoursesFindDto } from './dto/find.dto.js';
 
 @AccessControlContext('CoursePlatformCoursesEntityController')
 @Injectable()
@@ -16,9 +14,18 @@ import { DomainCoursePlatformDelegatedCoursesService } from '../../../../domain/
 export class APICoursePlatformDelegatedCoursesEntityController extends RESTAPIEntityControler<
   DataDBCourse,
   DomainCoursePlatformDelegatedCoursesService,
-  Omit<DefaultDtos<DataDBCourse>, 'find'> & { find: CoursePlatformStandaloneCoursesFindDto }
+  Omit<DefaultDtos<DataDBCourse>, 'find'> & {
+    find: CoursePlatformStandaloneCoursesFindDto;
+  }
 > {
-  constructor(domainEntityService: DomainCoursePlatformDelegatedCoursesService, logger: LoggerService) {
-    super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DataDBCourse>(), logger);
+  constructor(
+    domainEntityService: DomainCoursePlatformDelegatedCoursesService,
+    logger: LoggerService
+  ) {
+    super(
+      domainEntityService,
+      RESTAPIEntityControler.getDefaultDtos<DataDBCourse>(),
+      logger
+    );
   }
 }

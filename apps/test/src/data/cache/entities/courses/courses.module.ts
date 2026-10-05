@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/data-redis';
 
-import { DataCacheCourse, DataCacheCourseSchema } from './courses.entity.js';
-import { DataCacheCoursesEntityService } from './courses.service.js';
-
 import { Constants } from '../../../../common/definitions/common.constants.js';
+
+import {
+  type DataCacheCourse,
+  DataCacheCourseSchema
+} from './courses.entity.js';
+import { DataCacheCoursesEntityService } from './courses.service.js';
 
 @Module({
   imports: [

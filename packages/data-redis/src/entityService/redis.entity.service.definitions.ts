@@ -1,4 +1,4 @@
-import {
+import type {
   DataBulkCreatePrivateOptions,
   DataCountOptions,
   DataCountPrivateOptions,
@@ -29,7 +29,9 @@ export interface BulkCreatePrivateOptions extends DataBulkCreatePrivateOptions {
   validate?: boolean;
 }
 
-export interface CountOptions extends BaseOptions, Omit<DataCountOptions, 'withDeleted'> {}
+export interface CountOptions
+  extends BaseOptions,
+    Omit<DataCountOptions, 'withDeleted'> {}
 
 export type CountPrivateOptions = DataCountPrivateOptions;
 
@@ -40,19 +42,29 @@ export interface CreatePrivateOptions extends DataCreatePrivateOptions {
   validate?: boolean;
 }
 
-export interface DeleteOptions extends BaseOptions, Omit<DataDeleteOptions, 'softDelete'> {}
+export interface DeleteOptions
+  extends BaseOptions,
+    Omit<DataDeleteOptions, 'softDelete'> {}
 
 export type DeletePrivateOptions = DataDeletePrivateOptions;
 
 export interface FindOneOptions
-  extends BaseOptions, Omit<DataFindOneOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
+  extends BaseOptions,
+    Omit<
+      DataFindOneOptions,
+      'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'
+    > {}
 
 export interface FindOnePrivateOptions extends DataFindOnePrivateOptions {
   requirePrimaryKeys?: boolean;
 }
 
 export interface FindOptions
-  extends BaseOptions, Omit<DataFindOptions, 'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'> {}
+  extends BaseOptions,
+    Omit<
+      DataFindOptions,
+      'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'
+    > {}
 
 export interface FindPrivateOptions extends DataFindPrivateOptions {
   requirePrimaryKeys?: boolean;

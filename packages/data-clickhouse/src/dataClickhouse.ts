@@ -7,5 +7,5 @@ export * from './module/clickhouse.module.definitions.js';
 export * from './module/clickhouse.module.js';
 export * from './ormQueryBuilder/clickhouse.selectQueryBuilder.js';
 export * from './repository/clickhouse.repository.definitions.js';
-export * from './repository/clickhouse.repository.module.js';
 export * from './repository/clickhouse.repository.js';
+export * from './repository/clickhouse.repository.module.js';

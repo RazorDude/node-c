@@ -1,8 +1,16 @@
-import { ConfigProviderService, DataDefaultData, GenericObject, LoggerService } from '@node-c/core';
-import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
+import type {
+  ConfigProviderService,
+  DataDefaultData,
+  GenericObject,
+  LoggerService
+} from '@node-c/core';
+import {
+  RDBEntityService,
+  type SQLQueryBuilderService
+} from '@node-c/data-rdb';
 
-import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
-import { ClickHouseDBRepository } from '../repository/clickhouse.repository.js';
+import type { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
+import type { ClickHouseDBRepository } from '../repository/clickhouse.repository.js';
 
 export class ClickHouseDBEntityService<
   Entity extends GenericObject,
@@ -10,6 +18,7 @@ export class ClickHouseDBEntityService<
 > extends RDBEntityService<Entity, Data> {
   protected primaryKeys: string[];
 
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,

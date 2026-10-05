@@ -4,7 +4,12 @@ export default defineConfig({
   test: {
     coverage: {
       allowExternal: true,
-      exclude: ['**/*/src/index.ts', '**/*.spec.ts', 'apps/tests/src/main.ts', 'apps/test/src/data/*/migrations'],
+      exclude: [
+        '**/*/src/index.ts',
+        '**/*.spec.ts',
+        'apps/tests/src/main.ts',
+        'apps/test/src/data/*/migrations'
+      ],
       include: ['**/*/src/*.ts', '**/*/src/**/*.ts'],
       // provider: 'istanbul'
       provider: 'v8'

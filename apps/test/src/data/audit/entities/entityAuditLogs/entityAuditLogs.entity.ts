@@ -1,5 +1,8 @@
-import { GenericObject } from '@node-c/core';
-import { ClickHouseDBEntitySchema, ClickHouseDBEntitySchemaColumnType } from '@node-c/data-clickhouse';
+import type { GenericObject } from '@node-c/core';
+import {
+  type ClickHouseDBEntitySchema,
+  ClickHouseDBEntitySchemaColumnType
+} from '@node-c/data-clickhouse';
 
 export interface DataAuditEntityAuditLog extends GenericObject {
   dataBefore?: GenericObject;
@@ -11,18 +14,23 @@ export interface DataAuditEntityAuditLog extends GenericObject {
   userId: number;
 }
 
-export const DataAuditEntityAuditLogEntity: ClickHouseDBEntitySchema<DataAuditEntityAuditLog> = {
-  options: {
-    columns: {
-      dataBefore: { type: ClickHouseDBEntitySchemaColumnType.JSON },
-      dataAfter: { type: ClickHouseDBEntitySchemaColumnType.JSON },
-      datetime: { type: ClickHouseDBEntitySchemaColumnType.DateTime },
-      entityName: { type: ClickHouseDBEntitySchemaColumnType.Varchar },
-      entityPrimaryKeyValue: { type: ClickHouseDBEntitySchemaColumnType.Varchar },
-      entityPrimaryKeysAdditionalData: { type: ClickHouseDBEntitySchemaColumnType.JSON },
-      userId: { type: ClickHouseDBEntitySchemaColumnType.BigInteger }
-    },
-    tableName: 'entityAuditLogs',
-    name: 'entityAuditLog'
-  }
-};
+export const DataAuditEntityAuditLogEntity: ClickHouseDBEntitySchema<DataAuditEntityAuditLog> =
+  {
+    options: {
+      columns: {
+        dataBefore: { type: ClickHouseDBEntitySchemaColumnType.JSON },
+        dataAfter: { type: ClickHouseDBEntitySchemaColumnType.JSON },
+        datetime: { type: ClickHouseDBEntitySchemaColumnType.DateTime },
+        entityName: { type: ClickHouseDBEntitySchemaColumnType.Varchar },
+        entityPrimaryKeyValue: {
+          type: ClickHouseDBEntitySchemaColumnType.Varchar
+        },
+        entityPrimaryKeysAdditionalData: {
+          type: ClickHouseDBEntitySchemaColumnType.JSON
+        },
+        userId: { type: ClickHouseDBEntitySchemaColumnType.BigInteger }
+      },
+      tableName: 'entityAuditLogs',
+      name: 'entityAuditLog'
+    }
+  };

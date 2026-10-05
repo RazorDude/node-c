@@ -1,19 +1,21 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  HttpMethod,
-  LoggerService,
   base64UrlEncode,
-  httpRequest
+  type ConfigProviderService,
+  HttpMethod,
+  httpRequest,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { Constants } from '../../common/definitions/common.constants.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type {
   IAMAuthenticationOAuth2AccessTokenProviderResponseData,
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
@@ -27,9 +29,6 @@ import {
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData,
   IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
 } from './iam.authenticationOAuth2.definitions.js';
-
-import { Constants } from '../../common/definitions/common.constants.js';
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
 // TODO: provider param name mapping, in case a specific provider has custom parameter names
 // TODO: validate access_token flow - endpont
@@ -62,7 +61,12 @@ export class IAMAuthenticationOAuth2Service<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
     this.isLocal = false;
   }
@@ -81,11 +85,12 @@ export class IAMAuthenticationOAuth2Service<
    */
   async complete(
     data: IAMAuthenticationOAuth2CompleteData,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: IAMAuthenticationOAuth2CompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationOAuth2CompleteResult> {
     const { configProvider, logger, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const {
       accessTokenGrantUrl,
       allowedIncomingRedirectUris,
@@ -102,11 +107,15 @@ export class IAMAuthenticationOAuth2Service<
     let redirectUri: string | undefined;
     if (incomingRedirectUri) {
       if (!allowedIncomingRedirectUris) {
-        logger.error(`${logsPrefix}: Allowed incoming Redirect URIs not configured.`);
+        logger.error(
+          `${logsPrefix}: Allowed incoming Redirect URIs not configured.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       if (!allowedIncomingRedirectUris.includes(incomingRedirectUri)) {
-        logger.error(`${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`);
+        logger.error(
+          `${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       redirectUri = incomingRedirectUri;
@@ -118,20 +127,26 @@ export class IAMAuthenticationOAuth2Service<
       redirectUri = configRedirectUri;
     }
     const { data: providerResponseData, hasError } =
-      await httpRequest<IAMAuthenticationOAuth2AccessTokenProviderResponseData>(accessTokenGrantUrl, {
-        body: {
-          client_id: clientId,
-          client_secret: clientSecret,
-          code,
-          code_verifier: codeVerifier,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri
-        },
-        isFormData: true,
-        method: HttpMethod.POST
-      });
+      await httpRequest<IAMAuthenticationOAuth2AccessTokenProviderResponseData>(
+        accessTokenGrantUrl,
+        {
+          body: {
+            client_id: clientId,
+            client_secret: clientSecret,
+            code,
+            code_verifier: codeVerifier,
+            grant_type: 'authorization_code',
+            redirect_uri: redirectUri
+          },
+          isFormData: true,
+          method: HttpMethod.POST
+        }
+      );
     if (hasError || !providerResponseData) {
-      logger.error(`${logsPrefix}: Auhorization grant attempt failed for code "${code}".`, providerResponseData);
+      logger.error(
+        `${logsPrefix}: Auhorization grant attempt failed for code "${code}".`,
+        providerResponseData
+      );
       throw new ApplicationError('Authentication failed.');
     }
     return {
@@ -155,6 +170,7 @@ export class IAMAuthenticationOAuth2Service<
   }
 
   protected generateUrlEncodedString(length: number): string {
+    // biome-ignore lint/style/noMagicNumbers: False positive.
     const octetSize = Math.ceil((length * 3) / 4);
     const octets = crypto.getRandomValues(new Uint8Array(octetSize));
     return base64UrlEncode(octets.buffer).slice(0, length);
@@ -166,17 +182,21 @@ export class IAMAuthenticationOAuth2Service<
   ): Promise<IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult> {
     const { logger, moduleName, serviceName } = this;
     const { accessToken, idToken } = data;
-    const returnData: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult = {};
+    const returnData: IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
+      {};
     if (accessToken) {
-      const { accessTokenPayload, error } = await this.verifyExternalAccessToken({
-        accessToken
-      });
+      const { accessTokenPayload, error } =
+        await this.verifyExternalAccessToken({
+          accessToken
+        });
       if (error) {
         logger.error(
           `[${moduleName}][${serviceName}]: Method "getPayloadsFromExternalTokens" has produced an error:`,
           error
         );
-        throw new ApplicationError(`[${moduleName}][${serviceName}]: Error getting data from external tokens.`);
+        throw new ApplicationError(
+          `[${moduleName}][${serviceName}]: Error getting data from external tokens.`
+        );
       }
       returnData.accessTokenPayload = accessTokenPayload;
     }
@@ -190,48 +210,57 @@ export class IAMAuthenticationOAuth2Service<
   // Default config - plain OAuth2 without OIDC
   getUserAuthenticationConfig(): IAMAuthenticationOAuth2GetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationOAuth2GetUserAuthenticationConfigResult = {
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        cache: {
-          settings: {
-            cacheFieldName: 'state',
-            inputFieldName: 'data.state'
+    const defaultConfig: IAMAuthenticationOAuth2GetUserAuthenticationConfigResult =
+      {
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          cache: {
+            settings: {
+              cacheFieldName: 'state',
+              inputFieldName: 'data.state'
+            },
+            use: {
+              data: { overwrite: true, use: true }
+            }
           },
-          use: {
-            data: { overwrite: true, use: true }
-          }
-        },
-        createUser: true,
-        decodeReturnedTokens: true,
-        findUser: true,
-        findUserBeforeAuth: false,
-        findUserInAuthResultBy: {
-          userFieldName: 'email',
-          resultFieldName: 'accessTokenPayload.username'
-        },
-        useReturnedTokens: true,
-        validWithoutUser: false
-      },
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        cache: {
-          populate: {
-            data: [
-              { cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' },
-              { cacheFieldName: 'redirectUri', inputFieldName: 'result.redirectUri' }
-            ]
+          createUser: true,
+          decodeReturnedTokens: true,
+          findUser: true,
+          findUserBeforeAuth: false,
+          findUserInAuthResultBy: {
+            userFieldName: 'email',
+            resultFieldName: 'accessTokenPayload.username'
           },
-          settings: {
-            cacheFieldName: 'state',
-            inputFieldName: 'result.state'
-          }
+          useReturnedTokens: true,
+          validWithoutUser: false
         },
-        findUser: false,
-        stepResultPublicFields: ['authorizationCodeRequestURL'],
-        validWithoutUser: true
-      }
-    };
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          cache: {
+            populate: {
+              data: [
+                {
+                  cacheFieldName: 'codeVerifier',
+                  inputFieldName: 'result.codeVerifier'
+                },
+                {
+                  cacheFieldName: 'redirectUri',
+                  inputFieldName: 'result.redirectUri'
+                }
+              ]
+            },
+            settings: {
+              cacheFieldName: 'state',
+              inputFieldName: 'result.state'
+            }
+          },
+          findUser: false,
+          stepResultPublicFields: ['authorizationCodeRequestURL'],
+          validWithoutUser: true
+        }
+      };
     return ld.merge(defaultConfig, steps || {});
   }
 
@@ -255,7 +284,9 @@ export class IAMAuthenticationOAuth2Service<
     options: IAMAuthenticationOAuth2InitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationOAuth2InitiateResult> {
     const { configProvider, logger, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const {
       allowedIncomingRedirectUris,
       authorizationUrl,
@@ -275,11 +306,15 @@ export class IAMAuthenticationOAuth2Service<
     }
     if (incomingRedirectUri) {
       if (!allowedIncomingRedirectUris) {
-        logger.error(`${logsPrefix}: Allowed incoming Redirect URIs not configured.`);
+        logger.error(
+          `${logsPrefix}: Allowed incoming Redirect URIs not configured.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       if (!allowedIncomingRedirectUris.includes(incomingRedirectUri)) {
-        logger.error(`${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`);
+        logger.error(
+          `${logsPrefix}: Incoming redirect URI ${incomingRedirectUri} is not allowed.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       redirectUri = incomingRedirectUri;
@@ -291,9 +326,12 @@ export class IAMAuthenticationOAuth2Service<
       redirectUri = configRedirectUri;
     }
     if (!finalScope) {
-      logger.error(`${logsPrefix}: Either a scope in thwe input, or a configured default scope, is required..`);
+      logger.error(
+        `${logsPrefix}: Either a scope in thwe input, or a configured default scope, is required..`
+      );
       throw new ApplicationError('Authentication failed.');
     }
+    // biome-ignore lint/style/noMagicNumbers: False positive.
     const state = this.generateUrlEncodedString(16);
     let challenge: string | undefined;
     let nonce: string | undefined;
@@ -306,11 +344,14 @@ export class IAMAuthenticationOAuth2Service<
       `scope=${encodeURIComponent(finalScope)}&` +
       `state=${state}`;
     if (withPCKE) {
-      verifier = this.generateUrlEncodedString(parseInt(Constants.OAUTH2_CODE_VERIFIER_LENGTH, 10));
+      verifier = this.generateUrlEncodedString(
+        Number.parseInt(Constants.OAUTH2_CODE_VERIFIER_LENGTH, 10)
+      );
       challenge = await this.generateChallenge(verifier);
       url += `&code_challenge=${challenge}&code_challenge_method=${codeChallengeMethod}`;
     }
     if (generateNonce) {
+      // biome-ignore lint/style/noMagicNumbers: False positive.
       nonce = this.generateUrlEncodedString(16);
       url += `&nonce=${nonce}`;
     }
@@ -332,7 +373,9 @@ export class IAMAuthenticationOAuth2Service<
     data: IAMAuthenticationOAuth2VerifyExternalAccessTokenData
   ): Promise<IAMAuthenticationOAuth2VerifyExternalAccessTokenResult> {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { accessTokenAudiences, issuerUri, verifyTokensLocally } =
       moduleConfig.authServiceSettings![serviceName].oauth2!;
     const { accessToken } = data;

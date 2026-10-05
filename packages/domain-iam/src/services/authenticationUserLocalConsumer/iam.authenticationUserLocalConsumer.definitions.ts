@@ -1,9 +1,9 @@
-import {
+import type {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerInitiateResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
-import {
+import type {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult,
@@ -12,18 +12,24 @@ import {
   IAMAuthenticationUserLocalInitiateResult
 } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
 
-export type IAMAuthenticationUserLocalConsumerCompleteData = IAMAuthenticationUserLocalCompleteData;
+export type IAMAuthenticationUserLocalConsumerCompleteData =
+  IAMAuthenticationUserLocalCompleteData;
 
-export type IAMAuthenticationUserLocalConsumerCompleteOptions<Context extends object> =
-  IAMAuthenticationUserLocalCompleteOptions<Context>;
+export type IAMAuthenticationUserLocalConsumerCompleteOptions<
+  Context extends object
+> = IAMAuthenticationUserLocalCompleteOptions<Context>;
 
-export type IAMAuthenticationUserLocalConsumerCompleteResult = IAMAuthenticationUserLocalCompleteResult &
-  IAMAuthenticationConsumerCompleteResult;
+export type IAMAuthenticationUserLocalConsumerCompleteResult =
+  IAMAuthenticationUserLocalCompleteResult &
+    IAMAuthenticationConsumerCompleteResult;
 
-export type IAMAuthenticationUserLocalConsumerInitiateData = IAMAuthenticationUserLocalInitiateData;
+export type IAMAuthenticationUserLocalConsumerInitiateData =
+  IAMAuthenticationUserLocalInitiateData;
 
-export type IAMAuthenticationUserLocalConsumerInitiateOptions<Context extends object> =
-  IAMAuthenticationUserLocalInitiateOptions<Context>;
+export type IAMAuthenticationUserLocalConsumerInitiateOptions<
+  Context extends object
+> = IAMAuthenticationUserLocalInitiateOptions<Context>;
 
-export type IAMAuthenticationUserLocalConsumerInitiateResult = IAMAuthenticationUserLocalInitiateResult &
-  IAMAuthenticationConsumerInitiateResult;
+export type IAMAuthenticationUserLocalConsumerInitiateResult =
+  IAMAuthenticationUserLocalInitiateResult &
+    IAMAuthenticationConsumerInitiateResult;

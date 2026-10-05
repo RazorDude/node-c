@@ -10,8 +10,6 @@
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
     "publish-package": "npm run build:clean && npm publish --access public"
   },
   "dependencies": {

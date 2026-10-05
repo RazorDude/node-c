@@ -1,32 +1,43 @@
-import { Body, Controller, Get, Injectable, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Injectable,
+  Param,
+  Patch,
+  Post,
+  Query
+} from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
-import { AppConfigDomainIAMAuthenticationStep, LoggerService } from '@node-c/core';
+import {
+  AppConfigDomainIAMAuthenticationStep,
+  type LoggerService
+} from '@node-c/core';
 
-import { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
-import { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
-
-import { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
+import type { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
+import type { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import type { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
 export class APICoursePlatformFederatedUsersEntityController {
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected domainAuthenticationManagerService: DomainCoursePlatformFederatedAuthenticationManagerService,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService
   ) {}
 
   // Federated authentication - completion step
   @Patch('auth/:authType')
-  async authenticateComplete(
+  authenticateComplete(
     @Body()
     body: APICoursePlatformFederatedUsersAuthenticateDto,
     @Param()
     params: { authType: string }
-  ): ReturnType<DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']> {
+  ): ReturnType<
+    DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']
+  > {
     return this.domainAuthenticationManagerService.authenticate({
       ...body,
       auth: { ...body.auth, type: params.authType },
@@ -37,12 +48,14 @@ export class APICoursePlatformFederatedUsersEntityController {
 
   // Federated authentication - initiation step
   @Post('auth/:authType')
-  async authenticateInitiate(
+  authenticateInitiate(
     @Body()
     body: APICoursePlatformFederatedUsersAuthenticateDto,
     @Param()
     params: { authType: string }
-  ): ReturnType<DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']> {
+  ): ReturnType<
+    DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']
+  > {
     return this.domainAuthenticationManagerService.authenticate({
       ...body,
       auth: { ...body.auth, type: params.authType },
@@ -53,12 +66,14 @@ export class APICoursePlatformFederatedUsersEntityController {
 
   // Federated authentication - completion step (oauth2 callbacks)
   @Get('auth/:authType')
-  async authenticateOAuth2Callback(
+  authenticateOAuth2Callback(
     @Query()
     query: APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto,
     @Param()
     params: { authType: string }
-  ): ReturnType<DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']> {
+  ): ReturnType<
+    DomainCoursePlatformFederatedAuthenticationManagerService['authenticate']
+  > {
     return this.domainAuthenticationManagerService.authenticate({
       auth: { ...query, type: params.authType },
       mainFilterField: 'email',

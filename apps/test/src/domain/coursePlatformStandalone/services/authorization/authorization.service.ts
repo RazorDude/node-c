@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
-import { LoggerService } from '@node-c/core';
+import type { LoggerService } from '@node-c/core';
 import { IAMAuthorizationService } from '@node-c/domain-iam';
 
-import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
+import type { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneAuthorizationService extends IAMAuthorizationService {
-  constructor(logger: LoggerService, tokenManager: DomainCoursePlatformStandaloneTokenManagerService) {
+  constructor(
+    logger: LoggerService,
+    tokenManager: DomainCoursePlatformStandaloneTokenManagerService
+  ) {
     super(logger, tokenManager);
   }
 }

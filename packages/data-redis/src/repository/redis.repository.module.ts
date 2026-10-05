@@ -1,16 +1,17 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { type DynamicModule, Module } from '@nestjs/common';
 
 import { Constants as CoreConstants } from '@node-c/core';
 
-import { RedisRepositoryModuleOptions } from './redis.repository.definitions.js';
-import { RedisRepositoryService } from './redis.repository.service.js';
-
 import { Constants } from '../common/definitions/common.constants.js';
 import { RedisStoreService } from '../store/redis.store.service.js';
+import type { RedisRepositoryModuleOptions } from './redis.repository.definitions.js';
+import { RedisRepositoryService } from './redis.repository.service.js';
 
 @Module({})
 export class RedisRepositoryModule {
-  static register<Entity>(options: RedisRepositoryModuleOptions): DynamicModule {
+  static register<Entity>(
+    options: RedisRepositoryModuleOptions
+  ): DynamicModule {
     const { dataModuleName, schema } = options;
     return {
       module: RedisRepositoryModule,
@@ -23,8 +24,12 @@ export class RedisRepositoryModule {
         { provide: CoreConstants.DATA_MODULE_NAME, useValue: dataModuleName },
         {
           provide: RedisStoreService,
-          useFactory: (redisStoreService: RedisStoreService) => redisStoreService,
-          inject: [`${dataModuleName}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`]
+          useFactory: (
+            redisStoreService: RedisStoreService
+          ): RedisStoreService => redisStoreService,
+          inject: [
+            `${dataModuleName}${Constants.REDIS_CLIENT_STORE_SERVICE_SUFFIX}`
+          ]
         },
         RedisRepositoryService<Entity>
       ],

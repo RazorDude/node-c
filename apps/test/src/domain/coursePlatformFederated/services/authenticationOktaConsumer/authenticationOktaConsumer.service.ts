@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationOAuth2ConsumerService } from '@node-c/domain-iam';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+
+import type {
   DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteData,
   DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteOptions,
   DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteResult,
   DomainCoursePlatformFederatedAuthenticationOktaConsumerUserFields
 } from './authenticationOktaConsumer.definitions.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 /**
  * Okta OIDC Auth via another Node-C service that acts as the provider.
@@ -30,10 +34,14 @@ export class DomainCoursePlatformFederatedAuthenticationOktaConsumerService exte
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME
+    );
   }
 
   async complete(

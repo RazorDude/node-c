@@ -1,10 +1,19 @@
-import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import { IAMPermission } from '@node-c/domain-iam';
+import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import type { IAMPermission } from '@node-c/domain-iam';
 
-import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
-import { DataDBPermission, DataDBRole } from '../../../db/entities/db.entities.js';
+import {
+  getDefaultEntitySchema,
+  type RedisEntity
+} from '../../../cacheBase/entity/base.redis.entity.js';
+import type {
+  DataDBPermission,
+  DataDBRole
+} from '../../../db/entities/db.entities.js';
 
-const defaultSchema = getDefaultEntitySchema(EntitySchemaColumnType.Integer, 'permission');
+const defaultSchema = getDefaultEntitySchema(
+  EntitySchemaColumnType.Integer,
+  'permission'
+);
 
 export type DataCachePermission = RedisEntity<number> &
   IAMPermission<number> &

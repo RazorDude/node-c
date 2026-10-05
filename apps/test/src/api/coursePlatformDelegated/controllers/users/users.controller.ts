@@ -1,17 +1,26 @@
 import { Controller, Get, Injectable, Req } from '@nestjs/common';
 
-import * as NodeCApiHttp from '@node-c/api-http';
-import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
-import { DataDefaultData, DomainEntityServiceDefaultData, GenericObject, LoggerService } from '@node-c/core';
-
 import {
+  AccessControlContext,
+  AccessControlResource,
+  type RequestWithLocals
+} from '@node-c/api-http';
+import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import type {
+  DataDefaultData,
+  DomainEntityServiceDefaultData,
+  GenericObject,
+  LoggerService
+} from '@node-c/core';
+
+import type {
   DataDBUsersCreateUserData,
   DataDBUsersUpdateUserData
 } from '../../../../data/db/entities/users/users.definitions.js';
-import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
+import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import type { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
 
-@NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
+@AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
 export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEntityControler<
@@ -19,24 +28,34 @@ export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEnti
   DomainCoursePlatformDelegatedUsersService,
   DefaultDtos<DataDBUser>,
   DomainEntityServiceDefaultData<DataDBUser>,
-  DataDefaultData<DataDBUser> & { Create: DataDBUsersCreateUserData; Update: DataDBUsersUpdateUserData }
+  DataDefaultData<DataDBUser> & {
+    Create: DataDBUsersCreateUserData;
+    Update: DataDBUsersUpdateUserData;
+  }
 > {
-  constructor(domainEntityService: DomainCoursePlatformDelegatedUsersService, logger: LoggerService) {
-    super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DataDBUser>(), logger, [
-      'find',
-      'findOne',
-      'update'
-    ]);
+  constructor(
+    domainEntityService: DomainCoursePlatformDelegatedUsersService,
+    logger: LoggerService
+  ) {
+    super(
+      domainEntityService,
+      RESTAPIEntityControler.getDefaultDtos<DataDBUser>(),
+      logger,
+      ['find', 'findOne', 'update']
+    );
   }
 
-  @NodeCApiHttp.AccessControlResource('findLoginLogs')
+  @AccessControlResource('findLoginLogs')
   @Get('loginLogs')
-  async findLoginLogs(
-    @Req() req: NodeCApiHttp.RequestWithLocals<DataDBUser>
+  findLoginLogs(
+    @Req() req: RequestWithLocals<DataDBUser>
   ): ReturnType<DomainCoursePlatformDelegatedUsersService['findLoginLogs']> {
     return this.domainEntityService.findLoginLogs({
       ...req.query,
-      filters: { ...((req.query as { filters: GenericObject }).filters || {}), userId: req.locals?.user?.id }
+      filters: {
+        ...((req.query as { filters: GenericObject }).filters || {}),
+        userId: req.locals?.user?.id
+      }
     });
   }
 }

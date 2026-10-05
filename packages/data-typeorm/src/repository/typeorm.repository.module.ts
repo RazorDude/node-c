@@ -1,16 +1,18 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm';
+import { type DynamicModule, Module } from '@nestjs/common';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { DataSource, ObjectLiteral } from 'typeorm';
+import type { DataSource, ObjectLiteral } from 'typeorm';
 
-import { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions.js';
+import type { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions.js';
 import { TypeORMDBRepository } from './typeorm.repository.js';
 
 @Module({})
 export class TypeORMDBRepositoryModule {
-  static register<Entity extends ObjectLiteral>(options: TypeORMDBRepositoryModuleOptions): DynamicModule {
+  static register<Entity extends ObjectLiteral>(
+    options: TypeORMDBRepositoryModuleOptions
+  ): DynamicModule {
     const { connectionName, entityClass, dataModuleName } = options;
     return {
       module: TypeORMDBRepositoryModule,
@@ -22,8 +24,12 @@ export class TypeORMDBRepositoryModule {
         },
         {
           provide: SQLQueryBuilderService,
-          useFactory: (sqlQueryBuilderService: SQLQueryBuilderService) => sqlQueryBuilderService,
-          inject: [`${dataModuleName}${Constants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`]
+          useFactory: (
+            sqlQueryBuilderService: SQLQueryBuilderService
+          ): SQLQueryBuilderService => sqlQueryBuilderService,
+          inject: [
+            `${dataModuleName}${Constants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`
+          ]
         },
         {
           provide: Constants.RDB_REPOSITORY_ENTITY_CLASS,
@@ -31,7 +37,7 @@ export class TypeORMDBRepositoryModule {
         },
         {
           provide: Constants.RDB_REPOSITORY_DATASOURCE,
-          useFactory: (dataSource: DataSource) => dataSource,
+          useFactory: (dataSource: DataSource): DataSource => dataSource,
           inject: [getDataSourceToken(connectionName)]
         },
         TypeORMDBRepository<Entity>,
@@ -49,7 +55,7 @@ export class TypeORMDBRepositoryModule {
         },
         {
           provide: Constants.RDB_REPOSITORY_DATASOURCE,
-          useFactory: (dataSource: DataSource) => dataSource,
+          useFactory: (dataSource: DataSource): DataSource => dataSource,
           inject: [getDataSourceToken(connectionName)]
         }
       ]

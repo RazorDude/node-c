@@ -6,6 +6,7 @@
   - Dependecy vulnerability fixes.
   - End-to-end test fixes & more end-to-end tests.
   - Upgrade to vitest v4.
+  - Removal of istanbuljs, as it doesn't work with TypeScript 7. Switched to v8 instead.
   - Cleanup of old, unused unit tests.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.

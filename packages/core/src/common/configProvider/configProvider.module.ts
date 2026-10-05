@@ -1,9 +1,10 @@
-import { DynamicModule, Module } from '@nestjs/common';
-
-import { ConfigProviderModuleOptions } from './configProvider.definitions.js';
-import { ConfigProviderService } from './configProvider.service.js';
-
+import { type DynamicModule, Module } from '@nestjs/common';
 import { Constants } from '../definitions/common.constants.js';
+import type {
+  AppConfig,
+  ConfigProviderModuleOptions
+} from './configProvider.definitions.js';
+import { ConfigProviderService } from './configProvider.service.js';
 
 @Module({})
 export class ConfigProviderModule {
@@ -15,7 +16,10 @@ export class ConfigProviderModule {
       providers: [
         {
           provide: Constants.CONFIG,
-          useFactory: async () => await ConfigProviderService.loadConfig(appConfigs, { ...otherOptions })
+          useFactory: async (): Promise<AppConfig> =>
+            await ConfigProviderService.loadConfig(appConfigs, {
+              ...otherOptions
+            })
         },
         ConfigProviderService
       ],

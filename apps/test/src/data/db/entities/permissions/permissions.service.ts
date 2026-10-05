@@ -1,10 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
-import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
+import { Constants, type SQLQueryBuilderService } from '@node-c/data-rdb';
+import {
+  TypeORMDBEntityService,
+  type TypeORMDBRepository
+} from '@node-c/data-typeorm';
 
-import { DataDBPermission, DataDBPermissionEntity } from './permissions.entity.js';
+import {
+  type DataDBPermission,
+  DataDBPermissionEntity
+} from './permissions.entity.js';
 
 @Injectable()
 export class DataDBPermissionsService extends TypeORMDBEntityService<DataDBPermission> {

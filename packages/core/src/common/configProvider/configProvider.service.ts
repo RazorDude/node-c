@@ -1,53 +1,79 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+import { env } from 'node:process';
 
 import { Inject, Injectable } from '@nestjs/common';
-import dotenv from 'dotenv';
-import ld from 'lodash';
 
-import {
-  APP_CONFIG_FROM_ENV_KEYS as APP_CONFIG_FROM_ENV_KEYS_DEFAULT,
-  APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES as APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT,
-  AppConfigDataRDB,
-  AppConfig as AppConfigDefault,
-  AppEnvironment,
-  GenerateOrmconfigOptions,
-  LoadConfigAppConfigs,
-  LoadConfigOptions,
-  RDBType
-} from './configProvider.definitions.js';
+import * as dotenv from 'dotenv';
+import ld from 'lodash';
 
 import { Constants } from '../definitions/common.constants.js';
 import { setNested } from '../utils/setNested/setNested.method.js';
+import {
+  APP_CONFIG_FROM_ENV_KEYS as APP_CONFIG_FROM_ENV_KEYS_DEFAULT,
+  APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES as APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT,
+  type AppConfigDataRDB,
+  type AppConfig as AppConfigDefault,
+  AppEnvironment,
+  type GenerateOrmconfigOptions,
+  type LoadConfigAppConfigs,
+  type LoadConfigOptions,
+  RDBType
+} from './configProvider.definitions.js';
+
+const regExps = {
+  base: new RegExp(/^base$/),
+  entity: new RegExp(/\.entity\./),
+  sub: new RegExp(/\.subscriber\./),
+  trailingSlash: new RegExp(/\/$/),
+  trailingTs: new RegExp(/\.ts$/)
+};
 
 @Injectable()
-export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfigDefault> {
+export class ConfigProviderService<
+  AppConfig extends AppConfigDefault = AppConfigDefault
+> {
   constructor(
     @Inject(Constants.CONFIG)
-    // eslint-disable-next-line no-unused-vars
     public config: AppConfig
   ) {}
 
   // TODO: consider moving this into the data-rdb package
-  static async generateOrmconfig<AppConfig extends AppConfigDefault = AppConfigDefault>(
-    config: AppConfig,
+  static async generateOrmconfig<
+    AppConfigForOrmConfig extends AppConfigDefault = AppConfigDefault
+  >(
+    config: AppConfigForOrmConfig,
     options: GenerateOrmconfigOptions
   ): Promise<void> {
     const {
       general: { environment, projectRootPath },
       data
     } = config;
-    const { entitiesPathInModule, migrationsPathInModule, moduleName, modulePathInProject, seedsPathInModule } =
-      options;
-    const entitiesDirPath = path.join(projectRootPath, modulePathInProject, entitiesPathInModule);
+    const {
+      entitiesPathInModule,
+      migrationsPathInModule,
+      moduleName,
+      modulePathInProject,
+      seedsPathInModule
+    } = options;
+
+    const entitiesDirPath = path.join(
+      projectRootPath,
+      modulePathInProject,
+      entitiesPathInModule
+    );
     const entitiesDirData = await fs.readdir(entitiesDirPath);
     const entities: string[] = [];
-    const migrationsPath = path.join(projectRootPath, modulePathInProject, migrationsPathInModule);
+    const migrationsPath = path.join(
+      projectRootPath,
+      modulePathInProject,
+      migrationsPathInModule
+    );
     const moduleConfig = data[moduleName] as AppConfigDataRDB;
     const subscribers: string[] = [];
     for (const i in entitiesDirData) {
       const entityName = entitiesDirData[i];
-      if (entityName.match(/^base$/)) {
+      if (entityName.match(regExps.base)) {
         continue;
       }
       const entityFolderPath = path.join(entitiesDirPath, entityName);
@@ -58,20 +84,23 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       const entityFolderData = await fs.readdir(entityFolderPath);
       for (const j in entityFolderData) {
         const entityFolderFileName = entityFolderData[j];
-        if (entityFolderFileName.match(/\.entity\./)) {
+        if (entityFolderFileName.match(regExps.entity)) {
           entities.push(path.join(entityFolderPath, entityFolderFileName));
           continue;
         }
-        if (entityFolderFileName.match(/\.subscriber\./)) {
+        if (entityFolderFileName.match(regExps.sub)) {
           subscribers.push(path.join(entityFolderPath, entityFolderFileName));
-          continue;
         }
       }
     }
     // write the ORM Config file
     const ormconfigMigrations: string[] = [`${migrationsPath}/**/*.ts`];
     if (seedsPathInModule) {
-      const baseSeedsPath = path.join(projectRootPath, modulePathInProject, seedsPathInModule);
+      const baseSeedsPath = path.join(
+        projectRootPath,
+        modulePathInProject,
+        seedsPathInModule
+      );
       ormconfigMigrations.push(`${baseSeedsPath}/common/**/*.ts`);
     }
     await fs.writeFile(
@@ -84,16 +113,23 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           entities: [...entities],
           migrations: ormconfigMigrations,
           name: moduleConfig.connectionName,
-          synchronize: moduleConfig.type === RDBType.Aurora ? true : false,
+          synchronize: moduleConfig.type === RDBType.Aurora,
           subscribers: [...subscribers],
-          type: moduleConfig.type === RDBType.Aurora ? RDBType.MySQL : moduleConfig.type,
+          type:
+            moduleConfig.type === RDBType.Aurora
+              ? RDBType.MySQL
+              : moduleConfig.type,
           ...(moduleConfig.typeormExtraOptions || {})
         })
       )
     );
     // write the Datasource file
     const entitiesPathInProject = path
-      .join(modulePathInProject, entitiesPathInModule, `${moduleName}.entities.js`)
+      .join(
+        modulePathInProject,
+        entitiesPathInModule,
+        `${moduleName}.entities.js`
+      )
       .replace('src/', 'dist/');
     await fs.writeFile(
       path.join(projectRootPath, `datasource-${moduleName}-${environment}.js`),
@@ -112,15 +148,15 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
         '  logging: false,\n' +
         `  migrations: [${ormconfigMigrations
           .map(
-            item =>
-              `'${item.replace(projectRootPath.replace(/\/$/, ''), '.').replace('src/', 'dist/').replace(/\.ts$/, '.js')}'`
+            (item) =>
+              `'${item.replace(projectRootPath.replace(regExps.trailingSlash, ''), '.').replace('src/', 'dist/').replace(regExps.trailingTs, '.js')}'`
           )
           .join(', ')}],\n` +
         // `  name: '${moduleConfig.connectionName}',\n` +
         `  password: '${moduleConfig.password}',\n` +
         `  port: ${moduleConfig.port},\n` +
         '  subscribers: [],\n' +
-        `  synchronize: ${moduleConfig.type === RDBType.Aurora ? true : false},\n` +
+        `  synchronize: ${moduleConfig.type === RDBType.Aurora},\n` +
         `  type: '${moduleConfig.type === RDBType.Aurora ? RDBType.MySQL : moduleConfig.type}',\n` +
         `  username: '${moduleConfig.user}'\n` +
         '});\n'
@@ -128,15 +164,23 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
   }
 
   // TODO: logging about invalid config values
-  static async loadConfig<AppConfig extends AppConfigDefault = AppConfigDefault>(
+  static async loadConfig<
+    AppConfigToLoad extends AppConfigDefault = AppConfigDefault
+  >(
     appConfigs: LoadConfigAppConfigs,
     options?: LoadConfigOptions
-  ): Promise<AppConfig> {
-    const { useEnvFile, useEnvFileWithPriority, ...optionsData } = options || ({} as LoadConfigOptions);
+  ): Promise<AppConfigToLoad> {
+    const { useEnvFile, useEnvFileWithPriority, ...optionsData } =
+      options || ({} as LoadConfigOptions);
     const envKeys = optionsData.envKeys || APP_CONFIG_FROM_ENV_KEYS_DEFAULT;
-    const envKeysParentNames = optionsData.envKeysParentNames || APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT;
-    const processEnv = process.env;
-    const envName = optionsData.envName || (processEnv['NODE_ENV'] as AppEnvironment) || AppEnvironment.Local;
+    const envKeysParentNames =
+      optionsData.envKeysParentNames ||
+      APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES_DEFAULT;
+    const processEnv = env;
+    const envName =
+      optionsData.envName ||
+      (processEnv.NODE_ENV as AppEnvironment) ||
+      AppEnvironment.Local;
     const config = ld.merge(
       appConfigs.appConfigCommon,
       appConfigs[
@@ -145,17 +189,26 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
           envName.length
         )}` as keyof typeof appConfigs
       ]
-    ) as AppConfig;
+    ) as AppConfigToLoad;
     const moduleNamesByCategoryAndType: {
       [moduleCategory: string]: { [moduleType: string]: string[] };
     } = {};
-    const moduleTypesRegex = new RegExp(`^((${Object.keys(envKeys).join(')|(')}))_`);
+    const moduleTypesRegex = new RegExp(
+      `^((${Object.keys(envKeys).join(')|(')}))_`
+    );
     config.general.environment = envName;
     let envVars: Record<string, unknown> = processEnv;
     if (useEnvFile) {
       // populate the data from the .env file into the config object
       const envVarsFromFile = dotenv.parse(
-        (await fs.readFile(path.join(config.general.projectRootPath, `envFiles/.${envName}.env`))).toString()
+        (
+          await fs.readFile(
+            path.join(
+              config.general.projectRootPath,
+              `envFiles/.${envName}.env`
+            )
+          )
+        ).toString()
       );
       if (useEnvFileWithPriority) {
         envVars = ld.merge(envVars, envVarsFromFile);
@@ -169,7 +222,8 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
       if (!moduleCategory) {
         continue;
       }
-      const [, moduleName] = envKey.match(new RegExp(`^${moduleCategory}_(.+)_MODULE_TYPE$`)) || [];
+      const [, moduleName] =
+        envKey.match(new RegExp(`^${moduleCategory}_(.+)_MODULE_TYPE$`)) || [];
       if (!moduleName) {
         continue;
       }
@@ -188,15 +242,17 @@ export class ConfigProviderService<AppConfig extends AppConfigDefault = AppConfi
     }
     // second pass - actually go through the env vars and populate them in the config accordingly
     for (const moduleCategory in moduleNamesByCategoryAndType) {
-      const { children: moduleConfigKeysForCategory, name: categoryConfigKey } = envKeysParentNames[moduleCategory];
-      const moduleFieldsForCategory = envKeys[moduleCategory as keyof typeof envKeys];
+      const { children: moduleConfigKeysForCategory, name: categoryConfigKey } =
+        envKeysParentNames[moduleCategory];
+      const moduleFieldsForCategory =
+        envKeys[moduleCategory as keyof typeof envKeys];
       const moduleNamesByType = moduleNamesByCategoryAndType[moduleCategory];
       for (const moduleType in moduleNamesByType) {
         const moduleFieldsForType = moduleFieldsForCategory[
           moduleType as keyof typeof moduleFieldsForCategory
         ] as Record<string, string>;
         const moduleNames = moduleNamesByType[moduleType];
-        moduleNames.forEach(moduleName => {
+        moduleNames.forEach((moduleName) => {
           const moduleConfigKey = moduleConfigKeysForCategory[moduleName];
           for (const fieldName in moduleFieldsForType) {
             const configKey = `${categoryConfigKey}.${moduleConfigKey}.${moduleFieldsForType[fieldName]}`;

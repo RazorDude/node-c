@@ -1,54 +1,54 @@
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   ApplicationError,
-  ConfigProviderService,
-  DataEntityService,
-  DomainCreatePrivateOptions,
-  DomainCreateResult,
-  DomainEntityService,
-  GenericObject,
-  LoggerService,
+  type ConfigProviderService,
+  type DataEntityService,
+  type DomainCreatePrivateOptions,
+  type DomainCreateResult,
+  type DomainEntityService,
+  type GenericObject,
+  type LoggerService,
   setNested
 } from '@node-c/core';
 
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import ld from 'lodash';
-
-import {
-  DecodedTokenContent,
-  TokenEntity,
-  TokenManagerCreateData,
-  TokenManagerCreateOptions,
-  TokenManagerVerifyResult,
-  TokenType,
-  VerifyAccessTokenOptions,
-  VerifyAccessTokenReturnData
-} from './iam.tokenManager.definitions.js';
 
 import { Constants } from '../../common/definitions/common.constants.js';
 import { IAMAuthenticationType } from '../authentication/iam.authentication.definitions.js';
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
-import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import type { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import type { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import {
+  type DecodedTokenContent,
+  type TokenEntity,
+  type TokenManagerCreateData,
+  type TokenManagerCreateOptions,
+  type TokenManagerVerifyResult,
+  TokenType,
+  type VerifyAccessTokenOptions,
+  type VerifyAccessTokenReturnData
+} from './iam.tokenManager.definitions.js';
 
 /**
  * Service for managing local access and refresh JWTs.
  */
 export class IAMTokenManagerService<TokenEntityFields extends object> {
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
-    // eslint-disable-next-line no-unused-vars
-    // eslint-disable-next-line no-unused-vars
     protected authServices: {
-      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
-      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
+      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<
+        object,
+        object
+      >;
+      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<
+        object,
+        object
+      >;
     } & { [serviceName: string]: IAMAuthenticationService<object, object> },
-    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     public domainTokensEntityService?: DomainEntityService<
       TokenEntity<TokenEntityFields>,
       DataEntityService<TokenEntity<TokenEntityFields>>
@@ -60,8 +60,11 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     data: TokenManagerCreateData<TokenEntityFields>,
     options: TokenManagerCreateOptions
   ): Promise<DomainCreateResult<TokenEntity<TokenEntityFields>>> {
-    const { configProvider, logger, moduleName, domainTokensEntityService } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { configProvider, logger, moduleName, domainTokensEntityService } =
+      this;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { type, ...tokenData } = data;
     const {
       expiresInMinutes,
@@ -79,7 +82,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
       } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
-        signOptions.expiresIn = moduleConfig.accessTokenExpiryTimeInMinutes * 60;
+        signOptions.expiresIn =
+          moduleConfig.accessTokenExpiryTimeInMinutes * 60;
       }
     }
     // id token options: this intentionally uses the jwtAccessSecret and the jwtRefreshTokenExpiryTimeInMinutes
@@ -88,7 +92,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
       } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
-        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
+        signOptions.expiresIn =
+          moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
       }
     }
     // refresh token options
@@ -97,10 +102,13 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       if (expiresInMinutes) {
         signOptions.expiresIn = expiresInMinutes * 60;
       } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
-        signOptions.expiresIn = moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
+        signOptions.expiresIn =
+          moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
       }
     } else {
-      throw new ApplicationError(`[TokenManager.create]: Invalid token type - "${type}".`);
+      throw new ApplicationError(
+        `[TokenManager.create]: Invalid token type - "${type}".`
+      );
     }
     let token: string;
     if (useExternalTokenAsLocal) {
@@ -112,31 +120,47 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       token = data.externalToken;
     } else {
       token = await new Promise<string>((resolve, reject) => {
-        jwt.sign({ /*aud: moduleName,*/ data, iss: moduleName }, secret, signOptions, (err, token) => {
-          if (err) {
-            logger.error(err);
-            reject(new ApplicationError('Failed to sign token.'));
-            return;
+        jwt.sign(
+          { /*aud: moduleName,*/ data, iss: moduleName },
+          secret,
+          signOptions,
+          (err, signedToken) => {
+            if (err) {
+              logger.error(err);
+              reject(new ApplicationError('Failed to sign token.'));
+              return;
+            }
+            resolve(signedToken as string);
           }
-          resolve(token as string);
-        });
+        );
       });
     }
-    const objectToSave = { ...tokenData, token, type } as TokenEntity<TokenEntityFields>;
+    const objectToSave = {
+      ...tokenData,
+      token,
+      type
+    } as TokenEntity<TokenEntityFields>;
     if (tokenContentOnlyFields?.length) {
-      tokenContentOnlyFields.forEach(fieldName =>
-        setNested(objectToSave, fieldName, undefined, { removeNestedFieldEscapeSign: true })
-      );
+      tokenContentOnlyFields.forEach((fieldName) => {
+        setNested(objectToSave, fieldName, undefined, {
+          removeNestedFieldEscapeSign: true
+        });
+      });
     }
     // save the token in the data system of choice
     // TODO: multi-data isn't handled well here (or, actually, at all)
     if (persist) {
       if (!domainTokensEntityService) {
-        throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+        throw new ApplicationError(
+          `[${moduleName}][TokenManager] domainTokensEntityService not configured.`
+        );
       }
       if (purgeOldFromData && identifierDataField) {
         const identifierValue = ld.get(data, identifierDataField);
-        if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
+        if (
+          typeof identifierValue !== 'undefined' &&
+          typeof identifierValue !== 'object'
+        ) {
           await domainTokensEntityService.delete(
             {
               filters: { [identifierDataField]: identifierValue, type }
@@ -157,8 +181,11 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     token: string,
     options?: VerifyAccessTokenOptions
   ): Promise<VerifyAccessTokenReturnData<TokenEntityFields>> {
-    const { configProvider, domainTokensEntityService, logger, moduleName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { configProvider, domainTokensEntityService, logger, moduleName } =
+      this;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const {
       accessTokenDataRefreshTokenField,
       deleteFromStoreIfExpired,
@@ -169,13 +196,18 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       refreshToken
     } = options || {};
     // decode the token
-    const { error, externalTokenData, ...accessTokenData } = await this.verify(token, moduleConfig.jwtAccessSecret, {
-      // TODO: make this configurable
-      verifyExternal: true
-    });
-    const externalAccessTokenExpired = !!externalTokenData?.error;
+    const { error, externalTokenData, ...accessTokenData } = await this.verify(
+      token,
+      moduleConfig.jwtAccessSecret,
+      {
+        // TODO: make this configurable
+        verifyExternal: true
+      }
+    );
+    const externalAccessTokenExpired = Boolean(externalTokenData?.error);
     const internalAccessTokenExpired =
-      (error as { message: string } | undefined)?.message === Constants.TOKEN_EXPIRED_ERROR;
+      (error as { message: string } | undefined)?.message ===
+      Constants.TOKEN_EXPIRED_ERROR;
     if (error && !internalAccessTokenExpired) {
       logger.error(error);
       throw new ApplicationError('Invalid access token.');
@@ -201,13 +233,16 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
           );
           refreshTokenContent = rtc;
           if (!refreshTokenContent) {
-            errorMessageToLog = '[IAMTokenManagerService.verifyAccessToken]: Empty internal refresh token.';
+            errorMessageToLog =
+              '[IAMTokenManagerService.verifyAccessToken]: Empty internal refresh token.';
           } else if (refreshTokenError) {
             errorMessageToLog = refreshTokenError as string;
             // delete the refresh token from the store
             if (deleteFromStoreIfExpired) {
               if (!domainTokensEntityService) {
-                throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+                throw new ApplicationError(
+                  `[${moduleName}][TokenManager] domainTokensEntityService not configured.`
+                );
               }
               await domainTokensEntityService.delete(
                 {
@@ -217,12 +252,16 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
               );
             }
           } else {
-            const refreshTokenCheckValue = ld.get(content.data, accessTokenDataRefreshTokenField);
-            if (refreshTokenCheckValue !== refreshToken) {
-              errorMessageToLog = '[IAMTokenManagerService.verifyAccessToken]: Mismatched internal refresh token.';
-            } else {
+            const refreshTokenCheckValue = ld.get(
+              content.data,
+              accessTokenDataRefreshTokenField
+            );
+            if (refreshTokenCheckValue === refreshToken) {
               renewEnabled = true;
               throwError = false;
+            } else {
+              errorMessageToLog =
+                '[IAMTokenManagerService.verifyAccessToken]: Mismatched internal refresh token.';
             }
           }
           // external token renewal preparation
@@ -232,7 +271,8 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
               renewEnabled = true;
               throwError = false;
             } else {
-              errorMessageToLog = '[IAMTokenManagerService.verifyAccessToken]: Missing external refresh token.';
+              errorMessageToLog =
+                '[IAMTokenManagerService.verifyAccessToken]: Missing external refresh token.';
             }
           }
         }
@@ -242,10 +282,15 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
             '[IAMTokenManagerService.verifyAccessToken]: Access token expired & no refresh token data present or configured.';
           if (deleteFromStoreIfExpired) {
             if (!domainTokensEntityService) {
-              throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+              throw new ApplicationError(
+                `[${moduleName}][TokenManager] domainTokensEntityService not configured.`
+              );
             }
             const identifierValue = ld.get(content.data, identifierDataField);
-            if (typeof identifierValue !== 'undefined' && typeof identifierValue !== 'object') {
+            if (
+              typeof identifierValue !== 'undefined' &&
+              typeof identifierValue !== 'object'
+            ) {
               await domainTokensEntityService.delete(
                 {
                   filters: { [identifierDataField]: identifierValue, token }
@@ -258,39 +303,47 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       }
       // otherwise, simply throw an error
       else if (internalAccessTokenExpired) {
-        errorMessageToLog = '[IAMTokenManagerService.verify]: Internal access token expired.';
+        errorMessageToLog =
+          '[IAMTokenManagerService.verify]: Internal access token expired.';
       } else if (externalAccessTokenExpired) {
-        errorMessageToLog = '[IAMTokenManagerService.verify]: External access token expired.';
+        errorMessageToLog =
+          '[IAMTokenManagerService.verify]: External access token expired.';
       } else {
-        errorMessageToLog = '[IAMTokenManagerService.verify]: Unknown access token error.';
+        errorMessageToLog =
+          '[IAMTokenManagerService.verify]: Unknown access token error.';
       }
-    } else {
-      // check whether the local access token exists in the cache
-      if (moduleConfig.checkAccessTokenExistenceLocally) {
-        if (!identifierDataField) {
-          errorMessageToLog =
-            'The identifierDataField is required when checkAccessTokenExistenceLocally is set to true.';
-          throwError = true;
-        } else if (!content?.data) {
-          errorMessageToLog = 'Content.data is required when checkAccessTokenExistenceLocally is set to true.';
-          throwError = true;
+    }
+    // check whether the local access token exists in the cache
+    else if (moduleConfig.checkAccessTokenExistenceLocally) {
+      if (!identifierDataField) {
+        errorMessageToLog =
+          'The identifierDataField is required when checkAccessTokenExistenceLocally is set to true.';
+        throwError = true;
+      } else if (content?.data) {
+        if (!domainTokensEntityService) {
+          throw new ApplicationError(
+            `[${moduleName}][TokenManager] domainTokensEntityService not configured.`
+          );
+        }
+        const accessTokenResult = await domainTokensEntityService.findOne({
+          filters: {
+            [identifierDataField]: ld.get(content.data, identifierDataField),
+            type: TokenType.Access
+          }
+        });
+        if (accessTokenResult.result) {
+          throwError = false;
         } else {
-          if (!domainTokensEntityService) {
-            throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
-          }
-          const accessTokenResult = await domainTokensEntityService.findOne({
-            filters: { [identifierDataField]: ld.get(content.data, identifierDataField), type: TokenType.Access }
-          });
-          if (!accessTokenResult.result) {
-            errorMessageToLog = 'Access token not found locally.';
-            throwError = true;
-          } else {
-            throwError = false;
-          }
+          errorMessageToLog = 'Access token not found locally.';
+          throwError = true;
         }
       } else {
-        throwError = false;
+        errorMessageToLog =
+          'Content.data is required when checkAccessTokenExistenceLocally is set to true.';
+        throwError = true;
       }
+    } else {
+      throwError = false;
     }
     if (throwError) {
       logger.error(errorMessageToLog);
@@ -302,18 +355,27 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       // find and decode the id token, and add its data to the content
       if (identifierDataField) {
         if (!domainTokensEntityService) {
-          throw new ApplicationError(`[${moduleName}][TokenManager] domainTokensEntityService not configured.`);
+          throw new ApplicationError(
+            `[${moduleName}][TokenManager] domainTokensEntityService not configured.`
+          );
         }
         identifierValue = ld.get(content.data, identifierDataField);
         const idToken = await domainTokensEntityService.findOne({
-          filters: { [identifierDataField]: identifierValue, type: TokenType.Id }
+          filters: {
+            [identifierDataField]: identifierValue,
+            type: TokenType.Id
+          }
         });
         if (idToken.result) {
-          const idTokenData = await this.verify(idToken.result.token, moduleConfig.jwtAccessSecret);
+          const idTokenData = await this.verify(
+            idToken.result.token,
+            moduleConfig.jwtAccessSecret
+          );
           if (idTokenData.error && !renewEnabled) {
             logger.error(idTokenData.error);
             throw new ApplicationError('Invalid or expired id token.');
-          } else if (idTokenData.content) {
+          }
+          if (idTokenData.content) {
             idTokenContent = idTokenData.content;
             content = ld.merge(content, idTokenContent);
           }
@@ -323,11 +385,15 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
       // "[RedisRepositoryService token][Validation Error]: A value is required for non-generated PK column userId"
       // renewal
       if (renewEnabled) {
-        const tokenData: TokenManagerCreateData<GenericObject<unknown>> = { ...content.data, type: TokenType.Access };
-        const refreshTokenData: TokenManagerCreateData<GenericObject<unknown>> = {
-          ...refreshTokenContent?.data,
+        const tokenData: TokenManagerCreateData<GenericObject<unknown>> = {
+          ...content.data,
           type: TokenType.Access
         };
+        const refreshTokenData: TokenManagerCreateData<GenericObject<unknown>> =
+          {
+            ...refreshTokenContent?.data,
+            type: TokenType.Access
+          };
         if (refreshToken && accessTokenDataRefreshTokenField) {
           tokenData[accessTokenDataRefreshTokenField] = refreshToken;
         }
@@ -344,25 +410,30 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
             logger.error(errorMessageToLog);
             throw new ApplicationError('Expired access token.');
           }
-          tokenData.externalToken = externalAccessTokenRenewalResult.newAccessToken;
+          tokenData.externalToken =
+            externalAccessTokenRenewalResult.newAccessToken;
           // TODO: this
           // if (externalAccessTokenRenewalResult.newIdToken) {
           //   idTokenContent = idTokenData.content;
           //   content = ld.merge(content, idTokenContent);
           // }
           if (externalAccessTokenRenewalResult.newRefreshToken) {
-            refreshTokenData.externalToken = externalAccessTokenRenewalResult.newRefreshToken;
+            refreshTokenData.externalToken =
+              externalAccessTokenRenewalResult.newRefreshToken;
           }
         }
         // TODO: TTL
         // renew the internal access tokens
-        const { result } = await this.create(tokenData as TokenManagerCreateData<TokenEntityFields>, {
-          expiresInMinutes: newAccessTokenExpiresInMinutes,
-          identifierDataField,
-          persist: persistNewToken,
-          purgeOldFromData: purgeStoreOnRenew,
-          tokenContentOnlyFields: ['externalToken']
-        });
+        const { result } = await this.create(
+          tokenData as TokenManagerCreateData<TokenEntityFields>,
+          {
+            expiresInMinutes: newAccessTokenExpiresInMinutes,
+            identifierDataField,
+            persist: persistNewToken,
+            purgeOldFromData: purgeStoreOnRenew,
+            tokenContentOnlyFields: ['externalToken']
+          }
+        );
         newAccessToken = result.token;
         refreshTokenData.accessToken = newAccessToken;
         // renew the internal refreshToken
@@ -391,7 +462,10 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
               identifierDataField,
               persist: true,
               purgeOldFromData: true,
-              tokenContentOnlyFields: [...Object.keys(idTokenContent.data), 'accessToken']
+              tokenContentOnlyFields: [
+                ...Object.keys(idTokenContent.data),
+                'accessToken'
+              ]
             }
           );
           newIdToken = newIdTokenResult.token;
@@ -407,14 +481,28 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     options?: { forceVerifyExternal?: boolean; verifyExternal?: boolean }
   ): Promise<TokenManagerVerifyResult<TokenEntityFields>> {
     const { configProvider, moduleName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { forceVerifyExternal, verifyExternal } = options || {};
-    const data = await new Promise<{ content?: DecodedTokenContent<TokenEntityFields>; error?: unknown }>(resolve => {
+    const data = await new Promise<{
+      content?: DecodedTokenContent<TokenEntityFields>;
+      error?: unknown;
+    }>((resolve) => {
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
-          jwt.verify(token, secret, { ignoreExpiration: true }, (_newErr, decodedActual) => {
-            resolve({ content: decodedActual as DecodedTokenContent<TokenEntityFields>, error: err });
-          });
+          jwt.verify(
+            token,
+            secret,
+            { ignoreExpiration: true },
+            (_newErr, decodedActual) => {
+              resolve({
+                content:
+                  decodedActual as DecodedTokenContent<TokenEntityFields>,
+                error: err
+              });
+            }
+          );
           return;
         }
         resolve({ content: decoded as DecodedTokenContent<TokenEntityFields> });
@@ -423,18 +511,30 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     // TODO: move this logic to the verifyAccessToken method.
     const returnData: TokenManagerVerifyResult<TokenEntityFields> = { ...data };
     const tokenPayload = data.content?.data;
-    if (verifyExternal && tokenPayload?.externalToken && tokenPayload?.externalTokenAuthService) {
-      const authServiceConfig = moduleConfig.authServiceSettings?.[tokenPayload?.externalTokenAuthService];
-      if (authServiceConfig?.processExternalTokensOnVerify || forceVerifyExternal) {
-        const authService = this.authServices[tokenPayload?.externalTokenAuthService];
+    if (
+      verifyExternal &&
+      tokenPayload?.externalToken &&
+      tokenPayload?.externalTokenAuthService
+    ) {
+      const authServiceConfig =
+        moduleConfig.authServiceSettings?.[
+          tokenPayload?.externalTokenAuthService
+        ];
+      if (
+        authServiceConfig?.processExternalTokensOnVerify ||
+        forceVerifyExternal
+      ) {
+        const authService =
+          this.authServices[tokenPayload?.externalTokenAuthService];
         if (!authService) {
           throw new ApplicationError(
             `[IAMTokenManagerService.verify]: Auth service ${tokenPayload?.externalTokenAuthService} not configured.`
           );
         }
-        returnData.externalTokenData = await authService.verifyExternalAccessToken({
-          accessToken: tokenPayload?.externalToken
-        });
+        returnData.externalTokenData =
+          await authService.verifyExternalAccessToken({
+            accessToken: tokenPayload?.externalToken
+          });
       }
     }
     return returnData;

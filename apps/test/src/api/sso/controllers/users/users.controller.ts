@@ -1,20 +1,28 @@
-import { Body, Controller, Get, Injectable, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Injectable,
+  Param,
+  Patch,
+  Post,
+  Query
+} from '@nestjs/common';
 
-import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import {
+  AppConfigDomainIAMAuthenticationStep,
+  type LoggerService
+} from '@node-c/core';
 
-import { AppConfigDomainIAMAuthenticationStep, LoggerService } from '@node-c/core';
-
-import { SSOUsersAuthenticateDto } from './dto/authenticate.dto.js';
-
-import { SSOUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
-
-import { SSOUsersAuthenticatePassthroughDto } from './dto/authenticatePassthrough.dto.js';
-
-import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
-import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import { DomainIAMAuthenticationManagerService } from '../../../../domain/iam/services/authenticationManager/authenticationManager.service.js';
-import { DomainIAMUsersDomainEntityServiceData } from '../../../../domain/iam/services/users/users.definitions.js';
-import { DomainIAMUsersService } from '../../../../domain/iam/services/users/users.service.js';
+import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import type { DomainIAMAuthenticationManagerService } from '../../../../domain/iam/services/authenticationManager/authenticationManager.service.js';
+import type { DomainIAMUsersDomainEntityServiceData } from '../../../../domain/iam/services/users/users.definitions.js';
+import type { DomainIAMUsersService } from '../../../../domain/iam/services/users/users.service.js';
+import type { SSOUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import type { SSOUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
+import type { SSOUsersAuthenticatePassthroughDto } from './dto/authenticatePassthrough.dto.js';
 
 // TODO: create user (signup)
 // TODO: logout
@@ -34,7 +42,6 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
 > {
   constructor(
     domainEntityService: DomainIAMUsersService,
-    // eslint-disable-next-line no-unused-vars
     protected domainAuthenticationManagerService: DomainIAMAuthenticationManagerService,
     logger: LoggerService
   ) {
@@ -43,7 +50,7 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
 
   // Delegated or federated authentication - completion step
   @Patch('auth/:authType')
-  async authenticateComplete(
+  authenticateComplete(
     @Body()
     body: SSOUsersAuthenticateDto,
     @Param()
@@ -59,7 +66,7 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
 
   // Delegated or federated authentication - initiation step
   @Post('auth/:authType')
-  async authenticateInitiate(
+  authenticateInitiate(
     @Body()
     body: SSOUsersAuthenticateDto,
     @Param()
@@ -75,7 +82,7 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
 
   // Delegated authentication - completion step (direct oauth2 callbacks)
   @Get('auth/:authType')
-  async authenticateOAuth2Callback(
+  authenticateOAuth2Callback(
     @Query()
     query: SSOUsersAuthenticateOAuth2CallbackDto,
     @Param()
@@ -91,7 +98,7 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
   // Passthrough authentication (as a provider)
   @Patch('auth/passthrough')
   @Post('auth/passthrough')
-  async authenticateWithPassthrough(
+  authenticateWithPassthrough(
     @Body()
     body: SSOUsersAuthenticatePassthroughDto
   ): ReturnType<DomainIAMAuthenticationManagerService['authenticate']> {

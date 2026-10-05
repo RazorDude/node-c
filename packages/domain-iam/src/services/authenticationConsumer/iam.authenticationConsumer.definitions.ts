@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
@@ -12,12 +12,14 @@ import {
   IAMAuthenticationRefreshExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';
 
-export type IAMAuthenticationConsumerCompleteData = IAMAuthenticationCompleteData;
+export type IAMAuthenticationConsumerCompleteData =
+  IAMAuthenticationCompleteData;
 
 export type IAMAuthenticationConsumerCompleteOptions<Context extends object> =
   IAMAuthenticationCompleteOptions<Context>;
 
-export interface IAMAuthenticationConsumerCompleteResult extends IAMAuthenticationCompleteResult {
+export interface IAMAuthenticationConsumerCompleteResult
+  extends IAMAuthenticationCompleteResult {
   idToken?: string;
   refreshToken?: string;
 }
@@ -31,13 +33,16 @@ export type IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData =
 export type IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult =
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult;
 
-export type IAMAuthenticationConsumerInitiateData = IAMAuthenticationInitiateData;
+export type IAMAuthenticationConsumerInitiateData =
+  IAMAuthenticationInitiateData;
 
 export type IAMAuthenticationConsumerInitiateOptions<Context extends object> =
   IAMAuthenticationInitiateOptions<Context>;
 
-export type IAMAuthenticationConsumerInitiateResult = IAMAuthenticationInitiateResult;
+export type IAMAuthenticationConsumerInitiateResult =
+  IAMAuthenticationInitiateResult;
 
-export type IAMAuthenticationConsumerRefreshExternalAccessTokenData = IAMAuthenticationRefreshExternalAccessTokenData;
+export type IAMAuthenticationConsumerRefreshExternalAccessTokenData =
+  IAMAuthenticationRefreshExternalAccessTokenData;
 export type IAMAuthenticationConsumerRefreshExternalAccessTokenResult =
   IAMAuthenticationRefreshExternalAccessTokenResult;

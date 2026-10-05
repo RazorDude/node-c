@@ -1,14 +1,17 @@
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  LoggerService
+  type ConfigProviderService,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
+import type {
   IAMAuthenticationPassthroughConsumerCompleteData,
   IAMAuthenticationPassthroughConsumerCompleteOptions,
   IAMAuthenticationPassthroughConsumerCompleteResult,
@@ -20,8 +23,6 @@ import {
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult
 } from './iam.authenticationPassthroughConsumer.definitions.js';
 
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
-
 /**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.
  *
@@ -31,7 +32,12 @@ export class IAMAuthenticationPassthroughConsumerService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationConsumerService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
   }
 
@@ -39,7 +45,10 @@ export class IAMAuthenticationPassthroughConsumerService<
     data: IAMAuthenticationPassthroughConsumerCompleteData,
     options: IAMAuthenticationPassthroughConsumerCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationPassthroughConsumerCompleteResult> {
-    return super.complete(data, options) as Promise<IAMAuthenticationPassthroughConsumerCompleteResult>;
+    return super.complete(
+      data,
+      options
+    ) as Promise<IAMAuthenticationPassthroughConsumerCompleteResult>;
   }
 
   /**
@@ -55,25 +64,28 @@ export class IAMAuthenticationPassthroughConsumerService<
    */
   getUserAuthenticationConfig(): IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult = {
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        authReturnsTokens: true,
-        decodeReturnedTokens: true,
-        findUser: true,
-        findUserBeforeAuth: false,
-        findUserInExternalTokenPayloads: true,
-        useReturnedTokens: true,
-        useReturnedTokensAsLocal: false,
-        validWithoutUser: false
-      },
-      // this step simply does nothing
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        findUser: false,
-        validWithoutUser: true
-      }
-    };
+    const defaultConfig: IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult =
+      {
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          authReturnsTokens: true,
+          decodeReturnedTokens: true,
+          findUser: true,
+          findUserBeforeAuth: false,
+          findUserInExternalTokenPayloads: true,
+          useReturnedTokens: true,
+          useReturnedTokensAsLocal: false,
+          validWithoutUser: false
+        },
+        // this step simply does nothing
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          findUser: false,
+          validWithoutUser: true
+        }
+      };
     return ld.merge(defaultConfig, steps || {});
   }
 
@@ -81,12 +93,14 @@ export class IAMAuthenticationPassthroughConsumerService<
     data: IAMAuthenticationPassthroughConsumerInitiateData,
     options: IAMAuthenticationPassthroughConsumerInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationPassthroughConsumerInitiateResult> {
-    return super.initiate(data, options) as Promise<IAMAuthenticationPassthroughConsumerInitiateResult>;
+    return super.initiate(
+      data,
+      options
+    ) as Promise<IAMAuthenticationPassthroughConsumerInitiateResult>;
   }
 
   // This method must be implemented in the child class, since the external access tokens come from the consumer.
   async refreshExternalAccessToken(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _data: IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData
   ): Promise<IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult> {
     throw new ApplicationError(

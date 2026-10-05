@@ -1,8 +1,9 @@
-import path from 'path';
+import path from 'node:path';
+import { cwd } from 'node:process';
 
 import { Inject, Injectable } from '@nestjs/common';
-
 import * as NestjsPino from '@node-c/nestjs-pino';
+
 import { v4 as uuid } from 'uuid';
 
 export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
@@ -14,7 +15,10 @@ export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
     transport: {
       targets: [
         {
-          options: { destination: path.resolve(process.cwd(), 'logs/app_logs.txt'), sync: false },
+          options: {
+            destination: path.resolve(cwd(), 'logs/app_logs.txt'),
+            sync: false
+          },
           target: 'pino/file'
         },
         {
@@ -29,12 +33,14 @@ export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
 
 @Injectable()
 export class LoggerService extends NestjsPino.Logger {
-  constructor(logger: NestjsPino.PinoLogger, @Inject(NestjsPino.PARAMS_PROVIDER_TOKEN) params: NestjsPino.Params) {
+  constructor(
+    logger: NestjsPino.PinoLogger,
+    @Inject(NestjsPino.PARAMS_PROVIDER_TOKEN) params: NestjsPino.Params
+  ) {
     super(logger, params);
   }
 
   info(...args: unknown[]): void {
-    // eslint-disable-next-line prefer-spread
     this.logger.info.apply(this, args as [unknown, string, ...unknown[]]);
   }
 }

@@ -1,8 +1,16 @@
+/** biome-ignore-all lint/suspicious/useAwait: Inheritance. */
 import { Inject } from '@nestjs/common';
-import { ApplicationError, ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  ApplicationError,
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationPassthroughConsumerService } from '@node-c/domain-iam';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+
+import type {
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteData,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteOptions,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteResult,
@@ -13,8 +21,6 @@ import {
   CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields
 } from './authenticationPassthroughConsumer.definitions.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
 
 /**
  * A service for integrating Passthrough authentication via other Node-C Apps as a consumer.
@@ -29,7 +35,12 @@ export class CoursePlatformStandaloneAuthenticationPassthroughConsumerService ex
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME) moduleName: string
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME
+    );
   }
 
   async complete(
@@ -54,7 +65,6 @@ export class CoursePlatformStandaloneAuthenticationPassthroughConsumerService ex
 
   // This method must be implemented in the child class, since the external access tokens come from the consumer.
   async refreshExternalAccessToken(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _data: CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenData
   ): Promise<CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult> {
     throw new ApplicationError(

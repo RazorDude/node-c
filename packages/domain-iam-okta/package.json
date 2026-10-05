@@ -9,15 +9,16 @@
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "publish-package": "npm run build:clean && npm publish --access public",
-    "test": "vitest --config src/vitest.config.ts",
-    "test:coverage": "vitest --config src/vitest.config.ts --coverage"
+    "format": "npx @biomejs/biome format --write",
+    "format:check": "npx @biomejs/biome format",
+    "lint": "npx @biomejs/biome check",
+    "lint:fix": "npx @biomejs/biome check --write",
+    "publish-package": "npm run build:clean && npm publish --access public"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.3",
     "@node-c/core": "^1.0.0-beta9",
-    "@node-c/domain-iam": "^1.0.0-beta9"
+    "@node-c/domain-iam": "^1.0.0-beta9",
+    "lodash": "^4.18.1"
   }
 }

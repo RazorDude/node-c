@@ -7,16 +7,16 @@
 export function checkRoutes(route: string, routes: string[]): boolean {
   const splitRoute = route.split('/');
   for (const i in routes) {
-    const item = routes[i],
-      splitItem = item.split('/');
+    const item = routes[i];
+    const splitItem = item.split('/');
     if (item === '*' || route === item) {
       return true;
     }
     if (item.indexOf(':') !== -1 && splitItem.length === splitRoute.length) {
       let valid = true;
       for (const j in splitItem) {
-        const innerItem = splitItem[j],
-          routeItem = splitRoute[j];
+        const innerItem = splitItem[j];
+        const routeItem = splitRoute[j];
         if (routeItem !== innerItem && innerItem.indexOf(':') === -1) {
           valid = false;
           break;

@@ -2,7 +2,7 @@ import { Options } from 'pino-http';
 
 const LEVEL_MAP: Record<string, string> = {
   trace: 'verbose',
-  info: 'log',
+  info: 'log'
 };
 
 /**
@@ -30,6 +30,6 @@ export const nativeLoggerOptions: Options = {
   formatters: {
     level(label) {
       return { level: LEVEL_MAP[label] || label };
-    },
-  },
+    }
+  }
 };

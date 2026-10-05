@@ -52,13 +52,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: non-enabled default routes
   // find users (no options)
   it('should find users (no options)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -76,13 +79,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (pagination, page 1 - implicitly set)
   it('should find users (pagination, page 1 - implicitly set)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?perPage=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?perPage=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -100,13 +106,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (pagination, page 1 - explicitly set)
   it('should find users (pagination, page 1 - explicitly set)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=1&perPage=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=1&perPage=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -124,13 +133,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (pagination, page 2, perPage - implicitly set)
   it('should find users (pagination, page 2, perPage - implicitly set)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -144,13 +156,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (pagination, page 2, perPage - explicitly set)
   it('should find users (pagination, page 2, perPage - explicitly set)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=2&perPage=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?page=2&perPage=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -168,13 +183,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (sorting)
   it('should find users (sorting)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?orderBy[id]=desc`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -194,13 +212,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: filters on aliased fields
   // find users (filters - simple)
   it('should find users (filters - simple)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id]=1`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -389,13 +410,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: find users (filters - $ilike operator cases)
   // find users (filters - $not operator inside a field, as a single value)
   it('should find users (filters - $not operator inside a field, as a single value)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$not][]=1`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$not][]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -441,13 +465,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: find users (filters - $not operator ...can't remember the test case :D)
   // find users (filters - $gt operator)
   it('should find users (filters - $gt operator)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gt]=1`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gt]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -465,13 +492,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (filters - $gte operator)
   it('should find users (filters - $gte operator)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gte]=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gte]=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -489,13 +519,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (filters - $lt operator)
   it('should find users (filters - $lt operator)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$lt]=5`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$lt]=5`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -513,13 +546,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // find users (filters - $lte operator)
   it('should find users (filters - $lte operator)', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$lte]=2`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.GET
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$lte]=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(200);
     // check the basic properties of the request
@@ -591,10 +627,12 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(item).toHaveProperty('courseType');
       expect(item.courseType.id).toEqual(item.courseTypeId);
       expect(item).toHaveProperty('lessons');
-      item.lessons.forEach((lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
-        expect(lesson).toHaveProperty('lessonType');
-        expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
-      });
+      item.lessons.forEach(
+        (lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
+          expect(lesson).toHaveProperty('lessonType');
+          expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
+        }
+      );
     }
   });
   // find lessons (included relations with filters on relations - shallow, include added also)
@@ -628,10 +666,12 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(item).toHaveProperty('courseType');
       expect(item.courseType.id).toEqual(item.courseTypeId);
       expect(item).toHaveProperty('lessons');
-      item.lessons.forEach((lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
-        expect(lesson).toHaveProperty('lessonType');
-        expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
-      });
+      item.lessons.forEach(
+        (lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
+          expect(lesson).toHaveProperty('lessonType');
+          expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
+        }
+      );
     }
   });
   // (forbidden relation error) find lessons (included relations with filters on relations - shallow, include not added)
@@ -709,11 +749,13 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(item).toHaveProperty('courseType');
       expect(item.courseType.id).toEqual(item.courseTypeId);
       expect(item).toHaveProperty('lessons');
-      item.lessons.forEach((lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
-        expect(lesson.lessonTypeId).toEqual(1);
-        expect(lesson).toHaveProperty('lessonType');
-        expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
-      });
+      item.lessons.forEach(
+        (lesson: { lessonTypeId: number; lessonType: { id: number } }) => {
+          expect(lesson.lessonTypeId).toEqual(1);
+          expect(lesson).toHaveProperty('lessonType');
+          expect(lesson.lessonType.id).toEqual(lesson.lessonTypeId);
+        }
+      );
     }
   });
   // TODO: find courses - select specific fields only, including aliased fields
@@ -771,19 +813,22 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // create a course in the DB
   it('should create a course in the DB', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        data: {
-          courseTypeId: 1,
-          name: 'Test create course'
-        }
-      }),
-      method: HttpMethod.POST
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            courseTypeId: 1,
+            name: 'Test create course'
+          }
+        }),
+        method: HttpMethod.POST
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(201);
     expect(responseBody).toHaveProperty('result');
@@ -793,20 +838,23 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // fail to create a course in the cache directly because a non-generated PK has not been provided
   it('should fail to create a course in the cache directly because a non-generated PK has not been provided', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        data: {
-          courseTypeId: 2,
-          name: 'Test create course 2'
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
         },
-        dataServices: ['cache']
-      }),
-      method: HttpMethod.POST
-    });
+        body: JSON.stringify({
+          data: {
+            courseTypeId: 2,
+            name: 'Test create course 2'
+          },
+          dataServices: ['cache']
+        }),
+        method: HttpMethod.POST
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(400);
     expect(responseBody).toHaveProperty('statusCode');
@@ -818,28 +866,33 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // create a course in the cache directly
   it('should create a course in the cache directly if all data has been provided correctly', async () => {
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`, {
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        data: {
-          id: 4,
-          categoryId: 1,
-          courseTypeId: 3,
-          name: 'Cooking: A Day In Hell With Gordon Ramsey'
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
         },
-        dataServices: ['cache']
-      }),
-      method: HttpMethod.POST
-    });
+        body: JSON.stringify({
+          data: {
+            id: 4,
+            categoryId: 1,
+            courseTypeId: 3,
+            name: 'Cooking: A Day In Hell With Gordon Ramsey'
+          },
+          dataServices: ['cache']
+        }),
+        method: HttpMethod.POST
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(201);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(4);
     expect(responseBody.result.courseTypeId).toEqual(3);
-    expect(responseBody.result.name).toEqual('Cooking: A Day In Hell With Gordon Ramsey');
+    expect(responseBody.result.name).toEqual(
+      'Cooking: A Day In Hell With Gordon Ramsey'
+    );
   });
   // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)
   it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)', async () => {

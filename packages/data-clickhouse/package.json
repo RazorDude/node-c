@@ -9,11 +9,11 @@
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "publish-package": "npm run build:clean && npm publish --access public",
-    "test": "vitest --config src/vitest.config.ts",
-    "test:coverage": "vitest --config src/vitest.config.ts --coverage"
+    "format": "npx @biomejs/biome format --write",
+    "format:check": "npx @biomejs/biome format",
+    "lint": "npx @biomejs/biome check",
+    "lint:fix": "npx @biomejs/biome check --write",
+    "publish-package": "npm run build:clean && npm publish --access public"
   },
   "dependencies": {
     "@clickhouse/client": "^1.12.1",

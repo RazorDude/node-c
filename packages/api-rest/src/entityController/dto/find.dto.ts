@@ -1,10 +1,24 @@
-import type { DataOrderByDirection, DomainFindOptions, GenericObject } from '@node-c/core';
+import type {
+  DataOrderByDirection,
+  DomainFindOptions,
+  GenericObject
+} from '@node-c/core';
 
-import { IsArray, IsBooleanString, IsNotEmptyObject, IsNumberString, IsObject, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsBooleanString,
+  IsNotEmptyObject,
+  IsNumberString,
+  IsObject,
+  IsOptional
+} from 'class-validator';
 
 import { BaseDto } from './base.dto.js';
 
-export class FindDto<Options extends DomainFindOptions> extends BaseDto<Options> implements DomainFindOptions {
+export class FindDto<Options extends DomainFindOptions>
+  extends BaseDto<Options>
+  implements DomainFindOptions
+{
   @IsNotEmptyObject()
   @IsObject()
   @IsOptional()

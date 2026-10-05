@@ -1,4 +1,4 @@
-import { Params } from '@node-c/nestjs-pino';
+import type { Params } from '@node-c/nestjs-pino';
 
 export interface LoggerModuleOptions {
   pinoParams?: Params;

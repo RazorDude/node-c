@@ -2,12 +2,12 @@ import {
   ConsoleLogger,
   Inject,
   Injectable,
-  type LoggerService,
+  type LoggerService
 } from '@nestjs/common';
 import { Level } from 'pino';
 import { PinoLogger } from './PinoLogger.js';
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
 import type { Params } from './params.js';
+import { PARAMS_PROVIDER_TOKEN } from './params.js';
 
 /**
  * NestJS v12 collects plain objects passed after the message into a single
@@ -50,7 +50,7 @@ export class NativeLogger implements LoggerService {
 
   constructor(
     protected readonly logger: PinoLogger,
-    @Inject(PARAMS_PROVIDER_TOKEN) { renameContext, nativeLogger }: Params,
+    @Inject(PARAMS_PROVIDER_TOKEN) { renameContext, nativeLogger }: Params
   ) {
     this.contextName = renameContext || 'context';
     this.structuredParams =
@@ -105,7 +105,7 @@ export class NativeLogger implements LoggerService {
     message: unknown,
     context: string | undefined,
     stack?: string,
-    params?: Record<string, any>,
+    params?: Record<string, any>
   ) {
     // Flattened params go in first so that this logger's own fields win on a
     // key collision. Collisions with pino's fields (the level, the timestamp,
@@ -172,7 +172,7 @@ export class NativeLogger implements LoggerService {
       context,
       params: paramObjects.length
         ? Object.assign({}, ...paramObjects)
-        : undefined,
+        : undefined
     };
   }
 
@@ -187,13 +187,13 @@ export class NativeLogger implements LoggerService {
         return {
           messages: [args[0]],
           stack: args[1] as string,
-          context: undefined,
+          context: undefined
         };
       }
       if (typeof args[1] === 'string') {
         return {
           messages: [args[0]],
-          context: args[1],
+          context: args[1]
         };
       }
     }
@@ -201,7 +201,7 @@ export class NativeLogger implements LoggerService {
     const trailingArg = args[args.length - 1];
     if (args.length > 2 && this.isStackFormat(trailingArg)) {
       const { messages, context, params } = this.getContextAndMessagesToPrint(
-        args.slice(0, -1),
+        args.slice(0, -1)
       );
       return { messages, context, stack: trailingArg as string, params };
     }
@@ -218,7 +218,7 @@ export class NativeLogger implements LoggerService {
         stack: lastMessage,
         messages: messages.slice(0, messages.length - 1),
         context,
-        params,
+        params
       };
     }
     return { messages, context, params };

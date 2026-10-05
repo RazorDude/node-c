@@ -1,15 +1,15 @@
-import {
+import type {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';
 
-import {
+import type {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
-import {
+import type {
   IAMAuthenticationPassthroughCompleteData,
   IAMAuthenticationPassthroughCompleteOptions,
   IAMAuthenticationPassthroughCompleteResult,
@@ -19,31 +19,37 @@ import {
   IAMAuthenticationPassthroughInitiateResult
 } from '../authenticationPassthrough/iam.authenticationPassthrough.definitions.js';
 
-export type IAMAuthenticationPassthroughConsumerCompleteData = IAMAuthenticationPassthroughCompleteData & {
-  externalAccessToken?: string;
-  externalAccessTokenExpiresIn?: number;
-  externalIdToken?: string;
-  externalRefreshToken?: string;
-  externalRefreshTokenExpiresIn?: number;
-};
+export type IAMAuthenticationPassthroughConsumerCompleteData =
+  IAMAuthenticationPassthroughCompleteData & {
+    externalAccessToken?: string;
+    externalAccessTokenExpiresIn?: number;
+    externalIdToken?: string;
+    externalRefreshToken?: string;
+    externalRefreshTokenExpiresIn?: number;
+  };
 
-export type IAMAuthenticationPassthroughConsumerCompleteOptions<Context extends object> =
-  IAMAuthenticationPassthroughCompleteOptions<Context>;
+export type IAMAuthenticationPassthroughConsumerCompleteOptions<
+  Context extends object
+> = IAMAuthenticationPassthroughCompleteOptions<Context>;
 
-export type IAMAuthenticationPassthroughConsumerCompleteResult = IAMAuthenticationPassthroughCompleteResult &
-  IAMAuthenticationConsumerCompleteResult;
+export type IAMAuthenticationPassthroughConsumerCompleteResult =
+  IAMAuthenticationPassthroughCompleteResult &
+    IAMAuthenticationConsumerCompleteResult;
 
 export type IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult =
   IAMAuthenticationPassthroughGetUserAuthenticationConfigResult &
     IAMAuthenticationConsumerGetUserAuthenticationConfigResult;
 
-export type IAMAuthenticationPassthroughConsumerInitiateData = IAMAuthenticationPassthroughInitiateData;
+export type IAMAuthenticationPassthroughConsumerInitiateData =
+  IAMAuthenticationPassthroughInitiateData;
 
-export type IAMAuthenticationPassthroughConsumerInitiateOptions<Context extends object> =
-  IAMAuthenticationPassthroughInitiateOptions<Context>;
+export type IAMAuthenticationPassthroughConsumerInitiateOptions<
+  Context extends object
+> = IAMAuthenticationPassthroughInitiateOptions<Context>;
 
-export type IAMAuthenticationPassthroughConsumerInitiateResult = IAMAuthenticationPassthroughInitiateResult &
-  IAMAuthenticationConsumerInitiateResult;
+export type IAMAuthenticationPassthroughConsumerInitiateResult =
+  IAMAuthenticationPassthroughInitiateResult &
+    IAMAuthenticationConsumerInitiateResult;
 
 export type IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData =
   IAMAuthenticationRefreshExternalAccessTokenData;

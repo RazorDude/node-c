@@ -1,4 +1,4 @@
-import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 
 export interface RedisEntity<Id> {
   createdAt: Date;

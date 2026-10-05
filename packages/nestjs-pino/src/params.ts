@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   FactoryProvider,
   MiddlewareConsumer,
-  ModuleMetadata,
+  ModuleMetadata
 } from '@nestjs/common';
 import { DestinationStream, LevelWithSilent, Logger } from 'pino';
 import { Options, ReqId } from 'pino-http';
@@ -30,7 +30,7 @@ export type PassedLogger<CustomLevels extends string = never> = {
 export interface Params<
   IM = IncomingMessage,
   SR = ServerResponse,
-  CustomLevels extends string = never,
+  CustomLevels extends string = never
 > {
   /**
    * Optional parameters for `pino-http` module
@@ -176,7 +176,7 @@ export interface MicroserviceParams<CustomLevels extends string = never> {
    */
   customLogLevel?: (
     context: ExecutionContext,
-    error?: Error,
+    error?: Error
   ) => LevelWithSilent | CustomLevels;
 
   /**
@@ -197,14 +197,14 @@ export interface MicroserviceParams<CustomLevels extends string = never> {
   customSuccessMessage?: (
     context: ExecutionContext,
     result: unknown,
-    responseTime: number,
+    responseTime: number
   ) => string;
 
   /** @default `'message errored'`, or `'event errored'` for an `@EventPattern` */
   customErrorMessage?: (
     context: ExecutionContext,
     error: Error,
-    responseTime: number,
+    responseTime: number
   ) => string;
 
   /**
@@ -222,7 +222,7 @@ export interface MicroserviceParams<CustomLevels extends string = never> {
   customSuccessObject?: (
     context: ExecutionContext,
     result: unknown,
-    value: object,
+    value: object
   ) => object;
 
   /**
@@ -233,7 +233,7 @@ export interface MicroserviceParams<CustomLevels extends string = never> {
   customErrorObject?: (
     context: ExecutionContext,
     error: Error,
-    value: object,
+    value: object
   ) => object;
 
   /** Extra fields bound to every log made while handling the message. */
@@ -278,7 +278,7 @@ export interface MicroserviceParams<CustomLevels extends string = never> {
 export interface LoggerModuleAsyncParams<
   IM = IncomingMessage,
   SR = ServerResponse,
-  CustomLevels extends string = never,
+  CustomLevels extends string = never
 > extends Pick<ModuleMetadata, 'imports' | 'providers'>,
     // `provide` is deliberately not picked: `forRootAsync` sets it to
     // `PARAMS_PROVIDER_TOKEN` itself, so a caller-supplied token would only be
@@ -289,7 +289,7 @@ export interface LoggerModuleAsyncParams<
     > {}
 
 export function isPassedLogger(
-  pinoHttpProp: any,
+  pinoHttpProp: any
 ): pinoHttpProp is PassedLogger {
   return !!pinoHttpProp && 'logger' in pinoHttpProp;
 }

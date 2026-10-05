@@ -1,6 +1,12 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  type CallHandler,
+  type ExecutionContext,
+  HttpStatus,
+  Injectable,
+  type NestInterceptor
+} from '@nestjs/common';
 
-import { ApplicationError, LoggerService } from '@node-c/core';
+import { ApplicationError, type LoggerService } from '@node-c/core';
 
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -10,14 +16,11 @@ import { cleanUpAxiosError } from '../common/utils/utils.cleanUpAxiosError.js';
 
 @Injectable()
 export class HTTPErrorInterceptor implements NestInterceptor {
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    protected logger: LoggerService
-  ) {}
+  constructor(protected logger: LoggerService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      catchError(error => {
+      catchError((error) => {
         const loggableException = cleanUpAxiosError(error);
         this.logger.error(loggableException);
         let message: string | string[] = 'An error has occurred.';
@@ -32,10 +35,10 @@ export class HTTPErrorInterceptor implements NestInterceptor {
             } else if ('statusCode' in error.data) {
               status = error.data.statusCode as number;
             } else {
-              status = 400;
+              status = HttpStatus.BAD_REQUEST;
             }
           } else {
-            status = 400;
+            status = HttpStatus.BAD_REQUEST;
           }
         } else if (error.response) {
           const { response } = error;
@@ -45,16 +48,17 @@ export class HTTPErrorInterceptor implements NestInterceptor {
           if (response.message) {
             message = response.message;
           }
-        } else if (error instanceof Error) {
-          if (error.message) {
-            message = error.message;
-          }
+        } else if (error instanceof Error && error.message) {
+          message = error.message;
         }
         context
           .switchToHttp()
           .getResponse()
           .status(status)
-          .json({ error: message instanceof Array ? message.join('\n') : message, statusCode: status });
+          .json({
+            error: Array.isArray(message) ? message.join('\n') : message,
+            statusCode: status
+          });
         return new Observable();
       })
     );

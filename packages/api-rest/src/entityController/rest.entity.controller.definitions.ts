@@ -1,4 +1,4 @@
-import {
+import type {
   DataDefaultData,
   DataEntityService,
   DomainBulkCreateData,
@@ -27,8 +27,10 @@ export type CreateOptions<Entity> = Omit<CreateBody<Entity>, 'data'>;
 // These types and interfaces have to be here to avoid circular dependencies.
 export type DefaultDomainEntityService<
   Entity,
-  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  DataEntityServiceData extends DataDefaultData<Entity> = DataDefaultData<Entity>
+  DomainEntityServiceData extends
+    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  DataEntityServiceData extends
+    DataDefaultData<Entity> = DataDefaultData<Entity>
 > = DomainEntityService<
   Entity,
   DataEntityService<Entity, DataEntityServiceData>,

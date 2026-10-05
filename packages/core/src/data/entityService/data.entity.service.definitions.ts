@@ -1,4 +1,4 @@
-import { GenericObject } from '../../common/definitions/common.definitions.js';
+import type { GenericObject } from '../../common/definitions/common.definitions.js';
 
 export interface DataBulkCreatePrivateOptions extends GenericObject {
   processInputAllowedFieldsEnabled?: boolean;
@@ -90,34 +90,21 @@ export interface DataOrderBy {
 }
 
 export enum DataOrderByDirection {
-  // eslint-disable-next-line no-unused-vars
   Asc = 'ASC',
-  // eslint-disable-next-line no-unused-vars
   Desc = 'DESC'
 }
 
 export enum DataSelectOperator {
-  // eslint-disable-next-line no-unused-vars
   Between = '$between',
-  // eslint-disable-next-line no-unused-vars
   Contains = '$contains',
-  // eslint-disable-next-line no-unused-vars
   Equals = '$eq',
-  // eslint-disable-next-line no-unused-vars
   GreaterThan = '$gt',
-  // eslint-disable-next-line no-unused-vars
   GreaterThanOrEqual = '$gte',
-  // eslint-disable-next-line no-unused-vars
   LessThan = '$lt',
-  // eslint-disable-next-line no-unused-vars
   LessThanOrEqual = '$lte',
-  // eslint-disable-next-line no-unused-vars
   Like = '$like',
-  // eslint-disable-next-line no-unused-vars
   ILike = '$ilike',
-  // eslint-disable-next-line no-unused-vars
   Not = '$not',
-  // eslint-disable-next-line no-unused-vars
   Or = '$or'
 }
 
@@ -147,8 +134,6 @@ export interface ProcessObjectAllowedFieldsOptions {
 }
 
 export enum ProcessObjectAllowedFieldsType {
-  // eslint-disable-next-line no-unused-vars
   Filters = 'processFiltersAllowedFieldsEnabled',
-  // eslint-disable-next-line no-unused-vars
   Input = 'processInputAllowedFieldsEnabled'
 }

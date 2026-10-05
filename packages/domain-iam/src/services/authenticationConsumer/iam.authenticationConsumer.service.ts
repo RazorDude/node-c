@@ -1,17 +1,18 @@
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  GenericObject,
+  type ConfigProviderService,
+  type GenericObject,
   HttpMethod,
-  LoggerService,
-  httpRequest
+  httpRequest,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type {
   IAMAuthenticationConsumerCompleteData,
   IAMAuthenticationConsumerCompleteOptions,
   IAMAuthenticationConsumerCompleteResult,
@@ -25,8 +26,6 @@ import {
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
 } from './iam.authenticationConsumer.definitions.js';
 
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-
 /**
  * The base service for integrating authenticationServices via other Node-C Apps as a consumer.
  *
@@ -36,7 +35,12 @@ export class IAMAuthenticationConsumerService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
     this.isLocal = false;
   }
@@ -45,24 +49,30 @@ export class IAMAuthenticationConsumerService<
     data: IAMAuthenticationConsumerCompleteData,
     options: IAMAuthenticationConsumerCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationConsumerCompleteResult> {
-    const responseData = await this.runRequest<IAMAuthenticationConsumerCompleteResult>(
-      AppConfigDomainIAMAuthenticationStep.Complete,
-      {
-        auth: { ...data, type: this.serviceName },
-        step: AppConfigDomainIAMAuthenticationStep.Complete,
-        ...(options?.contextIdentifierField
-          ? {
-              filters: {
-                [options.contextIdentifierField]:
-                  options.context[options.contextIdentifierField as keyof CompleteContext]
+    const responseData =
+      await this.runRequest<IAMAuthenticationConsumerCompleteResult>(
+        AppConfigDomainIAMAuthenticationStep.Complete,
+        {
+          auth: { ...data, type: this.serviceName },
+          step: AppConfigDomainIAMAuthenticationStep.Complete,
+          ...(options.contextIdentifierField
+            ? {
+                filters: {
+                  [options.contextIdentifierField]:
+                    options.context[
+                      options.contextIdentifierField as keyof CompleteContext
+                    ]
+                }
               }
-            }
-          : {})
-      }
-    );
+            : {})
+        }
+      );
     return {
       ...responseData,
-      valid: typeof responseData.valid !== 'undefined' ? responseData.valid : !!responseData.accessToken?.length
+      valid:
+        typeof responseData.valid === 'undefined'
+          ? Boolean(responseData.accessToken?.length)
+          : responseData.valid
     };
   }
 
@@ -79,30 +89,34 @@ export class IAMAuthenticationConsumerService<
    */
   getUserAuthenticationConfig(): IAMAuthenticationConsumerGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationConsumerGetUserAuthenticationConfigResult = {
-      // this step just extracts the user data from the returned data and saves it in the consumer environment,
-      // together with the tokens
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        authReturnsTokens: true,
-        decodeReturnedTokens: true,
-        findUser: true,
-        findUserBeforeAuth: false,
-        findUserInExternalTokenPayloads: true,
-        useReturnedTokens: true,
-        useReturnedTokensAsLocal: true,
-        validWithoutUser: false
-      },
-      // this step simply does nothing
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        findUser: false,
-        validWithoutUser: true
-      }
-    };
+    const defaultConfig: IAMAuthenticationConsumerGetUserAuthenticationConfigResult =
+      {
+        // this step just extracts the user data from the returned data and saves it in the consumer environment,
+        // together with the tokens
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          authReturnsTokens: true,
+          decodeReturnedTokens: true,
+          findUser: true,
+          findUserBeforeAuth: false,
+          findUserInExternalTokenPayloads: true,
+          useReturnedTokens: true,
+          useReturnedTokensAsLocal: true,
+          validWithoutUser: false
+        },
+        // this step simply does nothing
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          findUser: false,
+          validWithoutUser: true
+        }
+      };
     return ld.merge(defaultConfig, steps || {});
   }
 
+  // biome-ignore lint/suspicious/useAwait: Abstract method.
   async getUserDataFromExternalTokenPayloads(
     data: IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData
   ): Promise<IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult | null> {
@@ -110,7 +124,8 @@ export class IAMAuthenticationConsumerService<
     if (!idTokenPayload?.data?.user) {
       return null;
     }
-    return idTokenPayload.data.user as unknown as IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult;
+    return idTokenPayload.data
+      .user as unknown as IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult;
   }
 
   async initiate(
@@ -118,14 +133,18 @@ export class IAMAuthenticationConsumerService<
     options: IAMAuthenticationConsumerInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationConsumerInitiateResult> {
     const responseData = await this.runRequest<
-      IAMAuthenticationConsumerInitiateResult | IAMAuthenticationConsumerCompleteResult
+      | IAMAuthenticationConsumerInitiateResult
+      | IAMAuthenticationConsumerCompleteResult
     >(AppConfigDomainIAMAuthenticationStep.Initiate, {
       auth: { ...data, type: this.serviceName },
       step: AppConfigDomainIAMAuthenticationStep.Initiate,
-      ...(options?.contextIdentifierField
+      ...(options.contextIdentifierField
         ? {
             filters: {
-              [options.contextIdentifierField]: options.context[options.contextIdentifierField as keyof InitiateContext]
+              [options.contextIdentifierField]:
+                options.context[
+                  options.contextIdentifierField as keyof InitiateContext
+                ]
             }
           }
         : {})
@@ -133,9 +152,10 @@ export class IAMAuthenticationConsumerService<
     return {
       ...responseData,
       valid:
-        typeof responseData.valid !== 'undefined'
-          ? responseData.valid
-          : 'accessToken' in responseData && !!responseData.accessToken?.length,
+        typeof responseData.valid === 'undefined'
+          ? 'accessToken' in responseData &&
+            Boolean(responseData.accessToken?.length)
+          : responseData.valid,
       ...('nextStepsRequired' in responseData && responseData.nextStepsRequired
         ? { mfaUsed: true, mfaValid: true }
         : { mfaUsed: false })
@@ -143,13 +163,22 @@ export class IAMAuthenticationConsumerService<
   }
 
   protected async runRequest<ReturnData>(
-    endpoint: AppConfigDomainIAMAuthenticationStep | 'refreshExternalAccessToken',
+    endpoint:
+      | AppConfigDomainIAMAuthenticationStep
+      | 'refreshExternalAccessToken',
     data: GenericObject
   ): Promise<ReturnData> {
     const { configProvider, logger, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { apiKey, apiSecret, apiSecretHashingAlgorithm, baseUrl, ...configData } =
-      moduleConfig.authServiceSettings![serviceName].nodeC!;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
+    const {
+      apiKey,
+      apiSecret,
+      apiSecretHashingAlgorithm,
+      baseUrl,
+      ...configData
+    } = moduleConfig.authServiceSettings![serviceName].nodeC!;
     const endpointMethod = configData[`${endpoint}EndpointMethod`];
     const endpointUri = configData[`${endpoint}Endpoint`];
     if (!baseUrl) {
@@ -157,23 +186,35 @@ export class IAMAuthenticationConsumerService<
       throw new ApplicationError('Authentication failed.');
     }
     if (!endpointUri) {
-      logger.error(`[${moduleName}][${serviceName}]: Endpoint URI for "${endpoint}" not configured.`);
+      logger.error(
+        `[${moduleName}][${serviceName}]: Endpoint URI for "${endpoint}" not configured.`
+      );
       throw new ApplicationError('Authentication failed.');
     }
     if (!endpointMethod) {
-      logger.error(`[${moduleName}][${serviceName}]: Endpoint method for "${endpoint}" not configured.`);
+      logger.error(
+        `[${moduleName}][${serviceName}]: Endpoint method for "${endpoint}" not configured.`
+      );
       throw new ApplicationError('Authentication failed.');
     }
-    const { data: responseData, hasError } = await httpRequest<ReturnData>(`${baseUrl}${endpointUri}`, {
-      apiKey,
-      apiSecret,
-      apiSecretHashingAlgorithm,
-      isJSON: true,
-      method: endpointMethod,
-      ...(endpointMethod === HttpMethod.GET ? { query: data } : { body: data })
-    });
+    const { data: responseData, hasError } = await httpRequest<ReturnData>(
+      `${baseUrl}${endpointUri}`,
+      {
+        apiKey,
+        apiSecret,
+        apiSecretHashingAlgorithm,
+        isJSON: true,
+        method: endpointMethod,
+        ...(endpointMethod === HttpMethod.GET
+          ? { query: data }
+          : { body: data })
+      }
+    );
     if (hasError || !responseData) {
-      logger.error(`[${moduleName}][${serviceName}]: Endpoint ${endpointUri} failed.`, responseData);
+      logger.error(
+        `[${moduleName}][${serviceName}]: Endpoint ${endpointUri} failed.`,
+        responseData
+      );
       throw new ApplicationError('Authentication failed.');
     }
     return responseData;

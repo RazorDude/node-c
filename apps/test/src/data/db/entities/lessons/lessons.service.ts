@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
-import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
+import { Constants, type SQLQueryBuilderService } from '@node-c/data-rdb';
+import {
+  TypeORMDBEntityService,
+  type TypeORMDBRepository
+} from '@node-c/data-typeorm';
 
-import { DataDBLesson, DataDBLessonEntity } from './lessons.entity.js';
+import { type DataDBLesson, DataDBLessonEntity } from './lessons.entity.js';
 
 @Injectable()
 export class DataDBLessonsService extends TypeORMDBEntityService<DataDBLesson> {

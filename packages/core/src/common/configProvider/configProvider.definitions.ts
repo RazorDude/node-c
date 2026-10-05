@@ -1,5 +1,5 @@
-import { HttpMethod } from '../definitions/common.constants.js';
-import { GenericObject } from '../definitions/common.definitions.js';
+import type { HttpMethod } from '../definitions/common.constants.js';
+import type { GenericObject } from '../definitions/common.definitions.js';
 
 /**
  * This object contains the names of the fields within the modules, by module category.
@@ -52,52 +52,63 @@ export const APP_CONFIG_FROM_ENV_KEYS: AppConfigFromEnvKeys = {
  *
  * _MODULE_TYPE, whose value correesponds to the values define in the 'children' here.
  */
-export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNames = {
-  API: {
-    children: {
-      HTTP: 'http',
-      REST: 'rest'
+export const APP_CONFIG_FROM_ENV_KEYS_PARENT_NAMES: AppConfigFromEnvKeysParentNames =
+  {
+    API: {
+      children: {
+        HTTP: 'http',
+        REST: 'rest'
+      },
+      name: 'api'
     },
-    name: 'api'
-  },
-  DOMAIN: {
-    children: {
-      IAM: 'iam'
+    DOMAIN: {
+      children: {
+        IAM: 'iam'
+      },
+      name: 'domain'
     },
-    name: 'domain'
-  },
-  DATA: {
-    children: {
-      DB: 'db',
-      REDIS: 'redis',
-      VALKEY: 'valkey'
-    },
-    name: 'data'
-  }
-};
+    DATA: {
+      children: {
+        DB: 'db',
+        REDIS: 'redis',
+        VALKEY: 'valkey'
+      },
+      name: 'data'
+    }
+  };
 
-type AppConfigIntermediate = AppConfigCommon & AppConfigProfile & AppConfigFromEnv;
-export type AppConfig = AppConfigIntermediate & Required<Pick<AppConfigIntermediate, 'api'>>;
-type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP & AppConfigFromEnvAPIHTTP;
+type AppConfigIntermediate = AppConfigCommon &
+  AppConfigProfile &
+  AppConfigFromEnv;
+export type AppConfig = AppConfigIntermediate &
+  Required<Pick<AppConfigIntermediate, 'api'>>;
+type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP &
+  AppConfigFromEnvAPIHTTP;
 export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
   Required<
     Pick<
       AppConfigAPIHTTPIntermediate,
-      'allowedOrigins' | 'allowedApiKeyRoutes' | 'anonymousAccessRoutes' | 'hostname' | 'port'
+      | 'allowedOrigins'
+      | 'allowedApiKeyRoutes'
+      | 'anonymousAccessRoutes'
+      | 'hostname'
+      | 'port'
     >
   >;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 
-export type AppConfigDomainIAM = AppConfigCommonDomainIAM & AppConfigFromEnvDomainIAM & AppConfigProfileDomainIAM;
+export type AppConfigDomainIAM = AppConfigCommonDomainIAM &
+  AppConfigFromEnvDomainIAM &
+  AppConfigProfileDomainIAM;
 
 export enum AppConfigDomainIAMAuthenticationStep {
-  // eslint-disable-next-line no-unused-vars
   Complete = 'complete',
-  // eslint-disable-next-line no-unused-vars
   Initiate = 'initiate'
 }
 
-export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL & AppConfigFromEnvDataNoSQL & AppConfigProfileDataNoSQL;
+export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL &
+  AppConfigFromEnvDataNoSQL &
+  AppConfigProfileDataNoSQL;
 export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
   AppConfigCommonDataRDB &
   AppConfigCommonDataClickHouse &
@@ -110,7 +121,12 @@ export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
  */
 
 export interface AppConfigCommon {
-  api?: { [apiName: string]: GenericObject | AppConfigCommonAPIHTTP | AppConfigCommonAPIREST };
+  api?: {
+    [apiName: string]:
+      | GenericObject
+      | AppConfigCommonAPIHTTP
+      | AppConfigCommonAPIREST;
+  };
   domain: { [domainName: string]: GenericObject | AppConfigCommonDomainIAM };
   general: {
     projectName: string;
@@ -204,7 +220,8 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem
   use: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
+  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   authReturnsTokens?: boolean;
   cache?: {
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -218,7 +235,8 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings exten
   useReturnedTokensAsLocal?: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings
+  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   cache?: {
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -257,14 +275,18 @@ export interface AppConfigCommonDataNoSQL extends AppConfigCommonData {
   sentinelRole?: 'master' | 'slave';
   storeDelimiter?: string;
   storeKey: string;
-  settingsPerEntity?: Record<string, AppConfigCommonDataNoSQLEntityServiceSettings>;
+  settingsPerEntity?: Record<
+    string,
+    AppConfigCommonDataNoSQLEntityServiceSettings
+  >;
   type: NoSQLType;
   useHashmap?: boolean;
   usePasswordForSentinelPassword?: boolean;
   validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
 }
 
-export interface AppConfigCommonDataNoSQLEntityServiceSettings extends AppConfigCommonDataEntityServiceSettings {
+export interface AppConfigCommonDataNoSQLEntityServiceSettings
+  extends AppConfigCommonDataEntityServiceSettings {
   defaultIndividualSearchEnabled?: boolean;
   ttl?: number;
   validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
@@ -286,10 +308,18 @@ export interface AppConfigCommonDataRDB extends AppConfigCommonData {
  */
 
 export interface AppConfigFromEnv {
-  api?: { [apiName: string]: GenericObject | AppConfigFromEnvAPIHTTP | AppConfigFromEnvAPIREST };
+  api?: {
+    [apiName: string]:
+      | GenericObject
+      | AppConfigFromEnvAPIHTTP
+      | AppConfigFromEnvAPIREST;
+  };
   domain?: { [domainName: string]: GenericObject | AppConfigFromEnvDomainIAM };
   data?: {
-    [moduleName: string]: GenericObject | AppConfigFromEnvDataNoSQL | AppConfigFromEnvDataRDB;
+    [moduleName: string]:
+      | GenericObject
+      | AppConfigFromEnvDataNoSQL
+      | AppConfigFromEnvDataRDB;
   };
 }
 
@@ -352,7 +382,12 @@ export interface AppConfigFromEnvDataRDB {
  */
 
 export interface AppConfigProfile {
-  api?: { [apiName: string]: GenericObject | AppConfigProfileAPIHTTP | AppConfigProfileAPIREST };
+  api?: {
+    [apiName: string]:
+      | GenericObject
+      | AppConfigProfileAPIHTTP
+      | AppConfigProfileAPIREST;
+  };
   domain?: { [domainName: string]: GenericObject | AppConfigProfileDomainIAM };
   general: {
     environment: AppEnvironment;
@@ -417,15 +452,10 @@ export type AppConfigProfileDataRDB = AppConfigCommonDataRDB & {
 };
 
 export enum AppEnvironment {
-  // eslint-disable-next-line no-unused-vars
   Development = 'development',
-  // eslint-disable-next-line no-unused-vars
   Local = 'local',
-  // eslint-disable-next-line no-unused-vars
   Production = 'production',
-  // eslint-disable-next-line no-unused-vars
   Staging = 'staging',
-  // eslint-disable-next-line no-unused-vars
   Test = 'endToEndTests'
 }
 
@@ -439,9 +469,7 @@ export interface ConfigProviderModuleOptions extends LoadConfigOptions {
 
 // TODO: figure out how to move this to the Domain-IAM package
 export enum EndpointSecurityMode {
-  // eslint-disable-next-line no-unused-vars
   Lax = 'lax',
-  // eslint-disable-next-line no-unused-vars
   Strict = 'strict'
 }
 
@@ -455,21 +483,15 @@ export interface GenerateOrmconfigOptions {
 
 // TODO: figure out how to move this to the Redis package
 export enum NoSQLType {
-  // eslint-disable-next-line no-unused-vars
   Redis = 'redis',
-  // eslint-disable-next-line no-unused-vars
   Valkey = 'valkey'
 }
 
 // TODO: figure out how to move this to the RDB package
 export enum RDBType {
-  // eslint-disable-next-line no-unused-vars
   Aurora = 'aurora',
-  // eslint-disable-next-line no-unused-vars
   ClickHouse = 'clickhouse',
-  // eslint-disable-next-line no-unused-vars
   MySQL = 'mysql',
-  // eslint-disable-next-line no-unused-vars
   PG = 'postgres'
 }
 

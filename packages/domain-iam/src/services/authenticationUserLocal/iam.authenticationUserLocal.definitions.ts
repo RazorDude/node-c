@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
@@ -8,22 +8,25 @@ import {
   IAMAuthenticationInitiateResult
 } from '../authentication/iam.authentication.definitions.js';
 
-export type IAMAuthenticationUserLocalCompleteData = IAMAuthenticationCompleteData;
+export type IAMAuthenticationUserLocalCompleteData =
+  IAMAuthenticationCompleteData;
 
 export type IAMAuthenticationUserLocalCompleteOptions<Context extends object> =
   IAMAuthenticationCompleteOptions<Context>;
 
-export type IAMAuthenticationUserLocalCompleteResult = IAMAuthenticationCompleteResult;
+export type IAMAuthenticationUserLocalCompleteResult =
+  IAMAuthenticationCompleteResult;
 
 export type IAMAuthenticationUserLocalGetUserAuthenticationConfigResult =
   IAMAuthenticationGetUserAuthenticationConfigResult;
 
-export interface IAMAuthenticationUserLocalInitiateData extends IAMAuthenticationInitiateData {
+export interface IAMAuthenticationUserLocalInitiateData
+  extends IAMAuthenticationInitiateData {
   password: string;
 }
 
-export type IAMAuthenticationUserLocalInitiateOptions<Context extends object> = IAMAuthenticationInitiateOptions<
-  { password: string } & Context
->;
+export type IAMAuthenticationUserLocalInitiateOptions<Context extends object> =
+  IAMAuthenticationInitiateOptions<{ password: string } & Context>;
 
-export type IAMAuthenticationUserLocalInitiateResult = IAMAuthenticationInitiateResult;
+export type IAMAuthenticationUserLocalInitiateResult =
+  IAMAuthenticationInitiateResult;

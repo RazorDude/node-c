@@ -1,4 +1,4 @@
-import { AppConfigProfile, AppEnvironment } from '@node-c/core';
+import { type AppConfigProfile, AppEnvironment } from '@node-c/core';
 
 export const appConfigProfileEndToEndTests: AppConfigProfile = {
   api: {
@@ -29,8 +29,10 @@ export const appConfigProfileEndToEndTests: AppConfigProfile = {
         okta: {
           oauth2: {
             accessTokenAudiences: ['https://integrator-4933645.okta.com'],
-            accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
-            authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
+            accessTokenGrantUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/token',
+            authorizationUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/authorize',
             issuerUri: 'https://integrator-4933645.okta.com',
             redirectUri: 'http://localhost:2081/users/accessToken/callback/okta'
           }

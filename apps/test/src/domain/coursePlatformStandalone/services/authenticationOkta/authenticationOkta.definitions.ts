@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
@@ -6,14 +6,17 @@ import {
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
 
-export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteData = IAMAuthenticationOktaCompleteData;
+export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteData =
+  IAMAuthenticationOktaCompleteData;
 
-export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteOptions<Context extends object> =
-  IAMAuthenticationOktaCompleteOptions<Context>;
+export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteOptions<
+  Context extends object
+> = IAMAuthenticationOktaCompleteOptions<Context>;
 
-export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteResult = IAMAuthenticationOktaCompleteResult;
+export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteResult =
+  IAMAuthenticationOktaCompleteResult;
 
 export type DomainCoursePlatformStandaloneAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData;
@@ -21,4 +24,5 @@ export type DomainCoursePlatformStandaloneAuthenticationOktaGetUserDataFromExter
 export type DomainCoursePlatformStandaloneAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
 
-export type DomainCoursePlatformStandaloneAuthenticationOktaUserFields = DataCacheStandaloneUser;
+export type DomainCoursePlatformStandaloneAuthenticationOktaUserFields =
+  DataCacheStandaloneUser;

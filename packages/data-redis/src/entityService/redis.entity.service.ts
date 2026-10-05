@@ -1,19 +1,20 @@
 import {
-  AppConfigCommonDataNoSQLEntityServiceSettings,
+  type AppConfigCommonDataNoSQLEntityServiceSettings,
   ApplicationError,
-  ConfigProviderService,
-  DataDeleteResult,
+  type ConfigProviderService,
+  type DataDeleteResult,
   DataEntityService,
-  DataFindResults,
-  DataUpdateResult,
-  GenericObject,
-  LoggerService,
+  type DataFindResults,
+  type DataUpdateResult,
+  type GenericObject,
+  type LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
 import ld from 'lodash';
-
-import {
+import type { RedisRepositoryService } from '../repository/redis.repository.service.js';
+import type { RedisStoreService } from '../store/redis.store.service.js';
+import type {
   BulkCreateOptions,
   BulkCreatePrivateOptions,
   CountOptions,
@@ -31,19 +32,17 @@ import {
   UpdatePrivateOptions
 } from './redis.entity.service.definitions.js';
 
-import { RedisRepositoryService } from '../repository/redis.repository.service.js';
-import { RedisStoreService } from '../store/redis.store.service.js';
-
 // TODO: support "pseudo-relations"
 // TODO: support update of multiple items in the update method
-export class RedisEntityService<Entity extends object> extends DataEntityService<Entity> {
+export class RedisEntityService<
+  Entity extends object
+> extends DataEntityService<Entity> {
   declare protected settings: AppConfigCommonDataNoSQLEntityServiceSettings;
 
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,
     protected repository: RedisRepositoryService<Entity>,
-    // eslint-disable-next-line no-unused-vars
     protected store: RedisStoreService
   ) {
     super(configProvider, repository.dataModuleName, logger);
@@ -60,11 +59,16 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.bulkCreate(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
+      const result = await this.bulkCreate(
+        data,
+        { ...actualOptions, transactionId: tId },
+        actualPrivateOptions
+      );
       await store.endTransaction(tId);
       return result;
     }
-    const { processInputAllowedFieldsEnabled, ttl, validate } = actualPrivateOptions;
+    const { processInputAllowedFieldsEnabled, ttl, validate } =
+      actualPrivateOptions;
     return await this.save(data, {
       generatePrimaryKeys: true,
       processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
@@ -74,63 +78,106 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     });
   }
 
-  async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
+  async count(
+    options: CountOptions,
+    privateOptions?: CountPrivateOptions
+  ): Promise<number | undefined> {
     const { repository } = this;
     const { filters, findAll } = options;
-    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } = privateOptions || {};
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
-      allowedFields: repository.columnNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field for counting is required.');
+    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } =
+      privateOptions || {};
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters || {},
+      {
+        allowedFields: repository.columnNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (!(allowCountWithoutFilters || Object.keys(parsedFilters).length > 0)) {
+      throw new ApplicationError(
+        'At least one filter field for counting is required.'
+      );
     }
-    return (await repository.find({ filters: parsedFilters, findAll, individualSearch: false })).items.length;
+    return (
+      await repository.find({
+        filters: parsedFilters,
+        findAll,
+        individualSearch: false
+      })
+    ).items.length;
   }
 
-  async create(data: Partial<Entity>, options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+  async create(
+    data: Partial<Entity>,
+    options?: CreateOptions,
+    privateOptions?: CreatePrivateOptions
+  ): Promise<Entity> {
     const { store } = this;
     const actualOptions = options || {};
     const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionId } = actualOptions;
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.create(data, { ...actualOptions, transactionId: tId }, actualPrivateOptions);
+      const result = await this.create(
+        data,
+        { ...actualOptions, transactionId: tId },
+        actualPrivateOptions
+      );
       await store.endTransaction(tId);
       return result;
     }
-    const { processInputAllowedFieldsEnabled, ttl, validate } = actualPrivateOptions;
-    const saveResult = await this.save<Partial<Entity>, Entity>(data instanceof Array ? data[0] : data, {
-      generatePrimaryKeys: false,
-      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
-      transactionId,
-      ttl,
-      validate
-    });
-    return saveResult instanceof Array ? saveResult[0] : saveResult;
+    const { processInputAllowedFieldsEnabled, ttl, validate } =
+      actualPrivateOptions;
+    const saveResult = await this.save<Partial<Entity>, Entity>(
+      Array.isArray(data) ? data[0] : data,
+      {
+        generatePrimaryKeys: false,
+        processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,
+        transactionId,
+        ttl,
+        validate
+      }
+    );
+    return Array.isArray(saveResult) ? saveResult[0] : saveResult;
   }
 
-  async delete(options: DeleteOptions, privateOptions?: DeletePrivateOptions): Promise<DataDeleteResult<Entity>> {
+  async delete(
+    options: DeleteOptions,
+    privateOptions?: DeletePrivateOptions
+  ): Promise<DataDeleteResult<Entity>> {
     const { repository, store } = this;
-    const { filters, forceTransaction, returnOriginalItems, transactionId } = options;
+    const { filters, forceTransaction, returnOriginalItems, transactionId } =
+      options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.delete({ ...options, transactionId: tId }, actualPrivateOptions);
+      const result = await this.delete(
+        { ...options, transactionId: tId },
+        actualPrivateOptions
+      );
       await store.endTransaction(tId);
       return result;
     }
-    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys = true } = actualPrivateOptions;
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
-      allowedFields: repository.columnNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field for deleting data is required.');
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys = true } =
+      actualPrivateOptions;
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters,
+      {
+        allowedFields: repository.columnNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (Object.keys(parsedFilters).length === 0) {
+      throw new ApplicationError(
+        'At least one filter field for deleting data is required.'
+      );
     }
-    const { items: itemsToDelete } = await this.find({ filters, findAll: true }, { requirePrimaryKeys });
+    const { items: itemsToDelete } = await this.find(
+      { filters, findAll: true },
+      { requirePrimaryKeys }
+    );
     const results: string[] = await this.save(itemsToDelete, {
       delete: true,
       generatePrimaryKeys: false,
@@ -143,7 +190,10 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     return dataToReturn;
   }
 
-  async find(options: FindOptions, privateOptions?: FindPrivateOptions): Promise<DataFindResults<Entity>> {
+  async find(
+    options: FindOptions,
+    privateOptions?: FindPrivateOptions
+  ): Promise<DataFindResults<Entity>> {
     const { repository } = this;
     const {
       filters,
@@ -153,18 +203,31 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       perPage: optPerPage,
       findAll: optFindAll
     } = options;
-    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } = privateOptions || {};
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } =
+      privateOptions || {};
     // make sure it's truly a number - it could come as string from GET requests
-    const page = optPage ? parseInt(optPage as unknown as string, 10) : 1;
+    const page = optPage
+      ? Number.parseInt(optPage as unknown as string, 10)
+      : 1;
     // same as above - must be a number
-    const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10;
+    const perPage = optPerPage
+      ? Number.parseInt(optPerPage as unknown as string, 10)
+      : 10;
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
-    const findResults: DataFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
-      allowedFields: repository.columnNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
+    const findResults: DataFindResults<Entity> = {
+      page: 1,
+      perPage: 0,
+      items: [],
+      more: false
+    };
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters || {},
+      {
+        allowedFields: repository.columnNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
     if (!findAll) {
       findResults.page = page;
       findResults.perPage = perPage;
@@ -178,23 +241,34 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     } else {
       findResults.more = more;
       if (getTotalCount) {
-        findResults.totalCount = await this.count(options, { allowCountWithoutFilters: true });
+        findResults.totalCount = await this.count(options, {
+          allowCountWithoutFilters: true
+        });
       }
     }
     findResults.items = items;
     return findResults;
   }
 
-  async findOne(options: FindOneOptions, privateOptions?: FindOnePrivateOptions): Promise<Entity | null> {
+  async findOne(
+    options: FindOneOptions,
+    privateOptions?: FindOnePrivateOptions
+  ): Promise<Entity | null> {
     const { filters } = options;
-    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } = privateOptions || {};
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
-      allowedFields: this.repository.columnNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field is required for the findOne method.');
+    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } =
+      privateOptions || {};
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters,
+      {
+        allowedFields: this.repository.columnNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (Object.keys(parsedFilters).length === 0) {
+      throw new ApplicationError(
+        'At least one filter field is required for the findOne method.'
+      );
     }
     const result = await this.repository.find(
       { filters, individualSearch: true, page: 1, perPage: 1 },
@@ -203,10 +277,10 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     return result.items[0] || null;
   }
 
-  protected async save<Data extends Partial<Entity> | Partial<Entity>[], ReturnData = unknown>(
-    data: Data,
-    options: ServiceSaveOptions
-  ): Promise<ReturnData> {
+  protected async save<
+    Data extends Partial<Entity> | Partial<Entity>[],
+    ReturnData = unknown
+  >(data: Data, options: ServiceSaveOptions): Promise<ReturnData> {
     const { repository, settings } = this;
     const { validationSettings } = settings;
     const {
@@ -225,16 +299,20 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
         validate: false
       })) as ReturnData;
     }
-    const dataToSave: Data | Data[] = await this.processObjectAllowedFields<Data>(data, {
-      allowedFields: repository.columnNames,
-      isEnabled: processObjectAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Input
-    });
+    const dataToSave: Data | Data[] =
+      await this.processObjectAllowedFields<Data>(data, {
+        allowedFields: repository.columnNames,
+        isEnabled: processObjectAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Input
+      });
     return (await repository.save(dataToSave as Entity, {
       generatePrimaryKeys,
       transactionId,
       ttl,
-      validate: typeof validate !== 'undefined' ? validate : !!validationSettings?.isEnabled
+      validate:
+        typeof validate === 'undefined'
+          ? Boolean(validationSettings?.isEnabled)
+          : validate
     })) as ReturnData;
   }
 
@@ -246,11 +324,21 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
     privateOptions?: UpdatePrivateOptions
   ): Promise<DataUpdateResult<Entity>> {
     const { store } = this;
-    const { filters, forceTransaction, returnData, returnOriginalItems, transactionId } = options;
+    const {
+      filters,
+      forceTransaction,
+      returnData,
+      returnOriginalItems,
+      transactionId
+    } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionId && forceTransaction) {
       const tId = store.createTransaction();
-      const result = await this.update(data, { ...options, transactionId: tId }, actualPrivateOptions);
+      const result = await this.update(
+        data,
+        { ...options, transactionId: tId },
+        actualPrivateOptions
+      );
       await store.endTransaction(tId);
       return result;
     }
@@ -266,7 +354,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       { filters, findAll: true },
       { processFiltersAllowedFieldsEnabled, requirePrimaryKeys }
     );
-    if (!itemsToUpdate.length) {
+    if (itemsToUpdate.length === 0) {
       dataToReturn.count = 0;
       if (returnData) {
         dataToReturn.items = [];
@@ -277,7 +365,7 @@ export class RedisEntityService<Entity extends object> extends DataEntityService
       return dataToReturn;
     }
     const updateResult = await this.save<Entity[], Entity[]>(
-      itemsToUpdate.map(item => ld.merge(item, data)),
+      itemsToUpdate.map((item) => ld.merge(item, data)),
       {
         generatePrimaryKeys: false,
         processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled,

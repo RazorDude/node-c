@@ -1,16 +1,19 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  LoggerService
+  type ConfigProviderService,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import type { IAMMFAService } from '../mfa/iam.mfa.service.js';
+import type {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult,
@@ -19,10 +22,6 @@ import {
   IAMAuthenticationUserLocalInitiateOptions,
   IAMAuthenticationUserLocalInitiateResult
 } from './iam.authenticationUserLocal.definitions.js';
-
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
-import { IAMMFAService } from '../mfa/iam.mfa.service.js';
 
 /**
  * A service for authentication using a local user and password.
@@ -33,12 +32,12 @@ export class IAMAuthenticationUserLocalService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
     configProvider: ConfigProviderService,
     logger: LoggerService,
     moduleName: string,
     serviceName: string,
-    // eslint-disable-next-line no-unused-vars
     protected mfaServices?: Record<IAMMFAType, IAMMFAService<object, object>>
   ) {
     super(configProvider, logger, moduleName, serviceName);
@@ -49,12 +48,17 @@ export class IAMAuthenticationUserLocalService<
     data: IAMAuthenticationUserLocalCompleteData,
     options: IAMAuthenticationUserLocalCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationUserLocalCompleteResult> {
-    const { configProvider, logger, moduleName, mfaServices, serviceName } = this;
-    const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { configProvider, logger, moduleName, mfaServices, serviceName } =
+      this;
+    const { defaultUserIdentifierField } = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { mfaData, mfaType } = data;
     const { context, mfaOptions } = options;
-    const userIdentifierField = options.contextIdentifierField || defaultUserIdentifierField;
-    const userIdentifierValue = context[userIdentifierField as keyof CompleteContext];
+    const userIdentifierField =
+      options.contextIdentifierField || defaultUserIdentifierField;
+    const userIdentifierValue =
+      context[userIdentifierField as keyof CompleteContext];
     let mfaUsed = false;
     let mfaValid = false;
     if (mfaType) {
@@ -71,7 +75,10 @@ export class IAMAuthenticationUserLocalService<
         );
         throw new ApplicationError('Authentication failed.');
       }
-      const mfaResult = await mfaService.complete(mfaData, { ...(mfaOptions || {}), context });
+      const mfaResult = await mfaService.complete(mfaData, {
+        ...(mfaOptions || {}),
+        context
+      });
       mfaUsed = true;
       mfaValid = mfaResult.valid;
     }
@@ -80,40 +87,45 @@ export class IAMAuthenticationUserLocalService<
 
   getUserAuthenticationConfig(): IAMAuthenticationUserLocalGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationUserLocalGetUserAuthenticationConfigResult = {
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        cache: {
-          settings: {
-            // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
-            cacheFieldName: 'state',
-            inputFieldName: 'options.context.id'
+    const defaultConfig: IAMAuthenticationUserLocalGetUserAuthenticationConfigResult =
+      {
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          cache: {
+            settings: {
+              // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
+              cacheFieldName: 'state',
+              inputFieldName: 'options.context.id'
+            },
+            use: {
+              options: { overwrite: true, use: true }
+            }
           },
-          use: {
-            options: { overwrite: true, use: true }
-          }
+          findUser: true,
+          findUserBeforeAuth: true,
+          validWithoutUser: false
         },
-        findUser: true,
-        findUserBeforeAuth: true,
-        validWithoutUser: false
-      },
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        cache: {
-          populate: {
-            options: [{ cacheFieldName: 'context', inputFieldName: 'options.context' }]
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          cache: {
+            populate: {
+              options: [
+                { cacheFieldName: 'context', inputFieldName: 'options.context' }
+              ]
+            },
+            settings: {
+              // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
+              cacheFieldName: 'state',
+              inputFieldName: 'options.context.id'
+            }
           },
-          settings: {
-            // we call the user's id "state" here, since "state" is also used as the cache key for the oauth2 flow
-            cacheFieldName: 'state',
-            inputFieldName: 'options.context.id'
-          }
-        },
-        findUser: true,
-        findUserBeforeAuth: true,
-        validWithoutUser: false
-      }
-    };
+          findUser: true,
+          findUserBeforeAuth: true,
+          validWithoutUser: false
+        }
+      };
     return ld.merge(defaultConfig, steps || {});
   }
 
@@ -121,26 +133,27 @@ export class IAMAuthenticationUserLocalService<
     data: IAMAuthenticationUserLocalInitiateData,
     options: IAMAuthenticationUserLocalInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationUserLocalInitiateResult> {
-    const { configProvider, logger, moduleName, mfaServices, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { secretKeyHMACAlgorithm, hashingSecret } = moduleConfig.authServiceSettings![serviceName].secretKey!;
+    const { configProvider, logger, moduleName, mfaServices, serviceName } =
+      this;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
+    const { secretKeyHMACAlgorithm, hashingSecret } =
+      moduleConfig.authServiceSettings![serviceName].secretKey!;
     const { mfaData, mfaType, password: authPassword } = data;
     const {
       context,
       context: { password: userPassword },
       mfaOptions
     } = options;
-    const userIdentifierField = options.contextIdentifierField || moduleConfig.defaultUserIdentifierField;
-    const userIdentifierValue = context[userIdentifierField as keyof InitiateContext];
+    const userIdentifierField =
+      options.contextIdentifierField || moduleConfig.defaultUserIdentifierField;
+    const userIdentifierValue =
+      context[userIdentifierField as keyof InitiateContext];
     let mfaUsed = false;
     let mfaValid = false;
     let wrongPassword = false;
-    if (!secretKeyHMACAlgorithm || !hashingSecret || !userPassword) {
-      wrongPassword = true;
-      logger.error(
-        `[${moduleName}][${serviceName}]: secretKeyHMACAlgorithm, hashingSecret and/or userPassword not provided.`
-      );
-    } else {
+    if (secretKeyHMACAlgorithm && hashingSecret && userPassword) {
       const computedPassword = crypto
         .createHmac(secretKeyHMACAlgorithm, hashingSecret)
         .update(`${authPassword}`)
@@ -149,6 +162,11 @@ export class IAMAuthenticationUserLocalService<
       if (computedPassword !== userPassword) {
         wrongPassword = true;
       }
+    } else {
+      wrongPassword = true;
+      logger.error(
+        `[${moduleName}][${serviceName}]: secretKeyHMACAlgorithm, hashingSecret and/or userPassword not provided.`
+      );
     }
     if (wrongPassword) {
       logger.error(
@@ -170,7 +188,10 @@ export class IAMAuthenticationUserLocalService<
         );
         throw new ApplicationError('Authentication failed.');
       }
-      const mfaResult = await mfaService.initiate(mfaData, { ...(mfaOptions || {}), context });
+      const mfaResult = await mfaService.initiate(mfaData, {
+        ...(mfaOptions || {}),
+        context
+      });
       mfaUsed = true;
       mfaValid = mfaResult.valid;
     }

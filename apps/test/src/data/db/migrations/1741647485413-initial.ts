@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class Initial1741647485413 implements MigrationInterface {
   name = 'Initial1741647485413';
@@ -76,48 +76,94 @@ export class Initial1741647485413 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_edf51db2850541f497e44dc0350`');
-    await queryRunner.query('ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_1bc7728887ce7726fa46a7ea415`');
+    await queryRunner.query(
+      'ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_edf51db2850541f497e44dc0350`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `userTypeAssignedUsers` DROP FOREIGN KEY `FK_1bc7728887ce7726fa46a7ea415`'
+    );
     await queryRunner.query(
       'ALTER TABLE `userTypeAuthorizationPoints` DROP FOREIGN KEY `FK_83510678c89098a99135feaa161`'
     );
     await queryRunner.query(
       'ALTER TABLE `userTypeAuthorizationPoints` DROP FOREIGN KEY `FK_6a440eb6859bd3ac63df1061e64`'
     );
-    await queryRunner.query('ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_d6c37197a7453e42373c0a143b8`');
-    await queryRunner.query('ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_a61b2044f9865e6f7dca2429bc1`');
-    await queryRunner.query('ALTER TABLE `courseLessons` DROP FOREIGN KEY `FK_149ea91b73c9da38941aefe5863`');
-    await queryRunner.query('ALTER TABLE `courseLessons` DROP FOREIGN KEY `FK_5db8e75063474458807838819ee`');
-    await queryRunner.query('ALTER TABLE `users` DROP FOREIGN KEY `FK_10b181b59cf33228a297b21dbb2`');
-    await queryRunner.query('ALTER TABLE `lessons` DROP FOREIGN KEY `FK_fc317529fc0a96ef87f8156ac98`');
-    await queryRunner.query('ALTER TABLE `courses` DROP FOREIGN KEY `FK_7d0effe56712c9f8d73b99f319c`');
-    await queryRunner.query('DROP INDEX `IDX_edf51db2850541f497e44dc035` ON `userTypeAssignedUsers`');
-    await queryRunner.query('DROP INDEX `IDX_1bc7728887ce7726fa46a7ea41` ON `userTypeAssignedUsers`');
+    await queryRunner.query(
+      'ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_d6c37197a7453e42373c0a143b8`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `userAssignedCourses` DROP FOREIGN KEY `FK_a61b2044f9865e6f7dca2429bc1`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `courseLessons` DROP FOREIGN KEY `FK_149ea91b73c9da38941aefe5863`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `courseLessons` DROP FOREIGN KEY `FK_5db8e75063474458807838819ee`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `users` DROP FOREIGN KEY `FK_10b181b59cf33228a297b21dbb2`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `lessons` DROP FOREIGN KEY `FK_fc317529fc0a96ef87f8156ac98`'
+    );
+    await queryRunner.query(
+      'ALTER TABLE `courses` DROP FOREIGN KEY `FK_7d0effe56712c9f8d73b99f319c`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_edf51db2850541f497e44dc035` ON `userTypeAssignedUsers`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_1bc7728887ce7726fa46a7ea41` ON `userTypeAssignedUsers`'
+    );
     await queryRunner.query('DROP TABLE `userTypeAssignedUsers`');
-    await queryRunner.query('DROP INDEX `IDX_83510678c89098a99135feaa16` ON `userTypeAuthorizationPoints`');
-    await queryRunner.query('DROP INDEX `IDX_6a440eb6859bd3ac63df1061e6` ON `userTypeAuthorizationPoints`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_83510678c89098a99135feaa16` ON `userTypeAuthorizationPoints`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_6a440eb6859bd3ac63df1061e6` ON `userTypeAuthorizationPoints`'
+    );
     await queryRunner.query('DROP TABLE `userTypeAuthorizationPoints`');
-    await queryRunner.query('DROP INDEX `IDX_d6c37197a7453e42373c0a143b` ON `userAssignedCourses`');
-    await queryRunner.query('DROP INDEX `IDX_a61b2044f9865e6f7dca2429bc` ON `userAssignedCourses`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_d6c37197a7453e42373c0a143b` ON `userAssignedCourses`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_a61b2044f9865e6f7dca2429bc` ON `userAssignedCourses`'
+    );
     await queryRunner.query('DROP TABLE `userAssignedCourses`');
-    await queryRunner.query('DROP INDEX `IDX_149ea91b73c9da38941aefe586` ON `courseLessons`');
-    await queryRunner.query('DROP INDEX `IDX_5db8e75063474458807838819e` ON `courseLessons`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_149ea91b73c9da38941aefe586` ON `courseLessons`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_5db8e75063474458807838819e` ON `courseLessons`'
+    );
     await queryRunner.query('DROP TABLE `courseLessons`');
-    await queryRunner.query('DROP INDEX `IDX_c3d9e1af185bc4387f0a51e777` ON `userTypes`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_c3d9e1af185bc4387f0a51e777` ON `userTypes`'
+    );
     await queryRunner.query('DROP TABLE `userTypes`');
     await queryRunner.query('DROP INDEX `USERS_UNIQUE_IDX_0` ON `users`');
     await queryRunner.query('DROP TABLE `users`');
-    await queryRunner.query('DROP INDEX `IDX_f3854ea6fa59e2075336931580` ON `userAccountStatuses`');
-    await queryRunner.query('DROP INDEX `IDX_7131e5aae25e83355d2cb3c298` ON `userAccountStatuses`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_f3854ea6fa59e2075336931580` ON `userAccountStatuses`'
+    );
+    await queryRunner.query(
+      'DROP INDEX `IDX_7131e5aae25e83355d2cb3c298` ON `userAccountStatuses`'
+    );
     await queryRunner.query('DROP TABLE `userAccountStatuses`');
-    await queryRunner.query('DROP INDEX `IDX_d22b9a22a475e61f014c085f0e` ON `lessonTypes`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_d22b9a22a475e61f014c085f0e` ON `lessonTypes`'
+    );
     await queryRunner.query('DROP TABLE `lessonTypes`');
     await queryRunner.query('DROP TABLE `lessons`');
-    await queryRunner.query('DROP INDEX `IDX_3103972501d48d64f05163ab26` ON `courseTypes`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_3103972501d48d64f05163ab26` ON `courseTypes`'
+    );
     await queryRunner.query('DROP TABLE `courseTypes`');
     await queryRunner.query('DROP INDEX `COURSES_UNIQUE_IDX_0` ON `courses`');
     await queryRunner.query('DROP TABLE `courses`');
-    await queryRunner.query('DROP INDEX `IDX_bb43ed6a75a6c094375132f655` ON `authorizationPoints`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_bb43ed6a75a6c094375132f655` ON `authorizationPoints`'
+    );
     await queryRunner.query('DROP TABLE `authorizationPoints`');
   }
 }

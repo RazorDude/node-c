@@ -1,10 +1,14 @@
-import { GenericObject } from '@node-c/core';
+import type { GenericObject } from '@node-c/core';
 
 import { EntitySchema } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
+import {
+  type DBEntity,
+  DBEntitySchema
+} from '../../../dbBase/entity/base.db.entity.js';
 
-export interface DataDBPermission<Role extends DBEntity = DBEntity> extends DBEntity {
+export interface DataDBPermission<Role extends DBEntity = DBEntity>
+  extends DBEntity {
   allowedInputData?: GenericObject;
   allowedOutputData?: GenericObject;
   forbiddenInputData?: GenericObject;

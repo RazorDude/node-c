@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationPassthroughService } from '@node-c/domain-iam';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+
+import type {
   DomainIAMAuthenticationPassthroughCompleteData,
   DomainIAMAuthenticationPassthroughCompleteOptions,
   DomainIAMAuthenticationPassthroughCompleteResult,
   DomainIAMAuthenticationPassthroughUserFields
 } from './authenticationPassthrough.definitions.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationPassthroughService extends IAMAuthenticationPassthroughService<
@@ -23,10 +27,14 @@ export class DomainIAMAuthenticationPassthroughService extends IAMAuthentication
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_PASSTHROUGH_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_IAM_AUTH_PASSTHROUGH_SERVICE_NAME
+    );
   }
 
   async complete(

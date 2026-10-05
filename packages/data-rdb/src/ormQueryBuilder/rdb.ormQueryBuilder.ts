@@ -1,4 +1,4 @@
-import { DataOrderByDirection } from '@node-c/core';
+import type { DataOrderByDirection } from '@node-c/core';
 
 export abstract class OrmBaseQueryBuilder<Entity> {
   abstract andWhere(..._args: unknown[]): OrmBaseQueryBuilder<Entity>;
@@ -6,7 +6,9 @@ export abstract class OrmBaseQueryBuilder<Entity> {
   abstract where(..._args: unknown[]): OrmBaseQueryBuilder<Entity>;
 }
 
-export abstract class OrmDeleteQueryBuilder<Entity> extends OrmBaseQueryBuilder<Entity> {
+export abstract class OrmDeleteQueryBuilder<
+  Entity
+> extends OrmBaseQueryBuilder<Entity> {
   abstract execute(): Promise<OrmDeleteQueryBuilderDeleteResult>;
 }
 
@@ -15,14 +17,24 @@ export interface OrmDeleteQueryBuilderDeleteResult {
   raw: unknown;
 }
 
-export abstract class OrmSelectQueryBuilder<Entity> extends OrmBaseQueryBuilder<Entity> {
-  abstract addOrderBy(_field: string, _direction: DataOrderByDirection): OrmSelectQueryBuilder<Entity>;
+export abstract class OrmSelectQueryBuilder<
+  Entity
+> extends OrmBaseQueryBuilder<Entity> {
+  abstract addOrderBy(
+    _field: string,
+    _direction: DataOrderByDirection
+  ): OrmSelectQueryBuilder<Entity>;
   abstract delete(): OrmDeleteQueryBuilder<Entity>;
   abstract getCount(): Promise<number>;
   abstract getMany(): Promise<Entity[]>;
   abstract getOne(): Promise<Entity | null>;
-  abstract leftJoinAndSelect(..._args: unknown[]): OrmSelectQueryBuilder<Entity>;
-  abstract orderBy(_field: string, _direction: DataOrderByDirection): OrmSelectQueryBuilder<Entity>;
+  abstract leftJoinAndSelect(
+    ..._args: unknown[]
+  ): OrmSelectQueryBuilder<Entity>;
+  abstract orderBy(
+    _field: string,
+    _direction: DataOrderByDirection
+  ): OrmSelectQueryBuilder<Entity>;
   abstract select(_selection: string[]): OrmSelectQueryBuilder<Entity>;
   abstract skip(_skipCount: number): OrmSelectQueryBuilder<Entity>;
   abstract softDelete(): OrmDeleteQueryBuilder<Entity>;
@@ -31,9 +43,13 @@ export abstract class OrmSelectQueryBuilder<Entity> extends OrmBaseQueryBuilder<
   abstract withDeleted(): OrmSelectQueryBuilder<Entity>;
 }
 
-export abstract class OrmUpdateQueryBuilder<Entity> extends OrmBaseQueryBuilder<Entity> {
+export abstract class OrmUpdateQueryBuilder<
+  Entity
+> extends OrmBaseQueryBuilder<Entity> {
   abstract execute(): Promise<OrmUpdateQueryBuilderUpdateResult>;
-  abstract returning(_selection: string | string[]): OrmUpdateQueryBuilder<Entity>;
+  abstract returning(
+    _selection: string | string[]
+  ): OrmUpdateQueryBuilder<Entity>;
   abstract set(..._args: unknown[]): OrmUpdateQueryBuilder<Entity>;
 }
 

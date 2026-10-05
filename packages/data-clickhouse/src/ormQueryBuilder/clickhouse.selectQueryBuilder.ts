@@ -1,24 +1,30 @@
-import { ApplicationError, DataOrderByDirection, GenericObject } from '@node-c/core';
-import { OrmDeleteQueryBuilder, OrmSelectQueryBuilder, OrmUpdateQueryBuilder } from '@node-c/data-rdb';
+import {
+  ApplicationError,
+  type DataOrderByDirection,
+  type GenericObject
+} from '@node-c/core';
+import type {
+  OrmDeleteQueryBuilder,
+  OrmSelectQueryBuilder,
+  OrmUpdateQueryBuilder
+} from '@node-c/data-rdb';
 
-import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
-import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
+import type { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
+import type { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
 
 // TODO: field selection, join, update, delete
-export class ClickHouseSelectQueryBuilder<
-  Entity extends GenericObject<unknown>
-> implements OrmSelectQueryBuilder<Entity> {
+export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
+  implements OrmSelectQueryBuilder<Entity>
+{
   protected deletedColumn?: string;
-  protected limitClause: string = '';
-  protected offsetClause: string = '';
-  protected orderByClause: string = '';
-  protected whereClause: string = '';
-  protected withDeletedEnabled: boolean = false;
+  protected limitClause = '';
+  protected offsetClause = '';
+  protected orderByClause = '';
+  protected whereClause = '';
+  protected withDeletedEnabled = false;
 
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected manager: ClickHouseEntityManager,
-    // eslint-disable-next-line no-unused-vars
     protected schema: ClickHouseDBEntitySchema<Entity>
   ) {
     const {
@@ -34,23 +40,31 @@ export class ClickHouseSelectQueryBuilder<
 
   protected addDeletedToWhereClause(): string {
     const { deletedColumn, whereClause, withDeletedEnabled } = this;
-    return !withDeletedEnabled && deletedColumn
+    return withDeletedEnabled !== true && deletedColumn
       ? `${whereClause.replace('where ', 'where (')}) and \`${deletedColumn}\` is null`
       : whereClause;
   }
 
-  addOrderBy(field: string, direction: DataOrderByDirection): ClickHouseSelectQueryBuilder<Entity> {
+  addOrderBy(
+    field: string,
+    direction: DataOrderByDirection
+  ): ClickHouseSelectQueryBuilder<Entity> {
     this.orderByClause += `, ${this.parseOrderByClause(field, direction)}`;
     return this;
   }
 
-  andWhere(query: string, params?: GenericObject<unknown>): ClickHouseSelectQueryBuilder<Entity> {
+  andWhere(
+    query: string,
+    params?: GenericObject<unknown>
+  ): ClickHouseSelectQueryBuilder<Entity> {
     this.whereClause += ` and (${this.parseWhereClause(query, params)})`;
     return this;
   }
 
   delete(): OrmDeleteQueryBuilder<Entity> {
-    throw new ApplicationError('Method ClickHouseSelectQueryBuilder.delete not implemented.');
+    throw new ApplicationError(
+      'Method ClickHouseSelectQueryBuilder.delete not implemented.'
+    );
   }
 
   async getCount(): Promise<number> {
@@ -66,7 +80,7 @@ export class ClickHouseSelectQueryBuilder<
       `select count() from \`${tableName}\` as \`${name}\` ` +
         `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
     );
-    return parseInt(result.data[0]?.['count()'], 10);
+    return Number.parseInt(result.data[0]?.['count()'], 10);
   }
 
   async getMany(): Promise<Entity[]> {
@@ -98,26 +112,39 @@ export class ClickHouseSelectQueryBuilder<
     return result.data || null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   leftJoinAndSelect(..._args: unknown[]): ClickHouseSelectQueryBuilder<Entity> {
-    throw new ApplicationError('Method ClickHouseSelectQueryBuilder.leftJoinAndSelect not implemented.');
+    throw new ApplicationError(
+      'Method ClickHouseSelectQueryBuilder.leftJoinAndSelect not implemented.'
+    );
   }
 
-  orWhere(query: string, params?: GenericObject<unknown>): ClickHouseSelectQueryBuilder<Entity> {
+  orWhere(
+    query: string,
+    params?: GenericObject<unknown>
+  ): ClickHouseSelectQueryBuilder<Entity> {
     this.whereClause += ` or (${this.parseWhereClause(query, params)})`;
     return this;
   }
 
-  orderBy(field: string, direction: DataOrderByDirection): ClickHouseSelectQueryBuilder<Entity> {
+  orderBy(
+    field: string,
+    direction: DataOrderByDirection
+  ): ClickHouseSelectQueryBuilder<Entity> {
     this.orderByClause += `order by ${this.parseOrderByClause(field, direction)}`;
     return this;
   }
 
-  protected parseOrderByClause(field: string, direction: DataOrderByDirection): string {
+  protected parseOrderByClause(
+    field: string,
+    direction: DataOrderByDirection
+  ): string {
     return `${field.replace(/[';]/g, '')} ${direction.replace(/[';]/g, '')}`;
   }
 
-  protected parseWhereClause(query: string, params?: GenericObject<unknown>): string {
+  protected parseWhereClause(
+    query: string,
+    params?: GenericObject<unknown>
+  ): string {
     let queryWithReplacements = `${query.replace(/[';]/g, '')}`;
     if (params) {
       for (const paramName in params) {
@@ -128,48 +155,63 @@ export class ClickHouseSelectQueryBuilder<
         // TODO: process dates, arrays and stringifyable objects
         let value = '';
         if (typeof rawValue === 'string') {
-          value = `'${rawValue.replace(/'/g, "\'")}'`;
+          value = `'${rawValue.replace(/'/g, "'")}'`;
         } else {
           value = `${rawValue}`;
         }
-        queryWithReplacements = queryWithReplacements.replace(`:${paramName}`, value);
+        queryWithReplacements = queryWithReplacements.replace(
+          `:${paramName}`,
+          value
+        );
       }
     }
     return queryWithReplacements;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   select(_selection: string[]): ClickHouseSelectQueryBuilder<Entity> {
-    throw new ApplicationError('Method ClickHouseSelectQueryBuilder.select not implemented.');
+    throw new ApplicationError(
+      'Method ClickHouseSelectQueryBuilder.select not implemented.'
+    );
   }
 
   skip(skipCount: number): ClickHouseSelectQueryBuilder<Entity> {
     // we need this to prevent SQL injection, since TS types don't work at runtime
     if (typeof skipCount !== 'number') {
-      throw new ApplicationError('Method ClickHouseSelectQueryBuilder.skip expects a number input for skipCount.');
+      throw new ApplicationError(
+        'Method ClickHouseSelectQueryBuilder.skip expects a number input for skipCount.'
+      );
     }
     this.offsetClause = `offset ${skipCount}`;
     return this;
   }
 
   softDelete(): OrmDeleteQueryBuilder<Entity> {
-    throw new ApplicationError('Method ClickHouseSelectQueryBuilder.softDelete not implemented.');
+    throw new ApplicationError(
+      'Method ClickHouseSelectQueryBuilder.softDelete not implemented.'
+    );
   }
 
   take(takeCount: number): ClickHouseSelectQueryBuilder<Entity> {
     // we need this to prevent SQL injection, since TS types don't work at runtime
     if (typeof takeCount !== 'number') {
-      throw new ApplicationError('Method ClickHouseSelectQueryBuilder.take expects a number input for takeCount.');
+      throw new ApplicationError(
+        'Method ClickHouseSelectQueryBuilder.take expects a number input for takeCount.'
+      );
     }
     this.limitClause += `limit ${takeCount}`;
     return this;
   }
 
   update(): OrmUpdateQueryBuilder<Entity> {
-    throw new ApplicationError('Method ClickHouseSelectQueryBuilder.update not implemented.');
+    throw new ApplicationError(
+      'Method ClickHouseSelectQueryBuilder.update not implemented.'
+    );
   }
 
-  where(query: string, params?: GenericObject<unknown>): ClickHouseSelectQueryBuilder<Entity> {
+  where(
+    query: string,
+    params?: GenericObject<unknown>
+  ): ClickHouseSelectQueryBuilder<Entity> {
     this.whereClause += `where (${this.parseWhereClause(query, params)})`;
     return this;
   }

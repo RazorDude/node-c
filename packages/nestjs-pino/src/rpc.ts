@@ -21,7 +21,7 @@ const TRANSPORT_NAMES = [
   'mqtt',
   'grpc',
   'rmq',
-  'kafka',
+  'kafka'
 ];
 
 const CONTEXT_SUFFIX = 'Context';
@@ -57,7 +57,7 @@ type StaticRpcInfo = Pick<RpcInfo, 'type' | 'pattern' | 'transport'>;
 const staticInfoCache = new WeakMap<(...args: any[]) => any, StaticRpcInfo>();
 
 function readStaticInfo(
-  handler: ((...args: any[]) => any) | undefined,
+  handler: ((...args: any[]) => any) | undefined
 ): StaticRpcInfo {
   if (!handler || typeof Reflect.getMetadata !== 'function') {
     return { type: 'message', pattern: undefined, transport: undefined };
@@ -78,7 +78,7 @@ function readStaticInfo(
         : patterns[0]
       : patterns,
     transport:
-      typeof transport === 'number' ? TRANSPORT_NAMES[transport] : undefined,
+      typeof transport === 'number' ? TRANSPORT_NAMES[transport] : undefined
   };
 }
 
@@ -141,6 +141,6 @@ export function getRpcInfo(context: ExecutionContext): RpcInfo {
     pattern: staticInfo.pattern,
     transport: readTransport(context) ?? staticInfo.transport,
     controller: context.getClass?.()?.name ?? '',
-    handler: handler?.name ?? '',
+    handler: handler?.name ?? ''
   };
 }

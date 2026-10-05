@@ -1,9 +1,12 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import pino from 'pino';
-
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
 import type { Params } from './params.js';
-import { ensureRootLogger, getRootLogger, resetRootLogger } from './rootLogger.js';
+import { PARAMS_PROVIDER_TOKEN } from './params.js';
+import {
+  ensureRootLogger,
+  getRootLogger,
+  resetRootLogger
+} from './rootLogger.js';
 import { Store, storage } from './storage.js';
 
 type PinoMethods<CustomLevels extends string = never> = Pick<
@@ -76,7 +79,7 @@ export class PinoLogger<CustomLevels extends string = never>
 
   constructor(
     @Inject(PARAMS_PROVIDER_TOKEN)
-    { pinoHttp, renameContext, useExisting }: Params<any, any, CustomLevels>,
+    { pinoHttp, renameContext, useExisting }: Params<any, any, CustomLevels>
   ) {
     // Handle both array tuple [Options, DestinationStream] and object forms
     const pinoHttpOptions = Array.isArray(pinoHttp) ? pinoHttp[0] : pinoHttp;
@@ -157,7 +160,7 @@ export class PinoLogger<CustomLevels extends string = never>
     const store = storage.getStore();
     if (!store) {
       throw new Error(
-        `${PinoLogger.name}: unable to assign extra fields out of request scope`,
+        `${PinoLogger.name}: unable to assign extra fields out of request scope`
       );
     }
     store.logger = store.logger.child(fields);
@@ -197,14 +200,14 @@ export class PinoLogger<CustomLevels extends string = never>
           args = [
             Object.assign(
               { [this.contextName]: this.context },
-              { [this.errorKey]: firstArg },
+              { [this.errorKey]: firstArg }
             ),
-            ...args.slice(1),
+            ...args.slice(1)
           ];
         } else {
           args = [
             Object.assign({ [this.contextName]: this.context }, firstArg),
-            ...args.slice(1),
+            ...args.slice(1)
           ];
         }
       } else {
@@ -217,7 +220,7 @@ export class PinoLogger<CustomLevels extends string = never>
 }
 
 function isFirstArgObject(
-  args: Parameters<LoggerFn>,
+  args: Parameters<LoggerFn>
 ): args is [obj: object, msg?: string, ...args: any[]] {
   return typeof args[0] === 'object';
 }

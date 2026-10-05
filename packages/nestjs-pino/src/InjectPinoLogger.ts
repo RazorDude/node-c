@@ -18,7 +18,7 @@ function createDecoratedLoggerProvider(context: string): Provider<PinoLogger> {
       logger.setContext(context);
       return logger;
     },
-    inject: [PinoLogger],
+    inject: [PinoLogger]
   };
 }
 

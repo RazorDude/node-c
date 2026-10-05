@@ -8,7 +8,7 @@ import {
   Module,
   type NestModule,
   type Provider,
-  RequestMethod,
+  RequestMethod
 } from '@nestjs/common';
 import { ApplicationConfig } from '@nestjs/core';
 
@@ -17,14 +17,14 @@ import { Logger } from './Logger.js';
 import {
   getMicroserviceHook,
   PINO_PRE_REQUEST_HOOK,
-  registerMicroserviceHook,
+  registerMicroserviceHook
 } from './microservice.js';
 import { NativeLogger } from './NativeLogger.js';
 import { PinoLogger } from './PinoLogger.js';
 import {
   type LoggerModuleAsyncParams,
   PARAMS_PROVIDER_TOKEN,
-  type Params,
+  type Params
 } from './params.js';
 import { ensureLoggerMiddleware, ensureRootLogger } from './rootLogger.js';
 import { Store, storage } from './storage.js';
@@ -48,11 +48,11 @@ export class LoggerModule implements NestModule {
   static forRoot<
     IM = IncomingMessage,
     SR = ServerResponse,
-    CustomLevels extends string = never,
+    CustomLevels extends string = never
   >(params?: Params<IM, SR, CustomLevels>): DynamicModule {
     const paramsProvider: Provider<Params<IM, SR, CustomLevels>> = {
       provide: PARAMS_PROVIDER_TOKEN,
-      useValue: params || {},
+      useValue: params || {}
     };
 
     const decorated = createProvidersForDecorated();
@@ -66,7 +66,7 @@ export class LoggerModule implements NestModule {
         ...decorated,
         PinoLogger,
         paramsProvider,
-        hookProvider,
+        hookProvider
       ],
       exports: [
         Logger,
@@ -74,22 +74,22 @@ export class LoggerModule implements NestModule {
         ...decorated,
         PinoLogger,
         paramsProvider,
-        hookProvider,
-      ],
+        hookProvider
+      ]
     };
   }
 
   static forRootAsync<
     IM = IncomingMessage,
     SR = ServerResponse,
-    CustomLevels extends string = never,
+    CustomLevels extends string = never
   >(params: LoggerModuleAsyncParams<IM, SR, CustomLevels>): DynamicModule {
     const paramsProvider: Provider<
       Params<IM, SR, CustomLevels> | Promise<Params<IM, SR, CustomLevels>>
     > = {
       provide: PARAMS_PROVIDER_TOKEN,
       useFactory: params.useFactory,
-      inject: params.inject,
+      inject: params.inject
     };
 
     const decorated = createProvidersForDecorated();
@@ -102,7 +102,7 @@ export class LoggerModule implements NestModule {
       PinoLogger,
       paramsProvider,
       hookProvider,
-      ...(params.providers || []),
+      ...(params.providers || [])
     ];
 
     return {
@@ -115,14 +115,14 @@ export class LoggerModule implements NestModule {
         ...decorated,
         PinoLogger,
         paramsProvider,
-        hookProvider,
-      ],
+        hookProvider
+      ]
     };
   }
 
   constructor(
     @Inject(PARAMS_PROVIDER_TOKEN) private readonly params: Params,
-    private readonly applicationConfig: ApplicationConfig,
+    private readonly applicationConfig: ApplicationConfig
   ) {
     // Microservices have no middleware, so `configure` is never called for
     // them. The hook is registered here instead, early enough that the message
@@ -139,13 +139,13 @@ export class LoggerModule implements NestModule {
       forRoutes = this.defaultRoutes(),
       pinoHttp,
       useExisting,
-      assignResponse,
+      assignResponse
     } = this.params;
 
     const middlewares = createLoggerMiddlewares(
       pinoHttp || {},
       useExisting,
-      assignResponse,
+      assignResponse
     );
 
     if (exclude) {
@@ -174,8 +174,8 @@ export class LoggerModule implements NestModule {
       ...DEFAULT_ROUTES,
       ...(exclude ?? []).map(({ path, requestMethod }) => ({
         path,
-        method: requestMethod,
-      })),
+        method: requestMethod
+      }))
     ];
   }
 }
@@ -191,14 +191,14 @@ function createHookProvider(): Provider {
       ensureRootLogger(params.pinoHttp);
       return getMicroserviceHook(params);
     },
-    inject: [PARAMS_PROVIDER_TOKEN],
+    inject: [PARAMS_PROVIDER_TOKEN]
   };
 }
 
 function createLoggerMiddlewares(
   params: NonNullable<Params['pinoHttp']>,
   useExisting = false,
-  assignResponse = false,
+  assignResponse = false
 ) {
   if (useExisting) {
     return [bindLoggerMiddlewareFactory(useExisting, assignResponse)];
@@ -218,12 +218,12 @@ function createLoggerMiddlewares(
 
 function bindLoggerMiddlewareFactory(
   useExisting: boolean,
-  assignResponse: boolean,
+  assignResponse: boolean
 ) {
   return function bindLoggerMiddleware(
     req: IncomingMessage,
     res: ServerResponse,
-    next: () => void,
+    next: () => void
   ) {
     let log = req.log;
     let resLog = assignResponse ? res.log : undefined;

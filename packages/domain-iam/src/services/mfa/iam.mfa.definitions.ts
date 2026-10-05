@@ -7,7 +7,6 @@ export interface IAMMFACompleteOptions<Context> {
 }
 
 export enum IAMMFAType {
-  // eslint-disable-next-line no-unused-vars
   Local = 'local'
 }
 

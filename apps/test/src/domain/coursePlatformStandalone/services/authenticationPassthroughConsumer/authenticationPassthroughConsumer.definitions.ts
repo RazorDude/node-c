@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationPassthroughConsumerCompleteData,
   IAMAuthenticationPassthroughConsumerCompleteOptions,
   IAMAuthenticationPassthroughConsumerCompleteResult,
@@ -10,13 +10,14 @@ import {
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult
 } from '@node-c/domain-iam';
 
-import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
 
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteData =
   IAMAuthenticationPassthroughConsumerCompleteData;
 
-export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteOptions<Context extends object> =
-  IAMAuthenticationPassthroughConsumerCompleteOptions<Context>;
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteOptions<
+  Context extends object
+> = IAMAuthenticationPassthroughConsumerCompleteOptions<Context>;
 
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteResult =
   IAMAuthenticationPassthroughConsumerCompleteResult;
@@ -27,8 +28,9 @@ export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteRes
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateData =
   IAMAuthenticationPassthroughConsumerInitiateData;
 
-export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateOptions<Context extends object> =
-  IAMAuthenticationPassthroughConsumerInitiateOptions<Context>;
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateOptions<
+  Context extends object
+> = IAMAuthenticationPassthroughConsumerInitiateOptions<Context>;
 
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerInitiateResult =
   IAMAuthenticationPassthroughConsumerInitiateResult;
@@ -39,4 +41,5 @@ export type CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExte
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult =
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult;
 
-export type CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields = DataCacheStandaloneUser;
+export type CoursePlatformStandaloneAuthenticationPassthroughConsumerUserFields =
+  DataCacheStandaloneUser;

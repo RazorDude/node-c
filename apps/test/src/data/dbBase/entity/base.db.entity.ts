@@ -1,4 +1,4 @@
-import { EntitySchemaColumnOptions } from 'typeorm';
+import type { EntitySchemaColumnOptions } from 'typeorm';
 
 export interface DBEntity {
   createdAt: Date;

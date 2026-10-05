@@ -2,26 +2,29 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import {
   ApplicationError,
-  ConfigProviderService,
-  DataFindResults,
-  DataUpdateResult,
-  LoggerService
+  type ConfigProviderService,
+  type DataFindResults,
+  type DataUpdateResult,
+  type LoggerService
 } from '@node-c/core';
 import {
   Constants,
-  CreateOptions,
-  CreatePrivateOptions,
-  FindOneOptions,
-  FindOptions,
-  SQLQueryBuilderService,
-  UpdateOptions
+  type CreateOptions,
+  type CreatePrivateOptions,
+  type FindOneOptions,
+  type FindOptions,
+  type SQLQueryBuilderService,
+  type UpdateOptions
 } from '@node-c/data-rdb';
-import { TypeORMDBEntityService, TypeORMDBRepository } from '@node-c/data-typeorm';
+import {
+  TypeORMDBEntityService,
+  type TypeORMDBRepository
+} from '@node-c/data-typeorm';
 
 import ld from 'lodash';
-import { EntityManager } from 'typeorm';
+import type { EntityManager } from 'typeorm';
 
-import {
+import type {
   DataDBUsersCreateUserData,
   DataDBUsersDataEntityServiceData,
   DataDBUsersFindOnePrivateOptions,
@@ -29,8 +32,7 @@ import {
   DataDBUsersUpdatePasswordData,
   DataDBUsersUpdateUserData
 } from './users.definitions.js';
-
-import { DataDBUser, DataDBUserEntity } from './users.entity.js';
+import { type DataDBUser, DataDBUserEntity } from './users.entity.js';
 
 // TODO: move all of the "omit password" logic to a new UsersDataEntityService in the core module
 @Injectable()
@@ -53,7 +55,12 @@ export class DataDBUsersService extends TypeORMDBEntityService<
     options: CreateOptions,
     privateOptions: CreatePrivateOptions
   ): Promise<DataDBUser> {
-    const createResult = await TypeORMDBEntityService.prototype.create.call(this, { ...data }, options, privateOptions);
+    const createResult = await TypeORMDBEntityService.prototype.create.call(
+      this,
+      { ...data },
+      options,
+      privateOptions
+    );
     return createResult;
   }
 
@@ -67,7 +74,7 @@ export class DataDBUsersService extends TypeORMDBEntityService<
     }
     return {
       ...findResults,
-      items: findResults.items.map(item => ld.omit(item, ['password']))
+      items: findResults.items.map((item) => ld.omit(item, ['password']))
     };
   }
 
@@ -82,23 +89,35 @@ export class DataDBUsersService extends TypeORMDBEntityService<
     return item ? ld.omit(item, ['password']) : item;
   }
 
-  async update(data: DataDBUsersUpdateUserData, options: UpdateOptions): Promise<DataUpdateResult<DataDBUser>> {
+  async update(
+    data: DataDBUsersUpdateUserData,
+    options: UpdateOptions
+  ): Promise<DataUpdateResult<DataDBUser>> {
     const { transactionManager } = options || {};
     if (!transactionManager) {
-      return this.repository.manager.transaction(tm =>
+      return this.repository.manager.transaction((tm) =>
         this.update(data, { ...(options || {}), transactionManager: tm })
       );
     }
     const updateResult = await TypeORMDBEntityService.prototype.update.call(
       this,
-      { ...ld.omit(data, ['assignedUserTypes', 'password'] as unknown as (keyof DataDBUsersUpdateUserData)[]) },
+      {
+        ...ld.omit(data, [
+          'assignedUserTypes',
+          'password'
+        ] as unknown as (keyof DataDBUsersUpdateUserData)[])
+      },
       options
     );
     if (updateResult.items?.length === 1 && data.assignedUserTypes?.length) {
       await this.processManyToMany(
         {
-          counterpartColumns: [{ sourceColumnName: 'id', targetColumnName: 'userTypeId' }],
-          currentEntityColumns: [{ sourceColumnName: 'id', targetColumnName: 'userId' }],
+          counterpartColumns: [
+            { sourceColumnName: 'id', targetColumnName: 'userTypeId' }
+          ],
+          currentEntityColumns: [
+            { sourceColumnName: 'id', targetColumnName: 'userId' }
+          ],
           currentEntityItems: updateResult.items,
           items: data.assignedUserTypes,
           tableName: 'userTypeAssignedUsers'
@@ -116,14 +135,20 @@ export class DataDBUsersService extends TypeORMDBEntityService<
   ): Promise<{ success: true }> {
     const { transactionManager } = options || {};
     if (!transactionManager) {
-      return this.repository.manager.transaction(tm =>
-        this.updatePassword(data, { ...(options || {}), transactionManager: tm })
+      return this.repository.manager.transaction((tm) =>
+        this.updatePassword(data, {
+          ...(options || {}),
+          transactionManager: tm
+        })
       );
     }
     const { userId } = data;
     const currentPassword = data.currentPassword.replace(/\s/g, '');
     const newPassword = data.newPassword.replace(/\s/g, '');
-    const user = await this.findOne({ filters: { id: userId }, transactionManager });
+    const user = await this.findOne({
+      filters: { id: userId },
+      transactionManager
+    });
     if (!user) {
       throw new ApplicationError('User not found.');
     }
@@ -131,7 +156,9 @@ export class DataDBUsersService extends TypeORMDBEntityService<
     //   throw new ApplicationError('Invalid current password.');
     // }
     if (currentPassword === newPassword) {
-      throw new ApplicationError('The new password must be different than the current password.');
+      throw new ApplicationError(
+        'The new password must be different than the current password.'
+      );
     }
     await TypeORMDBEntityService.prototype.update.call(
       this,

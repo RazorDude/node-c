@@ -1,6 +1,12 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
-import { AppConfigCommon, EndpointSecurityMode, HttpMethod, NoSQLType, RDBType } from '@node-c/core';
+import {
+  type AppConfigCommon,
+  EndpointSecurityMode,
+  HttpMethod,
+  NoSQLType,
+  RDBType
+} from '@node-c/core';
 
 import { Constants } from '../common/definitions/common.constants.js';
 
@@ -145,7 +151,7 @@ export const appConfigCommon: AppConfigCommon = {
       defaultTTL: 3600,
       defaultIndividualSearchEnabled: true,
       storeKey: Constants.DATA_CACHE_STORE_KEY,
-      ttlPerEntity: { users: 60000 },
+      ttlPerEntity: { users: 60_000 },
       type: NoSQLType.Redis,
       useHashmap: false
     },
@@ -164,7 +170,7 @@ export const appConfigCommon: AppConfigCommon = {
       defaultTTL: 3600,
       defaultIndividualSearchEnabled: true,
       storeKey: Constants.DATA_CACHE_FEDERATED_STORE_KEY,
-      ttlPerEntity: { users: 60000 },
+      ttlPerEntity: { users: 60_000 },
       type: NoSQLType.Valkey,
       useHashmap: false
     },
@@ -172,7 +178,7 @@ export const appConfigCommon: AppConfigCommon = {
       defaultTTL: 3600,
       defaultIndividualSearchEnabled: true,
       storeKey: Constants.DATA_CACHE_STANDALONE_STORE_KEY,
-      ttlPerEntity: { users: 60000 },
+      ttlPerEntity: { users: 60_000 },
       type: NoSQLType.Valkey,
       useHashmap: false
     },

@@ -1,45 +1,44 @@
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  DataDefaultData,
-  DataEntityService,
-  DomainEntityServiceDefaultData,
-  GenericObject,
-  LoggerService,
+  type ConfigProviderService,
+  type DataDefaultData,
+  type DataEntityService,
+  type DomainEntityServiceDefaultData,
+  type GenericObject,
   getNested,
+  type LoggerService,
   setNested
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
-  IAMAuthenticationManagerAuthenticateOptions,
-  IAMAuthenticationManagerAuthenticateReturnData,
-  IAMAuthenticationManagerExecuteStepData,
-  IAMAuthenticationManagerExecuteStepOptions,
-  IAMAuthenticationManagerExecuteStepResult,
-  IAMAuthenticationManagerUserTokenEnityFields,
-  IAMAuthenticationManagerUserTokenUserIdentifier
-} from './iam.authenticationManager.definitions.js';
-
 import { Constants } from '../../common/definitions/common.constants.js';
 import {
-  IAMAuthenticationCompleteData,
-  IAMAuthenticationCompleteOptions,
-  IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
+  type IAMAuthenticationCompleteData,
+  type IAMAuthenticationCompleteOptions,
+  type IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationType
 } from '../authentication/iam.authentication.definitions.js';
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
-import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
-import { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
-import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import type { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
+import type { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import type { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
+import type { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
 import { TokenType } from '../tokenManager/iam.tokenManager.definitions.js';
-import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
-import { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
-import { IAMUsersService } from '../users/iam.users.service.js';
+import type { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
+import type { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
+import type { IAMUsersService } from '../users/iam.users.service.js';
+import {
+  type IAMAuthenticationManagerAuthenticateOptions,
+  type IAMAuthenticationManagerAuthenticateReturnData,
+  type IAMAuthenticationManagerExecuteStepData,
+  type IAMAuthenticationManagerExecuteStepOptions,
+  type IAMAuthenticationManagerExecuteStepResult,
+  type IAMAuthenticationManagerUserTokenEnityFields,
+  IAMAuthenticationManagerUserTokenUserIdentifier
+} from './iam.authenticationManager.definitions.js';
 
 // TODO: create user (signup); this should include password hashing
 // TODO: update password (incl. hashing)
@@ -47,31 +46,39 @@ import { IAMUsersService } from '../users/iam.users.service.js';
 // TODO: periodic checking of external access tokens and their revoking
 export class IAMAuthenticationManagerService<
   User extends object = object,
-  Data extends DomainEntityServiceDefaultData<Partial<User>> = DomainEntityServiceDefaultData<Partial<User>>,
-  DataEntityServiceData extends DataDefaultData<Partial<User>> = DataDefaultData<Partial<User>>
+  Data extends DomainEntityServiceDefaultData<
+    Partial<User>
+  > = DomainEntityServiceDefaultData<Partial<User>>,
+  DataEntityServiceData extends DataDefaultData<
+    Partial<User>
+  > = DataDefaultData<Partial<User>>
 > {
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected authServices: {
-      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<object, object>;
-      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<object, object>;
+      [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<
+        object,
+        object
+      >;
+      [IAMAuthenticationType.UserLocal]?: IAMAuthenticationUserLocalService<
+        object,
+        object
+      >;
     } & { [serviceName: string]: IAMAuthenticationService<object, object> },
-    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected dataUsersAuthCacheService?: DataEntityService<GenericObject>,
-    // eslint-disable-next-line no-unused-vars
     public domainUsersEntityService?: IAMUsersService<
       User,
       DataEntityService<User, DataEntityServiceData>,
       Data,
-      Record<string, DataEntityService<Partial<User>, DataDefaultData<object>>> | undefined
+      | Record<
+          string,
+          DataEntityService<Partial<User>, DataDefaultData<object>>
+        >
+      | undefined
     >,
-    // eslint-disable-next-line no-unused-vars
     protected tokenManager?: IAMTokenManagerService<IAMAuthenticationManagerUserTokenEnityFields>
   ) {}
 
@@ -82,8 +89,14 @@ export class IAMAuthenticationManagerService<
     options: IAMAuthenticationManagerAuthenticateOptions<AuthData>
   ): Promise<IAMAuthenticationManagerAuthenticateReturnData<User>> {
     const { configProvider, logger, moduleName, tokenManager } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { accessTokenExpiryTimeInMinutes, defaultUserIdentifierField, refreshTokenExpiryTimeInHours } = moduleConfig;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
+    const {
+      accessTokenExpiryTimeInMinutes,
+      defaultUserIdentifierField,
+      refreshTokenExpiryTimeInHours
+    } = moduleConfig;
     const {
       auth: { type: authType },
       rememberUser
@@ -92,9 +105,14 @@ export class IAMAuthenticationManagerService<
       `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
     );
     // 1. Make sure the authentication service actually exists - local, oauth2, etc.
-    const authService = this.authServices[authType] as IAMAuthenticationService<object, object>;
+    const authService = this.authServices[authType] as IAMAuthenticationService<
+      object,
+      object
+    >;
     if (!authService) {
-      logger.info(`[Domain.${moduleName}.AuthenticationManager][${authType}]: No authService ${authType} found.`);
+      logger.info(
+        `[Domain.${moduleName}.AuthenticationManager][${authType}]: No authService ${authType} found.`
+      );
       throw new ApplicationError('Authentication failed.');
     }
     // 2. Get the user-specific configuration from the authService.
@@ -117,17 +135,32 @@ export class IAMAuthenticationManagerService<
     }
     let stepConfig = authServiceBehaviorConfig[step];
     // 3. Run the authentication method itself.
-    // eslint-disable-next-line prefer-const
-    let { stepResult, user, ...otherStepData } = await this.executeStep(options, {
-      authService,
-      name: step,
-      stepConfig
-    });
+    let { stepResult, user, ...otherStepData } = await this.executeStep(
+      options,
+      {
+        authService,
+        name: step,
+        stepConfig
+      }
+    );
     // 4. Run the final step, if this is the first step no mfa has been used.
-    if (step === AppConfigDomainIAMAuthenticationStep.Initiate && !stepResult.mfaUsed) {
+    if (
+      step === AppConfigDomainIAMAuthenticationStep.Initiate &&
+      !stepResult.mfaUsed
+    ) {
       issueTokens = true;
       // check whether skipping the complete step if mfaUsed is allowed and run the complete step if it isn't
-      if (!('skipCompleteStepAllowedOnNoMFA' in stepConfig && stepConfig.skipCompleteStepAllowedOnNoMFA)) {
+      if (
+        'skipCompleteStepAllowedOnNoMFA' in stepConfig &&
+        stepConfig.skipCompleteStepAllowedOnNoMFA
+      ) {
+        if ('userFilterField' in stepResult) {
+          userFilterField = stepResult.userFilterField as string;
+        }
+        if ('userFilterValue' in stepResult) {
+          userFilterValue = stepResult.userFilterValue as string;
+        }
+      } else {
         step = AppConfigDomainIAMAuthenticationStep.Complete;
         stepConfig = authServiceBehaviorConfig[step];
         const finalStepData = await this.executeStep(options, {
@@ -135,29 +168,30 @@ export class IAMAuthenticationManagerService<
           name: step,
           stepConfig: ld.omit(stepConfig, 'cache')
         });
-        stepResult = ld.merge(ld.omit(stepResult, ['mfaUsed', 'mfaValid', 'valid']), finalStepData.stepResult);
+        stepResult = ld.merge(
+          ld.omit(stepResult, ['mfaUsed', 'mfaValid', 'valid']),
+          finalStepData.stepResult
+        );
         user = user ?? finalStepData.user;
         userFilterField = finalStepData.userFilterField;
         userFilterValue = finalStepData.userFilterValue;
-      } else {
-        if ('userFilterField' in stepResult) {
-          userFilterField = stepResult.userFilterField as string;
-        }
-        if ('userFilterValue' in stepResult) {
-          userFilterValue = stepResult.userFilterValue as string;
-        }
       }
     }
     // 5. Process the external access, refresh and, optionally, id tokens that are returned by the step execution.
     const actualStepResult = stepResult as
-      IAMAuthenticationOAuth2CompleteResult | IAMAuthenticationUserLocalCompleteResult;
+      | IAMAuthenticationOAuth2CompleteResult
+      | IAMAuthenticationUserLocalCompleteResult;
     if (!userFilterField && otherStepData.userFilterField) {
       userFilterField = otherStepData.userFilterField;
     }
     if (!userFilterValue && otherStepData.userFilterValue) {
       userFilterValue = otherStepData.userFilterValue;
     }
-    if ('useReturnedTokens' in stepConfig && stepConfig.useReturnedTokens && stepConfig.authReturnsTokens) {
+    if (
+      'useReturnedTokens' in stepConfig &&
+      stepConfig.useReturnedTokens &&
+      stepConfig.authReturnsTokens
+    ) {
       // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
       if (!actualStepResult.accessToken) {
         logger.info(
@@ -173,7 +207,9 @@ export class IAMAuthenticationManagerService<
     // 6. Token management. In this case, we will definitely have the user, or will be force to create it.
     if (issueTokens) {
       if (!tokenManager) {
-        throw new ApplicationError(`[${moduleName}][AuthenticationManager] tokenManager not configured.`);
+        throw new ApplicationError(
+          `[${moduleName}][AuthenticationManager] tokenManager not configured.`
+        );
       }
       if (!user) {
         logger.info(
@@ -181,8 +217,11 @@ export class IAMAuthenticationManagerService<
         );
         throw new ApplicationError('Authentication failed.');
       }
-      const useExternalTokenAsLocal = 'useReturnedTokensAsLocal' in stepConfig && stepConfig.useReturnedTokensAsLocal;
-      const userIdentifierValue = user[defaultUserIdentifierField as keyof User];
+      const useExternalTokenAsLocal =
+        'useReturnedTokensAsLocal' in stepConfig &&
+        stepConfig.useReturnedTokensAsLocal;
+      const userIdentifierValue =
+        user[defaultUserIdentifierField as keyof User];
       let refreshToken: string | undefined;
       let refreshTokenExpiresIn: number | undefined;
       let refreshTokenTTL: number | undefined;
@@ -216,12 +255,14 @@ export class IAMAuthenticationManagerService<
         } = await tokenManager.create(
           {
             type: TokenType.Refresh,
-            [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
+            [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]:
+              userIdentifierValue,
             ...externalTokenData
           },
           {
             expiresInMinutes: refreshTokenExpiresIn,
-            identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
+            identifierDataField:
+              IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
             persist: true,
             purgeOldFromData: true,
             tokenContentOnlyFields: ['externalToken'],
@@ -233,20 +274,24 @@ export class IAMAuthenticationManagerService<
       }
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
       const accessTokenExpiresIn =
-        (externalAccessToken && 'accessTokenExpiresIn' in actualStepResult && actualStepResult.accessTokenExpiresIn) ||
+        (externalAccessToken &&
+          'accessTokenExpiresIn' in actualStepResult &&
+          actualStepResult.accessTokenExpiresIn) ||
         accessTokenExpiryTimeInMinutes ||
         Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS;
       const accessTokenTTL =
         refreshTokenExpiresIn ||
         accessTokenExpiresIn *
-          (moduleConfig.accessTokenExpiryStorageTTLMultiplier || Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER);
+          (moduleConfig.accessTokenExpiryStorageTTLMultiplier ||
+            Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER);
       const {
         result: { token: accessToken }
       } = await tokenManager.create(
         {
           refreshToken,
           type: TokenType.Access,
-          [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue,
+          [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]:
+            userIdentifierValue,
           ...(externalAccessToken
             ? {
                 externalToken: externalAccessToken,
@@ -256,7 +301,8 @@ export class IAMAuthenticationManagerService<
         },
         {
           expiresInMinutes: accessTokenExpiresIn,
-          identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
+          identifierDataField:
+            IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
           tokenContentOnlyFields: ['externalToken', 'refreshToken'],
@@ -272,11 +318,13 @@ export class IAMAuthenticationManagerService<
           accessToken,
           type: TokenType.Id,
           user,
-          [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]: userIdentifierValue
+          [IAMAuthenticationManagerUserTokenUserIdentifier.FieldName]:
+            userIdentifierValue
         },
         {
           expiresInMinutes: accessTokenExpiresIn,
-          identifierDataField: IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
+          identifierDataField:
+            IAMAuthenticationManagerUserTokenUserIdentifier.FieldName,
           persist: true,
           purgeOldFromData: true,
           tokenContentOnlyFields: ['accessToken', 'user'],
@@ -288,13 +336,17 @@ export class IAMAuthenticationManagerService<
       );
       return { accessToken, idToken, refreshToken, user };
     }
-    const returnData: IAMAuthenticationManagerAuthenticateReturnData<User> = { nextStepsRequired: true };
+    const returnData: IAMAuthenticationManagerAuthenticateReturnData<User> = {
+      nextStepsRequired: true
+    };
     if (stepConfig.stepResultPublicFields?.length) {
-      stepConfig.stepResultPublicFields.forEach(fieldName => {
+      stepConfig.stepResultPublicFields.forEach((fieldName) => {
         setNested(
           returnData,
           fieldName,
-          getNested(stepResult, fieldName, { removeNestedFieldEscapeSign: true }).unifiedValue,
+          getNested(stepResult, fieldName, {
+            removeNestedFieldEscapeSign: true
+          }).unifiedValue,
           { removeNestedFieldEscapeSign: true }
         );
       });
@@ -306,18 +358,33 @@ export class IAMAuthenticationManagerService<
     data: IAMAuthenticationManagerExecuteStepData<AuthData>,
     options: IAMAuthenticationManagerExecuteStepOptions<User>
   ): Promise<IAMAuthenticationManagerExecuteStepResult<User>> {
-    const { configProvider, dataUsersAuthCacheService, domainUsersEntityService, logger, moduleName } = this;
-    const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const {
+      configProvider,
+      dataUsersAuthCacheService,
+      domainUsersEntityService,
+      logger,
+      moduleName
+    } = this;
+    const { defaultUserIdentifierField } = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const {
       auth: { type: authType, ...authData },
       filters: userFilters,
       mainFilterField
     } = data;
     const { authService, stepConfig, name: stepName } = options;
-    const { cache: cacheSettings, findUser, findUserBeforeAuth, validWithoutUser } = stepConfig;
-    const hasFilters = userFilters && Object.keys(userFilters).length;
+    const {
+      cache: cacheSettings,
+      findUser,
+      findUserBeforeAuth,
+      validWithoutUser
+    } = stepConfig;
+    const hasFilters = userFilters && Object.keys(userFilters).length > 0;
     const logPrefix = `[Domain.${moduleName}.AuthenticationManager][executeStep][${authType}][${stepName}]`;
-    const stepInputData: { data: unknown; options?: unknown } = { data: ld.cloneDeep(authData) };
+    const stepInputData: { data: unknown; options?: unknown } = {
+      data: ld.cloneDeep(authData)
+    };
     let runFindUserInExternalTokenPayloads = false;
     let user: IAMUserWithPermissionsData<User, unknown> | null = null;
     let userFilterField: string | undefined;
@@ -325,12 +392,17 @@ export class IAMAuthenticationManagerService<
     // 1. Find the user based on the provided filters, if enabled.
     if (findUser && findUserBeforeAuth) {
       if (!hasFilters) {
-        logger.info(`${logPrefix}[Part 1]: No filters provided for findUserBeforeToken=true.`);
+        logger.info(
+          `${logPrefix}[Part 1]: No filters provided for findUserBeforeToken=true.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       userFilterField = mainFilterField;
       userFilterValue = userFilters[userFilterField];
-      user = await this.getUserForStepExecution({ filters: userFilters, mainFilterField: userFilterField });
+      user = await this.getUserForStepExecution({
+        filters: userFilters,
+        mainFilterField: userFilterField
+      });
       if (!user) {
         logger.info(
           `${logPrefix}[Part 1]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
@@ -352,7 +424,9 @@ export class IAMAuthenticationManagerService<
     // 2. Restore the cache, if configured.
     if (cacheSettings && 'use' in cacheSettings && cacheSettings.use) {
       if (!dataUsersAuthCacheService) {
-        logger.info(`${logPrefix}[Part 2]: dataUsersAuthCacheService not configured.`);
+        logger.info(
+          `${logPrefix}[Part 2]: dataUsersAuthCacheService not configured.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       const cacheInput: { data: unknown; options: unknown } = {
@@ -361,24 +435,35 @@ export class IAMAuthenticationManagerService<
       };
       const cacheResult = await dataUsersAuthCacheService.findOne({
         filters: {
-          [cacheSettings.settings.cacheFieldName]: getNested(cacheInput, cacheSettings.settings.inputFieldName)
-            .unifiedValue
+          [cacheSettings.settings.cacheFieldName]: getNested(
+            cacheInput,
+            cacheSettings.settings.inputFieldName
+          ).unifiedValue
         }
       });
       if (cacheResult) {
         for (const inputName in cacheSettings.use) {
-          const { overwrite, use } = cacheSettings.use[inputName as keyof typeof cacheSettings.use]!;
+          const { overwrite, use } =
+            cacheSettings.use[inputName as keyof typeof cacheSettings.use]!;
           if (!use) {
             continue;
           }
           const valueFromCache =
-            getNested(cacheResult, inputName, { removeNestedFieldEscapeSign: true }).unifiedValue || {};
+            getNested(cacheResult, inputName, {
+              removeNestedFieldEscapeSign: true
+            }).unifiedValue || {};
           const inputNameKey = inputName as keyof typeof stepInputData;
           if (overwrite) {
-            stepInputData[inputNameKey] = ld.merge(stepInputData[inputNameKey], valueFromCache);
+            stepInputData[inputNameKey] = ld.merge(
+              stepInputData[inputNameKey],
+              valueFromCache
+            );
             continue;
           }
-          stepInputData[inputNameKey] = ld.merge(valueFromCache, stepInputData[inputNameKey]);
+          stepInputData[inputNameKey] = ld.merge(
+            valueFromCache,
+            stepInputData[inputNameKey]
+          );
         }
       }
     }
@@ -389,30 +474,44 @@ export class IAMAuthenticationManagerService<
     );
     // 4. Process the step result
     if (
-      (!stepResult.valid && !(stepResult as unknown as { nextStepsRequired: boolean }).nextStepsRequired) ||
+      !(
+        stepResult.valid ||
+        (stepResult as unknown as { nextStepsRequired: boolean })
+          .nextStepsRequired
+      ) ||
       (stepResult.mfaUsed && !stepResult.mfaValid)
     ) {
       logger.info(`${logPrefix}[Part 4]: Bad step result:`, stepResult);
       throw new ApplicationError('Authentication failed.');
     }
     // 5. If the step returns tokens and decoding is enabled, decode the reutrned tokens for payloads.
-    if ('decodeReturnedTokens' in stepConfig && stepConfig.decodeReturnedTokens) {
+    if (
+      'decodeReturnedTokens' in stepConfig &&
+      stepConfig.decodeReturnedTokens
+    ) {
       const tokensForDecoding: Record<string, string> = {};
       const tokenKeys = ['accessToken', 'idToken', 'refreshToken'];
-      tokenKeys.forEach(tokenKey => {
-        const resultForKey = stepResult[tokenKey as keyof typeof stepResult] as unknown as string;
+      tokenKeys.forEach((tokenKey) => {
+        const resultForKey = stepResult[
+          tokenKey as keyof typeof stepResult
+        ] as unknown as string;
         if (!resultForKey) {
           return;
         }
         tokensForDecoding[tokenKey] = resultForKey;
       });
-      const externalTokenPayloads = await authService.getPayloadsFromExternalTokens(tokensForDecoding);
+      const externalTokenPayloads =
+        await authService.getPayloadsFromExternalTokens(tokensForDecoding);
       stepResult = { ...stepResult, ...externalTokenPayloads };
     }
     // 6. Find the user based on either the provided filters, or on the stepResult data, if enabled.
     if (findUser && !findUserBeforeAuth) {
-      if ('findUserInAuthResultBy' in stepConfig && stepConfig.findUserInAuthResultBy) {
-        const { userFieldName, resultFieldName } = stepConfig.findUserInAuthResultBy;
+      if (
+        'findUserInAuthResultBy' in stepConfig &&
+        stepConfig.findUserInAuthResultBy
+      ) {
+        const { userFieldName, resultFieldName } =
+          stepConfig.findUserInAuthResultBy;
         const payloadFilterValue = getNested(stepResult, resultFieldName, {
           removeNestedFieldEscapeSign: true
         }).unifiedValue;
@@ -426,7 +525,10 @@ export class IAMAuthenticationManagerService<
             mainFilterField: userFieldName
           });
         }
-      } else if ('findUserInExternalTokenPayloads' in stepConfig && stepConfig.findUserInExternalTokenPayloads) {
+      } else if (
+        'findUserInExternalTokenPayloads' in stepConfig &&
+        stepConfig.findUserInExternalTokenPayloads
+      ) {
         runFindUserInExternalTokenPayloads = true;
       } else if (hasFilters) {
         userFilterField = mainFilterField;
@@ -445,14 +547,21 @@ export class IAMAuthenticationManagerService<
       );
       if (createUser && userData) {
         if (!domainUsersEntityService) {
-          logger.info(`${logPrefix}[Part 7]: domainUsersEntityService not configured.`);
+          logger.info(
+            `${logPrefix}[Part 7]: domainUsersEntityService not configured.`
+          );
           throw new ApplicationError('Authentication failed.');
         }
-        const { result: createdUser } = await domainUsersEntityService.create(userData as unknown as Data['Create']);
+        const { result: createdUser } = await domainUsersEntityService.create(
+          userData as unknown as Data['Create']
+        );
         user = await domainUsersEntityService.getUserWithPermissionsData(
           {
             filters: {
-              [defaultUserIdentifierField]: createdUser[defaultUserIdentifierField as keyof typeof createdUser]
+              [defaultUserIdentifierField]:
+                createdUser[
+                  defaultUserIdentifierField as keyof typeof createdUser
+                ]
             }
           },
           { keepPassword: false }
@@ -468,12 +577,18 @@ export class IAMAuthenticationManagerService<
       throw new ApplicationError('Authentication failed.');
     }
     if (user && 'password' in user) {
-      delete user.password;
+      user.password = undefined;
     }
     // 8. Populate the cache, if configured
-    if (cacheSettings && 'populate' in cacheSettings && cacheSettings.populate) {
+    if (
+      cacheSettings &&
+      'populate' in cacheSettings &&
+      cacheSettings.populate
+    ) {
       if (!dataUsersAuthCacheService) {
-        logger.info(`${logPrefix}[Part 7]: dataUsersAuthCacheService not configured.`);
+        logger.info(
+          `${logPrefix}[Part 7]: dataUsersAuthCacheService not configured.`
+        );
         throw new ApplicationError('Authentication failed.');
       }
       const cacheInput: GenericObject = {
@@ -483,15 +598,20 @@ export class IAMAuthenticationManagerService<
       };
       const cacheData: GenericObject = {};
       for (const inputName in cacheSettings.populate) {
-        const inputSettings = cacheSettings.populate[inputName as keyof typeof cacheSettings.populate];
-        if (inputSettings instanceof Array) {
+        const inputSettings =
+          cacheSettings.populate[
+            inputName as keyof typeof cacheSettings.populate
+          ];
+        if (Array.isArray(inputSettings)) {
           const innerInputItem: GenericObject = {};
-          inputSettings.forEach(inputItemSettings => {
+          inputSettings.forEach((inputItemSettings) => {
             const { cacheFieldName, inputFieldName } = inputItemSettings;
             setNested(
               innerInputItem,
               cacheFieldName,
-              getNested(cacheInput, inputFieldName, { removeNestedFieldEscapeSign: true }).unifiedValue
+              getNested(cacheInput, inputFieldName, {
+                removeNestedFieldEscapeSign: true
+              }).unifiedValue
             );
           });
           cacheData[inputName] = innerInputItem;
@@ -501,8 +621,10 @@ export class IAMAuthenticationManagerService<
       }
       await dataUsersAuthCacheService.create({
         ...cacheData,
-        [cacheSettings.settings.cacheFieldName]: getNested(cacheInput, cacheSettings.settings.inputFieldName)
-          .unifiedValue
+        [cacheSettings.settings.cacheFieldName]: getNested(
+          cacheInput,
+          cacheSettings.settings.inputFieldName
+        ).unifiedValue
       });
     }
     return { stepResult, user, userFilterField, userFilterValue };
@@ -514,28 +636,40 @@ export class IAMAuthenticationManagerService<
   }): Promise<IAMUserWithPermissionsData<User, unknown> | null> {
     const { configProvider, domainUsersEntityService, moduleName } = this;
     if (!domainUsersEntityService) {
-      throw new ApplicationError(`[${moduleName}][AuthenticationManager] domainUsersEntityService not configured.`);
+      throw new ApplicationError(
+        `[${moduleName}][AuthenticationManager] domainUsersEntityService not configured.`
+      );
     }
-    const { defaultUserIdentifierField } = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const { defaultUserIdentifierField } = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { mainFilterField } = options;
     let filters: GenericObject = options.filters;
     let user: IAMUserWithPermissionsData<User, unknown> | null = null;
-    if (mainFilterField !== defaultUserIdentifierField) {
+    if (mainFilterField === defaultUserIdentifierField) {
+      filters = options.filters;
+    } else {
       // Allow search by an extended range of filters, directly in the database.
       // This is needed because getUserWithPermissionsData will usually query the cache, where a
       // prmary key filter is mandatory.
-      const mainFilterFieldResult = await domainUsersEntityService.findOne({ filters });
+      const mainFilterFieldResult = await domainUsersEntityService.findOne({
+        filters
+      });
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       if (!mainFilterFieldResult.result) {
         return null;
       }
       filters = {
         [defaultUserIdentifierField]:
-          mainFilterFieldResult.result[defaultUserIdentifierField as keyof typeof mainFilterFieldResult.result]
+          mainFilterFieldResult.result[
+            defaultUserIdentifierField as keyof typeof mainFilterFieldResult.result
+          ]
       };
-    } else {
-      filters = options.filters;
     }
-    user = await domainUsersEntityService.getUserWithPermissionsData({ filters }, { keepPassword: true });
+    user = await domainUsersEntityService.getUserWithPermissionsData(
+      { filters },
+      { keepPassword: true }
+    );
     return user;
   }
 }

@@ -1,23 +1,35 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  AppConfig,
-  AppConfigDataNoSQL,
+  type AppConfig,
+  type AppConfigDataNoSQL,
   ApplicationError,
-  ConfigProviderService,
+  type ConfigProviderService,
   Constants as CoreConstants,
-  GenericObject,
-  LoggerService,
+  type GenericObject,
+  type LoggerService,
   NoSQLType
 } from '@node-c/core';
 
-import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
-import Valkey, { ClusterOptions as ValkeyClusterOptions } from 'iovalkey';
+import Redis, {
+  type ChainableCommander,
+  Cluster,
+  type RedisOptions
+} from 'ioredis';
+import Valkey, { type ClusterOptions as ValkeyClusterOptions } from 'iovalkey';
 import { v4 as uuid } from 'uuid';
 
-import { GetOptions, ScanOptions, SetOptions, StoreDeleteOptions } from './redis.store.definitions.js';
-
 import { Constants } from '../common/definitions/common.constants.js';
+import type {
+  GetOptions,
+  ScanOptions,
+  SetOptions,
+  StoreDeleteOptions
+} from './redis.store.definitions.js';
+
+const DEFAULT_REDIS_SERVER_PORT = 6379;
+const RETRY_INTERVAL_TIMER_MS = 500;
+const RETRY_INTERVAL_MS = 60_000;
 
 // TODO: support switching between hashmap and non-hashmap methods (e.g. hget/get) on the method basis, rather than
 // for the whole store
@@ -33,19 +45,17 @@ export class RedisStoreService {
   constructor(
     protected configProvider: ConfigProviderService,
     @Inject(Constants.REDIS_CLIENT)
-    // eslint-disable-next-line no-unused-vars
     protected client: Redis.default | Cluster,
     @Inject(CoreConstants.DATA_MODULE_NAME)
     protected dataModuleName: string
   ) {
-    const { defaultTTL, storeDelimiter, storeKey, useHashmap } = configProvider.config.data[
-      dataModuleName
-    ] as AppConfigDataNoSQL;
+    const { defaultTTL, storeDelimiter, storeKey, useHashmap } = configProvider
+      .config.data[dataModuleName] as AppConfigDataNoSQL;
     this.defaultTTL = defaultTTL;
     this.storeDelimiter = storeDelimiter || Constants.DEFAULT_STORE_DELIMITER;
     this.storeKey = storeKey;
     this.transactions = {};
-    this.useHashmap = typeof useHashmap !== 'undefined' ? useHashmap : true;
+    this.useHashmap = typeof useHashmap === 'undefined' ? true : useHashmap;
   }
 
   static async createClient(
@@ -68,8 +78,9 @@ export class RedisStoreService {
       user
     } = config.data[dataModuleName] as AppConfigDataNoSQL;
     const actualHost = host || '0.0.0.0';
+    // biome-ignore lint/suspicious/noUnnecessaryConditions: Incorrect type defined by another npm package.
     const actualPassword = password?.length ? password : undefined;
-    const actualPort = port || 6379;
+    const actualPort = port || DEFAULT_REDIS_SERVER_PORT;
     const actualUser = user?.length ? user : undefined;
     const clientOptions: {
       clusterRetryStrategy?: ValkeyClusterOptions['clusterRetryStrategy'];
@@ -77,13 +88,14 @@ export class RedisStoreService {
       retryStrategy?: RedisOptions['retryStrategy'];
       sentinelRetryStrategy?: RedisOptions['sentinelRetryStrategy'];
     } = {};
-    let lastRetryAt = new Date().valueOf();
-    const retryMethod = () => {
-      const now = new Date().valueOf();
+    let lastRetryAt = Date.now();
+    // biome-ignore lint/correctness/useQwikValidLexicalScope: False positive.
+    const retryMethod = (): number | null => {
+      const now = Date.now();
       // 1 minute retry interval
-      if (Math.abs(lastRetryAt - now) > 60000) {
+      if (Math.abs(lastRetryAt - now) > RETRY_INTERVAL_MS) {
         lastRetryAt = now;
-        return 500;
+        return RETRY_INTERVAL_TIMER_MS;
       }
       return null;
     };
@@ -91,18 +103,29 @@ export class RedisStoreService {
       if (!failOnConnectionError) {
         clientOptions.clusterRetryStrategy = retryMethod;
       }
-      const ClusterConstructor = type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
-      const client = new ClusterConstructor(RedisStoreService.getNodeList(actualHost, actualPort), {
-        ...clientOptions,
-        lazyConnect: true,
-        redisOptions: { password: actualPassword, username: actualUser }
-      });
+      const ClusterConstructor =
+        type === NoSQLType.Valkey ? Valkey.Cluster : Cluster;
+      const client = new ClusterConstructor(
+        RedisStoreService.getNodeList(actualHost, actualPort),
+        {
+          ...clientOptions,
+          lazyConnect: true,
+          redisOptions: { password: actualPassword, username: actualUser }
+        }
+      );
       try {
-        logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
+        logger.info(
+          `[RedisStoreService][${dataModuleName}]: Connecting to Redis...`
+        );
         await client.connect();
-        logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
+        logger.info(
+          `[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`
+        );
       } catch (err) {
-        logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(
+          `[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`,
+          err
+        );
         if (failOnConnectionError) {
           throw err;
         }
@@ -115,7 +138,14 @@ export class RedisStoreService {
         clientOptions.maxRetriesPerRequest = 0;
         clientOptions.sentinelRetryStrategy = retryMethod;
       }
-      const SentinelConstructor = type === NoSQLType.Valkey ? Valkey.default : Redis.default;
+      const SentinelConstructor =
+        type === NoSQLType.Valkey ? Valkey.default : Redis.default;
+      let sentinelPasswordActual: string | undefined;
+      if (sentinelPassword?.length) {
+        sentinelPasswordActual = sentinelPassword;
+      } else if (usePasswordForSentinelPassword) {
+        sentinelPasswordActual = actualPassword;
+      }
       const client = new SentinelConstructor({
         ...clientOptions,
         lazyConnect: true,
@@ -123,22 +153,25 @@ export class RedisStoreService {
         password: actualPassword,
         role: sentinelRole || 'master',
         sentinels: RedisStoreService.getNodeList(actualHost, actualPort),
-        sentinelPassword: sentinelPassword?.length
-          ? sentinelPassword
-          : usePasswordForSentinelPassword
-            ? actualPassword
-            : undefined,
+        sentinelPassword: sentinelPasswordActual,
         username: actualUser
       });
       client.on('error', (error: unknown) => {
         logger.error(`[RedisStoreService][${dataModuleName}]: Error:`, error);
       });
       try {
-        logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
+        logger.info(
+          `[RedisStoreService][${dataModuleName}]: Connecting to Redis...`
+        );
         await client.connect();
-        logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
+        logger.info(
+          `[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`
+        );
       } catch (err) {
-        logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
+        logger.error(
+          `[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`,
+          err
+        );
         if (failOnConnectionError) {
           throw err;
         }
@@ -150,7 +183,8 @@ export class RedisStoreService {
       clientOptions.maxRetriesPerRequest = 0;
       clientOptions.retryStrategy = retryMethod;
     }
-    const ClientConstructor = type === NoSQLType.Valkey ? Valkey.default : Redis.default;
+    const ClientConstructor =
+      type === NoSQLType.Valkey ? Valkey.default : Redis.default;
     const client = new ClientConstructor({
       ...clientOptions,
       host: actualHost,
@@ -160,15 +194,24 @@ export class RedisStoreService {
       username: actualUser
     });
     try {
-      logger.info(`[RedisStoreService][${dataModuleName}]: Connecting to Redis...`);
+      logger.info(
+        `[RedisStoreService][${dataModuleName}]: Connecting to Redis...`
+      );
       await client.connect();
       const pingResult = await client.ping();
       if (pingResult !== 'PONG') {
-        throw new ApplicationError(`Invalid ping result: ${pingResult}. Expected PONG`);
+        throw new ApplicationError(
+          `Invalid ping result: ${pingResult}. Expected PONG`
+        );
       }
-      logger.info(`[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`);
+      logger.info(
+        `[RedisStoreService][${dataModuleName}]: Connected to Redis successfully.`
+      );
     } catch (err) {
-      logger.error(`[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`, err);
+      logger.error(
+        `[RedisStoreService][${dataModuleName}]: Error connecting to Redis:`,
+        err
+      );
       if (failOnConnectionError) {
         throw err;
       }
@@ -183,31 +226,46 @@ export class RedisStoreService {
     return transactionId;
   }
 
-  async delete(handle: string | string[], options?: StoreDeleteOptions): Promise<number> {
+  async delete(
+    handle: string | string[],
+    options?: StoreDeleteOptions
+  ): Promise<number> {
     const { client, storeDelimiter, storeKey, transactions, useHashmap } = this;
     const { transactionId } = options || ({} as StoreDeleteOptions);
-    const handles = handle instanceof Array ? handle : [handle];
+    const handles = Array.isArray(handle) ? handle : [handle];
     if (transactionId) {
       const transaction = transactions[transactionId];
       if (!transaction) {
-        throw new ApplicationError(`[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`);
+        throw new ApplicationError(
+          `[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`
+        );
       }
       transactions[transactionId] = useHashmap
         ? transaction.hdel(storeKey, ...handles)
-        : transaction.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
+        : transaction.del(
+            handles.map(
+              (handleItem) => `${storeKey}${storeDelimiter}${handleItem}`
+            )
+          );
       // TODO: return the actual amount
       return 0;
     }
     return useHashmap
       ? await client.hdel(storeKey, ...handles)
-      : await client.del(handles.map(handleItem => `${storeKey}${storeDelimiter}${handleItem}`));
+      : await client.del(
+          handles.map(
+            (handleItem) => `${storeKey}${storeDelimiter}${handleItem}`
+          )
+        );
   }
 
   async endTransaction(transactionId: string): Promise<void> {
     const { transactions } = this;
     const transaction = transactions[transactionId];
     if (!transaction) {
-      throw new ApplicationError(`[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`);
+      throw new ApplicationError(
+        `[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`
+      );
     }
     // TODO: how will we know whether it's successful or not?
     await transaction.exec();
@@ -215,33 +273,56 @@ export class RedisStoreService {
   }
 
   // TODO: support get from transaction data
-  async get<Value = unknown>(handle: string, options?: GetOptions): Promise<Value> {
+  async get<Value = unknown>(
+    handle: string,
+    options?: GetOptions
+  ): Promise<Value> {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
     const { parseToJSON, withValues } = options || ({} as GetOptions);
     if (withValues || typeof withValues === 'undefined') {
       const value = useHashmap
         ? await client.hget(storeKey, handle)
         : await client.get(`${storeKey}${storeDelimiter}${handle}`);
-      return parseToJSON && typeof value === 'string' ? JSON.parse(value) : (value as Value);
+      return parseToJSON && typeof value === 'string'
+        ? JSON.parse(value)
+        : (value as Value);
     }
-    return useHashmap
-      ? (!!(await client.hexists(storeKey, handle)) as Value)
-      : (!!(await client.exists(`${storeKey}${storeDelimiter}${handle}`)) as Value);
+    if (useHashmap) {
+      return Boolean(await client.hexists(storeKey, handle)) as Value;
+    }
+    return Boolean(
+      await client.exists(`${storeKey}${storeDelimiter}${handle}`)
+    ) as Value;
   }
 
-  static getNodeList(host: string, port: number): { host: string; port: number }[] {
+  static getNodeList(
+    host: string,
+    port: number
+  ): { host: string; port: number }[] {
     const hostList = host.split(',');
     const portList = `${port}`.split(',');
     return hostList.map((hostAddress, hostIndex) => {
-      return { host: hostAddress, port: parseInt(portList[hostIndex] || portList[0], 10) };
+      return {
+        host: hostAddress,
+        port: Number.parseInt(portList[hostIndex] || portList[0], 10)
+      };
     });
   }
 
   // TODO: support scan from transaction data
   // TODO: optimize this method to reduce branches, ugly conidtional statements and repeatability
-  async scan<Values = unknown[]>(handle: string, options: ScanOptions): Promise<{ cursor: number; values: Values }> {
+  async scan<Values = unknown[]>(
+    handle: string,
+    options: ScanOptions
+  ): Promise<{ cursor: number; values: Values }> {
     const { client, storeDelimiter, storeKey, useHashmap } = this;
-    const { count, cursor: optCursor, parseToJSON, scanAll, withValues } = options;
+    const {
+      count,
+      cursor: optCursor,
+      parseToJSON,
+      scanAll,
+      withValues
+    } = options;
     const getValues = typeof withValues === 'undefined' || withValues === true;
     const values: { field: string; value: string }[] = [];
     let cursor = 0;
@@ -250,15 +331,19 @@ export class RedisStoreService {
     if (scanAll) {
       if (useHashmap) {
         // TODO: remove repeating code
+        // biome-ignore lint/suspicious/noUnnecessaryConditions: As God intended.
         while (true) {
           const [newCursor, newKeys] = await client.hscan(
             storeKey,
             cursor,
             'MATCH',
             handle,
-            ...((typeof count !== 'undefined' ? ['COUNT', count] : []) as ['COUNT', number])
+            ...((typeof count === 'undefined' ? [] : ['COUNT', count]) as [
+              'COUNT',
+              number
+            ])
           );
-          cursor = parseInt(newCursor, 10);
+          cursor = Number.parseInt(newCursor, 10);
           if (getValues) {
             // TODO: remove repeating code
             for (const i in newKeys) {
@@ -278,9 +363,14 @@ export class RedisStoreService {
         }
       } else {
         // TODO: remove repeating code
+        // biome-ignore lint/suspicious/noUnnecessaryConditions: As God intended.
         while (true) {
-          const [newCursor, newKeys] = await client.scan(cursor, 'MATCH', `${storeKey}${storeDelimiter}${handle}`);
-          cursor = parseInt(newCursor, 10);
+          const [newCursor, newKeys] = await client.scan(
+            cursor,
+            'MATCH',
+            `${storeKey}${storeDelimiter}${handle}`
+          );
+          cursor = Number.parseInt(newCursor, 10);
           if (getValues) {
             for (const i in newKeys) {
               const key = newKeys[i];
@@ -300,12 +390,21 @@ export class RedisStoreService {
       }
     } else {
       if (typeof count === 'undefined') {
-        throw new ApplicationError('The "count" options is required when the "findAll" options is not positive.');
+        throw new ApplicationError(
+          'The "count" options is required when the "findAll" options is not positive.'
+        );
       }
       // TODO: remove repeating code
       if (useHashmap) {
-        const [newCursor, newKeys] = await client.hscan(storeKey, optCursor || 0, 'MATCH', handle, 'COUNT', count);
-        cursor = parseInt(newCursor, 10);
+        const [newCursor, newKeys] = await client.hscan(
+          storeKey,
+          optCursor || 0,
+          'MATCH',
+          handle,
+          'COUNT',
+          count
+        );
+        cursor = Number.parseInt(newCursor, 10);
         // TODO: remove repeating code
         if (getValues) {
           for (const i in newKeys) {
@@ -327,7 +426,7 @@ export class RedisStoreService {
           'COUNT',
           count
         );
-        cursor = parseInt(newCursor, 10);
+        cursor = Number.parseInt(newCursor, 10);
         // TODO: remove repeating code
         if (getValues) {
           for (const i in newKeys) {
@@ -360,18 +459,36 @@ export class RedisStoreService {
 
   // TODO: fix hExpire
   // TODO: optimize this method to reduce branches, ugly conidtional statements and repeatability
-  async set<Entry = unknown>(handle: string, entry: Entry, options?: SetOptions): Promise<void> {
-    const { client, defaultTTL, storeDelimiter, storeKey, transactions, useHashmap } = this;
+  async set<Entry = unknown>(
+    handle: string,
+    entry: Entry,
+    options?: SetOptions
+  ): Promise<void> {
+    const {
+      client,
+      defaultTTL,
+      storeDelimiter,
+      storeKey,
+      transactions,
+      useHashmap
+    } = this;
     const { transactionId, ttl } = options || ({} as SetOptions);
     const actualTTL = ttl || defaultTTL;
-    const valueToSet = typeof entry !== 'string' ? JSON.stringify(entry) : entry;
+    const valueToSet =
+      typeof entry === 'string' ? entry : JSON.stringify(entry);
     if (transactionId) {
       const transaction = transactions[transactionId];
       if (!transaction) {
-        throw new ApplicationError(`[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`);
+        throw new ApplicationError(
+          `[RedisStoreService][Error]: Transaction with id "${transactionId}" not found.`
+        );
       }
       if (useHashmap) {
-        transactions[transactionId] = transaction.hset(this.storeKey, handle, valueToSet);
+        transactions[transactionId] = transaction.hset(
+          this.storeKey,
+          handle,
+          valueToSet
+        );
         // if (actualTTL) {
         //   transactions[transactionId] = transactions[transactionId].hExpire(this.storeKey, handle, actualTTL, 'NX');
         // }
@@ -379,7 +496,11 @@ export class RedisStoreService {
         const fullKey = `${storeKey}${storeDelimiter}${handle}`;
         transactions[transactionId] = transaction.set(fullKey, valueToSet);
         if (actualTTL) {
-          transactions[transactionId] = transactions[transactionId].expire(fullKey, actualTTL, 'NX');
+          transactions[transactionId] = transactions[transactionId].expire(
+            fullKey,
+            actualTTL,
+            'NX'
+          );
         }
       }
       return;
@@ -399,7 +520,9 @@ export class RedisStoreService {
       }
     }
     if (result !== 'OK' && result !== 1) {
-      throw new ApplicationError(`[RedisStoreService][Error]: Value not set for handle "${handle}". Result: ${result}`);
+      throw new ApplicationError(
+        `[RedisStoreService][Error]: Value not set for handle "${handle}". Result: ${result}`
+      );
     }
   }
 }

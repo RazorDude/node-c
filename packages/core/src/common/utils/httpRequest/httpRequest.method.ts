@@ -1,13 +1,16 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import { HttpStatus } from '@nestjs/common';
 
-import axios, { RawAxiosHeaders } from 'axios';
+import axios, { type RawAxiosHeaders } from 'axios';
 import qs from 'qs';
 
-import { HTTPRequestData, HTTPRequestResponseData } from './httpRequest.definitions.js';
-
 import { HttpMethod } from '../../definitions/common.constants.js';
-import { GenericObject } from '../../definitions/common.definitions.js';
+import type { GenericObject } from '../../definitions/common.definitions.js';
 import { ApplicationError } from '../../definitions/common.errors.js';
+import type {
+  HTTPRequestData,
+  HTTPRequestResponseData
+} from './httpRequest.definitions.js';
 
 export const httpRequest = async <ResponseData = unknown>(
   url: string,
@@ -40,15 +43,13 @@ export const httpRequest = async <ResponseData = unknown>(
       let signatureContent: string | undefined;
       if (method === HttpMethod.GET) {
         signatureContent = qs.stringify(requestConfig.params || {});
-      } else {
-        if (requestConfig.data) {
-          if (typeof requestConfig.data === 'object') {
-            signatureContent = JSON.stringify(requestConfig.data);
-          } else if (typeof requestConfig.data === 'string') {
-            signatureContent = requestConfig.data;
-          } else if ('toString' in requestConfig.data) {
-            signatureContent = requestConfig.data.toString();
-          }
+      } else if (requestConfig.data) {
+        if (typeof requestConfig.data === 'object') {
+          signatureContent = JSON.stringify(requestConfig.data);
+        } else if (typeof requestConfig.data === 'string') {
+          signatureContent = requestConfig.data;
+        } else if ('toString' in requestConfig.data) {
+          signatureContent = requestConfig.data.toString();
         }
       }
       if (!signatureContent?.length) {
@@ -60,16 +61,22 @@ export const httpRequest = async <ResponseData = unknown>(
   requestConfig.headers = headers as RawAxiosHeaders;
   const response = await axios(requestConfig);
   const { status } = response;
-  const hasError = status >= 400;
+  const hasError = status >= HttpStatus.BAD_REQUEST;
   const usefulResponse = {
     body: response.data,
     headers: response.headers as RawAxiosHeaders,
     status
   };
   if (hasError && data.throwOnError) {
-    throw new ApplicationError(`An httpRequest error with statusCode ${status} has occurred.`, usefulResponse);
+    throw new ApplicationError(
+      `An httpRequest error with statusCode ${status} has occurred.`,
+      usefulResponse
+    );
   }
-  const returnData: HTTPRequestResponseData<ResponseData> = { hasError, statusCode: status };
+  const returnData: HTTPRequestResponseData<ResponseData> = {
+    hasError,
+    statusCode: status
+  };
   if (data.returnFullResponse) {
     returnData.fullResponse = usefulResponse;
   } else if (response.data) {

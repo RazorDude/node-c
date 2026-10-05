@@ -5,17 +5,15 @@ export { LoggerModule } from './LoggerModule.js';
 export {
   PINO_PRE_REQUEST_HOOK,
   type PreRequestHook,
-  registerMicroserviceLogging,
+  registerMicroserviceLogging
 } from './microservice.js';
 export { NativeLogger } from './NativeLogger.js';
 export { PinoLogger, type RunInContextOptions } from './PinoLogger.js';
-export {
-  PARAMS_PROVIDER_TOKEN
-} from './params.js';
 export type {
   LoggerModuleAsyncParams,
   MicroserviceParams,
-  Params,
+  Params
 } from './params.js';
+export { PARAMS_PROVIDER_TOKEN } from './params.js';
 export { nativeLoggerOptions } from './presets.js';
 export { getRpcInfo, type RpcInfo, type RpcType } from './rpc.js';

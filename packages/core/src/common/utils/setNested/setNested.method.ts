@@ -1,4 +1,9 @@
-import { SetNestedOptions } from './setNested.definitions.js';
+import type { SetNestedOptions } from './setNested.definitions.js';
+
+const regExps = {
+  leadingDollar: new RegExp(/^\$/),
+  trailingDollar: new RegExp(/\$$/)
+};
 
 // TODO: implement setNestedArraysPerIndex
 /**
@@ -8,10 +13,15 @@ import { SetNestedOptions } from './setNested.definitions.js';
  * @param value (required) - The value to set.
  * @returns boolean true if successful, false if not found
  */
-export function setNested(parent: unknown, field: string, value: unknown, options?: SetNestedOptions): boolean {
+export function setNested(
+  parent: unknown,
+  field: string,
+  value: unknown,
+  options?: SetNestedOptions
+): boolean {
   const { removeNestedFieldEscapeSign } = options || {};
   const fieldNames = field.split('.');
-  if (field === '' || !fieldNames.length) {
+  if (field === '' || fieldNames.length === 0) {
     return false;
   }
   let currentParent = parent;
@@ -24,13 +34,16 @@ export function setNested(parent: unknown, field: string, value: unknown, option
     let fieldName = fieldNames[i];
     // TODO: setNested for specific indexes
     // if the current parent is an array and the next field path item is not an index - set the value in all of the array's sub-items
-    if (currentParent instanceof Array && isNaN(parseInt(fieldName, 10))) {
-      let atLeastOnItemSet = false,
-        nestedFieldPath = `${fieldName}`;
+    if (
+      Array.isArray(currentParent) &&
+      Number.isNaN(Number.parseInt(fieldName, 10))
+    ) {
+      let atLeastOnItemSet = false;
+      let nestedFieldPath = `${fieldName}`;
       for (let j = i + 1; j <= loopEnd; j++) {
         nestedFieldPath += `.${fieldNames[j]}`;
       }
-      currentParent.forEach(item => {
+      currentParent.forEach((item) => {
         const result = setNested(item, nestedFieldPath, value);
         if (result && !atLeastOnItemSet) {
           atLeastOnItemSet = true;
@@ -40,8 +53,8 @@ export function setNested(parent: unknown, field: string, value: unknown, option
     }
     // logic for handling Sequelize-style $foo.bar$ - should be treated as a single element
     if (fieldName.charAt(0) === '$') {
-      let closingBracketFound = false,
-        closingBracketIndex = i + 1;
+      let closingBracketFound = false;
+      let closingBracketIndex = i + 1;
       while (closingBracketIndex <= loopEnd) {
         const element = fieldNames[closingBracketIndex];
         // false alarm - there's another $ opening before the current one closed - so the current one must be just a variable name, not a bracket
@@ -60,7 +73,9 @@ export function setNested(parent: unknown, field: string, value: unknown, option
           fieldName += `.${fieldNames[j]}`;
         }
         if (removeNestedFieldEscapeSign) {
-          fieldName = fieldName.replace(/^\$/, '').replace(/\$$/, '');
+          fieldName = fieldName
+            .replace(regExps.leadingDollar, '')
+            .replace(regExps.trailingDollar, '');
         }
         if (closingBracketIndex === loopEnd) {
           (currentParent as Record<string, unknown>)[fieldName] = value;
@@ -74,7 +89,10 @@ export function setNested(parent: unknown, field: string, value: unknown, option
       finalResult = true;
       break;
     }
-    if (typeof (currentParent as Record<string, unknown>)[fieldName] === 'undefined') {
+    if (
+      typeof (currentParent as Record<string, unknown>)[fieldName] ===
+      'undefined'
+    ) {
       (currentParent as Record<string, unknown>)[fieldName] = {};
     }
     currentParent = (currentParent as Record<string, unknown>)[fieldName];

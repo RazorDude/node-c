@@ -1,11 +1,8 @@
-import { GenericObject } from '@node-c/core';
+import type { GenericObject } from '@node-c/core';
 
 export enum ErrorCodes {
-  // eslint-disable-next-line no-unused-vars
   AUTH_INVALID = 'AUTH_INVALID',
-  // eslint-disable-next-line no-unused-vars
   AUTH_MISSING = 'AUTH_MISSING',
-  // eslint-disable-next-line no-unused-vars
   ROUTE_NOT_ALLOWED = 'ROUTE_NOT_ALLOWED'
 }
 

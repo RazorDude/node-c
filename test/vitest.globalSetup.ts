@@ -1,14 +1,19 @@
-import { ExecException, exec, spawn } from 'child_process';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+/** biome-ignore-all lint/suspicious/noConsole: Test file. */
+/** biome-ignore-all lint/style/noMagicNumbers: Test file. */
+/** biome-ignore-all lint/performance/useTopLevelRegex: Test file. */
+/** biome-ignore-all lint/style/noProcessEnv: Test file. */
+/** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
 
-import clickHouse from '@clickhouse/client';
+import { type ExecException, exec, spawn } from 'node:child_process';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+import process from 'node:process';
 
+import * as clickHouse from '@clickhouse/client';
 import { AppEnvironment } from '@node-c/core';
-
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 // import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
-import mysql from 'mysql2';
+import * as mysql from 'mysql2';
 
 process.env.NODE_ENV = 'endToEndTests';
 
@@ -18,7 +23,11 @@ export async function teardown(): Promise<void> {
     const commandData = await new Promise<string>((resolve, reject) => {
       exec('netstat -tulpn | grep 2071', (err, data, stderr) => {
         let error: ExecException | string | null = err;
-        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+        if (
+          !err &&
+          stderr &&
+          !stderr.includes('Not all processes could be identified')
+        ) {
           error = stderr;
         }
         if (error) {
@@ -36,15 +45,18 @@ export async function teardown(): Promise<void> {
   if (coursePlatformDelegatedMatches) {
     console.info('[TestLog]: Killing the server process at port 2071...');
     await new Promise<void>((resolve, reject) => {
-      exec(`kill -INT ${coursePlatformDelegatedMatches[1]}`, (err, _data, stderr) => {
-        const error = err || stderr;
-        if (error) {
-          console.error('[TestLog]: Teardown error at kill:', error);
-          reject();
-          return;
+      exec(
+        `kill -INT ${coursePlatformDelegatedMatches[1]}`,
+        (err, _data, stderr) => {
+          const error = err || stderr;
+          if (error) {
+            console.error('[TestLog]: Teardown error at kill:', error);
+            reject();
+            return;
+          }
+          resolve();
         }
-        resolve();
-      });
+      );
     });
     console.info('[TestLog]: Server process at port 2071 killed successfully.');
   }
@@ -55,7 +67,11 @@ export async function teardown(): Promise<void> {
     const commandData = await new Promise<string>((resolve, reject) => {
       exec('netstat -tulpn | grep 2081', (err, data, stderr) => {
         let error: ExecException | string | null = err;
-        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+        if (
+          !err &&
+          stderr &&
+          !stderr.includes('Not all processes could be identified')
+        ) {
           error = stderr;
         }
         if (error) {
@@ -94,7 +110,11 @@ async function teardownProcess(port: number): Promise<void> {
     const commandData = await new Promise<string>((resolve, reject) => {
       exec(`netstat -tulpn | grep ${port}`, (err, data, stderr) => {
         let error: ExecException | string | null = err;
-        if (!err && stderr && !stderr.includes('Not all processes could be identified')) {
+        if (
+          !err &&
+          stderr &&
+          !stderr.includes('Not all processes could be identified')
+        ) {
           error = stderr;
         }
         if (error) {
@@ -105,7 +125,9 @@ async function teardownProcess(port: number): Promise<void> {
         resolve(data || '');
       });
     });
-    serverProcessMatches = commandData.match(new RegExp(`/:${port}.+\s(\d+)\/_node/`));
+    serverProcessMatches = commandData.match(
+      new RegExp(`/:${port}.+s(d+)/_node/`)
+    );
   } catch (e) {
     console.info(e);
   }
@@ -130,7 +152,14 @@ export async function setup(): Promise<void> {
   // set the test server up and run the tests
   // parse the env vars
   const envVars = dotenv.parse(
-    (await fs.readFile(path.resolve(import.meta.dirname, '../apps/test/envFiles/.endToEndTests.env'))).toString()
+    (
+      await fs.readFile(
+        path.resolve(
+          import.meta.dirname,
+          '../apps/test/envFiles/.endToEndTests.env'
+        )
+      )
+    ).toString()
   );
   // TODO: generate ormconfig and datasource files
   // set up the main DB, empty it and seed the test data
@@ -138,11 +167,11 @@ export async function setup(): Promise<void> {
   let connection = mysql.createConnection({
     host: envVars.DATA_DB_HOST,
     password: envVars.DATA_DB_PASSWORD,
-    port: +envVars.DATA_DB_PORT,
+    port: Number.parseInt(envVars.DATA_DB_PORT, 10),
     user: envVars.DATA_DB_USER
   });
   await new Promise<void>((resolve, reject) => {
-    connection.connect(err => {
+    connection.connect((err) => {
       if (err) {
         reject(err);
         return;
@@ -151,22 +180,28 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`drop database if exists ${envVars.DATA_DB_DATABASE_NAME};`, err => {
-      if (err) {
-        reject(err);
-        return;
+    connection.query(
+      `drop database if exists ${envVars.DATA_DB_DATABASE_NAME};`,
+      (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`create database ${envVars.DATA_DB_DATABASE_NAME};`, err => {
-      if (err) {
-        reject(err);
-        return;
+    connection.query(
+      `create database ${envVars.DATA_DB_DATABASE_NAME};`,
+      (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
     exec(
@@ -187,22 +222,25 @@ export async function setup(): Promise<void> {
     );
   });
   await new Promise<void>((resolve, reject) => {
-    exec('cd apps/test && DATASOURCE_ENV=endToEndTests npm run typeorm:migration:run:db', (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-        return;
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests npm run typeorm:migration:run:db',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
       }
-      if (stdout) {
-        console.info(stdout);
-      }
-      if (stderr) {
-        console.error(stderr);
-      }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
-    connection.end(err => {
+    connection.end((err) => {
       if (err) {
         reject(err);
         return;
@@ -215,11 +253,11 @@ export async function setup(): Promise<void> {
   connection = mysql.createConnection({
     host: envVars.DATA_DB_CONFIGS_HOST,
     password: envVars.DATA_DB_PASSWORD,
-    port: +envVars.DATA_DB_PORT,
+    port: Number.parseInt(envVars.DATA_DB_PORT, 10),
     user: envVars.DATA_DB_USER
   });
   await new Promise<void>((resolve, reject) => {
-    connection.connect(err => {
+    connection.connect((err) => {
       if (err) {
         reject(err);
         return;
@@ -228,22 +266,28 @@ export async function setup(): Promise<void> {
     });
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`drop database if exists ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`, err => {
-      if (err) {
-        reject(err);
-        return;
+    connection.query(
+      `drop database if exists ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`,
+      (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
-    connection.query(`create database ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`, err => {
-      if (err) {
-        reject(err);
-        return;
+    connection.query(
+      `create database ${envVars.DATA_DB_CONFIGS_DATABASE_NAME};`,
+      (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
   await new Promise<void>((resolve, reject) => {
     exec(
@@ -282,7 +326,7 @@ export async function setup(): Promise<void> {
     );
   });
   await new Promise<void>((resolve, reject) => {
-    connection.end(err => {
+    connection.end((err) => {
       if (err) {
         reject(err);
         return;
@@ -298,8 +342,12 @@ export async function setup(): Promise<void> {
     url: `http://${envVars.DATA_AUDIT_HOST}:${envVars.DATA_AUDIT_PORT}`,
     username: envVars.DATA_AUDIT_USER
   });
-  await clickHouseClient.query({ query: `drop database if exists ${clickHouseDBName}` });
-  await clickHouseClient.query({ query: `create database ${clickHouseDBName}` });
+  await clickHouseClient.query({
+    query: `drop database if exists ${clickHouseDBName}`
+  });
+  await clickHouseClient.query({
+    query: `create database ${clickHouseDBName}`
+  });
   await clickHouseClient.query({
     query:
       `create table ${clickHouseDBName}.userLoginLogs (` +
@@ -307,15 +355,19 @@ export async function setup(): Promise<void> {
       'userId bigint unsigned not null' +
       ') engine Log'
   });
-  console.info('[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs...');
-  
+  console.info(
+    '[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs...'
+  );
+
   console.info('[TestLogs]: Valkey cleaned up. Starting apps...');
-  const logsFilePath = path.resolve(import.meta.dirname, `../logs/app_logs_${process.env.NODE_ENV}.txt`);
+  const logsFilePath = path.resolve(
+    import.meta.dirname,
+    `../logs/app_logs_${process.env.NODE_ENV}.txt`
+  );
   let appPromiseFulfilled = false;
   try {
     await fs.rm(logsFilePath);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_e) {
+  } catch {
     // console.info(e);
   }
   await new Promise<void>((resolve, reject) => {
@@ -330,7 +382,7 @@ export async function setup(): Promise<void> {
       appPromiseFulfilled = true;
       reject();
     });
-    appsProcess.on('error', data => {
+    appsProcess.on('error', (data) => {
       if (appPromiseFulfilled) {
         return;
       }
@@ -338,21 +390,21 @@ export async function setup(): Promise<void> {
       appPromiseFulfilled = true;
       reject();
     });
-    appsProcess.on('message', data => {
+    appsProcess.on('message', (data) => {
       const dataText = data?.toString() || '';
       if (dataText.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
         appPromiseFulfilled = true;
         resolve();
       }
     });
-    appsProcess.stdout.on('data', data => {
+    appsProcess.stdout.on('data', (data) => {
       const dataText = data?.toString() || '';
       if (dataText.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
         appPromiseFulfilled = true;
         resolve();
       }
     });
-    appsProcess.stderr.on('data', data => {
+    appsProcess.stderr.on('data', (data) => {
       if (appPromiseFulfilled) {
         return;
       }
@@ -370,13 +422,12 @@ export async function setup(): Promise<void> {
             resolve();
             clearInterval(appLogsInterval);
           }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e) {
+        } catch {
           // console.info(e);
         }
       })().then(
         () => true,
-        err => {
+        (err) => {
           console.error(err);
           clearInterval(appLogsInterval);
           reject();

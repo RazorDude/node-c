@@ -1,13 +1,16 @@
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods */
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
-  ConfigProviderService,
-  LoggerService
+  type ConfigProviderService,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import type {
   IAMAuthenticationOAuth2ConsumerCompleteData,
   IAMAuthenticationOAuth2ConsumerCompleteOptions,
   IAMAuthenticationOAuth2ConsumerCompleteResult,
@@ -21,9 +24,6 @@ import {
   IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenResult
 } from './iam.authenticationOAuth2Consumer.definitions.js';
 
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
-import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
-
 /**
  * A service for integrating OAuth2 via other Node-C Apps as a consumer.
  *
@@ -33,7 +33,12 @@ export class IAMAuthenticationOAuth2ConsumerService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationConsumerService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
   }
 
@@ -41,13 +46,18 @@ export class IAMAuthenticationOAuth2ConsumerService<
     data: IAMAuthenticationOAuth2ConsumerCompleteData,
     options: IAMAuthenticationOAuth2ConsumerCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationOAuth2ConsumerCompleteResult> {
-    return super.complete(data, options) as Promise<IAMAuthenticationOAuth2ConsumerCompleteResult>;
+    return super.complete(
+      data,
+      options
+    ) as Promise<IAMAuthenticationOAuth2ConsumerCompleteResult>;
   }
 
   getUserAuthenticationConfig(): IAMAuthenticationOAuth2ConsumerGetUserAuthenticationConfigResult {
     const configFromParent = super.getUserAuthenticationConfig();
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
     return ld.merge(
       configFromParent,
@@ -65,8 +75,11 @@ export class IAMAuthenticationOAuth2ConsumerService<
     options: IAMAuthenticationOAuth2ConsumerInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationOAuth2ConsumerInitiateResult> {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
-    const { redirectUri } = moduleConfig.authServiceSettings![serviceName].oauth2!;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
+    const { redirectUri } =
+      moduleConfig.authServiceSettings![serviceName].oauth2!;
     return super.initiate(
       {
         ...data,
@@ -88,6 +101,9 @@ export class IAMAuthenticationOAuth2ConsumerService<
   async verifyExternalAccessToken(
     data: IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenData
   ): Promise<IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenResult> {
-    return IAMAuthenticationOAuth2Service.prototype.verifyExternalAccessToken.call(this, data);
+    return IAMAuthenticationOAuth2Service.prototype.verifyExternalAccessToken.call(
+      this,
+      data
+    );
   }
 }

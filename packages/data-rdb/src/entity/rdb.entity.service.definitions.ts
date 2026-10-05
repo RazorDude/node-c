@@ -1,4 +1,4 @@
-import {
+import type {
   DataBulkCreatePrivateOptions,
   DataCountOptions,
   DataCountPrivateOptions,
@@ -13,7 +13,7 @@ import {
   DataUpdatePrivateOptions
 } from '@node-c/core';
 
-import { RDBEntityManager } from '../repository/rdb.repository.js';
+import type { RDBEntityManager } from '../repository/rdb.repository.js';
 
 export interface BaseOptions {
   forceTransaction?: boolean;
@@ -45,7 +45,6 @@ export interface FindOptions extends BaseOptions, DataFindOptions {}
 export type FindPrivateOptions = DataFindPrivateOptions;
 
 export enum PostgresErrorCode {
-  // eslint-disable-next-line no-unused-vars
   UniqueViolation = '23505'
 }
 

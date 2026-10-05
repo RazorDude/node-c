@@ -14,7 +14,7 @@ import { Store, storage } from './storage.js';
  */
 export type PreRequestHook = (
   context: ExecutionContext,
-  next: () => Observable<unknown>,
+  next: () => Observable<unknown>
 ) => Observable<unknown>;
 
 /**
@@ -64,7 +64,7 @@ export function getMicroserviceHook(params: HookParams): PreRequestHook {
  */
 export function registerMicroserviceHook(
   applicationConfig: unknown,
-  params: HookParams,
+  params: HookParams
 ): boolean {
   const registry = applicationConfig as PreRequestHookRegistry;
 
@@ -86,7 +86,7 @@ function warnNoPreRequestHooks() {
   new NestLogger('LoggerModule').warn(
     'Microservice logging needs the pre-request hooks introduced in NestJS ' +
       '12, so microservice messages will be logged without a logging ' +
-      'context. Everything else is unaffected.',
+      'context. Everything else is unaffected.'
   );
 }
 
@@ -131,7 +131,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
 
   if (options.useLevel && options.customLogLevel) {
     throw new Error(
-      "You can't pass 'useLevel' and 'customLogLevel' together in `microservice`",
+      "You can't pass 'useLevel' and 'customLogLevel' together in `microservice`"
     );
   }
 
@@ -160,14 +160,14 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
     customErrorObject,
     includePayload,
     quietRpcLogger,
-    quietResLogger,
+    quietResLogger
   } = options;
 
   const logsOnArrival = !!customReceivedMessage || !!customReceivedObject;
 
   function levelFor(
     context: ExecutionContext,
-    error: Error | undefined,
+    error: Error | undefined
   ): LevelWithSilent {
     if (customLogLevel) {
       return customLogLevel(context, error) as LevelWithSilent;
@@ -186,7 +186,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
       pattern: info.pattern,
       transport: info.transport,
       controller: info.controller,
-      handler: info.handler,
+      handler: info.handler
     };
     if (includePayload) {
       record.payload = context.switchToRpc().getData();
@@ -208,7 +208,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
       const quiet = base.child({ [reqIdKey]: genReqId(context) });
 
       let full: Logger = quiet.child({
-        [rpcKey]: buildRecord(context, info),
+        [rpcKey]: buildRecord(context, info)
       });
       const props = customProps?.(context);
       if (props) {
@@ -230,7 +230,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
         closingLogger[level](
           customSuccessObject?.(context, result, value) ?? value,
           customSuccessMessage?.(context, result, responseTime) ??
-            `${info.type} completed`,
+            `${info.type} completed`
         );
       }
 
@@ -241,12 +241,12 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
         const responseTime = Date.now() - start;
         const value = {
           [errKey]: error,
-          [responseTimeKey]: responseTime,
+          [responseTimeKey]: responseTime
         };
         closingLogger[level](
           customErrorObject?.(context, error, value) ?? value,
           customErrorMessage?.(context, error, responseTime) ??
-            `${info.type} errored`,
+            `${info.type} errored`
         );
       }
 
@@ -255,7 +255,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
       // `assignResponse` asks for the opposite, exactly as over HTTP.
       const store = new Store(
         contextLogger,
-        assignResponse ? closingLogger : undefined,
+        assignResponse ? closingLogger : undefined
       );
 
       let subscription: Subscription | undefined;
@@ -268,7 +268,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
           if (level !== 'silent') {
             contextLogger[level](
               customReceivedObject?.(context) ?? {},
-              customReceivedMessage?.(context),
+              customReceivedMessage?.(context)
             );
           }
         }
@@ -285,7 +285,7 @@ function createMicroserviceHook(params: HookParams): PreRequestHook {
           complete: () => {
             if (!skip) logCompleted();
             subscriber.complete();
-          },
+          }
         });
       });
 

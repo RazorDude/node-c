@@ -2,11 +2,10 @@ import { Controller, Injectable } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
 import { RESTAPIEntityControler } from '@node-c/api-rest';
+import type { LoggerService } from '@node-c/core';
 
-import { LoggerService } from '@node-c/core';
-
-import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-import { DomainCoursePlatformStandaloneCoursesService } from '../../../../domain/coursePlatformStandalone/services/courses/courses.service.js';
+import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
+import type { DomainCoursePlatformStandaloneCoursesService } from '../../../../domain/coursePlatformStandalone/services/courses/courses.service.js';
 
 @AccessControlContext('CoursePlatformCoursesEntityController')
 @Injectable()
@@ -15,7 +14,14 @@ export class APICoursePlatformStandaloneCoursesEntityController extends RESTAPIE
   DataDBCourse,
   DomainCoursePlatformStandaloneCoursesService
 > {
-  constructor(domainEntityService: DomainCoursePlatformStandaloneCoursesService, logger: LoggerService) {
-    super(domainEntityService, RESTAPIEntityControler.getDefaultDtos<DataDBCourse>(), logger);
+  constructor(
+    domainEntityService: DomainCoursePlatformStandaloneCoursesService,
+    logger: LoggerService
+  ) {
+    super(
+      domainEntityService,
+      RESTAPIEntityControler.getDefaultDtos<DataDBCourse>(),
+      logger
+    );
   }
 }

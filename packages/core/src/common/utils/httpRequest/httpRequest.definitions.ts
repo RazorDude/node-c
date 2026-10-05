@@ -1,7 +1,7 @@
-import { AxiosRequestConfig, AxiosResponse, RawAxiosHeaders } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse, RawAxiosHeaders } from 'axios';
 
-import { HttpMethod } from '../../definitions/common.constants.js';
-import { GenericObject } from '../../definitions/common.definitions.js';
+import type { HttpMethod } from '../../definitions/common.constants.js';
+import type { GenericObject } from '../../definitions/common.definitions.js';
 
 export interface HTTPRequestData {
   apiKey?: string;

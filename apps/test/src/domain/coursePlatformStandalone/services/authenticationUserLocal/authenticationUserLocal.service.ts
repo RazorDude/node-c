@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationUserLocalService } from '@node-c/domain-iam';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+
+import type {
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteData,
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteOptions,
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteResult,
   DomainCoursePlatformStandaloneAuthenticationUserLocalUserFields
 } from './authenticationUserLocal.definitions.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 /**
  * User & Password authentication as a standalone service. Its output can be used for the Passthrough service.
  */
@@ -25,10 +29,14 @@ export class DomainCoursePlatformStandaloneAuthenticationUserLocalService extend
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_COURSE_PLATFORM_AUTH_USER_LOCAL_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_COURSE_PLATFORM_AUTH_USER_LOCAL_SERVICE_NAME
+    );
   }
 
   async complete(

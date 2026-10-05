@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationOAuth2CompleteData,
@@ -12,12 +12,14 @@ import {
   IAMAuthenticationRefreshExternalAccessTokenResult
 } from '@node-c/domain-iam';
 
-export type IAMAuthenticationOktaCompleteData = IAMAuthenticationOAuth2CompleteData;
+export type IAMAuthenticationOktaCompleteData =
+  IAMAuthenticationOAuth2CompleteData;
 
 export type IAMAuthenticationOktaCompleteOptions<Context extends object> =
   IAMAuthenticationOAuth2CompleteOptions<Context>;
 
-export interface IAMAuthenticationOktaCompleteResult extends IAMAuthenticationOAuth2CompleteResult {
+export interface IAMAuthenticationOktaCompleteResult
+  extends IAMAuthenticationOAuth2CompleteResult {
   idToken: string;
   refreshToken: string;
 }
@@ -31,7 +33,8 @@ export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
 export type IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult =
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult;
 
-export interface IAMAuthenticationOktaInitiateData extends IAMAuthenticationOAuth2InitiateData {
+export interface IAMAuthenticationOktaInitiateData
+  extends IAMAuthenticationOAuth2InitiateData {
   scope: string;
 }
 
@@ -40,7 +43,8 @@ export type IAMAuthenticationOktaInitiateOptions<Context extends object> = Omit<
   'generateNonce' | 'withPCKE'
 >;
 
-export interface IAMAuthenticationOktaInitiateResult extends IAMAuthenticationOAuth2InitiateResult {
+export interface IAMAuthenticationOktaInitiateResult
+  extends IAMAuthenticationOAuth2InitiateResult {
   authorizationCodeRequestURL: string;
   codeChallenge: string;
   codeVerifier: string;
@@ -48,5 +52,7 @@ export interface IAMAuthenticationOktaInitiateResult extends IAMAuthenticationOA
   state: string;
 }
 
-export type IAMAuthenticationOktaRefreshExternalAccessTokenData = IAMAuthenticationRefreshExternalAccessTokenData;
-export type IAMAuthenticationOktaRefreshExternalAccessTokenResult = IAMAuthenticationRefreshExternalAccessTokenResult;
+export type IAMAuthenticationOktaRefreshExternalAccessTokenData =
+  IAMAuthenticationRefreshExternalAccessTokenData;
+export type IAMAuthenticationOktaRefreshExternalAccessTokenResult =
+  IAMAuthenticationRefreshExternalAccessTokenResult;

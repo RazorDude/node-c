@@ -1,14 +1,15 @@
-import { ClickHouseClient } from '@clickhouse/client';
-import { DynamicModule, Module } from '@nestjs/common';
+import type { ClickHouseClient } from '@clickhouse/client';
+import { type DynamicModule, Module } from '@nestjs/common';
 
-import { GenericObject } from '@node-c/core';
-import { Constants as RDBConstants, SQLQueryBuilderService } from '@node-c/data-rdb';
-
-import { ClickHouseDBRepositoryModuleOptions } from './clickhouse.repository.definitions.js';
-import { ClickHouseDBRepository } from './clickhouse.repository.js';
-
+import type { GenericObject } from '@node-c/core';
+import {
+  Constants as RDBConstants,
+  SQLQueryBuilderService
+} from '@node-c/data-rdb';
 import { Constants } from '../common/definitions/common.constants.js';
 import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
+import type { ClickHouseDBRepositoryModuleOptions } from './clickhouse.repository.definitions.js';
+import { ClickHouseDBRepository } from './clickhouse.repository.js';
 
 @Module({})
 export class ClickHouseDBRepositoryModule {
@@ -22,12 +23,17 @@ export class ClickHouseDBRepositoryModule {
       providers: [
         {
           provide: SQLQueryBuilderService,
-          useFactory: (sqlQueryBuilderService: SQLQueryBuilderService) => sqlQueryBuilderService,
-          inject: [`${dataModuleName}${RDBConstants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`]
+          useFactory: (
+            sqlQueryBuilderService: SQLQueryBuilderService
+          ): SQLQueryBuilderService => sqlQueryBuilderService,
+          inject: [
+            `${dataModuleName}${RDBConstants.SQL_BUILDER_SERVICE_TOKEN_SUFFIX}`
+          ]
         },
         {
           provide: Constants.CLICKHOUSE_CLIENT,
-          useFactory: (clickhouseClient: ClickHouseClient) => clickhouseClient,
+          useFactory: (clickhouseClient: ClickHouseClient): ClickHouseClient =>
+            clickhouseClient,
           inject: [clientName]
         },
         {
@@ -49,7 +55,8 @@ export class ClickHouseDBRepositoryModule {
         },
         {
           provide: Constants.CLICKHOUSE_CLIENT,
-          useFactory: (clickhouseClient: ClickHouseClient) => clickhouseClient,
+          useFactory: (clickhouseClient: ClickHouseClient): ClickHouseClient =>
+            clickhouseClient,
           inject: [clientName]
         }
       ]

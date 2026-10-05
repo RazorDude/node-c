@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-import { RedisEntityService, RedisRepositoryService, RedisStoreService } from '@node-c/data-redis';
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
+import {
+  RedisEntityService,
+  type RedisRepositoryService,
+  type RedisStoreService
+} from '@node-c/data-redis';
 
-import { DataCacheStandaloneToken } from './tokens.entity.js';
+import type { DataCacheStandaloneToken } from './tokens.entity.js';
 
 @Injectable()
 export class DataCacheStandaloneTokensEntityService extends RedisEntityService<DataCacheStandaloneToken> {

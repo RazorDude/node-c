@@ -1,4 +1,4 @@
-import { EntitySchema } from 'typeorm';
+import type { EntitySchema } from 'typeorm';
 
 export interface TypeORMDBRepositoryModuleOptions {
   connectionName: string;

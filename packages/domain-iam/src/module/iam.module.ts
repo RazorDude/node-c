@@ -1,15 +1,15 @@
-import { DynamicModule } from '@nestjs/common';
+import type { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 
-import { DomainIAMModuleOptions } from './iam.definitions.js';
-
 import { Constants } from '../common/definitions/common.constants.js';
+import type { DomainIAMModuleOptions } from './iam.definitions.js';
 
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass } = options;
-    const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
+    const { atEnd: importsAtEnd, atStart: importsAtStart } =
+      additionalImports || {};
     const { services } = loadDynamicModules(folderData);
     return {
       global: true,

@@ -1,5 +1,5 @@
-import { GenericObject } from '@node-c/core';
-import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import type { GenericObject } from '@node-c/core';
+import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 
 import ld from 'lodash';
 
@@ -10,7 +10,10 @@ export interface DataCacheAuthUserStepDataItem extends GenericObject<unknown> {
   state: string;
 }
 
-const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'userStepDataItem');
+const baseSchema = getDefaultEntitySchema(
+  EntitySchemaColumnType.UUIDV4,
+  'userStepDataItem'
+);
 export const DataCacheAuthUserStepDataItemSchema: EntitySchema = {
   ...ld.omit(baseSchema, 'columns'),
   columns: {

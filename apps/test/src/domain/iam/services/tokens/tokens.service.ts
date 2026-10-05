@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataDefaultData, DomainEntityService, DomainEntityServiceDefaultData, LoggerService } from '@node-c/core';
+import {
+  type DataDefaultData,
+  DomainEntityService,
+  type DomainEntityServiceDefaultData,
+  type LoggerService
+} from '@node-c/core';
 
-import { DataCacheAuthToken } from '../../../../data/cacheAuth/entities/tokens/tokens.entity.js';
-import { DataCacheAuthTokensEntityService } from '../../../../data/cacheAuth/entities/tokens/tokens.service.js';
+import type { DataCacheAuthToken } from '../../../../data/cacheAuth/entities/tokens/tokens.entity.js';
+import type { DataCacheAuthTokensEntityService } from '../../../../data/cacheAuth/entities/tokens/tokens.service.js';
 
 @Injectable()
 export class DomainIAMTokensService extends DomainEntityService<
@@ -13,7 +18,10 @@ export class DomainIAMTokensService extends DomainEntityService<
   undefined,
   DataDefaultData<DataCacheAuthToken>
 > {
-  constructor(dataEntityService: DataCacheAuthTokensEntityService, logger: LoggerService) {
+  constructor(
+    dataEntityService: DataCacheAuthTokensEntityService,
+    logger: LoggerService
+  ) {
     super(dataEntityService, ['create', 'findOne', 'delete'], logger);
   }
 }

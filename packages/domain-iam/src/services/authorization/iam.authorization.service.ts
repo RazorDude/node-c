@@ -1,33 +1,41 @@
-import crypto from 'crypto';
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods and false positives. */
+import crypto from 'node:crypto';
 
-import { ApplicationError, GenericObject, LoggerService, getNested, setNested } from '@node-c/core';
+import {
+  ApplicationError,
+  type GenericObject,
+  getNested,
+  type LoggerService,
+  setNested
+} from '@node-c/core';
 
 import ld from 'lodash';
 
+import type { DecodedTokenContent } from '../tokenManager/iam.tokenManager.definitions.js';
+import type { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
 import {
   IAMAuthorizationCheckErrorCode,
-  IAMAuthorizationStaticCheckAccessOptions,
-  IAMAuthorizationStaticCheckAccessResult,
-  IAMAuthorizationUser,
-  IAMAuthorizeApiKeyData,
-  IAMAuthorizeApiKeyOptions,
-  IAMPermission
+  type IAMAuthorizationStaticCheckAccessOptions,
+  type IAMAuthorizationStaticCheckAccessResult,
+  type IAMAuthorizationUser,
+  type IAMAuthorizeApiKeyData,
+  type IAMAuthorizeApiKeyOptions,
+  type IAMPermission
 } from './iam.authorization.definitions.js';
 
-import { DecodedTokenContent } from '../tokenManager/iam.tokenManager.definitions.js';
-import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
-
 export class IAMAuthorizationService<
-  TokenManager extends IAMTokenManagerService<object> = IAMTokenManagerService<object>
+  TokenManager extends
+    IAMTokenManagerService<object> = IAMTokenManagerService<object>
 > {
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected tokenManager?: TokenManager
   ) {}
 
-  async authorizeApiKey(data: IAMAuthorizeApiKeyData, options: IAMAuthorizeApiKeyOptions): Promise<{ valid: boolean }> {
+  async authorizeApiKey(
+    data: IAMAuthorizeApiKeyData,
+    options: IAMAuthorizeApiKeyOptions
+  ): Promise<{ valid: boolean }> {
     const { logger } = this;
     const { apiKey, signature, signatureContent } = data;
     const {
@@ -55,7 +63,9 @@ export class IAMAuthorizationService<
         .update(signatureContent)
         .digest('hex');
       if (calcualtedSignature !== signature) {
-        logger.error(`Invalid signature provided. Expected: ${calcualtedSignature}. Provided: ${signature}`);
+        logger.error(
+          `Invalid signature provided. Expected: ${calcualtedSignature}. Provided: ${signature}`
+        );
         return { valid: false };
       }
     }
@@ -96,7 +106,8 @@ export class IAMAuthorizationService<
         purgeStoreOnRenew: true,
         refreshToken
       });
-      tokenContent = tokenRes.content as unknown as DecodedTokenContent<UserTokenEnityFields>;
+      tokenContent =
+        tokenRes.content as unknown as DecodedTokenContent<UserTokenEnityFields>;
       if (tokenRes.newAccessToken) {
         newAccessToken = tokenRes.newAccessToken;
       }
@@ -110,17 +121,27 @@ export class IAMAuthorizationService<
       logger.error('Failed to parse the access or refresh token:', e);
       return { valid: false };
     }
-    return { newAccessToken, newIdToken, newRefreshToken, tokenContent, valid: true };
+    return {
+      newAccessToken,
+      newIdToken,
+      newRefreshToken,
+      tokenContent,
+      valid: true
+    };
   }
 
   async checkAccessWithStorage(): Promise<void> {
-    throw new ApplicationError('[IAMAuthorizationService.checkAccessWithStorage]: Method not implemented.');
+    throw new ApplicationError(
+      '[IAMAuthorizationService.checkAccessWithStorage]: Method not implemented.'
+    );
   }
 
   static checkAccess<InputData = GenericObject>(
     inputData: InputData,
     user: IAMAuthorizationUser<unknown>,
-    options: IAMAuthorizationStaticCheckAccessOptions & { logger?: LoggerService }
+    options: IAMAuthorizationStaticCheckAccessOptions & {
+      logger?: LoggerService;
+    }
   ): IAMAuthorizationStaticCheckAccessResult {
     const { moduleName, resourceContext, resource } = options;
     let hasResource = false;
@@ -175,9 +196,18 @@ export class IAMAuthorizationService<
         continue;
       }
       // FGA - check whether the user has access based on specific input and user fields.
-      const { allowedInputData, forbiddenInputData, inputDataFieldName, requiredStaticData, userFieldName } = apData;
-      const hasStaticData = requiredStaticData && Object.keys(requiredStaticData).length;
-      const innerMutatedInputData = ld.cloneDeep(mutatedInputData) as GenericObject;
+      const {
+        allowedInputData,
+        forbiddenInputData,
+        inputDataFieldName,
+        requiredStaticData,
+        userFieldName
+      } = apData;
+      const hasStaticData =
+        requiredStaticData && Object.keys(requiredStaticData).length > 0;
+      const innerMutatedInputData = ld.cloneDeep(
+        mutatedInputData
+      ) as GenericObject;
       const innerInputDataToBeMutated: GenericObject = {};
       hasAccess = true;
       if (!noMatchForResource) {
@@ -188,8 +218,9 @@ export class IAMAuthorizationService<
         for (const fieldName in requiredStaticData) {
           if (
             !IAMAuthorizationService.testValue(
-              getNested({ inputData: innerMutatedInputData, user }, fieldName, { removeNestedFieldEscapeSign: true })
-                .unifiedValue,
+              getNested({ inputData: innerMutatedInputData, user }, fieldName, {
+                removeNestedFieldEscapeSign: true
+              }).unifiedValue,
               requiredStaticData[fieldName]
             )
           ) {
@@ -203,14 +234,15 @@ export class IAMAuthorizationService<
       }
       // 2. User field data vs input field data.
       if (userFieldName && inputDataFieldName) {
-        const { paths: inputFieldPaths, unifiedValue: inputFieldValue } = getNested(
-          innerMutatedInputData,
-          inputDataFieldName,
-          {
+        const { paths: inputFieldPaths, unifiedValue: inputFieldValue } =
+          getNested(innerMutatedInputData, inputDataFieldName, {
             removeNestedFieldEscapeSign: true
-          }
+          });
+        const { unifiedValue: userFieldValue } = getNested(
+          user,
+          userFieldName,
+          { removeNestedFieldEscapeSign: true }
         );
-        const { unifiedValue: userFieldValue } = getNested(user, userFieldName, { removeNestedFieldEscapeSign: true });
         if (typeof userFieldValue === 'undefined') {
           hasAccess = false;
           continue;
@@ -222,38 +254,60 @@ export class IAMAuthorizationService<
             setNestedArraysPerIndex: inputFieldPaths.length > 1
           });
         } else {
-          const allowedValues = IAMAuthorizationService.matchInputValues(innerMutatedInputData, {
-            [inputDataFieldName]: userFieldValue
-          })[inputDataFieldName] as unknown[];
-          const inputValueIsArray = inputFieldValue instanceof Array;
+          const allowedValues = IAMAuthorizationService.matchInputValues(
+            innerMutatedInputData,
+            {
+              [inputDataFieldName]: userFieldValue
+            }
+          )[inputDataFieldName] as unknown[];
+          const inputValueIsArray = Array.isArray(inputFieldValue);
+          // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
           if (!allowedValues?.length) {
             hasAccess = false;
             continue;
           }
           if (inputValueIsArray) {
             innerInputDataToBeMutated[inputDataFieldName] = allowedValues;
-            setNested(innerMutatedInputData, inputDataFieldName, allowedValues, { removeNestedFieldEscapeSign: true });
+            setNested(
+              innerMutatedInputData,
+              inputDataFieldName,
+              allowedValues,
+              { removeNestedFieldEscapeSign: true }
+            );
           }
         }
       }
       // 3. Input data whitelist
       // WARNING: In an expressjs v5+ environment, this will only work properly if the query is mutable
-      if (allowedInputData && Object.keys(allowedInputData).length) {
-        const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, allowedInputData);
+      if (allowedInputData && Object.keys(allowedInputData).length > 0) {
+        const values = IAMAuthorizationService.matchInputValues(
+          innerMutatedInputData,
+          allowedInputData
+        );
         for (const key in values) {
           innerInputDataToBeMutated[key] = values[key];
-          setNested(innerMutatedInputData, key, values[key], { removeNestedFieldEscapeSign: true });
+          setNested(innerMutatedInputData, key, values[key], {
+            removeNestedFieldEscapeSign: true
+          });
         }
       }
       // 4. Input data blacklist
-      if (forbiddenInputData && Object.keys(forbiddenInputData).length) {
-        const values = IAMAuthorizationService.matchInputValues(innerMutatedInputData, forbiddenInputData);
+      if (forbiddenInputData && Object.keys(forbiddenInputData).length > 0) {
+        const values = IAMAuthorizationService.matchInputValues(
+          innerMutatedInputData,
+          forbiddenInputData
+        );
         for (const key in values) {
           innerInputDataToBeMutated[key] = undefined;
-          setNested(innerMutatedInputData, key, undefined, { removeNestedFieldEscapeSign: true });
+          setNested(innerMutatedInputData, key, undefined, {
+            removeNestedFieldEscapeSign: true
+          });
         }
       }
-      inputDataToBeMutated = ld.merge(inputDataToBeMutated, innerInputDataToBeMutated);
+      inputDataToBeMutated = ld.merge(
+        inputDataToBeMutated,
+        innerInputDataToBeMutated
+      );
       usedPermissions[apId] = apData;
       break;
     }
@@ -264,10 +318,15 @@ export class IAMAuthorizationService<
       permissions: usedPermissions
     };
     if (!hasAccess) {
-      if (!permissionsCount || permissionsForDifferentModules === permissionsCount) {
-        returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToModule;
+      if (
+        permissionsCount === 0 ||
+        permissionsForDifferentModules === permissionsCount
+      ) {
+        returnData.errorCode =
+          IAMAuthorizationCheckErrorCode.RBACNoAccessToModule;
       } else if (permissionsForDifferentContexts === permissionsCount) {
-        returnData.errorCode = IAMAuthorizationCheckErrorCode.RBACNoAccessToResource;
+        returnData.errorCode =
+          IAMAuthorizationCheckErrorCode.RBACNoAccessToResource;
       } else {
         returnData.errorCode = IAMAuthorizationCheckErrorCode.FGANoAccess;
       }
@@ -278,8 +337,8 @@ export class IAMAuthorizationService<
   static getValuesForTesting(valueToTest: unknown): unknown[] {
     const values = [
       valueToTest, // the value as-is
-      parseInt(valueToTest as string, 10), // the int equivalent of the value
-      parseFloat(valueToTest as string) // the float equivalent of the value
+      Number.parseInt(valueToTest as string, 10), // the int equivalent of the value
+      Number.parseFloat(valueToTest as string) // the float equivalent of the value
     ];
     // the boolean equivalent of the values
     if (valueToTest === 'true') {
@@ -290,34 +349,45 @@ export class IAMAuthorizationService<
     return values;
   }
 
-  static matchInputValues(input: GenericObject, values: GenericObject): GenericObject {
+  static matchInputValues(
+    input: GenericObject,
+    values: GenericObject
+  ): GenericObject {
     const matchedValues: GenericObject = {};
     for (const fieldName in values) {
-      const { paths: valuePaths, values: foundValues } = getNested(input, fieldName, {
-        removeNestedFieldEscapeSign: true
-      });
+      const { paths: valuePaths, values: foundValues } = getNested(
+        input,
+        fieldName,
+        {
+          removeNestedFieldEscapeSign: true
+        }
+      );
       const allowedValue = values[fieldName];
-      const allowedValues = allowedValue instanceof Array ? allowedValue : [allowedValue];
+      const allowedValues = Array.isArray(allowedValue)
+        ? allowedValue
+        : [allowedValue];
       const valuesToSet: unknown[] = [];
       valuePaths.forEach((valuePath, valuePathIndex) => {
         const valueAtIndex = foundValues[valuePathIndex];
         let valueIsArray = false;
         let valuesToCheck: unknown[] = [];
-        if (valueAtIndex instanceof Array) {
+        if (Array.isArray(valueAtIndex)) {
           valuesToCheck = valueAtIndex;
           valueIsArray = true;
         } else {
           valuesToCheck.push(valueAtIndex);
         }
-        valuesToCheck.forEach(valueToCheck => {
+        valuesToCheck.forEach((valueToCheck) => {
           for (const j in allowedValues) {
-            if (IAMAuthorizationService.testValue(valueToCheck, allowedValues[j])) {
+            if (
+              IAMAuthorizationService.testValue(valueToCheck, allowedValues[j])
+            ) {
               valuesToSet.push(valueToCheck);
               break;
             }
           }
         });
-        if (!valuesToSet.length) {
+        if (valuesToSet.length === 0) {
           matchedValues[valuePath] = undefined;
           return;
         }
@@ -340,21 +410,34 @@ export class IAMAuthorizationService<
       const { allowedOutputData, forbiddenOutputData } = apData;
       const innerMutatedOutputData = ld.cloneDeep(mutatedOutputData);
       const innerOutputDataToBeMutated: GenericObject = {};
-      if (allowedOutputData && Object.keys(allowedOutputData).length) {
-        const values = IAMAuthorizationService.matchInputValues(innerMutatedOutputData, allowedOutputData);
+      if (allowedOutputData && Object.keys(allowedOutputData).length > 0) {
+        const values = IAMAuthorizationService.matchInputValues(
+          innerMutatedOutputData,
+          allowedOutputData
+        );
         for (const key in values) {
           innerOutputDataToBeMutated[key] = values[key];
-          setNested(innerMutatedOutputData, key, values[key], { removeNestedFieldEscapeSign: true });
+          setNested(innerMutatedOutputData, key, values[key], {
+            removeNestedFieldEscapeSign: true
+          });
         }
       }
-      if (forbiddenOutputData && Object.keys(forbiddenOutputData).length) {
-        const values = IAMAuthorizationService.matchInputValues(innerMutatedOutputData, forbiddenOutputData);
+      if (forbiddenOutputData && Object.keys(forbiddenOutputData).length > 0) {
+        const values = IAMAuthorizationService.matchInputValues(
+          innerMutatedOutputData,
+          forbiddenOutputData
+        );
         for (const key in values) {
           innerOutputDataToBeMutated[key] = undefined;
-          setNested(innerMutatedOutputData, key, undefined, { removeNestedFieldEscapeSign: true });
+          setNested(innerMutatedOutputData, key, undefined, {
+            removeNestedFieldEscapeSign: true
+          });
         }
       }
-      outputDataToBeMutated = ld.merge(outputDataToBeMutated, innerOutputDataToBeMutated);
+      outputDataToBeMutated = ld.merge(
+        outputDataToBeMutated,
+        innerOutputDataToBeMutated
+      );
     }
     return { outputDataToBeMutated };
   }
@@ -365,11 +448,17 @@ export class IAMAuthorizationService<
       valueToTestAgainst.charAt(0) === '/' &&
       valueToTestAgainst.charAt(valueToTestAgainst.length - 1) === '/'
     ) {
-      const regex = new RegExp(valueToTestAgainst.substring(1, valueToTestAgainst.length - 1));
+      const regex = new RegExp(
+        valueToTestAgainst.substring(1, valueToTestAgainst.length - 1)
+      );
       if (typeof valueToTest === 'undefined') {
         return false;
       }
-      return regex.test(typeof valueToTest === 'string' ? valueToTest : JSON.stringify(valueToTest));
+      return regex.test(
+        typeof valueToTest === 'string'
+          ? valueToTest
+          : JSON.stringify(valueToTest)
+      );
     }
     if (
       typeof valueToTest === 'object' &&
@@ -379,7 +468,8 @@ export class IAMAuthorizationService<
     ) {
       return JSON.stringify(valueToTest) === JSON.stringify(valueToTestAgainst);
     }
-    const possibleValidValues = IAMAuthorizationService.getValuesForTesting(valueToTest);
+    const possibleValidValues =
+      IAMAuthorizationService.getValuesForTesting(valueToTest);
     let hasMatch = false;
     for (const i in possibleValidValues) {
       if (possibleValidValues[i] === valueToTestAgainst) {

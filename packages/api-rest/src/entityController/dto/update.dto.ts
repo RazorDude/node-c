@@ -1,10 +1,18 @@
 import type { GenericObject } from '@node-c/core';
 
-import { IsBoolean, IsDefined, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsDefined,
+  IsNotEmptyObject,
+  IsObject,
+  IsOptional
+} from 'class-validator';
 
+import type {
+  UpdateBody,
+  UpdateOptions
+} from '../rest.entity.controller.definitions.js';
 import { BaseDto } from './base.dto.js';
-
-import { UpdateBody, UpdateOptions } from '../rest.entity.controller.definitions.js';
 
 export class UpdateDto<Entity, Options extends UpdateOptions<Entity>>
   extends BaseDto<Options>

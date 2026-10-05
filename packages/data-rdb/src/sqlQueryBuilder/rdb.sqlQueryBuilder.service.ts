@@ -1,23 +1,35 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ApplicationError,
-  ConfigProviderService,
+  type ConfigProviderService,
   Constants as CoreConstants,
-  DataOrderBy,
+  type DataOrderBy,
   DataOrderByDirection,
   DataSelectOperator,
-  GenericObject,
-  LoggerService,
+  type GenericObject,
+  type LoggerService,
   RDBType
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import { BuildQueryOptions, IncludeItems, ParsedFilter } from './rdb.sqlQueryBuilder.definitions.js';
-
 import { Constants } from '../common/definitions/common.constants.js';
-import { OrmBaseQueryBuilder, OrmSelectQueryBuilder } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
-import { RDBEntityManager } from '../repository/rdb.repository.js';
+import type {
+  OrmBaseQueryBuilder,
+  OrmSelectQueryBuilder
+} from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import type { RDBEntityManager } from '../repository/rdb.repository.js';
+import type {
+  BuildQueryOptions,
+  IncludeItems,
+  ParsedFilter
+} from './rdb.sqlQueryBuilder.definitions.js';
+
+const regExps = {
+  commaSpace: new RegExp(/,\s$/),
+  dollarSign: new RegExp(/\$/),
+  dot: new RegExp(/\./)
+};
 
 @Injectable()
 export class SQLQueryBuilderService {
@@ -32,14 +44,16 @@ export class SQLQueryBuilderService {
     @Inject(Constants.SQL_BUILDER_DB_CONFIG_PATH)
     public dbConfigPath: string,
     @Inject(CoreConstants.DATA_MODULE_NAME)
-    // eslint-disable-next-line no-unused-vars
     public dataModuleName: string,
-    // eslint-disable-next-line no-unused-vars
     public logger: LoggerService
   ) {
     const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
     this.dbType = type;
-    if (type === RDBType.Aurora || type === RDBType.ClickHouse || type === RDBType.MySQL) {
+    if (
+      type === RDBType.Aurora ||
+      type === RDBType.ClickHouse ||
+      type === RDBType.MySQL
+    ) {
       this.columnQuotesSymbol = '`';
       this.iLikeSupported = false;
       this.returningSupported = false;
@@ -53,7 +67,9 @@ export class SQLQueryBuilderService {
   // TODO: relation crawling functionality for deletedAt
   // TODO: relation crawling functionality for primary & join keys for related data
   buildQuery<Entity>(
-    ormQueryBuilder: OrmBaseQueryBuilder<Entity> | OrmSelectQueryBuilder<Entity>,
+    ormQueryBuilder:
+      | OrmBaseQueryBuilder<Entity>
+      | OrmSelectQueryBuilder<Entity>,
     options: BuildQueryOptions
   ): void {
     const {
@@ -91,12 +107,15 @@ export class SQLQueryBuilderService {
                 `${cqs}${include[relationProperty]}${cqs}.${cqs}${relationDeletedColumnName}${cqs} IS NULL`
               );
             } else {
-              oqb.leftJoinAndSelect(relationProperty, include[relationProperty]);
+              oqb.leftJoinAndSelect(
+                relationProperty,
+                include[relationProperty]
+              );
             }
           }
         }
       }
-      if (select && select.length) {
+      if (select?.length) {
         oqb.select(this.parseSelect(select, include));
       }
     } else if (withDeleted === false && deletedColumnName) {
@@ -104,23 +123,25 @@ export class SQLQueryBuilderService {
         query: `${cqs}${deletedColumnName}${cqs} IS NULL`
       };
     }
-    if (Object.keys(where).length) {
+    if (Object.keys(where).length > 0) {
       let isFirst = true;
       for (const fieldName in where) {
         const whereItem = where[fieldName];
-        if (!whereItem.query.length) {
+        if (whereItem.query.length === 0) {
           continue;
         }
         let methodName = 'where';
         if (isFirst) {
           isFirst = false;
         } else {
-          methodName = fieldName === DataSelectOperator.Or ? 'orWhere' : 'andWhere';
+          methodName =
+            fieldName === DataSelectOperator.Or ? 'orWhere' : 'andWhere';
         }
-        (ormQueryBuilder as unknown as { [methodName: string]: (..._args: unknown[]) => void })[methodName](
-          whereItem.query,
-          whereItem.params
-        );
+        (
+          ormQueryBuilder as unknown as {
+            [oqbMethodName: string]: (..._args: unknown[]) => void;
+          }
+        )[methodName](whereItem.query, whereItem.params);
       }
     }
     if (orderBy && 'orderBy' in ormQueryBuilder) {
@@ -152,18 +173,25 @@ export class SQLQueryBuilderService {
         break;
       }
       const entityPathItem = entityPath[i];
-      const relationPathItem = relations.find(relationItem => relationItem.propertyName === entityPathItem);
+      const relationPathItem = relations.find(
+        (relationItem) => relationItem.propertyName === entityPathItem
+      );
       if (!relationPathItem) {
         break;
       }
       currentEntity = entityManager.getRepository(relationPathItem.type);
     }
-    if (currentEntity.target !== currentEntityName && currentEntity.metadata.deleteDateColumn) {
-      deletedAtColumnName = currentEntity.metadata.deleteDateColumn.databaseName;
+    if (
+      currentEntity.target !== currentEntityName &&
+      currentEntity.metadata.deleteDateColumn
+    ) {
+      deletedAtColumnName =
+        currentEntity.metadata.deleteDateColumn.databaseName;
     }
     return deletedAtColumnName;
   }
 
+  // biome-ignore lint/complexity/useMaxParams: Legacy.
   protected getValueForFilter(
     entityName: string,
     fieldName: string,
@@ -173,14 +201,19 @@ export class SQLQueryBuilderService {
     operator?: DataSelectOperator
   ): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
-    const escapedFieldAlias = fieldAlias.replace(/\$/, '__ds__');
-    const escapedFieldName = fieldName.replace(/\$/, '__ds__');
+    const escapedFieldAlias = fieldAlias.replace(regExps.dollarSign, '__ds__');
+    const escapedFieldName = fieldName.replace(regExps.dollarSign, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${escapedFieldName}${cqs}`;
-    let parsedInnerValue = fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
+    let parsedInnerValue =
+      fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === DataSelectOperator.Contains) {
       let query = '';
       // TODO: fix JSON_CONTAINS here for ClickHouse
-      if (dbType === RDBType.Aurora || dbType === RDBType.ClickHouse || dbType === RDBType.MySQL) {
+      if (
+        dbType === RDBType.Aurora ||
+        dbType === RDBType.ClickHouse ||
+        dbType === RDBType.MySQL
+      ) {
         query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
@@ -215,16 +248,23 @@ export class SQLQueryBuilderService {
         query: `${fieldString} <= :${escapedFieldAlias}`
       };
     }
-    if (operator === DataSelectOperator.Like || (operator === DataSelectOperator.ILike && !this.iLikeSupported)) {
+    if (
+      operator === DataSelectOperator.Like ||
+      (operator === DataSelectOperator.ILike && !this.iLikeSupported)
+    ) {
       return {
         params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString}${isNot ? ' not ' : ' '}` + `like :${escapedFieldAlias}`
+        query:
+          `${fieldString}${isNot ? ' not ' : ' '}` +
+          `like :${escapedFieldAlias}`
       };
     }
     if (operator === DataSelectOperator.ILike) {
       return {
         params: { [escapedFieldAlias]: typeof parsedInnerValue },
-        query: `${fieldString}${isNot ? ' not ' : ' '}` + `ilike :${escapedFieldAlias}`
+        query:
+          `${fieldString}${isNot ? ' not ' : ' '}` +
+          `ilike :${escapedFieldAlias}`
       };
     }
     return {
@@ -343,7 +383,8 @@ export class SQLQueryBuilderService {
     const { isTopLevel = true, operator } = options;
     const fieldAliases = options.fieldAliases || {};
     // const isTopLevelDebugPrefix = isTopLevel ? '' : '[inner]';
-    const parameterNamesToFieldAliasesMap = options.parameterNamesToFieldAliasesMap || {};
+    const parameterNamesToFieldAliasesMap =
+      options.parameterNamesToFieldAliasesMap || {};
     const where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
     // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[begin]:`, filters, options);
@@ -356,7 +397,7 @@ export class SQLQueryBuilderService {
       const isNot = operator === DataSelectOperator.Not;
       let fieldAlias = fieldAliases[fieldName];
       // handle relation fields
-      if (fieldName.match(/\./)) {
+      if (fieldName.match(regExps.dot)) {
         // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[1.0]: No value for fieldName ${fieldName}`);
         const fieldData = fieldName.split('.');
         const finalItemIndex = fieldData.length - 1;
@@ -372,7 +413,8 @@ export class SQLQueryBuilderService {
         if (!fieldAlias) {
           fieldAlias = actualFieldName;
         }
-        const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
+        const actualFieldAlias =
+          parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
         // console.log(
         //   `=> [parseFilters]${isTopLevelDebugPrefix}[1.1]: Running parseFilters recursively`,
         //   { [actualFieldName]: fieldValue },
@@ -398,7 +440,8 @@ export class SQLQueryBuilderService {
       if (!fieldAlias) {
         fieldAlias = fieldName;
       }
-      const actualFieldAlias = parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
+      const actualFieldAlias =
+        parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
       if (fieldValue === null) {
         // console.log(
         //   `=> [parseFilters]${isTopLevelDebugPrefix}[2]: Null value for fieldName ${fieldName}, alias ${actualFieldAlias}`
@@ -409,15 +452,13 @@ export class SQLQueryBuilderService {
         continue;
       }
       // handle array values
-      if (fieldValue instanceof Array) {
+      if (Array.isArray(fieldValue)) {
         // console.log(
         //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.0]: Array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
         // );
         // if all values are primitive types and/or dates, then use 'between' (if provided) or 'in'
-        const { hasValues, isSimple, paramsForQuery, queryTemplateParamNames } = this.parseArrayOfFilters(
-          fieldValue,
-          actualFieldAlias
-        );
+        const { hasValues, isSimple, paramsForQuery, queryTemplateParamNames } =
+          this.parseArrayOfFilters(fieldValue, actualFieldAlias);
         if (!hasValues) {
           // console.log(
           //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.1]: No values for array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
@@ -444,7 +485,7 @@ export class SQLQueryBuilderService {
             params: paramsForQuery,
             query:
               `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
-              `in (${queryTemplateParamNames.replace(/,\s$/, '')})`
+              `in (${queryTemplateParamNames.replace(regExps.commaSpace, '')})`
           };
           continue;
         }
@@ -462,8 +503,11 @@ export class SQLQueryBuilderService {
               `${actualFieldAlias}_${orFieldIndex}_f`,
               operator
             );
-            finalWhereValue.params = { ...finalWhereValue.params, ...(itemData.parsedFilter.params || {}) };
-            finalWhereValue.query += `${finalWhereValue.query.length ? ' or ' : '('}${itemData.parsedFilter.query}`;
+            finalWhereValue.params = {
+              ...finalWhereValue.params,
+              ...(itemData.parsedFilter.params || {})
+            };
+            finalWhereValue.query += `${finalWhereValue.query.length > 0 ? ' or ' : '('}${itemData.parsedFilter.query}`;
             include = { ...include, ...itemData.include };
           });
           finalWhereValue.query += ')';
@@ -513,12 +557,20 @@ export class SQLQueryBuilderService {
       // console.log(
       //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.6]: Simple value for fieldName ${fieldName}, alias ${actualFieldAlias}, parameter name ${fieldAlias}.`
       // );
-      where[fieldName] = this.getValueForFilter(entityName, actualFieldAlias, fieldAlias, fieldValue, isNot, operator);
+      where[fieldName] = this.getValueForFilter(
+        entityName,
+        actualFieldAlias,
+        fieldAlias,
+        fieldValue,
+        isNot,
+        operator
+      );
     }
     // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[end]:`, where, include);
     return { where, include };
   }
 
+  // biome-ignore lint/complexity/useMaxParams: Legacy.
   protected parseInnerFilters(
     entityName: string,
     filtersObject: GenericObject,
@@ -526,17 +578,20 @@ export class SQLQueryBuilderService {
     fieldAlias: string,
     operator?: DataSelectOperator
   ): { parsedFilter: ParsedFilter; include: IncludeItems } {
-    const itemsCount = filtersObject instanceof Array ? filtersObject.length : Object.keys(filtersObject).length;
+    const itemsCount = Array.isArray(filtersObject)
+      ? filtersObject.length
+      : Object.keys(filtersObject).length;
     const hasBrackets = itemsCount > 1;
     const parsedFilterItem = { params: {}, query: '' };
     let parsedValueCount = 0;
     let include = {};
     for (const key in filtersObject) {
-      let op = null;
+      let op: string | null = null;
       if (this.allowedStringOperators.indexOf(key) !== -1) {
         op = key;
       }
-      const actualFieldName = fieldName === DataSelectOperator.Or ? key : fieldName;
+      const actualFieldName =
+        fieldName === DataSelectOperator.Or ? key : fieldName;
       const fieldParameterName = `${fieldAlias}_${parsedValueCount}`;
       const innerValue = filtersObject[key];
       const itemData = this.parseFilters(
@@ -554,10 +609,15 @@ export class SQLQueryBuilderService {
         continue;
       }
       const innerQuery = itemData.where[actualFieldName].query;
-      parsedFilterItem.params = { ...parsedFilterItem.params, ...(fieldWhereData.params || {}) };
-      parsedFilterItem.query +=
-        (parsedValueCount > 0 ? (operator === DataSelectOperator.Or ? ' or ' : ' and ') : '') +
-        (hasBrackets ? `(${innerQuery})` : innerQuery);
+      parsedFilterItem.params = {
+        ...parsedFilterItem.params,
+        ...(fieldWhereData.params || {})
+      };
+      if (parsedValueCount > 0) {
+        parsedFilterItem.query +=
+          operator === DataSelectOperator.Or ? ' or ' : ' and ';
+      }
+      parsedFilterItem.query += hasBrackets ? `(${innerQuery})` : innerQuery;
       include = { ...include, ...itemData.include };
       parsedValueCount++;
     }
@@ -577,16 +637,16 @@ export class SQLQueryBuilderService {
     }
   ): IncludeItems {
     const { allowedInclude, throwErrorOnForbiddenInclude } = options;
-    if (!allowedInclude.length) {
+    if (allowedInclude.length === 0) {
       return {};
     }
     const { currentInclude, newIncludeItems, unparsedInclude } = data;
     const allowedIncludeMap: GenericObject<boolean> = {};
     const resultInclude: IncludeItems = { ...(currentInclude || {}) };
-    allowedInclude.forEach(allowedIncludeItem => {
+    allowedInclude.forEach((allowedIncludeItem) => {
       let currentParent = '';
-      allowedIncludeItem.split('.').forEach(innerItem => {
-        currentParent += `${currentParent.length ? '.' : ''}${innerItem}`;
+      allowedIncludeItem.split('.').forEach((innerItem) => {
+        currentParent += `${currentParent.length > 0 ? '.' : ''}${innerItem}`;
         if (!allowedIncludeMap[currentParent]) {
           allowedIncludeMap[currentParent] = true;
         }
@@ -595,7 +655,11 @@ export class SQLQueryBuilderService {
     if (newIncludeItems) {
       for (const includeItemPath in newIncludeItems) {
         const includeItemAlias = newIncludeItems[includeItemPath];
-        if (!allowedIncludeMap[includeItemPath.replace(/__/g, '.').replace(`${entityName}.`, '')]) {
+        if (
+          !allowedIncludeMap[
+            includeItemPath.replace(/__/g, '.').replace(`${entityName}.`, '')
+          ]
+        ) {
           if (throwErrorOnForbiddenInclude) {
             throw new ApplicationError(
               `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItemPath} (${includeItemAlias}).`
@@ -607,19 +671,22 @@ export class SQLQueryBuilderService {
       }
     }
     if (unparsedInclude) {
-      unparsedInclude.forEach(includeItem => {
+      unparsedInclude.forEach((includeItem) => {
         if (!allowedIncludeMap[includeItem]) {
           if (throwErrorOnForbiddenInclude) {
-            throw new ApplicationError(`[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItem}.`);
+            throw new ApplicationError(
+              `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItem}.`
+            );
           }
           return;
         }
         const includeData = includeItem.split('.');
         let entityAlias = `${entityName}`;
         let previousEntityAlias = `${entityName}`;
-        includeData.forEach(currentEntityName => {
+        includeData.forEach((currentEntityName) => {
           entityAlias += `__${currentEntityName}`;
-          resultInclude[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
+          resultInclude[`${previousEntityAlias}.${currentEntityName}`] =
+            entityAlias;
           previousEntityAlias = `${entityAlias}`;
         });
       });
@@ -635,10 +702,15 @@ export class SQLQueryBuilderService {
     let include: IncludeItems = {};
     for (const fieldName in orderByData) {
       const direction =
-        orderByData[fieldName].toLowerCase() === 'desc' ? DataOrderByDirection.Desc : DataOrderByDirection.Asc;
-      const item: DataOrderBy = { field: `${entityName}.${fieldName}`, direction };
+        orderByData[fieldName].toLowerCase() === 'desc'
+          ? DataOrderByDirection.Desc
+          : DataOrderByDirection.Asc;
+      const item: DataOrderBy = {
+        field: `${entityName}.${fieldName}`,
+        direction
+      };
       // handle relation fields
-      if (fieldName.match(/\./)) {
+      if (fieldName.match(regExps.dot)) {
         const fieldData = fieldName.split('.');
         const finalItemIndex = fieldData.length - 1;
         let entityAlias = `${entityName}`;
@@ -663,7 +735,7 @@ export class SQLQueryBuilderService {
   parseSelect(selectFields: string[], include?: IncludeItems): string[] {
     const actualInclude = include || {};
     const parsedSelect: string[] = [];
-    selectFields.forEach(item => {
+    selectFields.forEach((item) => {
       const itemData = item.split('.');
       if (itemData.length === 1) {
         parsedSelect.push(item);

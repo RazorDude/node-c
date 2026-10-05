@@ -1,19 +1,23 @@
 import { Injectable } from '@nestjs/common';
 
-import { DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, DomainDataEntityServiceType, LoggerService } from '@node-c/core';
-import { IAMPermission, IAMUsersService } from '@node-c/domain-iam';
-
 import {
+  DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
+  DomainDataEntityServiceType,
+  type LoggerService
+} from '@node-c/core';
+import { type IAMPermission, IAMUsersService } from '@node-c/domain-iam';
+
+import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
+import type { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
+import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import type { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
+
+import type {
   DomainIAMUsersDomainEntityServiceData,
   DomainIAMUsersGetUserWithPermissionsDataOptions,
   DomainIAMUsersGetUserWithPermissionsDataPrivateOptions
 } from './users.definitions.js';
-
-import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
-import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
-import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
-import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainIAMUsersService extends IAMUsersService<
@@ -28,7 +32,9 @@ export class DomainIAMUsersService extends IAMUsersService<
     dataEntityService: DataDBUsersService,
     logger: LoggerService
   ) {
-    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, { cache: cacheUsersEntityService });
+    super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, {
+      cache: cacheUsersEntityService
+    });
   }
 
   // TODO: caching by email
@@ -37,12 +43,16 @@ export class DomainIAMUsersService extends IAMUsersService<
     privateOptions?: DomainIAMUsersGetUserWithPermissionsDataPrivateOptions
   ): Promise<DataCacheUser | null> {
     const { keepPassword } = privateOptions || {};
-    const include = [...(options.include || []), 'accountStatus', 'assignedRoles.permissions'];
+    const include = [
+      ...(options.include || []),
+      'accountStatus',
+      'assignedRoles.permissions'
+    ];
     const { result: user } = await this.findOne(
       {
         ...options,
         include,
-        ...(!!options.filters.id
+        ...(options.filters.id
           ? {
               dataServices: ['cache', DomainDataEntityServiceType.Main],
               saveAdditionalResultsInFirstService: {
@@ -61,15 +71,15 @@ export class DomainIAMUsersService extends IAMUsersService<
     const currentPermissions: { [id: string]: IAMPermission<number> } = {};
     if (assignedRoles) {
       assignedRoles.forEach((item, itemIndex) => {
-        item.permissions?.forEach(pi => {
+        item.permissions?.forEach((pi) => {
           currentPermissions[pi.id] = pi;
         });
-        delete user.assignedRoles![itemIndex].permissions;
+        user.assignedRoles![itemIndex].permissions = undefined;
       });
     }
     user.currentPermissions = currentPermissions;
     if (!keepPassword) {
-      delete user.password;
+      user.password = undefined;
     }
     return user as DataCacheUser;
   }

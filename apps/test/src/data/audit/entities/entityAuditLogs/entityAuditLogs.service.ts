@@ -1,10 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-import { ClickHouseDBEntityService, ClickHouseDBRepository } from '@node-c/data-clickhouse';
-import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
+import {
+  ClickHouseDBEntityService,
+  type ClickHouseDBRepository
+} from '@node-c/data-clickhouse';
+import { Constants, type SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import { DataAuditEntityAuditLog, DataAuditEntityAuditLogEntity } from './entityAuditLogs.entity.js';
+import {
+  type DataAuditEntityAuditLog,
+  DataAuditEntityAuditLogEntity
+} from './entityAuditLogs.entity.js';
 
 @Injectable()
 export class DataAuditEntityAuditLogsService extends ClickHouseDBEntityService<DataAuditEntityAuditLog> {
@@ -15,6 +21,12 @@ export class DataAuditEntityAuditLogsService extends ClickHouseDBEntityService<D
     @Inject(Constants.RDB_ENTITY_REPOSITORY)
     repository: ClickHouseDBRepository<DataAuditEntityAuditLog>
   ) {
-    super(configProvider, logger, qb, repository, DataAuditEntityAuditLogEntity);
+    super(
+      configProvider,
+      logger,
+      qb,
+      repository,
+      DataAuditEntityAuditLogEntity
+    );
   }
 }

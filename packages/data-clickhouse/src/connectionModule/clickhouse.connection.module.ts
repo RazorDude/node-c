@@ -1,12 +1,16 @@
-import { ClickHouseClient, createClient } from '@clickhouse/client';
-import { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config.js';
-import { DynamicModule } from '@nestjs/common';
+import { type ClickHouseClient, createClient } from '@clickhouse/client';
+import type { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config.js';
+import type { DynamicModule } from '@nestjs/common';
 
-import { AppConfigDataRDB, ApplicationError, ConfigProviderService, LoggerService } from '@node-c/core';
-
-import { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions.js';
+import {
+  type AppConfigDataRDB,
+  ApplicationError,
+  ConfigProviderService,
+  LoggerService
+} from '@node-c/core';
 
 import { Constants } from '../common/definitions/common.constants.js';
+import type { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions.js';
 
 export class ClickHouseConnectionModule {
   static register(options: ClickHouseConnectionModuleOptions): DynamicModule {
@@ -19,7 +23,10 @@ export class ClickHouseConnectionModule {
       providers: [
         {
           provide: clientName,
-          useFactory: async (configProvider: ConfigProviderService, logger: LoggerService) => {
+          useFactory: async (
+            configProvider: ConfigProviderService,
+            logger: LoggerService
+          ): Promise<ClickHouseClient> => {
             const dataConfig = configProvider.config.data;
             const {
               application,
@@ -32,7 +39,9 @@ export class ClickHouseConnectionModule {
               requestTimeout,
               useHostParam,
               user
-            } = dataConfig[dataModuleName as keyof typeof dataConfig] as AppConfigDataRDB;
+            } = dataConfig[
+              dataModuleName as keyof typeof dataConfig
+            ] as AppConfigDataRDB;
             const connectionOptions: NodeClickHouseClientConfigOptions = {
               database,
               password,
@@ -52,15 +61,22 @@ export class ClickHouseConnectionModule {
               connectionOptions.url = url;
             }
             try {
-              logger.info(`[ClickHouseConnectionModule][${dataModuleName}]: Connecting to ClickHouse...`);
+              logger.info(
+                `[ClickHouseConnectionModule][${dataModuleName}]: Connecting to ClickHouse...`
+              );
               client = createClient(connectionOptions);
               const pingResult = await client.ping({ select: true });
               if (!pingResult.success) {
                 throw new ApplicationError(JSON.stringify(pingResult));
               }
-              logger.info(`[ClickHouseConnectionModule][${dataModuleName}]: Connected to ClickHouse successfully.`);
+              logger.info(
+                `[ClickHouseConnectionModule][${dataModuleName}]: Connected to ClickHouse successfully.`
+              );
             } catch (err) {
-              logger.error(`[ClickHouseConnectionModule][${dataModuleName}]: Error connecting to ClickHouse:`, err);
+              logger.error(
+                `[ClickHouseConnectionModule][${dataModuleName}]: Error connecting to ClickHouse:`,
+                err
+              );
               if (failOnConnectionError) {
                 throw err;
               }

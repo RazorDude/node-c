@@ -1,14 +1,20 @@
-import { EntitySchema, EntitySchemaRelationOptions } from 'typeorm';
+import { EntitySchema, type EntitySchemaRelationOptions } from 'typeorm';
 
-import { DBEntity, DBEntitySchema } from '../../../dbBase/entity/base.db.entity.js';
+import {
+  type DBEntity,
+  DBEntitySchema
+} from '../../../dbBase/entity/base.db.entity.js';
 
-export interface DataDBLessonType<Lesson extends DBEntity = DBEntity> extends DBEntity {
+export interface DataDBLessonType<Lesson extends DBEntity = DBEntity>
+  extends DBEntity {
   isActive: boolean;
   lessons?: Lesson[];
   name: string;
 }
 
-export const DataDBLessonTypeEntity = new EntitySchema<DataDBLessonType<DBEntity>>({
+export const DataDBLessonTypeEntity = new EntitySchema<
+  DataDBLessonType<DBEntity>
+>({
   columns: {
     ...DBEntitySchema.columns,
     isActive: { type: 'boolean', default: true },

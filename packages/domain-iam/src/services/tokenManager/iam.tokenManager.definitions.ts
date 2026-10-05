@@ -1,6 +1,6 @@
-import { DomainCreateOptions } from '@node-c/core';
+import type { DomainCreateOptions } from '@node-c/core';
 
-import {
+import type {
   IAMAuthenticationType,
   IAMAuthenticationVerifyExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';
@@ -10,13 +10,13 @@ export interface BaseTokenEntityFields {
   externalTokenAuthService?: IAMAuthenticationType;
 }
 
-export type DecodedTokenContent<TokenEntityFields> = {
+export interface DecodedTokenContent<TokenEntityFields> {
   aud: string;
   exp?: number;
   iat: number;
   iss: string;
   data?: TokenEntityFields & BaseTokenEntityFields;
-};
+}
 
 export type TokenEntity<TokenEntityFields extends object> = {
   token: string;
@@ -39,11 +39,8 @@ export type TokenManagerCreateOptions = {
 } & DomainCreateOptions;
 
 export enum TokenType {
-  // eslint-disable-next-line no-unused-vars
   Access = 'access',
-  // eslint-disable-next-line no-unused-vars
   Id = 'id',
-  // eslint-disable-next-line no-unused-vars
   Refresh = 'refresh'
 }
 

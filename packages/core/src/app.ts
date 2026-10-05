@@ -1,10 +1,12 @@
-import { DynamicModule, INestApplication } from '@nestjs/common';
+/** biome-ignore-all lint/suspicious/noConsole: No other logging method at startup. */
+
+import type { DynamicModule, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import {
-  AppConfig,
-  AppConfigDataRDB,
-  ConfigProviderModuleOptions,
+  type AppConfig,
+  type AppConfigDataRDB,
+  type ConfigProviderModuleOptions,
   RDBType
 } from './common/configProvider/configProvider.definitions.js';
 import { ConfigProviderService } from './common/configProvider/configProvider.service.js';
@@ -32,7 +34,12 @@ export class NodeCApp {
     options?: NodeCAppStartOptions
   ): Promise<INestApplication<unknown>[]> {
     console.info(`[Node-C]: Launching ${appModules.length} applications...`);
-    const { apiModulesOptions, generateOrmConfig, generateOrmConfigModuleOptions, loadConfigOptions } = options || {};
+    const {
+      apiModulesOptions,
+      generateOrmConfig,
+      generateOrmConfigModuleOptions,
+      loadConfigOptions
+    } = options || {};
     const apiModulesOptionsMap = new Map<string, string>();
     const apps: INestApplication<unknown>[] = [];
     let config: AppConfig | undefined;
@@ -46,7 +53,10 @@ export class NodeCApp {
         const { data } = config;
         for (const moduleName in data) {
           const { type } = data[moduleName] as AppConfigDataRDB;
-          if (type === RDBType.ClickHouse || !Object.values(RDBType).includes(type as RDBType)) {
+          if (
+            type === RDBType.ClickHouse ||
+            !Object.values(RDBType).includes(type as RDBType)
+          ) {
             continue;
           }
           await ConfigProviderService.generateOrmconfig(config, {
@@ -62,8 +72,8 @@ export class NodeCApp {
       }
       console.info('[Node-C]: Configurations loaded.');
     }
-    if (apiModulesOptions && apiModulesOptions.length) {
-      apiModulesOptions.forEach(item => {
+    if (apiModulesOptions?.length) {
+      apiModulesOptions.forEach((item) => {
         apiModulesOptionsMap.set(`${item.appModuleIndex}`, item.apiModuleName);
       });
     }
@@ -72,7 +82,9 @@ export class NodeCApp {
       // create the nest app from the module
       const apiModuleName = apiModulesOptionsMap.get(i);
       if (!apiModuleName) {
-        console.info(`[Node-C][${i}]: No api module found. Creating standalone app...`);
+        console.info(
+          `[Node-C][${i}]: No api module found. Creating standalone app...`
+        );
         const app = await NestFactory.createApplicationContext(appModules[i]);
         app.useLogger(app.get(LoggerService));
         apps.push(app as INestApplication);
@@ -80,9 +92,13 @@ export class NodeCApp {
         continue;
       }
       console.info(`[Node-C][${i}]: Api module found. Creating network app...`);
-      const app = await NestFactory.create(appModules[i], { bodyParser: false });
+      const app = await NestFactory.create(appModules[i], {
+        bodyParser: false
+      });
       app.useLogger(app.get(LoggerService));
-      console.info(`[Node-C]: Created a network app for module no ${i} (API module name "${apiModuleName}").`);
+      console.info(
+        `[Node-C]: Created a network app for module no ${i} (API module name "${apiModuleName}").`
+      );
       // TODO: starting the network app will potentially cause problems, so we can't rely on the config being loaded after the app
       if (!config) {
         config = app.get(ConfigProviderService).config;
@@ -93,22 +109,32 @@ export class NodeCApp {
       if (apiConfig) {
         const { hostname, port } = apiConfig;
         if (hostname && port) {
-          console.info(`[Node-C][${i}/${apiModuleName}]: Starting listeners...`);
+          console.info(
+            `[Node-C][${i}/${apiModuleName}]: Starting listeners...`
+          );
           // TODO: move the following app.set and app.use to the http module
-          // eslint-disable-next-line no-unused-vars
-          (app as unknown as { set: (...args: unknown[]) => void }).set('query parser', 'extended');
-          app.use((req: { query: unknown }, _res: unknown, next: () => void) => {
-            Object.defineProperty(req, 'query', {
-              ...Object.getOwnPropertyDescriptor(req, 'query'),
-              value: req.query,
-              writable: true
-            });
-            next();
-          });
+          (app as unknown as { set: (...args: unknown[]) => void }).set(
+            'query parser',
+            'extended'
+          );
+          app.use(
+            (req: { query: unknown }, _res: unknown, next: () => void) => {
+              Object.defineProperty(req, 'query', {
+                ...Object.getOwnPropertyDescriptor(req, 'query'),
+                value: req.query,
+                writable: true
+              });
+              next();
+            }
+          );
           await app.listen(port as number, hostname as string);
-          console.info(`[NODE-C][${i}/${apiModuleName}] Server listening at ${hostname}:${port}.`);
+          console.info(
+            `[NODE-C][${i}/${apiModuleName}] Server listening at ${hostname}:${port}.`
+          );
         } else {
-          console.info(`[Node-C][${i}/${apiModuleName}]: No listener configuration found.`);
+          console.info(
+            `[Node-C][${i}/${apiModuleName}]: No listener configuration found.`
+          );
         }
       } else {
         console.info(`[Node-C][${i}/${apiModuleName}]: No API config found.`);

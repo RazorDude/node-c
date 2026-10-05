@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class Initial1742235349409 implements MigrationInterface {
   name = 'Initial1742235349409';
@@ -10,7 +10,9 @@ export class Initial1742235349409 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP INDEX `IDX_69234b49b4d0537b223df8bab6` ON `globalConfigItems`');
+    await queryRunner.query(
+      'DROP INDEX `IDX_69234b49b4d0537b223df8bab6` ON `globalConfigItems`'
+    );
     await queryRunner.query('DROP TABLE `globalConfigItems`');
   }
 }

@@ -1,15 +1,23 @@
-import { DynamicModule } from '@nestjs/common';
+import type { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 
-import { RedisModuleOptions } from './redis.module.definitions.js';
-
 import { RedisStoreModule } from '../store/redis.store.module.js';
+import type { RedisModuleOptions } from './redis.module.definitions.js';
 
 export class RedisModule {
   static register(options: RedisModuleOptions): DynamicModule {
-    const { folderData, imports: additionalImports, moduleClass, moduleName } = options;
-    const { atEnd: importsAtEnd, postStore: importsPostStore, preStore: importsPreStore } = additionalImports || {};
+    const {
+      folderData,
+      imports: additionalImports,
+      moduleClass,
+      moduleName
+    } = options;
+    const {
+      atEnd: importsAtEnd,
+      postStore: importsPostStore,
+      preStore: importsPreStore
+    } = additionalImports || {};
     const { modules } = loadDynamicModules(folderData, {
       moduleRegisterOptions: options.entityModuleRegisterOptions,
       registerOptionsPerModule: options.registerOptionsPerEntityModule

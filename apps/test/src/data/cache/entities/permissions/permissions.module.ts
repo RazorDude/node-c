@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 
 import { RedisRepositoryModule } from '@node-c/data-redis';
 
-import { DataCachePermission, DataCachePermissionSchema } from './permissions.entity.js';
-import { DataCachePermissionsEntityService } from './permissions.service.js';
-
 import { Constants } from '../../../../common/definitions/common.constants.js';
+
+import {
+  type DataCachePermission,
+  DataCachePermissionSchema
+} from './permissions.entity.js';
+import { DataCachePermissionsEntityService } from './permissions.service.js';
 
 @Module({
   imports: [

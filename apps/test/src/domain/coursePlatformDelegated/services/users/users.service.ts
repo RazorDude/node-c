@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
 
 import {
+  type DataDefaultData,
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
-  DataDefaultData,
   DomainEntityService,
-  DomainEntityServiceDefaultData,
-  DomainFindOptions,
-  DomainFindResult,
-  LoggerService
+  type DomainEntityServiceDefaultData,
+  type DomainFindOptions,
+  type DomainFindResult,
+  type LoggerService
 } from '@node-c/core';
 
-import { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
-import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
-import {
+import type { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+import type { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
+import type {
   DataDBUsersCreateUserData,
   DataDBUsersUpdateUserData
 } from '../../../../data/db/entities/users/users.definitions.js';
-import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
+import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import type { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainCoursePlatformDelegatedUsersService extends DomainEntityService<
@@ -26,10 +26,12 @@ export class DomainCoursePlatformDelegatedUsersService extends DomainEntityServi
   DataDBUsersService,
   DomainEntityServiceDefaultData<DataDBUser>,
   { cache: DataCacheUsersEntityService },
-  DataDefaultData<DataDBUser> & { Create: DataDBUsersCreateUserData; Update: DataDBUsersUpdateUserData }
+  DataDefaultData<DataDBUser> & {
+    Create: DataDBUsersCreateUserData;
+    Update: DataDBUsersUpdateUserData;
+  }
 > {
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected dataAuditUserLoginLogsService: DataAuditUserLoginLogsService,
     protected dataCacheUsersService: DataCacheUsersEntityService,
     dataEntityService: DataDBUsersService,
@@ -40,7 +42,9 @@ export class DomainCoursePlatformDelegatedUsersService extends DomainEntityServi
     });
   }
 
-  async findLoginLogs(options: DomainFindOptions): Promise<DomainFindResult<DataAuditUserLoginLog>> {
+  async findLoginLogs(
+    options: DomainFindOptions
+  ): Promise<DomainFindResult<DataAuditUserLoginLog>> {
     return { result: await this.dataAuditUserLoginLogsService.find(options) };
   }
 }

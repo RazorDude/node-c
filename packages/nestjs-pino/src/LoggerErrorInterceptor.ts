@@ -2,7 +2,7 @@ import {
   type CallHandler,
   type ExecutionContext,
   Injectable,
-  type NestInterceptor,
+  type NestInterceptor
 } from '@nestjs/common';
 import { catchError, Observable, throwError } from 'rxjs';
 
@@ -10,7 +10,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 export class LoggerErrorInterceptor implements NestInterceptor {
   intercept(
     context: ExecutionContext,
-    next: CallHandler,
+    next: CallHandler
   ): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
       catchError((error) => {
@@ -29,7 +29,7 @@ export class LoggerErrorInterceptor implements NestInterceptor {
 
           return error;
         });
-      }),
+      })
     );
   }
 }

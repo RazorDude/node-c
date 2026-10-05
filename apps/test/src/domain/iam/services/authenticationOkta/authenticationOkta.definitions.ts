@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
@@ -6,14 +6,16 @@ import {
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
+import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 
-export type DomainIAMAuthenticationOktaCompleteData = IAMAuthenticationOktaCompleteData;
+export type DomainIAMAuthenticationOktaCompleteData =
+  IAMAuthenticationOktaCompleteData;
 
 export type DomainIAMAuthenticationOktaCompleteOptions<Context extends object> =
   IAMAuthenticationOktaCompleteOptions<Context>;
 
-export type DomainIAMAuthenticationOktaCompleteResult = IAMAuthenticationOktaCompleteResult;
+export type DomainIAMAuthenticationOktaCompleteResult =
+  IAMAuthenticationOktaCompleteResult;
 
 export type DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData =
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsData;

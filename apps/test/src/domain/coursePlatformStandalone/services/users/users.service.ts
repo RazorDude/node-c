@@ -4,24 +4,23 @@ import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainDataEntityServiceType,
   DomainEntityService,
-  DomainFindOptions,
-  DomainFindResult,
-  LoggerService
+  type DomainFindOptions,
+  type DomainFindResult,
+  type LoggerService
 } from '@node-c/core';
+import type { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import type { DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone/entities/users/users.service.js';
+import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import type { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
-import {
+import type {
   DomainCoursePlatformStandaloneUsersGetUserWithPermissionsDataOptions,
   DomainCoursePlatformStandaloneUsersGetUserWithPermissionsDataPrivateOptions,
   DomainCoursePlatformStandaloneUsersServiceData
 } from './users.definitions.js';
-
-import { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
-import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
-import { DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone/entities/users/users.service.js';
-import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
-import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneUsersService extends DomainEntityService<
@@ -32,7 +31,6 @@ export class DomainCoursePlatformStandaloneUsersService extends DomainEntityServ
   DataDBUsersDataEntityServiceData<DataDBUser>
 > {
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected dataAuditUserLoginLogsService: DataAuditUserLoginLogsService,
     protected dataCacheUsersService: DataCacheStandaloneUsersEntityService,
     dataEntityService: DataDBUsersService,
@@ -43,7 +41,9 @@ export class DomainCoursePlatformStandaloneUsersService extends DomainEntityServ
     });
   }
 
-  async findLoginLogs(options: DomainFindOptions): Promise<DomainFindResult<DataAuditUserLoginLog>> {
+  async findLoginLogs(
+    options: DomainFindOptions
+  ): Promise<DomainFindResult<DataAuditUserLoginLog>> {
     return { result: await this.dataAuditUserLoginLogsService.find(options) };
   }
 
@@ -58,7 +58,7 @@ export class DomainCoursePlatformStandaloneUsersService extends DomainEntityServ
       {
         ...options,
         include,
-        ...(!!options.filters.id
+        ...(options.filters.id
           ? {
               dataServices: ['cache', DomainDataEntityServiceType.Main],
               saveAdditionalResultsInFirstService: {
@@ -75,7 +75,7 @@ export class DomainCoursePlatformStandaloneUsersService extends DomainEntityServ
     }
     user.currentPermissions = {};
     if (!keepPassword) {
-      delete user.password;
+      user.password = undefined;
     }
     return user as DataCacheStandaloneUser;
   }

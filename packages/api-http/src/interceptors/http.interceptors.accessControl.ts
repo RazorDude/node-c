@@ -1,17 +1,34 @@
-import { CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
-import { ModuleRef, Reflector } from '@nestjs/core';
+/** biome-ignore-all lint/suspicious/useAwait: Enforced by parent class definitions */
+import {
+  type CallHandler,
+  type ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  type NestInterceptor
+} from '@nestjs/common';
+import type { ModuleRef, Reflector } from '@nestjs/core';
 
-import { GenericObject, LoggerService, Constants as NodeCCoreConstants, setNested } from '@node-c/core';
+import {
+  type GenericObject,
+  type LoggerService,
+  Constants as NodeCCoreConstants,
+  setNested
+} from '@node-c/core';
 import {
   IAMAuthorizationService,
-  IAMUserWithPermissionsData,
+  type IAMUserWithPermissionsData,
   Constants as NodeCDomainIAMConstants
 } from '@node-c/domain-iam';
 
-import { Observable, map } from 'rxjs';
+// biome-ignore lint/suspicious/noDeprecatedImports: False positive.
+import { map, type Observable } from 'rxjs';
 
-import { RequestWithLocals } from '../common/definitions/common.definitions.js';
-import { AccessControlContext, AccessControlResource } from '../decorators/http.decorators.accessControl.js';
+import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import {
+  AccessControlContext,
+  AccessControlResource
+} from '../decorators/http.decorators.accessControl.js';
 
 /**
  * Access control interceptor - used for both role-based and fine-grained access control.
@@ -19,17 +36,18 @@ import { AccessControlContext, AccessControlResource } from '../decorators/http.
 @Injectable()
 export class HTTPAccessControlInterceptor<
   User extends IAMUserWithPermissionsData<unknown, unknown>
-> implements NestInterceptor {
+> implements NestInterceptor
+{
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService,
-    // eslint-disable-next-line no-unused-vars
     protected moduleRef: ModuleRef,
-    // eslint-disable-next-line no-unused-vars
     protected reflector: Reflector
   ) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler
+  ): Promise<Observable<unknown>> {
     const [req]: [RequestWithLocals<User>, unknown] = context.getArgs();
     const locals = req.locals!;
     if (!locals) {
@@ -48,18 +66,26 @@ export class HTTPAccessControlInterceptor<
       logger.error(
         `[HTTPAccessControlInterceptor]: No moduleName configured for ${contextClass.name}.${contextHandler.name}.`
       );
-      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-    const resourceContextData = reflector.get(AccessControlContext, contextClass);
+    const resourceContextData = reflector.get(
+      AccessControlContext,
+      contextClass
+    );
     const accessControlOptions = {
       moduleName,
       resource:
         reflector.get(AccessControlResource, contextHandler) ||
-        (typeof resourceContextData !== 'string' && resourceContextData?.resourceMap?.[contextHandler.name]) ||
+        (typeof resourceContextData !== 'string' &&
+          resourceContextData?.resourceMap?.[contextHandler.name]) ||
         contextHandler.name,
       resourceContext:
         (typeof resourceContextData === 'string' && resourceContextData) ||
-        (typeof resourceContextData !== 'string' && resourceContextData?.context) ||
+        (typeof resourceContextData !== 'string' &&
+          resourceContextData?.context) ||
         contextClass.name
     };
     const user = locals.user!; // we'll always have this, otherwise the system has not been configured properly
@@ -69,7 +95,12 @@ export class HTTPAccessControlInterceptor<
       inputDataToBeMutated,
       permissions: usedPermissions
     } = IAMAuthorizationService.checkAccess(
-      { body: req.body, headers: req.headers, params: req.params, query: req.query },
+      {
+        body: req.body,
+        headers: req.headers,
+        params: req.params,
+        query: req.query
+      },
       user,
       { ...accessControlOptions, logger }
     );
@@ -80,15 +111,26 @@ export class HTTPAccessControlInterceptor<
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
     for (const key in inputDataToBeMutated) {
-      setNested(req, key, inputDataToBeMutated[key], { removeNestedFieldEscapeSign: true });
+      setNested(req, key, inputDataToBeMutated[key], {
+        removeNestedFieldEscapeSign: true
+      });
     }
     return next.handle().pipe(
       map((data?: unknown) => {
-        if (typeof data === 'undefined' || data === null || typeof data !== 'object' || data instanceof Date) {
+        if (
+          typeof data === 'undefined' ||
+          data === null ||
+          typeof data !== 'object' ||
+          data instanceof Date
+        ) {
           return data;
         }
         const actualData = data as GenericObject;
-        const { outputDataToBeMutated } = IAMAuthorizationService.processOutputData(usedPermissions, actualData);
+        const { outputDataToBeMutated } =
+          IAMAuthorizationService.processOutputData(
+            usedPermissions,
+            actualData
+          );
         for (const key in outputDataToBeMutated) {
           setNested(actualData, key, outputDataToBeMutated[key]);
         }

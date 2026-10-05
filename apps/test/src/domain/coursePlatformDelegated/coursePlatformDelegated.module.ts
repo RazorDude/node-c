@@ -1,10 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 
-import { Constants as NodeCCoreConstants, loadDynamicModules } from '@node-c/core';
-
-import * as FolderData from './services/coursePlatformDelegated.services.js';
+import {
+  loadDynamicModules,
+  Constants as NodeCCoreConstants
+} from '@node-c/core';
 
 import { Constants } from '../../common/definitions/common.constants.js';
+
+import * as FolderData from './services/coursePlatformDelegated.services.js';
 
 const { services } = loadDynamicModules(FolderData);
 

@@ -1,15 +1,15 @@
-import {
+import type {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';
-import {
+import type {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult,
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
-import {
+import type {
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,
@@ -20,34 +20,41 @@ import {
   IAMAuthenticationOAuth2VerifyExternalAccessTokenResult
 } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
 
-export type IAMAuthenticationOAuth2ConsumerCompleteData = IAMAuthenticationOAuth2CompleteData;
+export type IAMAuthenticationOAuth2ConsumerCompleteData =
+  IAMAuthenticationOAuth2CompleteData;
 
-export type IAMAuthenticationOAuth2ConsumerCompleteOptions<Context extends object> =
-  IAMAuthenticationOAuth2CompleteOptions<Context>;
+export type IAMAuthenticationOAuth2ConsumerCompleteOptions<
+  Context extends object
+> = IAMAuthenticationOAuth2CompleteOptions<Context>;
 
-export type IAMAuthenticationOAuth2ConsumerCompleteResult = IAMAuthenticationOAuth2CompleteResult &
-  IAMAuthenticationConsumerCompleteResult & {
-    idToken?: string;
-    refreshToken?: string;
-  };
+export type IAMAuthenticationOAuth2ConsumerCompleteResult =
+  IAMAuthenticationOAuth2CompleteResult &
+    IAMAuthenticationConsumerCompleteResult & {
+      idToken?: string;
+      refreshToken?: string;
+    };
 
 export type IAMAuthenticationOAuth2ConsumerGetUserAuthenticationConfigResult =
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult;
 
-export interface IAMAuthenticationOAuth2ConsumerInitiateData extends IAMAuthenticationOAuth2InitiateData {
+export interface IAMAuthenticationOAuth2ConsumerInitiateData
+  extends IAMAuthenticationOAuth2InitiateData {
   scope: string;
 }
 
-export type IAMAuthenticationOAuth2ConsumerInitiateOptions<Context extends object> =
-  IAMAuthenticationOAuth2InitiateOptions<Context>;
+export type IAMAuthenticationOAuth2ConsumerInitiateOptions<
+  Context extends object
+> = IAMAuthenticationOAuth2InitiateOptions<Context>;
 
-export type IAMAuthenticationOAuth2ConsumerInitiateResult = IAMAuthenticationOAuth2InitiateResult &
-  IAMAuthenticationConsumerInitiateResult;
+export type IAMAuthenticationOAuth2ConsumerInitiateResult =
+  IAMAuthenticationOAuth2InitiateResult &
+    IAMAuthenticationConsumerInitiateResult;
 
 export type IAMAuthenticationOAuth2ConsumerRefreshExternalAccessTokenData =
   IAMAuthenticationRefreshExternalAccessTokenData;
 export type IAMAuthenticationOAuth2ConsumerRefreshExternalAccessTokenResult =
-  IAMAuthenticationRefreshExternalAccessTokenResult & IAMAuthenticationConsumerRefreshExternalAccessTokenResult;
+  IAMAuthenticationRefreshExternalAccessTokenResult &
+    IAMAuthenticationConsumerRefreshExternalAccessTokenResult;
 
 export type IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenData =
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData;

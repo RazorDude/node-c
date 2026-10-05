@@ -1,10 +1,22 @@
-import type { DataOrderByDirection, DomainFindOneOptions, GenericObject } from '@node-c/core';
+import type {
+  DataOrderByDirection,
+  DomainFindOneOptions,
+  GenericObject
+} from '@node-c/core';
 
-import { IsArray, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmptyObject,
+  IsObject,
+  IsOptional
+} from 'class-validator';
 
 import { BaseDto } from './base.dto.js';
 
-type DomainFindOneOptionsWithOptionalFilters = Omit<DomainFindOneOptions, 'filters'> &
+type DomainFindOneOptionsWithOptionalFilters = Omit<
+  DomainFindOneOptions,
+  'filters'
+> &
   Partial<Pick<DomainFindOneOptions, 'filters'>>;
 
 export class FindOneDto<Options extends DomainFindOneOptionsWithOptionalFilters>

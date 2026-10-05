@@ -1,11 +1,16 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { type DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  ConfigProviderService,
+  Constants as CoreConstants,
+  LoggerService
+} from '@node-c/core';
 
-import { RedisStoreModuleOptions } from './redis.store.definitions.js';
-import { RedisStoreService } from './redis.store.service.js';
+import type { Cluster, Redis } from 'ioredis';
 
 import { Constants } from '../common/definitions/common.constants.js';
+import type { RedisStoreModuleOptions } from './redis.store.definitions.js';
+import { RedisStoreService } from './redis.store.service.js';
 
 @Module({})
 export class RedisStoreModule {
@@ -18,9 +23,15 @@ export class RedisStoreModule {
       providers: [
         {
           provide: Constants.REDIS_CLIENT,
-          useFactory: async (configProvider: ConfigProviderService, logger: LoggerService) => {
+          useFactory: async (
+            configProvider: ConfigProviderService,
+            logger: LoggerService
+          ): Promise<Cluster | Redis> => {
             // this is purposfully split like this, so we can place debug logs in between when needed :D
-            const client = await RedisStoreService.createClient(configProvider.config, { dataModuleName, logger });
+            const client = await RedisStoreService.createClient(
+              configProvider.config,
+              { dataModuleName, logger }
+            );
             return client;
           },
           inject: [ConfigProviderService, LoggerService]

@@ -1,8 +1,12 @@
-import { ClickHouseClient } from '@clickhouse/client';
+import type { ClickHouseClient } from '@clickhouse/client';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { GenericObject } from '@node-c/core';
-import { Constants as RDBConstants, RDBEntityManager, RDBRepository } from '@node-c/data-rdb';
+import type { GenericObject } from '@node-c/core';
+import {
+  Constants as RDBConstants,
+  type RDBEntityManager,
+  type RDBRepository
+} from '@node-c/data-rdb';
 
 import { Constants } from '../common/definitions/common.constants.js';
 
@@ -10,15 +14,14 @@ import { Constants } from '../common/definitions/common.constants.js';
 export class ClickHouseEntityManager implements RDBEntityManager {
   constructor(
     @Inject(Constants.CLICKHOUSE_CLIENT)
-    // eslint-disable-next-line no-unused-vars
     protected client: ClickHouseClient,
     @Inject(RDBConstants.RDB_ENTITY_REPOSITORY)
-    // eslint-disable-next-line no-unused-vars
     protected repository: RDBRepository<GenericObject<unknown>>
   ) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getRepository<Entity extends GenericObject<unknown>>(_target: string): RDBRepository<Entity> {
+  getRepository<Entity extends GenericObject<unknown>>(
+    _target: string
+  ): RDBRepository<Entity> {
     return this.repository as RDBRepository<Entity>;
   }
 
@@ -35,12 +38,18 @@ export class ClickHouseEntityManager implements RDBEntityManager {
     query: string,
     params?: { field: string; value: string | number }[]
   ): Promise<ReturnData> {
-    let queryParams: Record<string, string | number> | undefined = undefined;
+    let queryParams: Record<string, string | number> | undefined;
     if (params?.length) {
       queryParams = {};
-      params.forEach(item => (queryParams![item.field] = item.value));
+      params.forEach((item) => {
+        queryParams![item.field] = item.value;
+      });
     }
-    const results = await this.client.query({ format: 'JSON', query, query_params: queryParams });
+    const results = await this.client.query({
+      format: 'JSON',
+      query,
+      query_params: queryParams
+    });
     const jsonData = await results.json();
     return jsonData as ReturnData;
   }
@@ -55,7 +64,9 @@ export class ClickHouseEntityManager implements RDBEntityManager {
   }
 
   // TODO: actual transactions
-  transaction(callback: (_em: ClickHouseEntityManager) => Promise<unknown>): Promise<unknown> {
+  transaction(
+    callback: (_em: ClickHouseEntityManager) => Promise<unknown>
+  ): Promise<unknown> {
     return callback(this);
   }
 }

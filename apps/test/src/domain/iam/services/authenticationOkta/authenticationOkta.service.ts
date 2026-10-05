@@ -1,9 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationOktaService } from '@node-c/domain-iam-okta';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+
+import type {
   DomainIAMAuthenticationOktaCompleteData,
   DomainIAMAuthenticationOktaCompleteOptions,
   DomainIAMAuthenticationOktaCompleteResult,
@@ -12,8 +19,7 @@ import {
   DomainIAMAuthenticationOktaUserFields
 } from './authenticationOkta.definitions.js';
 
-import { Constants } from '../../../../common/definitions/common.constants.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+const INITIAL_PASSWORD_LENGTH = 30;
 
 @Injectable()
 export class DomainIAMAuthenticationOktaService extends IAMAuthenticationOktaService<
@@ -25,10 +31,14 @@ export class DomainIAMAuthenticationOktaService extends IAMAuthenticationOktaSer
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_IAM_AUTH_OKTA_SERVICE_NAME
+    );
   }
 
   async complete(
@@ -57,7 +67,7 @@ export class DomainIAMAuthenticationOktaService extends IAMAuthenticationOktaSer
       ...parentResult,
       accountStatusId: 1,
       assignedUserTypes: [{ id: 2 }],
-      initialPassword: this.generateUrlEncodedString(30)
+      initialPassword: this.generateUrlEncodedString(INITIAL_PASSWORD_LENGTH)
     } as unknown as DomainIAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult;
   }
 }

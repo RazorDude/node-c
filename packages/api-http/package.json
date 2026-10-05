@@ -9,6 +9,8 @@
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "dev": "tsc -p tsconfig.build.json --watch",
+    "format": "npx @biomejs/biome format --write",
+    "format:check": "npx @biomejs/biome format",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "publish-package": "npm run build:clean && npm publish --access public",
@@ -17,6 +19,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^12.0.3",
+    "@nestjs/core": "^12.1.2",
     "@nestjs/platform-express": "^12.0.3",
     "@node-c/core": "^1.0.0-beta9",
     "@node-c/domain-iam": "^1.0.0-beta9",

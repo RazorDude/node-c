@@ -1,15 +1,17 @@
-import path from 'path';
+import path from 'node:path';
+import process, { env } from 'node:process';
 
 import { Module } from '@nestjs/common';
 
 import {
   APP_CONFIG_FROM_ENV_KEYS,
   ConfigProviderModule,
-  ConfigProviderModuleOptions,
+  type ConfigProviderModuleOptions,
   DEFAULT_PINO_PARAMS,
   LoggerModule
 } from '@node-c/core';
-import { Params } from '@node-c/nestjs-pino';
+
+import type { Params } from '@node-c/nestjs-pino';
 
 import ld from 'lodash';
 
@@ -30,72 +32,88 @@ import { DomainCoursePlatformFederatedModule } from './domain/coursePlatformFede
 import { DomainCoursePlatformStandaloneModule } from './domain/coursePlatformStandalone/coursePlatformStandalone.module.js';
 import { DomainIAMModule } from './domain/iam/iam.module.js';
 
+const processEnv: NodeJS.ProcessEnv = env;
+
 export class AppModuleBase {
-  static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions = {
-    appConfigs: AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
-    envKeys: ld.merge(APP_CONFIG_FROM_ENV_KEYS, {
-      DOMAIN: {
-        COURSE_PLATFORM_FEDERATED: {
-          JWT_ACCESS_SECRET: 'jwtAccessSecret',
-          JWT_REFRESH_SECRET: 'jwtRefreshSecret',
-          OKTA_CONSUMER_API_KEY: 'authServiceSettings.oktaConsumer.nodeC.apiKey',
-          OKTA_CONSUMER_API_SECRET: 'authServiceSettings.oktaConsumer.nodeC.apiSecret',
-          USER_LOCAL_CONSUMER_API_KEY: 'authServiceSettings.userLocalConsumer.nodeC.apiKey',
-          USER_LOCAL_CONSUMER_API_SECRET: 'authServiceSettings.userLocalConsumer.nodeC.apiSecret'
-        },
-        COURSE_PLATFORM_STANDALONE: {
-          JWT_ACCESS_SECRET: 'jwtAccessSecret',
-          JWT_REFRESH_SECRET: 'jwtRefreshSecret',
-          OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
-          OAUTH2_OKTA_CLIENT_SECRET: 'authServiceSettings.okta.oauth2.clientSecret',
-          PASSTHROUGH_CONSUMER_API_KEY: 'authServiceSettings.passthroughConsumer.nodeC.apiKey',
-          PASSTHROUGH_CONSUMER_API_SECRET: 'authServiceSettings.passthroughConsumer.nodeC.apiSecret',
-          USER_LOCAL_PASSWORD_SECRET: 'authServiceSettings.userLocal.secretKey.hashingSecret'
-        },
-        IAM: {
-          OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
-          OAUTH2_OKTA_CLIENT_SECRET: 'authServiceSettings.okta.oauth2.clientSecret',
-          USER_LOCAL_PASSWORD_SECRET: 'authServiceSettings.userLocal.secretKey.hashingSecret'
+  static readonly configProviderModuleRegisterOptions: ConfigProviderModuleOptions =
+    {
+      appConfigs:
+        AppConfigs as unknown as ConfigProviderModuleOptions['appConfigs'],
+      envKeys: ld.merge(APP_CONFIG_FROM_ENV_KEYS, {
+        DOMAIN: {
+          COURSE_PLATFORM_FEDERATED: {
+            JWT_ACCESS_SECRET: 'jwtAccessSecret',
+            JWT_REFRESH_SECRET: 'jwtRefreshSecret',
+            OKTA_CONSUMER_API_KEY:
+              'authServiceSettings.oktaConsumer.nodeC.apiKey',
+            OKTA_CONSUMER_API_SECRET:
+              'authServiceSettings.oktaConsumer.nodeC.apiSecret',
+            USER_LOCAL_CONSUMER_API_KEY:
+              'authServiceSettings.userLocalConsumer.nodeC.apiKey',
+            USER_LOCAL_CONSUMER_API_SECRET:
+              'authServiceSettings.userLocalConsumer.nodeC.apiSecret'
+          },
+          COURSE_PLATFORM_STANDALONE: {
+            JWT_ACCESS_SECRET: 'jwtAccessSecret',
+            JWT_REFRESH_SECRET: 'jwtRefreshSecret',
+            OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
+            OAUTH2_OKTA_CLIENT_SECRET:
+              'authServiceSettings.okta.oauth2.clientSecret',
+            PASSTHROUGH_CONSUMER_API_KEY:
+              'authServiceSettings.passthroughConsumer.nodeC.apiKey',
+            PASSTHROUGH_CONSUMER_API_SECRET:
+              'authServiceSettings.passthroughConsumer.nodeC.apiSecret',
+            USER_LOCAL_PASSWORD_SECRET:
+              'authServiceSettings.userLocal.secretKey.hashingSecret'
+          },
+          IAM: {
+            OAUTH2_OKTA_CLIENT_ID: 'authServiceSettings.okta.oauth2.clientId',
+            OAUTH2_OKTA_CLIENT_SECRET:
+              'authServiceSettings.okta.oauth2.clientSecret',
+            USER_LOCAL_PASSWORD_SECRET:
+              'authServiceSettings.userLocal.secretKey.hashingSecret'
+          }
         }
-      }
-    }),
-    envKeysParentNames: {
-      API: {
-        children: {
-          COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE - REST
-          COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE - REST
-          COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE - REST
-          SSO: 'sso' // _MODULE_TYPE - REST
+      }),
+      envKeysParentNames: {
+        API: {
+          children: {
+            COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE - REST
+            COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE - REST
+            COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE - REST
+            SSO: 'sso' // _MODULE_TYPE - REST
+          },
+          name: 'api'
         },
-        name: 'api'
+        DOMAIN: {
+          children: {
+            COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE - COURSE_PLATFORM_DELEGATED
+            COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE - COURSE_PLATFORM_FEDERATED
+            COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE - COURSE_PLATFORM_STANDALONE
+            IAM: 'iam' // _MODULE_TYPE - IAM
+          },
+          name: 'domain'
+        },
+        DATA: {
+          children: {
+            AUDIT: 'audit', // _MODULE_TYPE - RDB
+            CACHE: 'cache', // _MODULE_TYPE - NOSQL
+            CACHE_AUTH: 'cacheAuth', // _MODULE_TYPE - NOSQL
+            CACHE_FEDERATED: 'cacheFederated', // _MODULE_TYPE - NOSQL
+            CACHE_STANDALONE: 'cacheStandalone', // _MODULE_TYPE - NOSQL
+            DB: 'db', // _MODULE_TYPE - RDB
+            DB_CONFIGS: 'dbConfigs' // _MODULE_TYPE - RDB
+          },
+          name: 'data'
+        }
       },
-      DOMAIN: {
-        children: {
-          COURSE_PLATFORM_DELEGATED: 'coursePlatformDelegated', // _MODULE_TYPE - COURSE_PLATFORM_DELEGATED
-          COURSE_PLATFORM_FEDERATED: 'coursePlatformFederated', // _MODULE_TYPE - COURSE_PLATFORM_FEDERATED
-          COURSE_PLATFORM_STANDALONE: 'coursePlatformStandalone', // _MODULE_TYPE - COURSE_PLATFORM_STANDALONE
-          IAM: 'iam' // _MODULE_TYPE - IAM
-        },
-        name: 'domain'
-      },
-      DATA: {
-        children: {
-          AUDIT: 'audit', // _MODULE_TYPE - RDB
-          CACHE: 'cache', // _MODULE_TYPE - NOSQL
-          CACHE_AUTH: 'cacheAuth', // _MODULE_TYPE - NOSQL
-          CACHE_FEDERATED: 'cacheFederated', // _MODULE_TYPE - NOSQL
-          CACHE_STANDALONE: 'cacheStandalone', // _MODULE_TYPE - NOSQL
-          DB: 'db', // _MODULE_TYPE - RDB
-          DB_CONFIGS: 'dbConfigs' // _MODULE_TYPE - RDB
-        },
-        name: 'data'
-      }
-    },
-    useEnvFile: true,
-    useEnvFileWithPriority: true
-  };
+      useEnvFile: true,
+      useEnvFileWithPriority: true
+    };
   static readonly imports = [
-    ConfigProviderModule.register(AppModuleBase.configProviderModuleRegisterOptions),
+    ConfigProviderModule.register(
+      AppModuleBase.configProviderModuleRegisterOptions
+    ),
     LoggerModule.register({
       pinoParams: {
         ...DEFAULT_PINO_PARAMS,
@@ -105,7 +123,10 @@ export class AppModuleBase {
             targets: [
               {
                 options: {
-                  destination: path.resolve(process.cwd(), `logs/app_logs_${process.env.NODE_ENV}.txt`),
+                  destination: path.resolve(
+                    process.cwd(),
+                    `logs/app_logs_${processEnv.NODE_ENV}.txt`
+                  ),
                   sync: false
                 },
                 target: 'pino/file'
@@ -135,7 +156,9 @@ export class AppModuleBase {
 @Module({
   imports: [
     ...AppModuleBase.imports,
-    APICoursePlatformDelegatedModule.register(APICoursePlatformDelegatedModule.moduleOptions),
+    APICoursePlatformDelegatedModule.register(
+      APICoursePlatformDelegatedModule.moduleOptions
+    ),
     DomainCoursePlatformDelegatedModule,
     DomainIAMModule.register()
   ]
@@ -145,7 +168,9 @@ export class AppModuleCoursePlatformDelegated extends AppModuleBase {}
 @Module({
   imports: [
     ...AppModuleBase.imports,
-    APICoursePlatformFederatedModule.register(APICoursePlatformFederatedModule.moduleOptions),
+    APICoursePlatformFederatedModule.register(
+      APICoursePlatformFederatedModule.moduleOptions
+    ),
     DomainCoursePlatformFederatedModule
   ]
 })
@@ -154,13 +179,19 @@ export class AppModuleCoursePlatformFederated extends AppModuleBase {}
 @Module({
   imports: [
     ...AppModuleBase.imports,
-    APICoursePlatformStandaloneModule.register(APICoursePlatformStandaloneModule.moduleOptions),
+    APICoursePlatformStandaloneModule.register(
+      APICoursePlatformStandaloneModule.moduleOptions
+    ),
     DomainCoursePlatformStandaloneModule
   ]
 })
 export class AppModuleCoursePlatformStandalone extends AppModuleBase {}
 
 @Module({
-  imports: [...AppModuleBase.imports, APISSOModule.register(APISSOModule.moduleOptions), DomainIAMModule.register()]
+  imports: [
+    ...AppModuleBase.imports,
+    APISSOModule.register(APISSOModule.moduleOptions),
+    DomainIAMModule.register()
+  ]
 })
 export class AppModuleSSO extends AppModuleBase {}

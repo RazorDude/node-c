@@ -1,16 +1,20 @@
-import { GenericObject } from '@node-c/core';
-import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import type { GenericObject } from '@node-c/core';
+import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 
 import ld from 'lodash';
 
 import { getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
 
-export interface DataCacheStandaloneUserStepDataItem extends GenericObject<unknown> {
+export interface DataCacheStandaloneUserStepDataItem
+  extends GenericObject<unknown> {
   codeVerifier: string;
   state: string;
 }
 
-const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'userStepDataItem');
+const baseSchema = getDefaultEntitySchema(
+  EntitySchemaColumnType.UUIDV4,
+  'userStepDataItem'
+);
 export const DataCacheStandaloneUserStepDataItemSchema: EntitySchema = {
   ...ld.omit(baseSchema, 'columns'),
   columns: {

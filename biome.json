@@ -1,0 +1,101 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "assist": {
+    "enabled": true
+  },
+  "files": {
+    "ignoreUnknown": false
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "delimiterSpacing": false,
+      "jsxQuoteStyle": "double",
+      "lineWidth": 80,
+      "quoteProperties": "asNeeded",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "none"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "complexity": {
+        "noBannedTypes": "error",
+        "noExcessiveCognitiveComplexity": "off",
+        "noExcessiveLinesPerFunction": "off",
+        "noForEach": "off",
+        "noStaticOnlyClass": "off"
+      },
+      "correctness": {
+        "noInvalidUseBeforeDeclaration": "error",
+        "noNodejsModules": "off",
+        "noUnresolvedImports": "error",
+        "noUnusedVariables": "error",
+        "useHookAtTopLevel": "off",
+        "useImportExtensions": "off"
+      },
+      "nursery": {
+        "useExplicitType": "error",
+        "useThisInClassMethods": "off"
+      },
+      "performance": {
+        "noAwaitInLoops": "off",
+        "noBarrelFile": "off",
+        "noNamespaceImport": "off",
+        "noReExportAll": "off"
+      },
+      "preset": "all",
+      "security": {
+        "noSecrets": "off"
+      },
+      "style": {
+        "noContinue": "off",
+        "noEnum": "off",
+        "noExcessiveClassesPerFile": "off",
+        "noExcessiveLinesPerFile": "off",
+        "noIncrementDecrement": "off",
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "error",
+        "noParameterProperties": "off",
+        "noSubstr": "off",
+        "noTernary": "off",
+        "useAtIndex": "off",
+        "useBlockStatements": "off",
+        "useConsistentArrowReturn": "off",
+        "useConsistentMemberAccessibility": "off",
+        "useDestructuring": "off",
+        "useExportsLast": "off",
+        "useFilenamingConvention": "off",
+        "useLiteralEnumMembers": "error",
+        "useNamingConvention": "off"
+      },
+      "suspicious": {
+        "noConfusingVoidType": "off",
+        "noDoubleEquals": "error",
+        "noEmptyBlockStatements": "error",
+        "noEmptyInterface": "error",
+        "noExplicitAny": "error",
+        "noForIn": "off",
+        "noImplicitAnyLet": "error",
+        "noImportCycles": "error",
+        "useGuardForIn": "off"
+      }
+    }
+  },
+  "vcs": {
+    "enabled": false,
+    "useIgnoreFile": false
+  }
+}

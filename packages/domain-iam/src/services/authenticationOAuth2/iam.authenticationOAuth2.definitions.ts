@@ -1,4 +1,4 @@
-import {
+import type {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,
@@ -21,16 +21,19 @@ export interface IAMAuthenticationOAuth2AccessTokenProviderResponseData {
   token_type: string;
 }
 
-export interface IAMAuthenticationOAuth2CompleteData extends IAMAuthenticationCompleteData {
+export interface IAMAuthenticationOAuth2CompleteData
+  extends IAMAuthenticationCompleteData {
   code: string;
   codeVerifier: string;
   redirectUri?: string;
   state: string;
 }
 
-export type IAMAuthenticationOAuth2CompleteOptions<Context extends object> = IAMAuthenticationCompleteOptions<Context>;
+export type IAMAuthenticationOAuth2CompleteOptions<Context extends object> =
+  IAMAuthenticationCompleteOptions<Context>;
 
-export interface IAMAuthenticationOAuth2CompleteResult extends IAMAuthenticationCompleteResult {
+export interface IAMAuthenticationOAuth2CompleteResult
+  extends IAMAuthenticationCompleteResult {
   accessToken: string;
   scope: string;
 }
@@ -44,19 +47,20 @@ export type IAMAuthenticationOAuth2GetPayloadsFromExternalTokensResult =
 export type IAMAuthenticationOAuth2GetUserAuthenticationConfigResult =
   IAMAuthenticationGetUserAuthenticationConfigResult;
 
-export interface IAMAuthenticationOAuth2InitiateData extends IAMAuthenticationInitiateData {
+export interface IAMAuthenticationOAuth2InitiateData
+  extends IAMAuthenticationInitiateData {
   redirectUri?: string;
   scope?: string;
 }
 
-export interface IAMAuthenticationOAuth2InitiateOptions<
-  Context extends object
-> extends IAMAuthenticationInitiateOptions<Context> {
+export interface IAMAuthenticationOAuth2InitiateOptions<Context extends object>
+  extends IAMAuthenticationInitiateOptions<Context> {
   generateNonce?: boolean;
   withPCKE?: boolean;
 }
 
-export interface IAMAuthenticationOAuth2InitiateResult extends IAMAuthenticationInitiateResult {
+export interface IAMAuthenticationOAuth2InitiateResult
+  extends IAMAuthenticationInitiateResult {
   authorizationCodeRequestURL: string;
   codeChallenge?: string;
   codeVerifier?: string;

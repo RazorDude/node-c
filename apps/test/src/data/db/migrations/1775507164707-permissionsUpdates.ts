@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class PermissionsUpdates1775507164707 implements MigrationInterface {
   name = 'PermissionsUpdates1775507164707';
@@ -6,7 +6,9 @@ export class PermissionsUpdates1775507164707 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // authorizationPoints -> permissions
     // 1. Rename table
-    await queryRunner.query('ALTER TABLE `authorizationPoints` RENAME `permissions`');
+    await queryRunner.query(
+      'ALTER TABLE `authorizationPoints` RENAME `permissions`'
+    );
     // 2. Add new columns
     await queryRunner.query(
       'ALTER TABLE `permissions` ADD COLUMN `moduleName` varchar(255) NULL, ADD COLUMN `resourceContext` varchar(255) NULL, CHANGE COLUMN `handlerNames` `resources` json NULL'
@@ -16,7 +18,9 @@ export class PermissionsUpdates1775507164707 implements MigrationInterface {
       "UPDATE `permissions` SET `moduleName` = json_extract(`moduleNames`, '$[0]'), `resourceContext` = json_extract(`controllerNames`, '$[0]')"
     );
     // 4. Remove old columns
-    await queryRunner.query('ALTER TABLE `permissions` DROP COLUMN `moduleNames`, DROP COLUMN `controllerNames`');
+    await queryRunner.query(
+      'ALTER TABLE `permissions` DROP COLUMN `moduleNames`, DROP COLUMN `controllerNames`'
+    );
 
     // userTypes -> roles
     // 1. Rename table
@@ -24,13 +28,17 @@ export class PermissionsUpdates1775507164707 implements MigrationInterface {
 
     // userTypeAuthorizationPoints -> rolePermissions
     // 1. Rename table
-    await queryRunner.query('ALTER TABLE `userTypeAuthorizationPoints` RENAME `rolePermissions`');
+    await queryRunner.query(
+      'ALTER TABLE `userTypeAuthorizationPoints` RENAME `rolePermissions`'
+    );
 
     // userTypesAssignedUsers -> userAssignedRoles
     // 1. Rename table
-    await queryRunner.query('ALTER TABLE `userTypeAssignedUsers` RENAME `userAssignedRoles`');
+    await queryRunner.query(
+      'ALTER TABLE `userTypeAssignedUsers` RENAME `userAssignedRoles`'
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

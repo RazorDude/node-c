@@ -1,42 +1,70 @@
-import { DynamicModule } from '@nestjs/common';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import type { DynamicModule } from '@nestjs/common';
+import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
 // import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
-import { AppConfigDataRDB, ConfigProviderService, LoggerService, RDBType, loadDynamicModules } from '@node-c/core';
+import {
+  type AppConfigDataRDB,
+  ConfigProviderService,
+  LoggerService,
+  loadDynamicModules,
+  RDBType
+} from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 
-import { DataSource } from 'typeorm';
+import { DataSource, type DataSourceOptions } from 'typeorm';
 
-import { TypeORMDBModuleOptions } from './typeorm.module.definitions.js';
+import type { TypeORMDBModuleOptions } from './typeorm.module.definitions.js';
+
+const RETRY_INTERVAL_MS = 60_000;
 
 export class TypeORMDBModule {
   static register(options: TypeORMDBModuleOptions): DynamicModule {
-    const { connectionName, folderData, imports: additionalImports, moduleClass, moduleName } = options;
-    const { atEnd: importsAtEnd, postORM: importsPostORM, preORM: importsPreORM } = additionalImports || {};
+    const {
+      connectionName,
+      folderData,
+      imports: additionalImports,
+      moduleClass,
+      moduleName
+    } = options;
+    const {
+      atEnd: importsAtEnd,
+      postORM: importsPostORM,
+      preORM: importsPreORM
+    } = additionalImports || {};
     const { entities, modules } = loadDynamicModules(folderData, {
       moduleRegisterOptions: options.entityModuleRegisterOptions,
       registerOptionsPerModule: options.registerOptionsPerEntityModule
     });
-    let lastRetryAt = new Date().valueOf();
+    let lastRetryAt = Date.now();
     return {
       global: true,
       module: moduleClass as DynamicModule['module'],
       imports: [
         ...(importsPreORM || []),
         TypeOrmModule.forRootAsync({
-          dataSourceFactory: async options => {
-            const { failOnConnectionError = true, nodeCAppLoggerService } = (options || {}) as {
-              failOnConnectionError?: boolean;
-              nodeCAppLoggerService: LoggerService;
-            };
+          dataSourceFactory: async (
+            dsfOptions: DataSourceOptions | undefined
+          ) => {
+            const { failOnConnectionError = true, nodeCAppLoggerService } =
+              (dsfOptions || {}) as {
+                failOnConnectionError?: boolean;
+                nodeCAppLoggerService: LoggerService;
+              };
             let dataSource: DataSource;
             try {
-              nodeCAppLoggerService.info(`[TypeORMDBModule][${moduleName}]: Connecting to the DB server...`);
-              dataSource = new DataSource(options!);
+              nodeCAppLoggerService.info(
+                `[TypeORMDBModule][${moduleName}]: Connecting to the DB server...`
+              );
+              dataSource = new DataSource(dsfOptions!);
               await dataSource.initialize();
-              nodeCAppLoggerService.info(`[TypeORMDBModule][${moduleName}]: Connected to the DB server successfully.`);
+              nodeCAppLoggerService.info(
+                `[TypeORMDBModule][${moduleName}]: Connected to the DB server successfully.`
+              );
             } catch (err) {
-              nodeCAppLoggerService.error(`[TypeORMDBModule][${moduleName}]: Error connecting to the DB server:`, err);
+              nodeCAppLoggerService.error(
+                `[TypeORMDBModule][${moduleName}]: Error connecting to the DB server:`,
+                err
+              );
               if (failOnConnectionError) {
                 throw err;
               }
@@ -44,17 +72,32 @@ export class TypeORMDBModule {
             return dataSource!;
           },
           name: connectionName,
-          useFactory: (configProvider: ConfigProviderService, logger: LoggerService) => {
+          useFactory: (
+            configProvider: ConfigProviderService,
+            logger: LoggerService
+          ) => {
             const dataConfig = configProvider.config.data;
             // example : configProvider.config.data.db
-            const { database, failOnConnectionError, host, password, port, type, typeormExtraOptions, user } =
-              dataConfig[moduleName as keyof typeof dataConfig] as AppConfigDataRDB;
-            const dataSourceOptions: { toRetry?: TypeOrmModuleOptions['toRetry'] } = {};
+            const {
+              database,
+              failOnConnectionError,
+              host,
+              password,
+              port,
+              type,
+              typeormExtraOptions,
+              user
+            } = dataConfig[
+              moduleName as keyof typeof dataConfig
+            ] as AppConfigDataRDB;
+            const dataSourceOptions: {
+              toRetry?: TypeOrmModuleOptions['toRetry'];
+            } = {};
             if (!failOnConnectionError) {
               dataSourceOptions.toRetry = () => {
-                const now = new Date().valueOf();
+                const now = Date.now();
                 // 1 minute retry interval
-                if (Math.abs(lastRetryAt - now) > 60000) {
+                if (Math.abs(lastRetryAt - now) > RETRY_INTERVAL_MS) {
                   lastRetryAt = now;
                   return true;
                 }

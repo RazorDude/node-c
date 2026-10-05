@@ -1,11 +1,8 @@
-import { GenericObject } from '@node-c/core';
+import type { GenericObject } from '@node-c/core';
 
 export enum IAMAuthorizationCheckErrorCode {
-  // eslint-disable-next-line no-unused-vars
   FGANoAccess = 'FGA_NO_ACCESS',
-  // eslint-disable-next-line no-unused-vars
   RBACNoAccessToModule = 'RBAC_NO_ACCESS_TO_MODULE',
-  // eslint-disable-next-line no-unused-vars
   RBACNoAccessToResource = 'RBAC_NO_ACCESS_TO_RESOURCE'
 }
 

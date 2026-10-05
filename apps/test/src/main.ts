@@ -1,4 +1,7 @@
-import { DynamicModule } from '@nestjs/common';
+/** biome-ignore-all lint/suspicious/noConsole: No other way before the logger service is initialized. */
+import process from 'node:process';
+
+import type { DynamicModule } from '@nestjs/common';
 
 import { NodeCApp } from '@node-c/core';
 
@@ -11,7 +14,7 @@ import {
 } from './app.module.js';
 import { Constants } from './common/definitions/common.constants.js';
 
-(async function () {
+(async () => {
   await NodeCApp.start(
     [
       AppModuleCoursePlatformDelegated,
@@ -21,9 +24,18 @@ import { Constants } from './common/definitions/common.constants.js';
     ] as unknown as DynamicModule[],
     {
       apiModulesOptions: [
-        { appModuleIndex: 0, apiModuleName: Constants.API_COURSE_PLATFORM_DELEGATED_MODULE_NAME },
-        { appModuleIndex: 1, apiModuleName: Constants.API_COURSE_PLATFORM_FEDERATED_MODULE_NAME },
-        { appModuleIndex: 2, apiModuleName: Constants.API_COURSE_PLATFORM_STANDALONE_MODULE_NAME },
+        {
+          appModuleIndex: 0,
+          apiModuleName: Constants.API_COURSE_PLATFORM_DELEGATED_MODULE_NAME
+        },
+        {
+          appModuleIndex: 1,
+          apiModuleName: Constants.API_COURSE_PLATFORM_FEDERATED_MODULE_NAME
+        },
+        {
+          appModuleIndex: 2,
+          apiModuleName: Constants.API_COURSE_PLATFORM_STANDALONE_MODULE_NAME
+        },
         { appModuleIndex: 3, apiModuleName: Constants.API_SSO_MODULE_NAME }
       ],
       generateOrmConfig: true,
@@ -32,7 +44,7 @@ import { Constants } from './common/definitions/common.constants.js';
   );
 })().then(
   () => console.info('App started.'),
-  err => {
+  (err) => {
     console.error(err);
     process.exit(1);
   }

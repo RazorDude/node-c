@@ -1,13 +1,16 @@
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
-  ConfigProviderService,
-  LoggerService
+  type ConfigProviderService,
+  type LoggerService
 } from '@node-c/core';
 
 import ld from 'lodash';
 
-import {
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type {
   IAMAuthenticationPassthroughCompleteData,
   IAMAuthenticationPassthroughCompleteOptions,
   IAMAuthenticationPassthroughCompleteResult,
@@ -16,8 +19,6 @@ import {
   IAMAuthenticationPassthroughInitiateOptions,
   IAMAuthenticationPassthroughInitiateResult
 } from './iam.authenticationPassthrough.definitions.js';
-
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 /**
  * A service for skipping authentication in order to use the rest of the AuthenticationManager.authenticate functionality (passthrough).
  *
@@ -27,17 +28,24 @@ export class IAMAuthenticationPassthroughService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
     this.isLocal = true;
   }
 
   async complete(
     data: IAMAuthenticationPassthroughCompleteData,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: IAMAuthenticationPassthroughCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationPassthroughCompleteResult> {
-    const returnData: IAMAuthenticationPassthroughCompleteResult = { mfaUsed: false, valid: true };
+    const returnData: IAMAuthenticationPassthroughCompleteResult = {
+      mfaUsed: false,
+      valid: true
+    };
     if (data.externalAccessToken) {
       returnData.accessToken = data.externalAccessToken;
       if (data.externalAccessTokenExpiresIn) {
@@ -69,30 +77,31 @@ export class IAMAuthenticationPassthroughService<
    */
   getUserAuthenticationConfig(): IAMAuthenticationPassthroughGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationPassthroughGetUserAuthenticationConfigResult = {
-      // this step accepts the external access tokens (if any) from the authData in the step input
-      // and issues local tokens using that data
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        findUser: true,
-        findUserBeforeAuth: true,
-        validWithoutUser: false
-      },
-      // this step simply does nothing
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        findUser: false,
-        findUserBeforeAuth: false,
-        validWithoutUser: true
-      }
-    };
+    const defaultConfig: IAMAuthenticationPassthroughGetUserAuthenticationConfigResult =
+      {
+        // this step accepts the external access tokens (if any) from the authData in the step input
+        // and issues local tokens using that data
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          findUser: true,
+          findUserBeforeAuth: true,
+          validWithoutUser: false
+        },
+        // this step simply does nothing
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          findUser: false,
+          findUserBeforeAuth: false,
+          validWithoutUser: true
+        }
+      };
     return ld.merge(defaultConfig, steps || {});
   }
 
   async initiate(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _data: IAMAuthenticationPassthroughInitiateData,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: IAMAuthenticationPassthroughInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationPassthroughInitiateResult> {
     return { mfaUsed: false, valid: true };

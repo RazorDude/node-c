@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataDefaultData, DomainEntityService, DomainEntityServiceDefaultData, LoggerService } from '@node-c/core';
+import {
+  type DataDefaultData,
+  DomainEntityService,
+  type DomainEntityServiceDefaultData,
+  type LoggerService
+} from '@node-c/core';
 
-import { DataCacheStandaloneToken } from '../../../../data/cacheStandalone/entities/tokens/tokens.entity.js';
-import { DataCacheStandaloneTokensEntityService } from '../../../../data/cacheStandalone/entities/tokens/tokens.service.js';
+import type { DataCacheStandaloneToken } from '../../../../data/cacheStandalone/entities/tokens/tokens.entity.js';
+import type { DataCacheStandaloneTokensEntityService } from '../../../../data/cacheStandalone/entities/tokens/tokens.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneTokensService extends DomainEntityService<
@@ -13,7 +18,10 @@ export class DomainCoursePlatformStandaloneTokensService extends DomainEntitySer
   undefined,
   DataDefaultData<DataCacheStandaloneToken>
 > {
-  constructor(dataEntityService: DataCacheStandaloneTokensEntityService, logger: LoggerService) {
+  constructor(
+    dataEntityService: DataCacheStandaloneTokensEntityService,
+    logger: LoggerService
+  ) {
     super(dataEntityService, ['create', 'findOne', 'delete'], logger);
   }
 }

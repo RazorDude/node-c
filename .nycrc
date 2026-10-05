@@ -1,7 +1,0 @@
-{
-  "all": true,
-  "instrument": true,
-  "sourceMap": true,
-  "produceSourceMap": true,
-  "reporter": ["text", "lcov"]
-}

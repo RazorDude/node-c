@@ -1,15 +1,17 @@
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+
 import {
-  AppConfigDomainIAM,
+  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  ConfigProviderService,
-  LoggerService
+  type ConfigProviderService,
+  type LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationOAuth2Service } from '@node-c/domain-iam';
 
 import ld from 'lodash';
 
-import {
+import type {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
@@ -30,7 +32,12 @@ export class IAMAuthenticationOktaService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationOAuth2Service<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
   }
 
@@ -38,7 +45,10 @@ export class IAMAuthenticationOktaService<
     data: IAMAuthenticationOktaCompleteData,
     options: IAMAuthenticationOktaCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationOktaCompleteResult> {
-    return super.complete(data, options) as Promise<IAMAuthenticationOktaCompleteResult>;
+    return super.complete(
+      data,
+      options
+    ) as Promise<IAMAuthenticationOktaCompleteResult>;
   }
 
   async getUserDataFromExternalTokenPayloads(
@@ -49,55 +59,68 @@ export class IAMAuthenticationOktaService<
       return null;
     }
     const nameData = idTokenPayload.name.split(' ');
-    return { email: idTokenPayload.email, firstName: nameData[0], lastName: nameData[nameData.length - 1] };
+    return {
+      email: idTokenPayload.email,
+      firstName: nameData[0],
+      lastName: nameData[nameData.length - 1]
+    };
   }
 
   // Okta Auth via OIDC
   getUserAuthenticationConfig(): IAMAuthenticationOktaGetUserAuthenticationConfigResult {
     const { configProvider, moduleName, serviceName } = this;
-    const moduleConfig = configProvider.config.domain[moduleName] as AppConfigDomainIAM;
+    const moduleConfig = configProvider.config.domain[
+      moduleName
+    ] as AppConfigDomainIAM;
     const { steps } = moduleConfig.authServiceSettings![serviceName];
-    const defaultConfig: IAMAuthenticationOktaGetUserAuthenticationConfigResult = {
-      [AppConfigDomainIAMAuthenticationStep.Complete]: {
-        authReturnsTokens: true,
-        cache: {
-          settings: {
-            cacheFieldName: 'state',
-            inputFieldName: 'data.state'
+    const defaultConfig: IAMAuthenticationOktaGetUserAuthenticationConfigResult =
+      {
+        [AppConfigDomainIAMAuthenticationStep.Complete]: {
+          authReturnsTokens: true,
+          cache: {
+            settings: {
+              cacheFieldName: 'state',
+              inputFieldName: 'data.state'
+            },
+            use: {
+              data: { overwrite: true, use: true }
+            }
           },
-          use: {
-            data: { overwrite: true, use: true }
-          }
-        },
-        createUser: true,
-        decodeReturnedTokens: true,
-        findUser: true,
-        findUserBeforeAuth: false,
-        findUserInAuthResultBy: {
-          userFieldName: 'email',
-          resultFieldName: 'idTokenPayload.email'
-        },
-        useReturnedTokens: true,
-        validWithoutUser: false
-      },
-      [AppConfigDomainIAMAuthenticationStep.Initiate]: {
-        cache: {
-          populate: {
-            data: [
-              { cacheFieldName: 'codeVerifier', inputFieldName: 'result.codeVerifier' },
-              { cacheFieldName: 'redirectUri', inputFieldName: 'result.redirectUri' }
-            ]
+          createUser: true,
+          decodeReturnedTokens: true,
+          findUser: true,
+          findUserBeforeAuth: false,
+          findUserInAuthResultBy: {
+            userFieldName: 'email',
+            resultFieldName: 'idTokenPayload.email'
           },
-          settings: {
-            cacheFieldName: 'state',
-            inputFieldName: 'result.state'
-          }
+          useReturnedTokens: true,
+          validWithoutUser: false
         },
-        findUser: false,
-        stepResultPublicFields: ['authorizationCodeRequestURL'],
-        validWithoutUser: true
-      }
-    };
+        [AppConfigDomainIAMAuthenticationStep.Initiate]: {
+          cache: {
+            populate: {
+              data: [
+                {
+                  cacheFieldName: 'codeVerifier',
+                  inputFieldName: 'result.codeVerifier'
+                },
+                {
+                  cacheFieldName: 'redirectUri',
+                  inputFieldName: 'result.redirectUri'
+                }
+              ]
+            },
+            settings: {
+              cacheFieldName: 'state',
+              inputFieldName: 'result.state'
+            }
+          },
+          findUser: false,
+          stepResultPublicFields: ['authorizationCodeRequestURL'],
+          validWithoutUser: true
+        }
+      };
     return ld.merge(defaultConfig, steps);
   }
 
@@ -114,7 +137,6 @@ export class IAMAuthenticationOktaService<
 
   // TODO: this
   async refreshExternalAccessToken(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _data: IAMAuthenticationOktaRefreshExternalAccessTokenData
   ): Promise<IAMAuthenticationOktaRefreshExternalAccessTokenResult> {
     throw new ApplicationError(

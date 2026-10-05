@@ -1,4 +1,9 @@
-import { DataDefaultData, DataFindOnePrivateOptions, DataFindPrivateOptions, DataRelationItem } from '@node-c/core';
+import type {
+  DataDefaultData,
+  DataFindOnePrivateOptions,
+  DataFindPrivateOptions,
+  DataRelationItem
+} from '@node-c/core';
 
 export interface DataDBUsersBaseSerachPrivateOptions {
   withPassword?: boolean;
@@ -18,9 +23,11 @@ export type DataDBUsersDataEntityServiceData<User> = DataDefaultData<User> & {
   Update: DataDBUsersUpdateUserData;
 };
 
-export type DataDBUsersFindOnePrivateOptions = DataDBUsersBaseSerachPrivateOptions & DataFindPrivateOptions;
+export type DataDBUsersFindOnePrivateOptions =
+  DataDBUsersBaseSerachPrivateOptions & DataFindPrivateOptions;
 
-export type DataDBUsersFindPrivateOptions = DataDBUsersBaseSerachPrivateOptions & DataFindOnePrivateOptions;
+export type DataDBUsersFindPrivateOptions =
+  DataDBUsersBaseSerachPrivateOptions & DataFindOnePrivateOptions;
 
 export interface DataDBUsersUpdatePasswordData {
   currentPassword: string;

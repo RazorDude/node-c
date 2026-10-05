@@ -1,6 +1,8 @@
-import { ConfigProviderService, LoggerService } from '@node-c/core';
+/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+import type { ConfigProviderService, LoggerService } from '@node-c/core';
 
-import {
+import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
+import type {
   IAMAuthenticationUserLocalConsumerCompleteData,
   IAMAuthenticationUserLocalConsumerCompleteOptions,
   IAMAuthenticationUserLocalConsumerCompleteResult,
@@ -8,8 +10,6 @@ import {
   IAMAuthenticationUserLocalConsumerInitiateOptions,
   IAMAuthenticationUserLocalConsumerInitiateResult
 } from './iam.authenticationUserLocalConsumer.definitions.js';
-
-import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
 
 /**
  * A service for integrating UserLocal authentication via other Node-C Apps as a consumer.
@@ -20,7 +20,12 @@ export class IAMAuthenticationUserLocalConsumerService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationConsumerService<CompleteContext, InitiateContext> {
-  constructor(configProvider: ConfigProviderService, logger: LoggerService, moduleName: string, serviceName: string) {
+  constructor(
+    configProvider: ConfigProviderService,
+    logger: LoggerService,
+    moduleName: string,
+    serviceName: string
+  ) {
     super(configProvider, logger, moduleName, serviceName);
   }
 
@@ -28,13 +33,19 @@ export class IAMAuthenticationUserLocalConsumerService<
     data: IAMAuthenticationUserLocalConsumerCompleteData,
     options: IAMAuthenticationUserLocalConsumerCompleteOptions<CompleteContext>
   ): Promise<IAMAuthenticationUserLocalConsumerCompleteResult> {
-    return super.complete(data, options) as Promise<IAMAuthenticationUserLocalConsumerCompleteResult>;
+    return super.complete(
+      data,
+      options
+    ) as Promise<IAMAuthenticationUserLocalConsumerCompleteResult>;
   }
 
   async initiate(
     data: IAMAuthenticationUserLocalConsumerInitiateData,
     options: IAMAuthenticationUserLocalConsumerInitiateOptions<InitiateContext>
   ): Promise<IAMAuthenticationUserLocalConsumerInitiateResult> {
-    return super.initiate(data, options) as Promise<IAMAuthenticationUserLocalConsumerInitiateResult>;
+    return super.initiate(
+      data,
+      options
+    ) as Promise<IAMAuthenticationUserLocalConsumerInitiateResult>;
   }
 }

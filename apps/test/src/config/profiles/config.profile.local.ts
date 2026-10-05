@@ -1,4 +1,4 @@
-import { AppConfigProfile, AppEnvironment } from '@node-c/core';
+import { type AppConfigProfile, AppEnvironment } from '@node-c/core';
 
 export const appConfigProfileLocal: AppConfigProfile = {
   api: {
@@ -46,9 +46,13 @@ export const appConfigProfileLocal: AppConfigProfile = {
         okta: {
           oauth2: {
             accessTokenAudiences: ['https://integrator-4933645.okta.com'],
-            accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
-            allowedIncomingRedirectUris: ['http://localhost:2050/users/auth/okta'],
-            authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
+            accessTokenGrantUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/token',
+            allowedIncomingRedirectUris: [
+              'http://localhost:2050/users/auth/okta'
+            ],
+            authorizationUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/authorize',
             issuerUri: 'https://integrator-4933645.okta.com',
             redirectUri: 'http://localhost:2050/users/auth/okta'
           }
@@ -65,12 +69,14 @@ export const appConfigProfileLocal: AppConfigProfile = {
         okta: {
           oauth2: {
             accessTokenAudiences: ['https://integrator-4933645.okta.com'],
-            accessTokenGrantUrl: 'https://integrator-4933645.okta.com/oauth2/v1/token',
+            accessTokenGrantUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/token',
             allowedIncomingRedirectUris: [
               'http://localhost:2060/users/auth/okta',
               'http://localhost:2080/users/auth/okta'
             ],
-            authorizationUrl: 'https://integrator-4933645.okta.com/oauth2/v1/authorize',
+            authorizationUrl:
+              'https://integrator-4933645.okta.com/oauth2/v1/authorize',
             issuerUri: 'https://integrator-4933645.okta.com',
             redirectUri: 'http://localhost:2080/users/auth/okta'
           }

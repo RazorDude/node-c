@@ -7,6 +7,8 @@
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "format": "npx @biomejs/biome format --write",
+    "format:check": "npx @biomejs/biome format",
     "generate:datasource-files": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} npx @node-c/core generateDatasourceFiles",
     "generate:datasource-files:local": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} node ../../packages/core/dist/scripts/generateDatasourceFiles.js",
     "lint": "eslint src",
@@ -31,14 +33,20 @@
     "@node-c/api-rest": "^1.0.0-beta9",
     "@node-c/core": "^1.0.0-beta9",
     "@node-c/data-clickhouse": "^1.0.0-beta9",
+    "@node-c/data-rdb": "^1.0.0-beta9",
     "@node-c/data-redis": "^1.0.0-beta9",
     "@node-c/data-typeorm": "^1.0.0-beta9",
     "@node-c/domain-iam": "^1.0.0-beta9",
     "@node-c/domain-iam-okta": "^1.0.0-beta9",
+    "@node-c/nestjs-pino": "^1.0.0-beta9",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.4",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
+    "lodash": "^4.18.1",
     "mysql2": "^3.14.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.31"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
@@ -46,7 +54,6 @@
     "@types/yargs": "^17.0.35",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "nodemon": "^3.1.14",
     "nyc": "^18.0.0",
     "ts-node": "^10.9.2",
     "yargs": "^18.2.0"

@@ -1,20 +1,22 @@
-import {
+import type {
   AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings,
   AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings,
   AppConfigDomainIAMAuthenticationStep,
   GenericObject
 } from '@node-c/core';
 
-import {
+import type {
   IAMAuthenticationCompleteResult,
   IAMAuthenticationInitiateResult,
   IAMAuthenticationType
 } from '../authentication/iam.authentication.definitions.js';
-import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
-import { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
+import type { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import type { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import type { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
 
-export interface IAMAuthenticationManagerAuthenticateOptions<AuthData = unknown> {
+export interface IAMAuthenticationManagerAuthenticateOptions<
+  AuthData = unknown
+> {
   auth: {
     mfaType?: IAMMFAType;
     type: IAMAuthenticationType | string;
@@ -39,7 +41,9 @@ export type IAMAuthenticationManagerExecuteStepData<AuthData = unknown> = Omit<
   'rememberUser' | 'step'
 >;
 
-export interface IAMAuthenticationManagerExecuteStepOptions<User extends object> {
+export interface IAMAuthenticationManagerExecuteStepOptions<
+  User extends object
+> {
   authService: IAMAuthenticationService<User, User>;
   name: AppConfigDomainIAMAuthenticationStep;
   stepConfig:
@@ -47,14 +51,18 @@ export interface IAMAuthenticationManagerExecuteStepOptions<User extends object>
     | AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings;
 }
 
-export interface IAMAuthenticationManagerExecuteStepResult<User extends object> {
+export interface IAMAuthenticationManagerExecuteStepResult<
+  User extends object
+> {
   stepResult: IAMAuthenticationCompleteResult | IAMAuthenticationInitiateResult;
   user: IAMUserWithPermissionsData<User, unknown> | null;
   userFilterField?: string | undefined;
   userFilterValue?: unknown | undefined;
 }
 
-export interface IAMAuthenticationManagerUserTokenEnityFields<UserId = unknown> {
+export interface IAMAuthenticationManagerUserTokenEnityFields<
+  UserId = unknown
+> {
   accessToken?: string;
   refreshToken?: string;
   userId: UserId;
@@ -62,6 +70,5 @@ export interface IAMAuthenticationManagerUserTokenEnityFields<UserId = unknown> 
 }
 
 export enum IAMAuthenticationManagerUserTokenUserIdentifier {
-  // eslint-disable-next-line no-unused-vars
   FieldName = 'userId'
 }

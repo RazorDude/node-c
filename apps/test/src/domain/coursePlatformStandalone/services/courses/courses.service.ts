@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { DomainEntityService, LoggerService } from '@node-c/core';
+import { DomainEntityService, type LoggerService } from '@node-c/core';
 
-import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-import { DataDBCoursesService } from '../../../../data/db/entities/courses/courses.service.js';
+import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
+import type { DataDBCoursesService } from '../../../../data/db/entities/courses/courses.service.js';
 
 @Injectable()
 export class DomainCoursePlatformStandaloneCoursesService extends DomainEntityService<

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { TypeORMDBRepositoryModule } from '@node-c/data-typeorm';
 
+import { Constants } from '../../../../common/definitions/common.constants.js';
+
 import { DataDBConfigsGlobalConfigItemEntity } from './globalConfigItems.entity.js';
 import { DataDBConfigsGlobalConfigItemsService } from './globalConfigItems.service.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
 
 @Module({
   imports: [

@@ -1,6 +1,9 @@
-import { AppConfigCommonDomainIAMAuthServiceConfigStepSettings, GenericObject } from '@node-c/core';
+import type {
+  AppConfigCommonDomainIAMAuthServiceConfigStepSettings,
+  GenericObject
+} from '@node-c/core';
 
-import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import type { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
 
 export interface IAMAuthenticationCompleteData {
   mfaData?: unknown;
@@ -14,9 +17,7 @@ export interface IAMAuthenticationCompleteOptions<Context> {
 }
 
 export enum IAMAuthenticationType {
-  // eslint-disable-next-line no-unused-vars
   OAuth2 = 'oauth2',
-  // eslint-disable-next-line no-unused-vars
   UserLocal = 'userLocal'
 }
 
@@ -31,7 +32,8 @@ export interface IAMAuthenticationCompleteResult {
   valid: boolean;
 }
 
-export type IAMAuthenticationGetUserAuthenticationConfigResult = AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
+export type IAMAuthenticationGetUserAuthenticationConfigResult =
+  AppConfigCommonDomainIAMAuthServiceConfigStepSettings;
 
 export interface IAMAuthenticationGetPayloadsFromExternalTokensData {
   accessToken?: string;

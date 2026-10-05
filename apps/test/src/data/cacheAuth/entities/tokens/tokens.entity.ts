@@ -1,9 +1,12 @@
-import { EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import { TokenType as TokenTypeBase } from '@node-c/domain-iam';
+import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
+import type { TokenType as TokenTypeBase } from '@node-c/domain-iam';
 
 import ld from 'lodash';
 
-import { RedisEntity, getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
+import {
+  getDefaultEntitySchema,
+  type RedisEntity
+} from '../../../cacheBase/entity/base.redis.entity.js';
 
 export type DataCacheAuthTokenType = TokenTypeBase;
 
@@ -14,7 +17,10 @@ export interface DataCacheAuthToken extends RedisEntity<string> {
   userId: string;
 }
 
-const baseSchema = getDefaultEntitySchema(EntitySchemaColumnType.UUIDV4, 'token');
+const baseSchema = getDefaultEntitySchema(
+  EntitySchemaColumnType.UUIDV4,
+  'token'
+);
 export const DataCacheAuthTokenSchema: EntitySchema = {
   ...baseSchema,
   columns: {

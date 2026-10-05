@@ -1,34 +1,46 @@
-import { DynamicModule, Inject, MiddlewareConsumer, ModuleMetadata, ValidationPipe } from '@nestjs/common';
+import {
+  type DynamicModule,
+  Inject,
+  type MiddlewareConsumer,
+  type ModuleMetadata,
+  ValidationPipe
+} from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 
-import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
+import { type ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
-import express, { Response } from 'express';
-
-import { HTTPAPIModuleOptions } from './http.api.module.definitions.js';
+import express, { type Response } from 'express';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
 import { HttpExceptionFilter } from '../filters/http.filtes.exception.js';
 import { HTTPAccessControlInterceptor } from '../interceptors/http.interceptors.accessControl.js';
 import { HTTPErrorInterceptor } from '../interceptors/http.interceptors.error.js';
 import { HTTPAuthorizationMiddleware } from '../middlewares/http.middlewares.authorization.js';
 import { HTTPCORSMiddleware } from '../middlewares/http.middlewares.cors.js';
 import { HTTPRequestLoggingMiddleware } from '../middlewares/http.middlewares.requestLogging.js';
+import type { HTTPAPIModuleOptions } from './http.api.module.definitions.js';
 
 export class HTTPAPIModule {
   constructor(
-    // eslint-disable-next-line no-unused-vars
     protected configProvider: ConfigProviderService,
     @Inject(Constants.API_MODULE_NAME)
-    // eslint-disable-next-line no-unused-vars
     protected moduleName: string
   ) {}
 
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(express.urlencoded({ verify: HTTPAPIModule.rawBodyBuffer, extended: true })).forRoutes('*');
-    consumer.apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer })).forRoutes('*');
+    consumer
+      .apply(
+        express.urlencoded({
+          verify: HTTPAPIModule.rawBodyBuffer,
+          extended: true
+        })
+      )
+      .forRoutes('*');
+    consumer
+      .apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer }))
+      .forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
     // configure logging
     consumer.apply(HTTPRequestLoggingMiddleware).forRoutes('*');
@@ -36,15 +48,20 @@ export class HTTPAPIModule {
     consumer.apply(HTTPAuthorizationMiddleware).forRoutes('*');
   }
 
-  static rawBodyBuffer(req: RequestWithLocals<unknown>, _res: Response, buffer: Buffer): void {
-    if (buffer && buffer.length) {
+  static rawBodyBuffer(
+    req: RequestWithLocals<unknown>,
+    _res: Response,
+    buffer: Buffer
+  ): void {
+    if (buffer && buffer.length > 0) {
       req.rawBody = buffer.toString();
     }
   }
 
   static register(options: HTTPAPIModuleOptions): DynamicModule {
     const { folderData, imports: additionalImports, moduleClass } = options;
-    const { atEnd: importsAtEnd, atStart: importsAtStart } = additionalImports || {};
+    const { atEnd: importsAtEnd, atStart: importsAtStart } =
+      additionalImports || {};
     const { controllers, services } = loadDynamicModules(folderData);
     return {
       module: moduleClass as DynamicModule['module'],
@@ -76,7 +93,10 @@ export class HTTPAPIModule {
         ...(options.providers || []),
         ...(services || [])
       ],
-      controllers: [...(controllers || []), ...(options.controllers || [])] as unknown as ModuleMetadata['controllers'],
+      controllers: [
+        ...(controllers || []),
+        ...(options.controllers || [])
+      ] as unknown as ModuleMetadata['controllers'],
       exports: [...(services || []), ...(options.exports || [])]
     };
   }

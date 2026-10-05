@@ -19,7 +19,8 @@ export const Constants = {
   DATA_DB_MODULE_CONNECTION_NAME: 'db_connection',
   DATA_DB_MODULE_NAME: 'db',
   DOMAIN_COURSE_PLATFORM_AUTH_OKTA_SERVICE_NAME: 'okta',
-  DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME: 'passthroughConsumer',
+  DOMAIN_COURSE_PLATFORM_AUTH_PASSTHROUGH_CONSUMER_SERVICE_NAME:
+    'passthroughConsumer',
   DOMAIN_COURSE_PLATFORM_AUTH_USER_LOCAL_SERVICE_NAME: 'userLocal',
   DOMAIN_COURSE_PLATFORM_DELEGATED_MODULE_NAME: 'coursePlatformDelegated',
   DOMAIN_COURSE_PLATFORM_FEDERATED_MODULE_NAME: 'coursePlatformFederated',
@@ -31,11 +32,35 @@ export const Constants = {
 };
 
 export const domainMap: {
-  [key: string]: { domain: string; secure: boolean; sameSite: boolean | 'lax' | 'strict' | 'none' };
+  [key: string]: {
+    domain: string;
+    secure: boolean;
+    sameSite: boolean | 'lax' | 'strict' | 'none';
+  };
 } = {
-  'http://localhost:2080': { domain: 'localhost', secure: false, sameSite: 'lax' },
-  'http://localhost:2090': { domain: 'localhost', secure: false, sameSite: 'lax' },
-  'https://dev.course-platform.node-c.com': { domain: '.dev.node-c.com', secure: true, sameSite: 'none' },
-  'https://staging.course-platform.node-c.com': { domain: '.staging.node-c.com', secure: true, sameSite: 'none' },
-  'https://course-platform.node-c.com': { domain: '.node-c.com', secure: true, sameSite: 'none' }
+  'http://localhost:2080': {
+    domain: 'localhost',
+    secure: false,
+    sameSite: 'lax'
+  },
+  'http://localhost:2090': {
+    domain: 'localhost',
+    secure: false,
+    sameSite: 'lax'
+  },
+  'https://dev.course-platform.node-c.com': {
+    domain: '.dev.node-c.com',
+    secure: true,
+    sameSite: 'none'
+  },
+  'https://staging.course-platform.node-c.com': {
+    domain: '.staging.node-c.com',
+    secure: true,
+    sameSite: 'none'
+  },
+  'https://course-platform.node-c.com': {
+    domain: '.node-c.com',
+    secure: true,
+    sameSite: 'none'
+  }
 };

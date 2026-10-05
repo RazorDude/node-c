@@ -1,18 +1,20 @@
-import {
+import type {
   IAMAuthenticationOAuth2ConsumerCompleteData,
   IAMAuthenticationOAuth2ConsumerCompleteOptions,
   IAMAuthenticationOAuth2ConsumerCompleteResult
 } from '@node-c/domain-iam';
 
-import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
+import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 
 export type DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteData =
   IAMAuthenticationOAuth2ConsumerCompleteData;
 
-export type DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteOptions<Context extends object> =
-  IAMAuthenticationOAuth2ConsumerCompleteOptions<Context>;
+export type DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteOptions<
+  Context extends object
+> = IAMAuthenticationOAuth2ConsumerCompleteOptions<Context>;
 
 export type DomainCoursePlatformFederatedAuthenticationOktaConsumerCompleteResult =
   IAMAuthenticationOAuth2ConsumerCompleteResult;
 
-export type DomainCoursePlatformFederatedAuthenticationOktaConsumerUserFields = DataCacheUser;
+export type DomainCoursePlatformFederatedAuthenticationOktaConsumerUserFields =
+  DataCacheUser;

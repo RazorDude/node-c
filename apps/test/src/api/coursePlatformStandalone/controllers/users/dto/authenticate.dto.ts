@@ -1,14 +1,28 @@
 import { GenericObjectClass } from '@node-c/core';
-import { IAMAuthenticationManagerAuthenticateOptions, IAMMFAType } from '@node-c/domain-iam';
+import type {
+  IAMAuthenticationManagerAuthenticateOptions,
+  IAMMFAType
+} from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
-import { IsDefined, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsDefined,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested
+} from 'class-validator';
 
 interface AuthenticateAuthWithoutType {
   auth: Omit<IAMAuthenticationManagerAuthenticateOptions['auth'], 'type'>;
 }
-type AuthenticateOptionsCustom = Omit<IAMAuthenticationManagerAuthenticateOptions, 'auth' | 'mainFilterField'>;
-type AuthenticateOptionsCustomFinal = AuthenticateOptionsCustom & AuthenticateAuthWithoutType;
+type AuthenticateOptionsCustom = Omit<
+  IAMAuthenticationManagerAuthenticateOptions,
+  'auth' | 'mainFilterField'
+>;
+type AuthenticateOptionsCustomFinal = AuthenticateOptionsCustom &
+  AuthenticateAuthWithoutType;
 
 export class APICoursePlatformStandaloneUsersAuthenticateAuthDto extends GenericObjectClass {
   @IsOptional()
@@ -33,7 +47,9 @@ export class APICoursePlatformStandaloneUsersAuthenticateFiltersDto extends Gene
   email: string;
 }
 
-export class APICoursePlatformStandaloneUsersAuthenticateDto implements AuthenticateOptionsCustomFinal {
+export class APICoursePlatformStandaloneUsersAuthenticateDto
+  implements AuthenticateOptionsCustomFinal
+{
   @IsDefined()
   @IsObject()
   @Type(() => APICoursePlatformStandaloneUsersAuthenticateAuthDto)

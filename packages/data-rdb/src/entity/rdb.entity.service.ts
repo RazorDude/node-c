@@ -1,44 +1,49 @@
 import {
   ApplicationError,
-  ConfigProviderService,
-  DataDefaultData,
-  DataDeleteResult,
+  type ConfigProviderService,
+  type DataDefaultData,
+  type DataDeleteResult,
   DataEntityService,
-  DataFindResults,
-  DataOrderBy,
-  DataRelationItem,
+  type DataFindResults,
+  type DataOrderBy,
+  type DataRelationItem,
   DataSelectOperator,
-  DataUpdateResult,
-  GenericObject,
-  LoggerService,
+  type DataUpdateResult,
+  type GenericObject,
+  type LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
-import { RDBEntitySchema } from './rdb.entity.schema.js';
+import type { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import type {
+  RDBEntityManager,
+  RDBRepository
+} from '../repository/rdb.repository.js';
+import type {
+  IncludeItems,
+  ParsedFilter
+} from '../sqlQueryBuilder/rdb.sqlQueryBuilder.definitions.js';
+import type { SQLQueryBuilderService } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.service.js';
+import type { RDBEntitySchema } from './rdb.entity.schema.js';
 import {
-  BulkCreateOptions,
-  BulkCreatePrivateOptions,
-  CountOptions,
-  CountPrivateOptions,
-  CreateOptions,
-  CreatePrivateOptions,
-  DeleteOptions,
-  DeletePrivateOptions,
-  FindOneOptions,
-  FindOnePrivateOptions,
-  FindOptions,
-  FindPrivateOptions,
+  type BulkCreateOptions,
+  type BulkCreatePrivateOptions,
+  type CountOptions,
+  type CountPrivateOptions,
+  type CreateOptions,
+  type CreatePrivateOptions,
+  type DeleteOptions,
+  type DeletePrivateOptions,
+  type FindOneOptions,
+  type FindOnePrivateOptions,
+  type FindOptions,
+  type FindPrivateOptions,
   PostgresErrorCode,
-  ProcessManyToManyColumnSettingsItem,
+  type ProcessManyToManyColumnSettingsItem,
   // ProcessRelationsDataOptions,
-  UpdateOptions,
-  UpdatePrivateOptions
+  type UpdateOptions,
+  type UpdatePrivateOptions
 } from './rdb.entity.service.definitions.js';
-
-import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
-import { RDBEntityManager, RDBRepository } from '../repository/rdb.repository.js';
-import { IncludeItems, ParsedFilter } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.definitions.js';
-import { SQLQueryBuilderService } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.service.js';
 
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)
 // TODO: enforce the above to be always set to the primary key for the count method
@@ -54,11 +59,11 @@ export class RDBEntityService<
   protected deletedColumnName?: string;
   protected primaryKeys: string[];
 
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,
     protected qb: SQLQueryBuilderService,
-    // eslint-disable-next-line no-unused-vars
     protected repository: RDBRepository<Entity>,
     protected schema: RDBEntitySchema
   ) {
@@ -87,7 +92,10 @@ export class RDBEntityService<
     // console.log('====>', this.repository.metadata?.deleteDateColumn);
   }
 
-  protected buildPrimaryKeyWhereClause(data: Entity[]): { field: string; value: ParsedFilter } {
+  protected buildPrimaryKeyWhereClause(data: Entity[]): {
+    field: string;
+    value: ParsedFilter;
+  } {
     const { primaryKeys, qb, repository } = this;
     const { columnQuotesSymbol: cqs } = qb;
     const tableName = repository.metadata.tableName;
@@ -96,7 +104,9 @@ export class RDBEntityService<
       return {
         field: primaryKey,
         value: {
-          params: { [primaryKey]: data.map(item => item[primaryKey as keyof Entity]) },
+          params: {
+            [primaryKey]: data.map((item) => item[primaryKey as keyof Entity])
+          },
           query: `${cqs}${tableName}${cqs}.${cqs}${primaryKey}${cqs} in (:...${primaryKey})`
         }
       };
@@ -105,14 +115,19 @@ export class RDBEntityService<
     const query: string[] = [];
     data.forEach((item, itemIndex) => {
       const innerQuery: string[] = [];
-      primaryKeys.forEach(fieldName => {
+      primaryKeys.forEach((fieldName) => {
         const primaryKeyName = `${fieldName}${itemIndex}`;
         params[primaryKeyName] = item[fieldName as keyof Entity];
-        innerQuery.push(`${cqs}${tableName}${cqs}.${cqs}${fieldName}${cqs} = :${primaryKeyName}`);
+        innerQuery.push(
+          `${cqs}${tableName}${cqs}.${cqs}${fieldName}${cqs} = :${primaryKeyName}`
+        );
       });
       query.push(`(${innerQuery.join(' and ')})`);
     });
-    return { field: DataSelectOperator.Or, value: { params, query: `(${query.join(' or ')})` } };
+    return {
+      field: DataSelectOperator.Or,
+      value: { params, query: `(${query.join(' or ')})` }
+    };
   }
 
   async bulkCreate(
@@ -125,38 +140,69 @@ export class RDBEntityService<
     const { forceTransaction, transactionManager } = actualOptions;
     const { processInputAllowedFieldsEnabled } = actualPrivateOptions;
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.bulkCreate(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.bulkCreate(
+          data,
+          { ...actualOptions, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<Entity[]>;
     }
-    return await this.save(data instanceof Array ? data : [data], transactionManager, {
-      processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled
-    });
+    return await this.save(
+      Array.isArray(data) ? data : [data],
+      transactionManager,
+      {
+        processObjectAllowedFieldsEnabled: processInputAllowedFieldsEnabled
+      }
+    );
   }
 
-  async count(options: CountOptions, privateOptions?: CountPrivateOptions): Promise<number | undefined> {
-    const { filters, forceTransaction, include: optInclude, transactionManager, withDeleted = false } = options;
+  async count(
+    options: CountOptions,
+    privateOptions?: CountPrivateOptions
+  ): Promise<number | undefined> {
+    const {
+      filters,
+      forceTransaction,
+      include: optInclude,
+      transactionManager,
+      withDeleted = false
+    } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.count({ ...options, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.count(
+          { ...options, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<number>;
     }
-    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
+    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } =
+      actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
-    const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters!, {
-      allowedFields: this.columNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!allowCountWithoutFilters && !Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field for counting is required.');
+    const queryBuilder =
+      this.getRepository(transactionManager).createQueryBuilder(entityName);
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters!,
+      {
+        allowedFields: this.columNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (!(allowCountWithoutFilters || Object.keys(parsedFilters).length > 0)) {
+      throw new ApplicationError(
+        'At least one filter field for counting is required.'
+      );
     }
-    const { where, include: includeFromFilters } = this.qb.parseFilters(tableName, parsedFilters, {
-      fieldAliases: this.columnAliases
-    });
+    const { where, include: includeFromFilters } = this.qb.parseFilters(
+      tableName,
+      parsedFilters,
+      {
+        fieldAliases: this.columnAliases
+      }
+    );
     const include = this.qb.parseRelations(
       tableName,
       {
@@ -176,51 +222,91 @@ export class RDBEntityService<
     return await queryBuilder.getCount();
   }
 
-  async create(data: Data['Create'], options?: CreateOptions, privateOptions?: CreatePrivateOptions): Promise<Entity> {
+  async create(
+    data: Data['Create'],
+    options?: CreateOptions,
+    privateOptions?: CreatePrivateOptions
+  ): Promise<Entity> {
     const actualOptions = options || {};
     const actualPrivateOptions = privateOptions || {};
     const { forceTransaction, transactionManager } = actualOptions;
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.create(data, { ...actualOptions, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.create(
+          data,
+          { ...actualOptions, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<Entity>;
     }
-    const saveResult = (await this.save(data instanceof Array ? data[0] : data, transactionManager, {
-      processObjectAllowedFieldsEnabled: actualPrivateOptions.processInputAllowedFieldsEnabled
-    })) as Entity;
+    const saveResult = (await this.save(
+      Array.isArray(data) ? data[0] : data,
+      transactionManager,
+      {
+        processObjectAllowedFieldsEnabled:
+          actualPrivateOptions.processInputAllowedFieldsEnabled
+      }
+    )) as Entity;
     // TODO: automatic processManyToMany
     return saveResult;
   }
 
   // TODO: functionality for preventing delete while certain relations exist
-  async delete(options: DeleteOptions, privateOptions?: DeletePrivateOptions): Promise<DataDeleteResult<Entity>> {
-    const { filters, forceTransaction, returnOriginalItems, transactionManager, softDelete = true } = options;
+  async delete(
+    options: DeleteOptions,
+    privateOptions?: DeletePrivateOptions
+  ): Promise<DataDeleteResult<Entity>> {
+    const {
+      filters,
+      forceTransaction,
+      returnOriginalItems,
+      transactionManager,
+      softDelete = true
+    } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.delete({ ...options, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.delete(
+          { ...options, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<DataDeleteResult<Entity>>;
     }
     const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.tableName;
     const dataToReturn: DataUpdateResult<Entity> = {};
-    const deleteType = softDelete && this.deletedColumnName ? 'softDelete' : 'delete';
-    const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName)[deleteType]();
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
-      allowedFields: this.columNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field for deletion is required.');
+    const deleteType =
+      softDelete && this.deletedColumnName ? 'softDelete' : 'delete';
+    const queryBuilder = this.getRepository(transactionManager)
+      .createQueryBuilder(entityName)
+      [deleteType]();
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters,
+      {
+        allowedFields: this.columNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (Object.keys(parsedFilters).length === 0) {
+      throw new ApplicationError(
+        'At least one filter field for deletion is required.'
+      );
     }
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, parsedFilters, {
-      fieldAliases: this.columnAliases
-    });
+    const { where: parsedWhere, include } = this.qb.parseFilters(
+      tableName,
+      parsedFilters,
+      {
+        fieldAliases: this.columnAliases
+      }
+    );
     let where: { [fieldName: string]: ParsedFilter } = {};
-    if (Object.keys(include).length || returnOriginalItems) {
-      const findData = await this.find({ filters: parsedFilters, transactionManager });
+    if (Object.keys(include).length > 0 || returnOriginalItems) {
+      const findData = await this.find({
+        filters: parsedFilters,
+        transactionManager
+      });
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       where[field] = value;
       dataToReturn.originalItems = findData.items;
@@ -234,10 +320,16 @@ export class RDBEntityService<
       where
     });
     const result = await queryBuilder.execute();
-    return { ...dataToReturn, count: typeof result.affected === 'number' ? result.affected : undefined };
+    return {
+      ...dataToReturn,
+      count: typeof result.affected === 'number' ? result.affected : undefined
+    };
   }
 
-  async find(options: FindOptions, privateOptions?: FindPrivateOptions): Promise<DataFindResults<Entity>> {
+  async find(
+    options: FindOptions,
+    privateOptions?: FindPrivateOptions
+  ): Promise<DataFindResults<Entity>> {
     const {
       filters,
       forceTransaction,
@@ -252,28 +344,46 @@ export class RDBEntityService<
     } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.find({ ...options, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.find(
+          { ...options, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<DataFindResults<Entity>>;
     }
-    const page = optPage ? parseInt(optPage as unknown as string, 10) : 1; // make sure it's truly a number - it could come as string from GET requests
-    const perPage = optPerPage ? parseInt(optPerPage as unknown as string, 10) : 10; // same as above - must be a number
+    const page = optPage
+      ? Number.parseInt(optPage as unknown as string, 10)
+      : 1; // make sure it's truly a number - it could come as string from GET requests
+    const perPage = optPerPage
+      ? Number.parseInt(optPerPage as unknown as string, 10)
+      : 10; // same as above - must be a number
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
-    const findResults: DataFindResults<Entity> = { page: 1, perPage: 0, items: [], more: false };
+    const findResults: DataFindResults<Entity> = {
+      page: 1,
+      perPage: 0,
+      items: [],
+      more: false
+    };
     const entityName = this.repository.metadata.name;
-    const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
-      allowedFields: this.columNames,
-      isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
+    const processedFilters =
+      (await this.processObjectAllowedFields<GenericObject>(filters || {}, {
+        allowedFields: this.columNames,
+        isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      })) as GenericObject;
+    const queryBuilder =
+      this.getRepository(transactionManager).createQueryBuilder(entityName);
     let where: { [fieldName: string]: ParsedFilter } = {};
     let include: IncludeItems = {};
     let orderBy: DataOrderBy[] = [];
-    if (Object.keys(processedFilters).length) {
-      const parsedFiltersData = this.qb.parseFilters(entityName, processedFilters, {
-        fieldAliases: this.columnAliases
-      });
+    if (Object.keys(processedFilters).length > 0) {
+      const parsedFiltersData = this.qb.parseFilters(
+        entityName,
+        processedFilters,
+        {
+          fieldAliases: this.columnAliases
+        }
+      );
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
@@ -325,7 +435,10 @@ export class RDBEntityService<
   }
 
   // TODO: requirePrimaryKeys
-  async findOne(options: FindOneOptions, privateOptions?: FindOnePrivateOptions): Promise<Entity | null> {
+  async findOne(
+    options: FindOneOptions,
+    privateOptions?: FindOnePrivateOptions
+  ): Promise<Entity | null> {
     const {
       filters,
       forceTransaction,
@@ -337,24 +450,37 @@ export class RDBEntityService<
     } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return this.repository.manager.transaction(tm => {
-        return this.findOne({ ...options, transactionManager: tm }, actualPrivateOptions);
+      return this.repository.manager.transaction((tm) => {
+        return this.findOne(
+          { ...options, transactionManager: tm },
+          actualPrivateOptions
+        );
       }) as Promise<Entity | null>;
     }
     const entityName = this.repository.metadata.name;
-    const queryBuilder = this.getRepository(transactionManager).createQueryBuilder(entityName);
-    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
-      allowedFields: this.columNames,
-      isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!Object.keys(parsedFilters).length) {
-      throw new ApplicationError('At least one filter field is required for the findOne method.');
+    const queryBuilder =
+      this.getRepository(transactionManager).createQueryBuilder(entityName);
+    const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
+      filters,
+      {
+        allowedFields: this.columNames,
+        isEnabled: actualPrivateOptions.processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      }
+    )) as GenericObject;
+    if (Object.keys(parsedFilters).length === 0) {
+      throw new ApplicationError(
+        'At least one filter field is required for the findOne method.'
+      );
     }
-    const { where, include: includeFromFilters } = this.qb.parseFilters(entityName, parsedFilters, {
-      fieldAliases: this.columnAliases,
-      operator: selectOperator as DataSelectOperator
-    });
+    const { where, include: includeFromFilters } = this.qb.parseFilters(
+      entityName,
+      parsedFilters,
+      {
+        fieldAliases: this.columnAliases,
+        operator: selectOperator as DataSelectOperator
+      }
+    );
     const include = this.qb.parseRelations(
       entityName,
       {
@@ -385,7 +511,9 @@ export class RDBEntityService<
     return this.repository.target;
   }
 
-  protected getRepository(transactionManager?: RDBEntityManager): RDBRepository<Entity> {
+  protected getRepository(
+    transactionManager?: RDBEntityManager
+  ): RDBRepository<Entity> {
     if (transactionManager) {
       return transactionManager.getRepository<Entity>(this.repository.target);
     }
@@ -407,11 +535,21 @@ export class RDBEntityService<
     const { transactionManager } = actualOptions;
     // the transaction here is mandatory
     if (!transactionManager) {
-      return this.repository.manager.transaction(tm => {
-        return this.processManyToMany(data, { ...actualOptions, transactionManager: tm });
+      return this.repository.manager.transaction((tm) => {
+        return this.processManyToMany(data, {
+          ...actualOptions,
+          transactionManager: tm
+        });
       }) as Promise<void>;
     }
-    const { counterpartColumns, currentEntityColumns, currentEntityItems, extraColumns, items, tableName } = data;
+    const {
+      counterpartColumns,
+      currentEntityColumns,
+      currentEntityItems,
+      extraColumns,
+      items,
+      tableName
+    } = data;
     const { columnQuotesSymbol: cqs } = this.qb;
     let deleteQuery = `delete from ${cqs}${tableName}${cqs} where `;
     let deleteQueryItem = '(';
@@ -421,33 +559,43 @@ export class RDBEntityService<
     let insertQueryValues: unknown[] = [];
     let runDeleteQuery = false;
     let runInsertQuery = false;
-    currentEntityColumns.forEach(columnNameData => {
-      const targetColumnName = columnNameData.targetColumnName || columnNameData.sourceColumnName;
+    currentEntityColumns.forEach((columnNameData) => {
+      const targetColumnName =
+        columnNameData.targetColumnName || columnNameData.sourceColumnName;
       insertQuery += `${cqs}${targetColumnName}${cqs}, `;
       insertQueryItem += '?, ';
       deleteQueryItem += `${cqs}${targetColumnName}${cqs} = ? and `;
     });
-    counterpartColumns.forEach(columnNameData => {
-      const targetColumnName = columnNameData.targetColumnName || columnNameData.sourceColumnName;
+    counterpartColumns.forEach((columnNameData) => {
+      const targetColumnName =
+        columnNameData.targetColumnName || columnNameData.sourceColumnName;
       insertQuery += `${cqs}${targetColumnName}${cqs}, `;
       insertQueryItem += '?, ';
       deleteQueryItem += `${cqs}${targetColumnName}${cqs} = ? and `;
     });
     if (extraColumns?.length) {
-      extraColumns.forEach(columnNameData => {
+      extraColumns.forEach((columnNameData) => {
         insertQuery += `${cqs}${columnNameData.targetColumnName || columnNameData.sourceColumnName}${cqs}, `;
         insertQueryItem += '?, ';
       });
     }
     insertQuery = `${insertQuery.substring(0, insertQuery.length - 2)}) values `;
     insertQueryItem = `${insertQueryItem.substring(0, insertQueryItem.length - 2)})`;
-    deleteQueryItem = `${deleteQueryItem.substring(0, deleteQueryItem.length - 4)})`;
-    items.forEach(item => {
+    deleteQueryItem = `${
+      // biome-ignore lint/style/noMagicNumbers: False positive.
+      deleteQueryItem.substring(0, deleteQueryItem.length - 4)
+    })`;
+    items.forEach((item) => {
       const { deleted, ...itemData } = item;
       const itemColumnValues = [
-        ...counterpartColumns.map(columnNameData => itemData[columnNameData.sourceColumnName as keyof typeof itemData]),
-        ...(extraColumns?.map(columnNameData => itemData[columnNameData.sourceColumnName as keyof typeof itemData]) ||
-          [])
+        ...counterpartColumns.map(
+          (columnNameData) =>
+            itemData[columnNameData.sourceColumnName as keyof typeof itemData]
+        ),
+        ...(extraColumns?.map(
+          (columnNameData) =>
+            itemData[columnNameData.sourceColumnName as keyof typeof itemData]
+        ) || [])
       ];
       if (deleted) {
         if (runDeleteQuery) {
@@ -456,10 +604,13 @@ export class RDBEntityService<
           runDeleteQuery = true;
         }
         deleteQuery += deleteQueryItem;
-        currentEntityItems.forEach(currentEntityItem => {
+        currentEntityItems.forEach((currentEntityItem) => {
           deleteQueryValues = [
             ...deleteQueryValues,
-            ...currentEntityColumns.map(columnNameData => currentEntityItem[columnNameData.sourceColumnName]),
+            ...currentEntityColumns.map(
+              (columnNameData) =>
+                currentEntityItem[columnNameData.sourceColumnName]
+            ),
             ...itemColumnValues
           ];
         });
@@ -471,10 +622,13 @@ export class RDBEntityService<
         runInsertQuery = true;
       }
       insertQuery += insertQueryItem;
-      currentEntityItems.forEach(currentEntityItem => {
+      currentEntityItems.forEach((currentEntityItem) => {
         insertQueryValues = [
           ...insertQueryValues,
-          ...currentEntityColumns.map(columnNameData => currentEntityItem[columnNameData.sourceColumnName]),
+          ...currentEntityColumns.map(
+            (columnNameData) =>
+              currentEntityItem[columnNameData.sourceColumnName]
+          ),
           ...itemColumnValues
         ];
       });
@@ -529,31 +683,36 @@ export class RDBEntityService<
   //   }
   // }
 
-  protected async save<Data = unknown, ReturnData = unknown>(
-    data: Data,
+  protected async save<DataToSave = unknown, ReturnData = unknown>(
+    data: DataToSave,
     transactionManager?: RDBEntityManager,
     options?: { processObjectAllowedFieldsEnabled?: boolean }
   ): Promise<ReturnData> {
     const { columNames, repository } = this;
     const { processObjectAllowedFieldsEnabled } = options || {};
-    const dataToSave: Data | Data[] = await this.processObjectAllowedFields<Data>(data, {
-      allowedFields: columNames,
-      isEnabled: processObjectAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Input
-    });
+    const dataToSave: DataToSave | DataToSave[] =
+      await this.processObjectAllowedFields<DataToSave>(data, {
+        allowedFields: columNames,
+        isEnabled: processObjectAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Input
+      });
     try {
       if (transactionManager) {
-        return (await transactionManager.save(repository.target, dataToSave as Partial<Entity>)) as ReturnData;
+        return (await transactionManager.save(
+          repository.target,
+          dataToSave as Partial<Entity>
+        )) as ReturnData;
       }
       return repository.save(dataToSave as Partial<Entity>) as ReturnData;
     } catch (e) {
       const error = e as Record<string, unknown>;
       // TODO: move this functionality out of here and make this abstract
       if (error.code === PostgresErrorCode.UniqueViolation) {
-        const extractVariableName = new RegExp(/^Key \((.*)\)\=(.*)$/g);
+        const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
         const result = extractVariableName.exec(error.detail as string);
         throw new ApplicationError(
-          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`
+          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
+          { cause: e }
         );
       }
       throw e;
@@ -566,42 +725,62 @@ export class RDBEntityService<
     privateOptions?: UpdatePrivateOptions
   ): Promise<DataUpdateResult<Entity>> {
     const { columNames, repository } = this;
-    const { filters, forceTransaction, returnData, returnOriginalItems, transactionManager } = options;
+    const {
+      filters,
+      forceTransaction,
+      returnData,
+      returnOriginalItems,
+      transactionManager
+    } = options;
     const {
       processFiltersAllowedFieldsEnabled,
       processInputAllowedFieldsEnabled,
       withDeleted = false
     } = privateOptions || {};
     if (!transactionManager && forceTransaction) {
-      return repository.manager.transaction(tm => {
-        return this.update(data, { ...options, transactionManager: tm }, privateOptions);
+      return repository.manager.transaction((tm) => {
+        return this.update(
+          data,
+          { ...options, transactionManager: tm },
+          privateOptions
+        );
       }) as Promise<DataUpdateResult<Entity>>;
     }
-    const dataToUpdate = (await this.processObjectAllowedFields(data instanceof Array ? data[0] : data, {
-      allowedFields: columNames,
-      isEnabled: processInputAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Input
-    })) as Partial<Entity>;
-    if (!Object.keys(dataToUpdate).length) {
+    const dataToUpdate = (await this.processObjectAllowedFields(
+      Array.isArray(data) ? data[0] : data,
+      {
+        allowedFields: columNames,
+        isEnabled: processInputAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Input
+      }
+    )) as Partial<Entity>;
+    if (Object.keys(dataToUpdate).length === 0) {
       throw new ApplicationError('At least one field for update is required.');
     }
     const entityName = repository.metadata.name;
     const tableName = repository.metadata.tableName;
-    const processedFilters = (await this.processObjectAllowedFields<GenericObject>(filters, {
-      allowedFields: this.columNames,
-      isEnabled: processFiltersAllowedFieldsEnabled,
-      objectType: ProcessObjectAllowedFieldsType.Filters
-    })) as GenericObject;
-    if (!Object.keys(processedFilters).length) {
-      throw new ApplicationError('At least one filter field for update is required.');
+    const processedFilters =
+      (await this.processObjectAllowedFields<GenericObject>(filters, {
+        allowedFields: this.columNames,
+        isEnabled: processFiltersAllowedFieldsEnabled,
+        objectType: ProcessObjectAllowedFieldsType.Filters
+      })) as GenericObject;
+    if (Object.keys(processedFilters).length === 0) {
+      throw new ApplicationError(
+        'At least one filter field for update is required.'
+      );
     }
     const queryBuilder = this.getRepository(transactionManager)
       .createQueryBuilder(entityName)
       .update()
       .set(dataToUpdate);
-    const { where: parsedWhere, include } = this.qb.parseFilters(tableName, processedFilters, {
-      fieldAliases: this.columnAliases
-    });
+    const { where: parsedWhere, include } = this.qb.parseFilters(
+      tableName,
+      processedFilters,
+      {
+        fieldAliases: this.columnAliases
+      }
+    );
     const hasInclude = Object.keys(include).length;
     let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};
@@ -649,11 +828,13 @@ export class RDBEntityService<
         // remove any related entities that might have been joined for the search
         if (hasInclude) {
           const keysToDelete: string[] = [];
-          for (const entityName in include) {
-            keysToDelete.push(entityName.split('.')[0]);
+          for (const includeEntityName in include) {
+            keysToDelete.push(includeEntityName.split('.')[0]);
           }
           updatedItems.forEach((updatedItem, updatedItemIndex) => {
-            keysToDelete.forEach(keyToDelete => delete updatedItem[keyToDelete]);
+            keysToDelete.forEach((keyToDelete) => {
+              delete updatedItem[keyToDelete];
+            });
             updatedItems[updatedItemIndex] = updatedItem;
           });
         }
@@ -664,7 +845,8 @@ export class RDBEntityService<
       dataToReturn.items = result.raw as Entity[];
     } else {
       const result = await queryBuilder.execute();
-      dataToReturn.count = typeof result.affected === 'number' ? result.affected : undefined;
+      dataToReturn.count =
+        typeof result.affected === 'number' ? result.affected : undefined;
     }
     return dataToReturn;
   }

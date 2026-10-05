@@ -1,8 +1,8 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { Level } from 'pino';
 import { PinoLogger } from './PinoLogger.js';
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
 import type { Params } from './params.js';
+import { PARAMS_PROVIDER_TOKEN } from './params.js';
 
 @Injectable()
 export class Logger implements LoggerService {
@@ -10,7 +10,7 @@ export class Logger implements LoggerService {
 
   constructor(
     protected readonly logger: PinoLogger,
-    @Inject(PARAMS_PROVIDER_TOKEN) { renameContext }: Params,
+    @Inject(PARAMS_PROVIDER_TOKEN) { renameContext }: Params
   ) {
     this.contextName = renameContext || 'context';
   }
@@ -87,7 +87,7 @@ export class Logger implements LoggerService {
   private isWrongExceptionsHandlerContract(
     level: Level,
     message: any,
-    params: any[],
+    params: any[]
   ): params is [string] {
     return (
       level === 'error' &&

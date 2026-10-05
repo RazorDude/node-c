@@ -4,6 +4,8 @@
 
 import 'reflect-metadata';
 
+import process from 'node:process';
+
 import { CacheClearCommand } from 'typeorm/commands/CacheClearCommand.js';
 import { EntityCreateCommand } from 'typeorm/commands/EntityCreateCommand.js';
 import { InitCommand } from 'typeorm/commands/InitCommand.js';
@@ -21,7 +23,6 @@ import { VersionCommand } from 'typeorm/commands/VersionCommand.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
 yargs(hideBin(process.argv))
   .usage('Usage: $0 <command> [options]')
   .command(new CacheClearCommand())

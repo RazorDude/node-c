@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ConfigProviderService, Constants as CoreConstants, LoggerService } from '@node-c/core';
+import {
+  type ConfigProviderService,
+  Constants as CoreConstants,
+  type LoggerService
+} from '@node-c/core';
 import { IAMAuthenticationUserLocalService as BaseIAMAuthenticationUserLocalService } from '@node-c/domain-iam';
 
-import {
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+
+import type {
   DomainIAMAuthenticationUserLocalCompleteData,
   DomainIAMAuthenticationUserLocalCompleteOptions,
   DomainIAMAuthenticationUserLocalCompleteResult,
   DomainIAMAuthenticationUserLocalUserFields
 } from './authenticationUserLocal.definitions.js';
-
-import { Constants } from '../../../../common/definitions/common.constants.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticationUserLocalService<
@@ -23,10 +27,14 @@ export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticati
     logger: LoggerService,
     @Inject(CoreConstants.DOMAIN_MODULE_NAME)
     moduleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected userLoginLogsService: DataAuditUserLoginLogsService
   ) {
-    super(configProvider, logger, moduleName, Constants.DOMAIN_IAM_AUTH_USER_LOCAL_SERVICE_NAME);
+    super(
+      configProvider,
+      logger,
+      moduleName,
+      Constants.DOMAIN_IAM_AUTH_USER_LOCAL_SERVICE_NAME
+    );
   }
 
   async complete(

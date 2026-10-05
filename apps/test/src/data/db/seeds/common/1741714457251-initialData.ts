@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialData1741714457251 implements MigrationInterface {
   name = 'InitialData1741714457251';
@@ -37,7 +37,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         // third item
         3,
-        '{ \"query.include\": [\"/lessons(\\\\.lessonType)?/\", \"courseType\"] }',
+        '{ "query.include": ["/lessons(\\\\.lessonType)?/", "courseType"] }',
         '["CoursePlatformCoursesEntityController"]',
         null,
         '["find"]',
@@ -48,7 +48,7 @@ export class InitialData1741714457251 implements MigrationInterface {
         'assignedCourses.id',
         // fourth item
         4,
-        '{ \"query.include\": [\"/lessons(\\\\.lessonType)?/\", \"courseType\"] }',
+        '{ "query.include": ["/lessons(\\\\.lessonType)?/", "courseType"] }',
         '["CoursePlatformCoursesEntityController"]',
         null,
         '["findOne"]',
@@ -109,8 +109,8 @@ export class InitialData1741714457251 implements MigrationInterface {
         "(5, 2, 'Multi-stage cooking'), " +
         "(6, 1, 'Advanced ingredients'), " +
         "(7, 3, 'Advanced staple food recipes'), " +
-        "(8, 3, 'The secrets of Grandma\'\'s food'), " +
-        "(9, 3, 'Introduction to Gordon\'\'s style');"
+        "(8, 3, 'The secrets of Grandma''s food'), " +
+        "(9, 3, 'Introduction to Gordon''s style');"
     );
     await queryRunner.query(
       'INSERT INTO `courseLessons` (`courseId`, `lessonId`) VALUES ' +
@@ -176,6 +176,6 @@ export class InitialData1741714457251 implements MigrationInterface {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

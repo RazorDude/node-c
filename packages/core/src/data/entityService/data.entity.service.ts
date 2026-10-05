@@ -1,4 +1,11 @@
-import {
+import type {
+  AppConfigCommonData,
+  AppConfigCommonDataEntityServiceSettings
+} from '../../common/configProvider/configProvider.definitions.js';
+import type { ConfigProviderService } from '../../common/configProvider/configProvider.service.js';
+import { ApplicationError } from '../../common/definitions/common.errors.js';
+import type { LoggerService } from '../../common/logger/logger.service.js';
+import type {
   DataBulkCreatePrivateOptions,
   DataCountPrivateOptions,
   DataCreatePrivateOptions,
@@ -17,113 +24,113 @@ import {
   ProcessObjectAllowedFieldsOptions
 } from './data.entity.service.definitions.js';
 
-import {
-  AppConfigCommonData,
-  AppConfigCommonDataEntityServiceSettings
-} from '../../common/configProvider/configProvider.definitions.js';
-import { ConfigProviderService } from '../../common/configProvider/configProvider.service.js';
-import { ApplicationError } from '../../common/definitions/common.errors.js';
-import { LoggerService } from '../../common/logger/logger.service.js';
-
 /**
  * This class is used as a unifying abstraction between RDB and non-RDB entities. It can be used
  * to define classes that are agnostic of the type of persitance.
  */
-export abstract class DataEntityService<Entity, Data extends DataDefaultData<Entity> = DataDefaultData<Entity>> {
+export abstract class DataEntityService<
+  Entity,
+  Data extends DataDefaultData<Entity> = DataDefaultData<Entity>
+> {
   protected settings: AppConfigCommonDataEntityServiceSettings;
 
   constructor(
     protected configProvider: ConfigProviderService,
     protected dataModuleName: string,
-    // eslint-disable-next-line no-unused-vars
     protected logger: LoggerService
   ) {
-    const { settingsPerEntity } = configProvider.config.data[dataModuleName] as AppConfigCommonData;
+    const { settingsPerEntity } = configProvider.config.data[
+      dataModuleName
+    ] as AppConfigCommonData;
     this.settings = settingsPerEntity || {};
   }
 
-  public async bulkCreate(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public bulkCreate(
     _data: Data['BulkCreate'],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options?: unknown,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataBulkCreatePrivateOptions
   ): Promise<Entity[]> {
-    throw new ApplicationError(`Method bulkCreate not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method bulkCreate not implemented for class ${typeof this}.`
+    );
   }
 
-  public async count(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public count(
     _options: DataFindOptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataCountPrivateOptions
   ): Promise<number | undefined> {
-    throw new ApplicationError(`Method count not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method count not implemented for class ${typeof this}.`
+    );
   }
 
-  public async create(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public create(
     _data: Data['Create'],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options?: unknown,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataCreatePrivateOptions
   ): Promise<Entity> {
-    throw new ApplicationError(`Method create not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method create not implemented for class ${typeof this}.`
+    );
   }
 
   public delete(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: DataDeleteOptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataDeletePrivateOptions
   ): Promise<DataDeleteResult<Entity>> {
-    throw new ApplicationError(`Method delete not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method delete not implemented for class ${typeof this}.`
+    );
   }
 
   public find(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: DataFindOptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataFindPrivateOptions
   ): Promise<DataFindResults<Entity>> {
-    throw new ApplicationError(`Method find not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method find not implemented for class ${typeof this}.`
+    );
   }
 
   public findOne(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: DataFindOneOptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataFindOnePrivateOptions
   ): Promise<Entity | null> {
-    throw new ApplicationError(`Method findOne not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method findOne not implemented for class ${typeof this}.`
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public getEntityName(noError?: boolean): string | null {
     if (noError) {
       return null;
     }
-    throw new ApplicationError(`Method getEntityName not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method getEntityName not implemented for class ${typeof this}.`
+    );
   }
 
   // TODO: handle relations' fields
-  protected async processObjectAllowedFields<Data = Partial<Entity>>(
-    data: Data | Data[],
+  // biome-ignore lint/suspicious/useAwait: Legacy.
+  protected async processObjectAllowedFields<DataObject = Partial<Entity>>(
+    data: DataObject | DataObject[],
     options: ProcessObjectAllowedFieldsOptions
-  ): Promise<Data | Data[]> {
+  ): Promise<DataObject | DataObject[]> {
     const { settings } = this;
     const { allowedFields, isEnabled, objectType } = options;
-    if (isEnabled === false || (typeof isEnabled === 'undefined' && !settings[objectType as keyof typeof settings])) {
+    if (
+      isEnabled === false ||
+      (typeof isEnabled === 'undefined' &&
+        !settings[objectType as keyof typeof settings])
+    ) {
       return data;
     }
-    const actualData = data instanceof Array ? data : [data];
-    const processedData: Data[] = [];
-    actualData.forEach(dataItem => {
-      const processedDataItem = {} as Data;
-      allowedFields.forEach(fieldName => {
-        const typedFieldName = fieldName as unknown as keyof Data;
+    const actualData = Array.isArray(data) ? data : [data];
+    const processedData: DataObject[] = [];
+    actualData.forEach((dataItem) => {
+      const processedDataItem = {} as DataObject;
+      allowedFields.forEach((fieldName) => {
+        const typedFieldName = fieldName as unknown as keyof DataObject;
         const value = dataItem[typedFieldName];
         if (typeof value !== 'undefined') {
           processedDataItem[typedFieldName] = value;
@@ -134,14 +141,13 @@ export abstract class DataEntityService<Entity, Data extends DataDefaultData<Ent
     return processedData.length === 1 ? processedData[0] : processedData;
   }
 
-  public async update(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public update(
     _data: Data['Update'],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: DataUpdateOptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _privateOptions?: DataUpdatePrivateOptions
   ): Promise<DataUpdateResult<Entity>> {
-    throw new ApplicationError(`Method update not implemented for class ${typeof this}.`);
+    throw new ApplicationError(
+      `Method update not implemented for class ${typeof this}.`
+    );
   }
 }
