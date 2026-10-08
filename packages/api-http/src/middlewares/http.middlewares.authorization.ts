@@ -6,12 +6,9 @@ import {
   type NestMiddleware
 } from '@nestjs/common';
 
-import {
-  type AppConfigAPIHTTP,
-  type ConfigProviderService,
-  HttpMethod,
-  type LoggerService
-} from '@node-c/core';
+import type { AppConfigAPIHTTP } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService, HttpMethod, LoggerService } from '@node-c/core';
 import type {
   IAMAuthenticationManagerService,
   IAMAuthenticationManagerUserTokenEnityFields,

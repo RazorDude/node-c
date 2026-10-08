@@ -9,16 +9,18 @@ import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 import type {
   DataDefaultData,
   DomainEntityServiceDefaultData,
-  GenericObject,
-  LoggerService
+  GenericObject
 } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '@node-c/core';
 
 import type {
   DataDBUsersCreateUserData,
   DataDBUsersUpdateUserData
 } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import type { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
 
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

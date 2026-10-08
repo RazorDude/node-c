@@ -1,10 +1,12 @@
 /** biome-ignore-all lint/suspicious/useAwait: Inheritance. */
 import { Inject } from '@nestjs/common';
+
+// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationPassthroughConsumerService } from '@node-c/domain-iam';
 

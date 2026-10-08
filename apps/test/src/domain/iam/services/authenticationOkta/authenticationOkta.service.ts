@@ -1,14 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationOktaService } from '@node-c/domain-iam-okta';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
-import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 import type {
   DomainIAMAuthenticationOktaCompleteData,

@@ -5,7 +5,9 @@ import {
   type NestMiddleware
 } from '@nestjs/common';
 
-import type { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
+import type { AppConfigAPIHTTP } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService } from '@node-c/core';
 
 import type { NextFunction, Response } from 'express';
 

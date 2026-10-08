@@ -3,6 +3,7 @@ import type { DynamicModule } from '@nestjs/common';
 import { loadDynamicModules } from '@node-c/core';
 
 import { RedisStoreModule } from '../store/redis.store.module.js';
+
 import type { RedisModuleOptions } from './redis.module.definitions.js';
 
 export class RedisModule {

@@ -1,12 +1,14 @@
 import ld from 'lodash';
 import type { GenericObject } from '../../common/definitions/common.definitions.js';
 import { ApplicationError } from '../../common/definitions/common.errors.js';
-import type { LoggerService } from '../../common/logger/logger.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '../../common/logger/logger.service.js';
 import type {
   DataDefaultData,
   DataFindResults
 } from '../../data/entityService/data.entity.service.definitions.js';
-import type { DataEntityService } from '../../data/entityService/data.entity.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataEntityService } from '../../data/entityService/data.entity.service.js';
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   type DomainBaseAdditionalServiceOptionsOverrides,

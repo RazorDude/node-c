@@ -1,13 +1,16 @@
+import type {
+  AppConfigDomainIAM,
+  DataEntityService,
+  DomainCreatePrivateOptions,
+  DomainCreateResult,
+  DomainEntityService,
+  GenericObject
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type AppConfigDomainIAM,
   ApplicationError,
-  type ConfigProviderService,
-  type DataEntityService,
-  type DomainCreatePrivateOptions,
-  type DomainCreateResult,
-  type DomainEntityService,
-  type GenericObject,
-  type LoggerService,
+  ConfigProviderService,
+  LoggerService,
   setNested
 } from '@node-c/core';
 

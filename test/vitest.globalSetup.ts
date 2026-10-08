@@ -358,8 +358,8 @@ export async function setup(): Promise<void> {
   console.info(
     '[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs...'
   );
-
-  console.info('[TestLogs]: Valkey cleaned up. Starting apps...');
+  // TODO: cleanup valkey
+  console.info('[TestLogs]: Valkey cleaned up. Setting up logs...');
   const logsFilePath = path.resolve(
     import.meta.dirname,
     `../logs/app_logs_${process.env.NODE_ENV}.txt`
@@ -370,6 +370,7 @@ export async function setup(): Promise<void> {
   } catch {
     // console.info(e);
   }
+  console.info('[TestLogs]: Logs set up. Starting apps...');
   await new Promise<void>((resolve, reject) => {
     // used to be start:apps-test:nyc:direct
     const appsProcess = spawn('npm', ['run', 'start:apps-test:direct'], {
@@ -379,6 +380,7 @@ export async function setup(): Promise<void> {
       if (appPromiseFulfilled) {
         return;
       }
+      console.error('App exited unexpectedly.');
       appPromiseFulfilled = true;
       reject();
     });
@@ -386,7 +388,7 @@ export async function setup(): Promise<void> {
       if (appPromiseFulfilled) {
         return;
       }
-      console.error(data);
+      console.error('App process error:', data);
       appPromiseFulfilled = true;
       reject();
     });
@@ -408,8 +410,12 @@ export async function setup(): Promise<void> {
       if (appPromiseFulfilled) {
         return;
       }
-      const dataText = data?.toString() || '';
-      console.error(dataText);
+      const dataText: string = data?.toString() || '';
+      if (dataText.indexOf('npm notice') !== -1) {
+        console.info(dataText);
+        return;
+      }
+      console.error('App stderr data:', dataText);
       appPromiseFulfilled = true;
       reject();
     });

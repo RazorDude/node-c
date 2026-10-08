@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { ConfigProviderService, LoggerService } from '@node-c/core';
-import { Constants, type SQLQueryBuilderService } from '@node-c/data-rdb';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService, LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import {
   TypeORMDBEntityService,
   type TypeORMDBRepository

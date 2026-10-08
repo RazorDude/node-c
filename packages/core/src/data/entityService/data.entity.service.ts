@@ -2,9 +2,12 @@ import type {
   AppConfigCommonData,
   AppConfigCommonDataEntityServiceSettings
 } from '../../common/configProvider/configProvider.definitions.js';
-import type { ConfigProviderService } from '../../common/configProvider/configProvider.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService } from '../../common/configProvider/configProvider.service.js';
 import { ApplicationError } from '../../common/definitions/common.errors.js';
-import type { LoggerService } from '../../common/logger/logger.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '../../common/logger/logger.service.js';
+
 import type {
   DataBulkCreatePrivateOptions,
   DataCountPrivateOptions,

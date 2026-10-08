@@ -6,7 +6,8 @@ import {
   type NestInterceptor
 } from '@nestjs/common';
 
-import { ApplicationError, type LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ApplicationError, LoggerService } from '@node-c/core';
 
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';

@@ -5,8 +5,10 @@ import {
   Constants as RDBConstants,
   type RDBRepository
 } from '@node-c/data-rdb';
+
 import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
 import { ClickHouseSelectQueryBuilder } from '../ormQueryBuilder/clickhouse.selectQueryBuilder.js';
+
 import type * as ClickhouseRepositoryDefinitions from './clickhouse.repository.definitions.js';
 
 // TODO: save method

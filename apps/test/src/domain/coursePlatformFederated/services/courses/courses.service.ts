@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { DomainEntityService, type LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainEntityService, LoggerService } from '@node-c/core';
 
 import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-import type { DataDBCoursesService } from '../../../../data/db/entities/courses/courses.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataDBCoursesService } from '../../../../data/db/entities/courses/courses.service.js';
 
 @Injectable()
 export class DomainCoursePlatformFederatedCoursesService extends DomainEntityService<

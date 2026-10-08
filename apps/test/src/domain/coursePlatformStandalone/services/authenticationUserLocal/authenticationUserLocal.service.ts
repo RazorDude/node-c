@@ -1,14 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationUserLocalService } from '@node-c/domain-iam';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
-import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 
 import type {
   DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteData,

@@ -1,13 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import type {
+  AppConfig,
+  AppConfigDataNoSQL,
+  GenericObject,
+  LoggerService
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type AppConfig,
-  type AppConfigDataNoSQL,
   ApplicationError,
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type GenericObject,
-  type LoggerService,
   NoSQLType
 } from '@node-c/core';
 

@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
 
+import type { DomainFindOptions, DomainFindResult } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainDataEntityServiceType,
   DomainEntityService,
-  type DomainFindOptions,
-  type DomainFindResult,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
+
 import type { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
-import type { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
-import type { DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone/entities/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataCacheStandaloneUsersEntityService } from '../../../../data/cacheStandalone/entities/users/users.service.js';
 import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import type { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 import type {
   DomainCoursePlatformStandaloneUsersGetUserWithPermissionsDataOptions,

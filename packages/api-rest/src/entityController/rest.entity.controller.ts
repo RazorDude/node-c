@@ -29,9 +29,10 @@ import type {
   DomainFindOneResult,
   DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult,
-  LoggerService
+  DomainUpdateResult
 } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '@node-c/core';
 
 import { BulkCreateDto as BaseBulkCreateDto } from './dto/bulkCreate.dto.js';
 import { CreateDto as BaseCreateDto } from './dto/create.dto.js';

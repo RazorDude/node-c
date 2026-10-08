@@ -7,11 +7,13 @@ import {
   Injectable,
   type NestInterceptor
 } from '@nestjs/common';
-import type { ModuleRef, Reflector } from '@nestjs/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ModuleRef, Reflector } from '@nestjs/core';
 
+import type { GenericObject } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type GenericObject,
-  type LoggerService,
+  LoggerService,
   Constants as NodeCCoreConstants,
   setNested
 } from '@node-c/core';

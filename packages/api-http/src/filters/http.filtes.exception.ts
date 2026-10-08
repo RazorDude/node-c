@@ -6,7 +6,8 @@ import {
   HttpStatus
 } from '@nestjs/common';
 
-import type { LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '@node-c/core';
 
 import type { Response } from 'express';
 

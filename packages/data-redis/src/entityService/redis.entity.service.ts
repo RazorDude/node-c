@@ -1,19 +1,26 @@
+import type {
+  AppConfigCommonDataNoSQLEntityServiceSettings,
+  DataDeleteResult,
+  DataFindResults,
+  DataUpdateResult,
+  GenericObject
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type AppConfigCommonDataNoSQLEntityServiceSettings,
   ApplicationError,
-  type ConfigProviderService,
-  type DataDeleteResult,
+  ConfigProviderService,
   DataEntityService,
-  type DataFindResults,
-  type DataUpdateResult,
-  type GenericObject,
-  type LoggerService,
+  LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
 import ld from 'lodash';
-import type { RedisRepositoryService } from '../repository/redis.repository.service.js';
-import type { RedisStoreService } from '../store/redis.store.service.js';
+
+// biome-ignore lint/style/useImportType: DI.
+import { RedisRepositoryService } from '../repository/redis.repository.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { RedisStoreService } from '../store/redis.store.service.js';
+
 import type {
   BulkCreateOptions,
   BulkCreatePrivateOptions,

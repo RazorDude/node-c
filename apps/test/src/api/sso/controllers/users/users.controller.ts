@@ -10,16 +10,20 @@ import {
 } from '@nestjs/common';
 
 import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+// biome-ignore lint/style/useImportType: DI.
 import {
   AppConfigDomainIAMAuthenticationStep,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 
 import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import type { DomainIAMAuthenticationManagerService } from '../../../../domain/iam/services/authenticationManager/authenticationManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMAuthenticationManagerService } from '../../../../domain/iam/services/authenticationManager/authenticationManager.service.js';
 import type { DomainIAMUsersDomainEntityServiceData } from '../../../../domain/iam/services/users/users.definitions.js';
-import type { DomainIAMUsersService } from '../../../../domain/iam/services/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMUsersService } from '../../../../domain/iam/services/users/users.service.js';
+
 import type { SSOUsersAuthenticateDto } from './dto/authenticate.dto.js';
 import type { SSOUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 import type { SSOUsersAuthenticatePassthroughDto } from './dto/authenticatePassthrough.dto.js';

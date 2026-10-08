@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
   type DataDefaultData,
   DomainEntityService,
   type DomainEntityServiceDefaultData,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 
 import type { DataCacheFederatedToken } from '../../../../data/cacheFederated/entities/tokens/tokens.entity.js';
-import type { DataCacheFederatedTokensEntityService } from '../../../../data/cacheFederated/entities/tokens/tokens.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataCacheFederatedTokensEntityService } from '../../../../data/cacheFederated/entities/tokens/tokens.service.js';
 
 @Injectable()
 export class DomainCoursePlatformFederatedTokensService extends DomainEntityService<

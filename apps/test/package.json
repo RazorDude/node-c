@@ -6,26 +6,21 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
+    "build:watch": "npm run build -- -w",
+    "build:watch:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build:watch",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "format": "npx @biomejs/biome format --write",
     "format:check": "npx @biomejs/biome format",
     "generate:datasource-files": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} npx @node-c/core generateDatasourceFiles",
     "generate:datasource-files:local": "DATASOURCE_ENV=${DATASOURCE_ENV} MODULE_NAMES=${MODULE_NAMES} node ../../packages/core/dist/scripts/generateDatasourceFiles.js",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "start:dev": "nodemon --watch src --exec ts-node src/main.ts",
-    "start:dev:debug": "nodemon --watch src --exec node --inspect-brk -r ts-node/register src/main.ts",
-    "start:test:nyc": "NODE_ENV=endToEndTests nyc ts-node src/main.ts",
-    "test": "NODE_ENV=endToEndTests nyc vitest --config test/vitest.config.ts",
-    "typeorm": "typeorm-ts-node-esm",
+    "lint": "npx @biomejs/biome check",
+    "lint:fix": "npx @biomejs/biome check --write",
+    "start:dev": "node --watch dist/main.js",
+    "start:dev:debug": "node --watch --inspect-brk -r dist/main.js",
     "typeorm:migration:generate:db": "npx @node-c/data-typeorm migration:generate -d datasource-db-${DATASOURCE_ENV}.js ${MIGRATION_NAME}",
-    "typeorm:migration:generate:db:directCli": "npm run typeorm -- migration:generate -d datasource-db-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
     "typeorm:migration:generate:dbConfigs": "npx @node-c/data-typeorm migration:generate -d datasource-dbConfigs-${DATASOURCE_ENV}.js ${MIGRATION_NAME}",
-    "typeorm:migration:generate:dbConfigs:directCli": "npm run typeorm -- migration:generate -d datasource-dbConfigs-${DATASOURCE_ENV}.ts ${MIGRATION_NAME}",
     "typeorm:migration:run:db": "npx @node-c/data-typeorm migration:run -d datasource-db-${DATASOURCE_ENV}.js",
-    "typeorm:migration:run:db:directCli": "npm run typeorm -- migration:run -d datasource-db-${DATASOURCE_ENV}.ts",
-    "typeorm:migration:run:dbConfigs": "npx @node-c/data-typeorm migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.js",
-    "typeorm:migration:run:dbConfigs:directCli": "npm run typeorm -- migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.ts"
+    "typeorm:migration:run:dbConfigs": "npx @node-c/data-typeorm migration:run -d datasource-dbConfigs-${DATASOURCE_ENV}.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.3",
@@ -54,8 +49,6 @@
     "@types/yargs": "^17.0.35",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "nyc": "^18.0.0",
-    "ts-node": "^10.9.2",
     "yargs": "^18.2.0"
   }
 }

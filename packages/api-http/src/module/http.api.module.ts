@@ -7,7 +7,8 @@ import {
 } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 
-import { type ConfigProviderService, loadDynamicModules } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
 import express, { type Response } from 'express';

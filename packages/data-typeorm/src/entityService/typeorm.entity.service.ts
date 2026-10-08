@@ -1,16 +1,14 @@
-import type {
-  ConfigProviderService,
-  DataDefaultData,
-  LoggerService
-} from '@node-c/core';
-import {
-  RDBEntityService,
-  type SQLQueryBuilderService
-} from '@node-c/data-rdb';
+import type { DataDefaultData } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { ConfigProviderService, LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
+import type { ObjectLiteral } from 'typeorm';
+// biome-ignore lint/style/useImportType: DI.
+import { EntitySchema } from 'typeorm';
 
-import type { EntitySchema, ObjectLiteral } from 'typeorm';
-
-import type { TypeORMDBRepository } from '../repository/typeorm.repository.js';
+// biome-ignore lint/style/useImportType: DI.
+import { TypeORMDBRepository } from '../repository/typeorm.repository.js';
 
 export class TypeORMDBEntityService<
   Entity extends ObjectLiteral,

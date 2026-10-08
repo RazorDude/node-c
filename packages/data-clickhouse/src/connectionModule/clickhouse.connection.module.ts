@@ -10,6 +10,7 @@ import {
 } from '@node-c/core';
 
 import { Constants } from '../common/definitions/common.constants.js';
+
 import type { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions.js';
 
 export class ClickHouseConnectionModule {

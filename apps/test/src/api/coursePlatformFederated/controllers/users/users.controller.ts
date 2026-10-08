@@ -10,12 +10,14 @@ import {
 } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
+// biome-ignore lint/style/useImportType: DI.
 import {
   AppConfigDomainIAMAuthenticationStep,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 
-import type { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
 import type { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
 import type { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 

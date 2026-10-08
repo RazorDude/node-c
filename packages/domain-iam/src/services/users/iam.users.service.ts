@@ -2,14 +2,17 @@
 
 import { Injectable } from '@nestjs/common';
 
+import type {
+  DataDefaultData,
+  DataEntityService,
+  DomainEntityServiceDefaultData
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
-  type DataDefaultData,
-  type DataEntityService,
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainEntityService,
-  type DomainEntityServiceDefaultData,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 
 import type {

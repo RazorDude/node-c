@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
+
+import type { DataOrderBy, GenericObject } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type DataOrderBy,
   DataOrderByDirection,
   DataSelectOperator,
-  type GenericObject,
-  type LoggerService,
+  LoggerService,
   RDBType
 } from '@node-c/core';
 
@@ -19,6 +20,7 @@ import type {
   OrmSelectQueryBuilder
 } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
 import type { RDBEntityManager } from '../repository/rdb.repository.js';
+
 import type {
   BuildQueryOptions,
   IncludeItems,

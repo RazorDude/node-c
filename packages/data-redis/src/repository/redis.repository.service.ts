@@ -1,12 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import type {
+  AppConfigCommonDataNoSQLValidationSettings,
+  AppConfigDataNoSQL,
+  GenericObject
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type AppConfigCommonDataNoSQLValidationSettings,
-  type AppConfigDataNoSQL,
   ApplicationError,
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type GenericObject,
   getNested,
   setNested
 } from '@node-c/core';
@@ -20,7 +23,9 @@ import ld from 'lodash';
 import { v4 as uuid } from 'uuid';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RedisStoreService } from '../store/redis.store.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { RedisStoreService } from '../store/redis.store.service.js';
+
 import * as RedisRepositoryDefinitions from './redis.repository.definitions.js';
 
 const DEFAULT_PER_PAGE_COUNT = 100;

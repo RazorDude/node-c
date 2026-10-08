@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import {
   type IAMAuthenticationManagerAuthenticateOptions,
@@ -17,16 +18,22 @@ import {
 import ld from 'lodash';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
-import type { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
 import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 
-import type { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
-import type { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer/authenticationPassthroughConsumer.service.js';
-import type { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
-import type { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformStandaloneAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { CoursePlatformStandaloneAuthenticationPassthroughConsumerService } from '../authenticationPassthroughConsumer/authenticationPassthroughConsumer.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformStandaloneAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformStandaloneTokenManagerService } from '../tokenManager/tokenManager.service.js';
 import type { DomainCoursePlatformStandaloneUsersServiceData } from '../users/users.definitions.js';
-import type { DomainCoursePlatformStandaloneUsersService } from '../users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformStandaloneUsersService } from '../users/users.service.js';
 
 // TODO: inject passthrough consumer after the standalone authentication finishes
 @Injectable()

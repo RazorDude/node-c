@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
+/** biome-ignore-all lint/suspicious/noConsole: Test file. */
+
 import { HttpMethod } from '@node-c/core';
 
 import { describe, expect, it } from 'vitest';

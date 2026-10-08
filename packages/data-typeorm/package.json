@@ -10,8 +10,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
+    "build:watch": "npm run build -- -w",
+    "build:watch:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build:watch",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
-    "dev": "tsc -p tsconfig.build.json --watch",
     "format": "npx @biomejs/biome format --write",
     "format:check": "npx @biomejs/biome format",
     "lint": "npx @biomejs/biome check",

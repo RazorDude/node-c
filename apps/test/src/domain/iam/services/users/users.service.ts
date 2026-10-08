@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainDataEntityServiceType,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { type IAMPermission, IAMUsersService } from '@node-c/domain-iam';
 
 import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
-import type { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
 import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-import type { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
 import type {
   DomainIAMUsersDomainEntityServiceData,

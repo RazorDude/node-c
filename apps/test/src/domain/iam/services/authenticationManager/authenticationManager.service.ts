@@ -1,23 +1,30 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
-import type { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
 import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
 import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 
-import type { DomainIAMAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
-import type { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough/authenticationPassthrough.service.js';
-import type { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
-import type { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough/authenticationPassthrough.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
 import type { DomainIAMUsersDomainEntityServiceData } from '../users/users.definitions.js';
-import type { DomainIAMUsersService } from '../users/users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMUsersService } from '../users/users.service.js';
 
 @Injectable()
 export class DomainIAMAuthenticationManagerService extends IAMAuthenticationManagerService<

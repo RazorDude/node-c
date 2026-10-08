@@ -1,7 +1,9 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 
 import { Constants as CoreConstants } from '@node-c/core';
+
 import { Constants } from '../common/definitions/common.constants.js';
+
 import type { SQLQueryBuilderModuleOptions } from './rdb.sqlQueryBuilder.definitions.js';
 import { SQLQueryBuilderService } from './rdb.sqlQueryBuilder.service.js';
 

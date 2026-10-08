@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import type { LoggerService } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
+import { LoggerService } from '@node-c/core';
 import { IAMAuthorizationService } from '@node-c/domain-iam';
 
-import type { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()
 export class DomainIAMAuthorizationService extends IAMAuthorizationService {

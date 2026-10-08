@@ -1,14 +1,17 @@
+import type {
+  AppConfigDomainIAM,
+  DataDefaultData,
+  DataEntityService,
+  DomainEntityServiceDefaultData,
+  GenericObject
+} from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  type ConfigProviderService,
-  type DataDefaultData,
-  type DataEntityService,
-  type DomainEntityServiceDefaultData,
-  type GenericObject,
+  ConfigProviderService,
   getNested,
-  type LoggerService,
+  LoggerService,
   setNested
 } from '@node-c/core';
 
@@ -27,9 +30,12 @@ import type { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam
 import type { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
 import type { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
 import { TokenType } from '../tokenManager/iam.tokenManager.definitions.js';
-import type { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
 import type { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
-import type { IAMUsersService } from '../users/iam.users.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { IAMUsersService } from '../users/iam.users.service.js';
+
 import {
   type IAMAuthenticationManagerAuthenticateOptions,
   type IAMAuthenticationManagerAuthenticateReturnData,

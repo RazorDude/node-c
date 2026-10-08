@@ -1,21 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import type { DataFindResults, DataUpdateResult } from '@node-c/core';
+// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
-  type ConfigProviderService,
-  type DataFindResults,
-  type DataUpdateResult,
-  type LoggerService
+  ConfigProviderService,
+  LoggerService
 } from '@node-c/core';
-import {
-  Constants,
-  type CreateOptions,
-  type CreatePrivateOptions,
-  type FindOneOptions,
-  type FindOptions,
-  type SQLQueryBuilderService,
-  type UpdateOptions
+import type {
+  CreateOptions,
+  CreatePrivateOptions,
+  FindOneOptions,
+  FindOptions,
+  UpdateOptions
 } from '@node-c/data-rdb';
+// biome-ignore lint/style/useImportType: DI.
+import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import {
   TypeORMDBEntityService,
   type TypeORMDBRepository

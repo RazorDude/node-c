@@ -1,9 +1,10 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
 
+// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
-  type ConfigProviderService,
-  type LoggerService
+  ConfigProviderService,
+  LoggerService
 } from '@node-c/core';
 
 import type {

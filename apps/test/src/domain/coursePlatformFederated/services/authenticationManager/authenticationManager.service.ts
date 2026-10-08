@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+// biome-ignore lint/style/useImportType: DI.
 import {
-  type ConfigProviderService,
+  ConfigProviderService,
   Constants as CoreConstants,
-  type LoggerService
+  LoggerService
 } from '@node-c/core';
 import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
 
-import type { DomainCoursePlatformFederatedAuthenticationOktaConsumerService } from '../authenticationOktaConsumer/authenticationOktaConsumer.service.js';
-import type { DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService } from '../authenticationUserLocalConsumer/authenticationUserLocalConsumer.service.js';
-import type { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManager/tokenManager.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformFederatedAuthenticationOktaConsumerService } from '../authenticationOktaConsumer/authenticationOktaConsumer.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService } from '../authenticationUserLocalConsumer/authenticationUserLocalConsumer.service.js';
+// biome-ignore lint/style/useImportType: DI.
+import { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()
 export class DomainCoursePlatformFederatedAuthenticationManagerService extends IAMAuthenticationManagerService {
