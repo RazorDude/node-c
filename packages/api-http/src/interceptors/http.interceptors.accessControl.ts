@@ -1,32 +1,30 @@
 /** biome-ignore-all lint/suspicious/useAwait: Enforced by parent class definitions */
 import {
-  type CallHandler,
-  type ExecutionContext,
+  CallHandler,
+  ExecutionContext,
   HttpException,
   HttpStatus,
   Injectable,
-  type NestInterceptor
+  NestInterceptor
 } from '@nestjs/common';
-// biome-ignore lint/style/useImportType: DI.
 import { ModuleRef, Reflector } from '@nestjs/core';
 
-import type { GenericObject } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  GenericObject,
   LoggerService,
   Constants as NodeCCoreConstants,
   setNested
 } from '@node-c/core';
 import {
   IAMAuthorizationService,
-  type IAMUserWithPermissionsData,
+  IAMUserWithPermissionsData,
   Constants as NodeCDomainIAMConstants
 } from '@node-c/domain-iam';
 
 // biome-ignore lint/suspicious/noDeprecatedImports: False positive.
-import { map, type Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
-import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 import {
   AccessControlContext,
   AccessControlResource

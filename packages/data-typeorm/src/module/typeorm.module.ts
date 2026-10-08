@@ -1,4 +1,4 @@
-import type { DynamicModule } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
 // import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
@@ -13,7 +13,7 @@ import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 
 import { DataSource, type DataSourceOptions } from 'typeorm';
 
-import type { TypeORMDBModuleOptions } from './typeorm.module.definitions.js';
+import { TypeORMDBModuleOptions } from './typeorm.module.definitions.js';
 
 const RETRY_INTERVAL_MS = 60_000;
 

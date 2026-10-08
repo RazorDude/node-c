@@ -1,5 +1,5 @@
-import type { GenericObject } from '@node-c/core';
-import type { RDBEntitySchema } from '@node-c/data-rdb';
+import { GenericObject } from '@node-c/core';
+import { RDBEntitySchema } from '@node-c/data-rdb';
 
 export interface ClickHouseDBEntitySchema<
   EntityClass extends GenericObject<unknown>

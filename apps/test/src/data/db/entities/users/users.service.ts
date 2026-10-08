@@ -1,30 +1,30 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { DataFindResults, DataUpdateResult } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
   ConfigProviderService,
+  DataFindResults,
+  DataUpdateResult,
   LoggerService
 } from '@node-c/core';
-import type {
+import {
+  Constants,
   CreateOptions,
   CreatePrivateOptions,
   FindOneOptions,
   FindOptions,
+  SQLQueryBuilderService,
   UpdateOptions
 } from '@node-c/data-rdb';
-// biome-ignore lint/style/useImportType: DI.
-import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import {
   TypeORMDBEntityService,
-  type TypeORMDBRepository
+  TypeORMDBRepository
 } from '@node-c/data-typeorm';
 
 import ld from 'lodash';
-import type { EntityManager } from 'typeorm';
+import { EntityManager } from 'typeorm';
 
-import type {
+import {
   DataDBUsersCreateUserData,
   DataDBUsersDataEntityServiceData,
   DataDBUsersFindOnePrivateOptions,
@@ -32,7 +32,7 @@ import type {
   DataDBUsersUpdatePasswordData,
   DataDBUsersUpdateUserData
 } from './users.definitions.js';
-import { type DataDBUser, DataDBUserEntity } from './users.entity.js';
+import { DataDBUser, DataDBUserEntity } from './users.entity.js';
 
 // TODO: move all of the "omit password" logic to a new UsersDataEntityService in the core module
 @Injectable()

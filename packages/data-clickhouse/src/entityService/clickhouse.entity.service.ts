@@ -1,12 +1,12 @@
-import type { DataDefaultData, GenericObject } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
+import {
+  ConfigProviderService,
+  DataDefaultData,
+  GenericObject,
+  LoggerService
+} from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
 import { ClickHouseDBRepository } from '../repository/clickhouse.repository.js';
 
 export class ClickHouseDBEntityService<

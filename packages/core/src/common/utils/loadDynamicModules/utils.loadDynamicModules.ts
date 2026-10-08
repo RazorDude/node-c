@@ -1,6 +1,6 @@
-import type { ClassProvider, DynamicModule, Provider } from '@nestjs/common';
+import { ClassProvider, DynamicModule, Provider } from '@nestjs/common';
 
-import type { GenericObject } from '../../definitions/common.definitions.js';
+import { GenericObject } from '../../definitions/common.definitions.js';
 
 const regExps = {
   base: new RegExp(/^base(.+)?$/),

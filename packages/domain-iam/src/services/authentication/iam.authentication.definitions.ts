@@ -1,9 +1,9 @@
-import type {
+import {
   AppConfigCommonDomainIAMAuthServiceConfigStepSettings,
   GenericObject
 } from '@node-c/core';
 
-import type { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
 
 export interface IAMAuthenticationCompleteData {
   mfaData?: unknown;

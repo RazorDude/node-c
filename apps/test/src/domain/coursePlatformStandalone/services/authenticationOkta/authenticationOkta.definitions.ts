@@ -1,4 +1,4 @@
-import type {
+import {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
@@ -6,7 +6,7 @@ import type {
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
 
 export type DomainCoursePlatformStandaloneAuthenticationOktaCompleteData =
   IAMAuthenticationOktaCompleteData;

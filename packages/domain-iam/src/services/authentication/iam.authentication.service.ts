@@ -1,5 +1,4 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
   ConfigProviderService,
@@ -10,7 +9,7 @@ import * as jwt from 'jsonwebtoken';
 
 import { Constants } from '../../common/definitions/common.constants.js';
 
-import type {
+import {
   IAMAuthenticationCompleteData,
   IAMAuthenticationCompleteOptions,
   IAMAuthenticationCompleteResult,

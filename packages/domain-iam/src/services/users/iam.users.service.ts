@@ -2,20 +2,17 @@
 
 import { Injectable } from '@nestjs/common';
 
-import type {
-  DataDefaultData,
-  DataEntityService,
-  DomainEntityServiceDefaultData
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
+  DataDefaultData,
+  DataEntityService,
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainEntityService,
+  DomainEntityServiceDefaultData,
   LoggerService
 } from '@node-c/core';
 
-import type {
+import {
   IAMUsersGetUserWithPermissionsDataOptions,
   IAMUsersGetUserWithPermissionsDataPrivateOptions,
   IAMUserWithPermissionsData

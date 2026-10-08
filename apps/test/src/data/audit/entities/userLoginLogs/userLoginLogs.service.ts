@@ -1,16 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ConfigProviderService, LoggerService } from '@node-c/core';
 import {
   ClickHouseDBEntityService,
-  type ClickHouseDBRepository
+  ClickHouseDBRepository
 } from '@node-c/data-clickhouse';
-// biome-ignore lint/style/useImportType: DI.
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
 import {
-  type DataAuditUserLoginLog,
+  DataAuditUserLoginLog,
   DataAuditUserLoginLogEntity
 } from './userLoginLogs.entity.js';
 

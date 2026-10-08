@@ -1,12 +1,11 @@
 import {
-  type CallHandler,
-  type ExecutionContext,
+  CallHandler,
+  ExecutionContext,
   HttpStatus,
   Injectable,
-  type NestInterceptor
+  NestInterceptor
 } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ApplicationError, LoggerService } from '@node-c/core';
 
 import { Observable } from 'rxjs';

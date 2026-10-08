@@ -1,6 +1,6 @@
-import type { ModuleMetadata } from '@nestjs/common';
+import { ModuleMetadata } from '@nestjs/common';
 
-import type { GenericObject } from '@node-c/core';
+import { GenericObject } from '@node-c/core';
 
 export interface ClickHouseDBModuleOptions {
   entityModuleRegisterOptions?: unknown;

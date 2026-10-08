@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  type Type,
+  Type,
   UseInterceptors,
   ValidationPipe
 } from '@nestjs/common';
@@ -17,22 +17,20 @@ import {
   HTTPAccessControlInterceptor,
   HTTPErrorInterceptor
 } from '@node-c/api-http';
-
-import type {
+import {
   DataDefaultData,
   DomainBulkCreateResult,
   DomainCreateResult,
-  DomainDeleteOptions,
+  type DomainDeleteOptions,
   DomainDeleteResult,
   DomainEntityServiceDefaultData,
-  DomainFindOneOptions,
+  type DomainFindOneOptions,
   DomainFindOneResult,
-  DomainFindOptions,
+  type DomainFindOptions,
   DomainFindResult,
-  DomainUpdateResult
+  DomainUpdateResult,
+  LoggerService
 } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { LoggerService } from '@node-c/core';
 
 import { BulkCreateDto as BaseBulkCreateDto } from './dto/bulkCreate.dto.js';
 import { CreateDto as BaseCreateDto } from './dto/create.dto.js';
@@ -46,7 +44,7 @@ import type {
   DefaultDomainEntityService,
   UpdateBody
 } from './rest.entity.controller.definitions.js';
-import type { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
+import { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
 
 // TODO: a middleware for converting string booleans to booleans
 // TODO: add the ability to specify which dataServices are exposed by the domainService and for which methods

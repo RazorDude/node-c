@@ -1,10 +1,10 @@
-import type {
+import {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult
 } from '@node-c/domain-iam';
 
-import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
 
 export type DomainCoursePlatformStandaloneAuthenticationUserLocalCompleteData =
   IAMAuthenticationUserLocalCompleteData;

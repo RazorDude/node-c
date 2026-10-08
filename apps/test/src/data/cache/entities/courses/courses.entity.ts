@@ -4,7 +4,7 @@ import {
   getDefaultEntitySchema,
   type RedisEntity
 } from '../../../cacheBase/entity/base.redis.entity.js';
-import type { DataDBCourse } from '../../../db/entities/db.entities.js';
+import { DataDBCourse } from '../../../db/entities/db.entities.js';
 
 const defaultSchema = getDefaultEntitySchema(
   EntitySchemaColumnType.Integer,

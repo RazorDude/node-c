@@ -2,7 +2,7 @@ import {
   type AppConfigDomainIAMAuthenticationStep,
   GenericObjectClass
 } from '@node-c/core';
-import type { IAMAuthenticationManagerAuthenticateOptions } from '@node-c/domain-iam';
+import { IAMAuthenticationManagerAuthenticateOptions } from '@node-c/domain-iam';
 
 import { Type } from 'class-transformer';
 import {

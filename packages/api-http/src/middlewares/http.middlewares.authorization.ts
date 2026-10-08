@@ -3,24 +3,26 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  type NestMiddleware
+  NestMiddleware
 } from '@nestjs/common';
-
-import type { AppConfigAPIHTTP } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { ConfigProviderService, HttpMethod, LoggerService } from '@node-c/core';
-import type {
+import {
+  AppConfigAPIHTTP,
+  ConfigProviderService,
+  HttpMethod,
+  LoggerService
+} from '@node-c/core';
+import {
   IAMAuthenticationManagerService,
   IAMAuthenticationManagerUserTokenEnityFields,
   IAMAuthorizationService,
   IAMTokenManagerService
 } from '@node-c/domain-iam';
 
-import type { NextFunction, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import qs from 'qs';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 import { ErrorCodes } from '../common/definitions/common.errors.js';
 import { checkRoutes } from '../common/utils/utils.checkRoutes.js';
 

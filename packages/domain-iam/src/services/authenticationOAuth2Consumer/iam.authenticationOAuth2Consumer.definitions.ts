@@ -1,15 +1,15 @@
-import type {
+import {
   IAMAuthenticationRefreshExternalAccessTokenData,
   IAMAuthenticationRefreshExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';
-import type {
+import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
   IAMAuthenticationConsumerInitiateResult,
   IAMAuthenticationConsumerRefreshExternalAccessTokenResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
-import type {
+import {
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,
   IAMAuthenticationOAuth2CompleteResult,

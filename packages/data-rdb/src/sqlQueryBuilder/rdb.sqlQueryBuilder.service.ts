@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { DataOrderBy, GenericObject } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
   ConfigProviderService,
   Constants as CoreConstants,
+  DataOrderBy,
   DataOrderByDirection,
   DataSelectOperator,
+  GenericObject,
   LoggerService,
   RDBType
 } from '@node-c/core';
@@ -15,13 +15,13 @@ import {
 import ld from 'lodash';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type {
+import {
   OrmBaseQueryBuilder,
   OrmSelectQueryBuilder
 } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
-import type { RDBEntityManager } from '../repository/rdb.repository.js';
+import { RDBEntityManager } from '../repository/rdb.repository.js';
 
-import type {
+import {
   BuildQueryOptions,
   IncludeItems,
   ParsedFilter

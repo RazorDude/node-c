@@ -1,39 +1,39 @@
 import ld from 'lodash';
-import type { GenericObject } from '../../common/definitions/common.definitions.js';
+
+import { GenericObject } from '../../common/definitions/common.definitions.js';
 import { ApplicationError } from '../../common/definitions/common.errors.js';
-// biome-ignore lint/style/useImportType: DI.
 import { LoggerService } from '../../common/logger/logger.service.js';
-import type {
+import {
   DataDefaultData,
   DataFindResults
 } from '../../data/entityService/data.entity.service.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DataEntityService } from '../../data/entityService/data.entity.service.js';
+
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
-  type DomainBaseAdditionalServiceOptionsOverrides,
-  type DomainBulkCreateOptions,
-  type DomainBulkCreatePrivateOptions,
-  type DomainBulkCreateResult,
-  type DomainCreateOptions,
-  type DomainCreatePrivateOptions,
-  type DomainCreateResult,
+  DomainBaseAdditionalServiceOptionsOverrides,
+  DomainBulkCreateOptions,
+  DomainBulkCreatePrivateOptions,
+  DomainBulkCreateResult,
+  DomainCreateOptions,
+  DomainCreatePrivateOptions,
+  DomainCreateResult,
   DomainDataEntityServiceType,
-  type DomainDeleteOptions,
-  type DomainDeletePrivateOptions,
-  type DomainDeleteResult,
-  type DomainEntityServiceDefaultData,
-  type DomainFindOneOptions,
-  type DomainFindOnePrivateOptions,
-  type DomainFindOneResult,
-  type DomainFindOptions,
-  type DomainFindPrivateOptions,
-  type DomainFindResult,
+  DomainDeleteOptions,
+  DomainDeletePrivateOptions,
+  DomainDeleteResult,
+  DomainEntityServiceDefaultData,
+  DomainFindOneOptions,
+  DomainFindOnePrivateOptions,
+  DomainFindOneResult,
+  DomainFindOptions,
+  DomainFindPrivateOptions,
+  DomainFindResult,
   DomainMethod,
-  type DomainRunMethodInAdditionalServicesOptions,
-  type DomainUpdateOptions,
-  type DomainUpdatePrivateOptions,
-  type DomainUpdateResult
+  DomainRunMethodInAdditionalServicesOptions,
+  DomainUpdateOptions,
+  DomainUpdatePrivateOptions,
+  DomainUpdateResult
 } from './domain.entity.service.definitions.js';
 
 // TODO: privateOptionsOverrides by service

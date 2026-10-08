@@ -1,9 +1,8 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
-// biome-ignore lint/style/useImportType: DI.
 import { ConfigProviderService, LoggerService } from '@node-c/core';
 
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
-import type {
+import {
   IAMAuthenticationUserLocalConsumerCompleteData,
   IAMAuthenticationUserLocalConsumerCompleteOptions,
   IAMAuthenticationUserLocalConsumerCompleteResult,

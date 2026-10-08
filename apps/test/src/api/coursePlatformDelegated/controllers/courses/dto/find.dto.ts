@@ -11,7 +11,7 @@ import {
   ValidateNested
 } from 'class-validator';
 
-import type { DataDBCourse } from '../../../../../data/db/entities/db.entities.js';
+import { DataDBCourse } from '../../../../../data/db/entities/db.entities.js';
 
 export class CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions {
   @IsObject()

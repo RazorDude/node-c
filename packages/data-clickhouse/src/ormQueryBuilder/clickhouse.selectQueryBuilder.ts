@@ -1,17 +1,15 @@
 import {
   ApplicationError,
-  type DataOrderByDirection,
-  type GenericObject
+  DataOrderByDirection,
+  GenericObject
 } from '@node-c/core';
-import type {
+import {
   OrmDeleteQueryBuilder,
   OrmSelectQueryBuilder,
   OrmUpdateQueryBuilder
 } from '@node-c/data-rdb';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
-// biome-ignore lint/style/useImportType: DI.
 import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
 
 // TODO: field selection, join, update, delete

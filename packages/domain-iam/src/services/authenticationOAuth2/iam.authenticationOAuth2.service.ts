@@ -1,8 +1,7 @@
 import crypto from 'node:crypto';
 
-import type { AppConfigDomainIAM } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   base64UrlEncode,
@@ -17,7 +16,7 @@ import ld from 'lodash';
 import { Constants } from '../../common/definitions/common.constants.js';
 import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
-import type {
+import {
   IAMAuthenticationOAuth2AccessTokenProviderResponseData,
   IAMAuthenticationOAuth2CompleteData,
   IAMAuthenticationOAuth2CompleteOptions,

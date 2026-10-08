@@ -1,4 +1,4 @@
-import type {
+import {
   DataBulkCreatePrivateOptions,
   DataCountOptions,
   DataCountPrivateOptions,

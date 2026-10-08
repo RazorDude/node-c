@@ -1,15 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ConfigProviderService, LoggerService } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 import {
   TypeORMDBEntityService,
-  type TypeORMDBRepository
+  TypeORMDBRepository
 } from '@node-c/data-typeorm';
 
-import { type DataDBCourse, DataDBCourseEntity } from './courses.entity.js';
+import { DataDBCourse, DataDBCourseEntity } from './courses.entity.js';
 
 @Injectable()
 export class DataDBCoursesService extends TypeORMDBEntityService<DataDBCourse> {

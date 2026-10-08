@@ -1,4 +1,4 @@
-import type { DataOrderByDirection } from '@node-c/core';
+import { DataOrderByDirection } from '@node-c/core';
 
 export abstract class OrmBaseQueryBuilder<Entity> {
   abstract andWhere(..._args: unknown[]): OrmBaseQueryBuilder<Entity>;

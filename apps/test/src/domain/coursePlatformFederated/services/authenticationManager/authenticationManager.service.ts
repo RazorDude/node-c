@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import {
   ConfigProviderService,
   Constants as CoreConstants,
@@ -10,11 +9,8 @@ import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
 
-// biome-ignore lint/style/useImportType: DI.
 import { DomainCoursePlatformFederatedAuthenticationOktaConsumerService } from '../authenticationOktaConsumer/authenticationOktaConsumer.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService } from '../authenticationUserLocalConsumer/authenticationUserLocalConsumer.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManager/tokenManager.service.js';
 
 @Injectable()

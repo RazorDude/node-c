@@ -1,4 +1,4 @@
-import type {
+import {
   IAMAuthenticationPassthroughConsumerCompleteData,
   IAMAuthenticationPassthroughConsumerCompleteOptions,
   IAMAuthenticationPassthroughConsumerCompleteResult,
@@ -10,7 +10,7 @@ import type {
   IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenResult
 } from '@node-c/domain-iam';
 
-import type { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
+import { DataCacheStandaloneUser } from '../../../../data/cacheStandalone/entities/users/users.entity.js';
 
 export type CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteData =
   IAMAuthenticationPassthroughConsumerCompleteData;

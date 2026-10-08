@@ -1,9 +1,9 @@
-import type {
+import {
   DomainFindOneOptions,
   DomainFindOnePrivateOptions
 } from '@node-c/core';
 
-import type { IAMAuthorizationUser } from '../authorization/iam.authorization.definitions.js';
+import { IAMAuthorizationUser } from '../authorization/iam.authorization.definitions.js';
 
 export type IAMUsersGetUserWithPermissionsDataOptions = DomainFindOneOptions;
 

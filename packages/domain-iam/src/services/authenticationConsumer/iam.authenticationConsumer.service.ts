@@ -1,9 +1,9 @@
-import type { AppConfigDomainIAM, GenericObject } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
+  GenericObject,
   HttpMethod,
   httpRequest,
   LoggerService
@@ -13,7 +13,7 @@ import ld from 'lodash';
 
 import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
-import type {
+import {
   IAMAuthenticationConsumerCompleteData,
   IAMAuthenticationConsumerCompleteOptions,
   IAMAuthenticationConsumerCompleteResult,

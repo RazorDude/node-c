@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/suspicious/useAwait: Inheritance. */
 import { Inject } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
   ConfigProviderService,
@@ -12,7 +11,7 @@ import { IAMAuthenticationPassthroughConsumerService } from '@node-c/domain-iam'
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
 
-import type {
+import {
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteData,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteOptions,
   CoursePlatformStandaloneAuthenticationPassthroughConsumerCompleteResult,

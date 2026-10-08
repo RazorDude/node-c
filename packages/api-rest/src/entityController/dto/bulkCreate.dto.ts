@@ -1,6 +1,6 @@
 import { ArrayNotEmpty, IsArray, IsDefined } from 'class-validator';
 
-import type {
+import {
   BulkCreateBody,
   BulkCreateOptions
 } from '../rest.entity.controller.definitions.js';

@@ -1,9 +1,9 @@
-import type { DynamicModule } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 import { ClickHouseConnectionModule } from '../connectionModule/clickhouse.connection.module.js';
-import type { ClickHouseDBModuleOptions } from './clickhouse.module.definitions.js';
+import { ClickHouseDBModuleOptions } from './clickhouse.module.definitions.js';
 
 export class ClickHouseDBModule {
   static register(options: ClickHouseDBModuleOptions): DynamicModule {

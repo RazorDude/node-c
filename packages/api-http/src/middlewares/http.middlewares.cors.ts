@@ -1,18 +1,11 @@
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  type NestMiddleware
-} from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-import type { AppConfigAPIHTTP } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { ConfigProviderService } from '@node-c/core';
+import { AppConfigAPIHTTP, ConfigProviderService } from '@node-c/core';
 
-import type { NextFunction, Response } from 'express';
+import { NextFunction, Response } from 'express';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 
 @Injectable()
 export class HTTPCORSMiddleware implements NestMiddleware {

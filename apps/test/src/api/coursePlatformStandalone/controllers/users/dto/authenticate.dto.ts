@@ -1,5 +1,5 @@
 import { GenericObjectClass } from '@node-c/core';
-import type {
+import {
   IAMAuthenticationManagerAuthenticateOptions,
   IAMMFAType
 } from '@node-c/domain-iam';

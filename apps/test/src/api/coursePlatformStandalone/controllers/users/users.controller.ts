@@ -11,30 +11,25 @@ import {
 } from '@nestjs/common';
 
 import * as NodeCApiHttp from '@node-c/api-http';
-import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
-import type {
-  DataDefaultData,
-  DomainEntityServiceDefaultData,
-  GenericObject
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
+import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 import {
   AppConfigDomainIAMAuthenticationStep,
+  DataDefaultData,
+  DomainEntityServiceDefaultData,
+  GenericObject,
   LoggerService
 } from '@node-c/core';
 
-import type {
+import {
   DataDBUsersCreateUserData,
   DataDBUsersUpdateUserData
 } from '../../../../data/db/entities/users/users.definitions.js';
-import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 import { DomainCoursePlatformStandaloneAuthenticationManagerService } from '../../../../domain/coursePlatformStandalone/services/authenticationManager/authenticationManager.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainCoursePlatformStandaloneUsersService } from '../../../../domain/coursePlatformStandalone/services/users/users.service.js';
 
-import type { APICoursePlatformStandaloneUsersAuthenticateDto } from './dto/authenticate.dto.js';
-import type { APICoursePlatformStandaloneUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
+import { APICoursePlatformStandaloneUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import { APICoursePlatformStandaloneUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 
 @NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

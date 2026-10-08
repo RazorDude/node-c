@@ -10,16 +10,15 @@ import {
 } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
-// biome-ignore lint/style/useImportType: DI.
 import {
   AppConfigDomainIAMAuthenticationStep,
   LoggerService
 } from '@node-c/core';
 
-// biome-ignore lint/style/useImportType: DI.
 import { DomainCoursePlatformFederatedAuthenticationManagerService } from '../../../../domain/coursePlatformFederated/services/authenticationManager/authenticationManager.service.js';
-import type { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
-import type { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
+
+import { APICoursePlatformFederatedUsersAuthenticateDto } from './dto/authenticate.dto.js';
+import { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './dto/authenticateOAuth2Callback.dto.js';
 
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()

@@ -1,6 +1,6 @@
 import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
 
-import type {
+import {
   CreateBody,
   CreateOptions
 } from '../rest.entity.controller.definitions.js';

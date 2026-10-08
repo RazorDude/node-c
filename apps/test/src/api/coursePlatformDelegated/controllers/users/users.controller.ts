@@ -6,20 +6,18 @@ import {
   type RequestWithLocals
 } from '@node-c/api-http';
 import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
-import type {
+import {
   DataDefaultData,
   DomainEntityServiceDefaultData,
-  GenericObject
+  GenericObject,
+  LoggerService
 } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { LoggerService } from '@node-c/core';
 
-import type {
+import {
   DataDBUsersCreateUserData,
   DataDBUsersUpdateUserData
 } from '../../../../data/db/entities/users/users.definitions.js';
-import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/coursePlatformDelegated/services/users/users.service.js';
 
 @AccessControlContext('CoursePlatformUsersEntityController')

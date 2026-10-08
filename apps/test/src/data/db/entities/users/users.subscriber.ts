@@ -1,19 +1,17 @@
 /** biome-ignore-all lint/suspicious/useAwait: Reasons. */
 import { Inject, Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ApplicationError, ConfigProviderService } from '@node-c/core';
 import { Constants } from '@node-c/data-rdb';
 
-import type {
+import {
   DataSource,
   EntitySubscriberInterface,
   InsertEvent,
   UpdateEvent
 } from 'typeorm';
 
-import type { DataDBUser } from './users.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBUser } from './users.entity.js';
 import { DataDBUsersService } from './users.service.js';
 
 // TODO: move the password properties logic away and into the domain

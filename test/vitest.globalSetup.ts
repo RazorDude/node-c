@@ -38,7 +38,9 @@ export async function teardown(): Promise<void> {
         resolve(data || '');
       });
     });
-    coursePlatformDelegatedMatches = commandData.match(/:2071.+\s(\d+)\/_node/);
+    coursePlatformDelegatedMatches = commandData.match(
+      /:2071.+\s(\d+)\/_?node/
+    );
   } catch (e) {
     console.info(e);
   }
@@ -82,7 +84,7 @@ export async function teardown(): Promise<void> {
         resolve(data || '');
       });
     });
-    ssoServerMatches = commandData.match(/:2081.+\s(\d+)\/_node/);
+    ssoServerMatches = commandData.match(/:2081.+\s(\d+)\/_?node/);
   } catch (e) {
     console.info(e);
   }
@@ -126,7 +128,7 @@ async function teardownProcess(port: number): Promise<void> {
       });
     });
     serverProcessMatches = commandData.match(
-      new RegExp(`/:${port}.+s(d+)/_node/`)
+      new RegExp(`/:${port}.+s(d+)/_?node/`)
     );
   } catch (e) {
     console.info(e);

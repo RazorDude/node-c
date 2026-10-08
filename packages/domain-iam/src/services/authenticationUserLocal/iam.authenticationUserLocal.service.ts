@@ -1,8 +1,7 @@
 import crypto from 'node:crypto';
 
-import type { AppConfigDomainIAM } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
@@ -12,10 +11,10 @@ import {
 import ld from 'lodash';
 
 import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import type { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
-import type { IAMMFAService } from '../mfa/iam.mfa.service.js';
+import { IAMMFAType } from '../mfa/iam.mfa.definitions.js';
+import { IAMMFAService } from '../mfa/iam.mfa.service.js';
 
-import type {
+import {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult,

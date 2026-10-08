@@ -1,9 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Constants } from '@node-c/data-rdb';
-
-import type { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
-import { Repository } from 'typeorm';
+import {
+  DataSource,
+  type EntityTarget,
+  ObjectLiteral,
+  Repository
+} from 'typeorm';
 
 @Injectable()
 export class TypeORMDBRepository<

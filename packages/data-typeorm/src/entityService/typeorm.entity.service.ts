@@ -1,13 +1,11 @@
-import type { DataDefaultData } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { ConfigProviderService, LoggerService } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
+import {
+  ConfigProviderService,
+  DataDefaultData,
+  LoggerService
+} from '@node-c/core';
 import { RDBEntityService, SQLQueryBuilderService } from '@node-c/data-rdb';
-import type { ObjectLiteral } from 'typeorm';
-// biome-ignore lint/style/useImportType: DI.
-import { EntitySchema } from 'typeorm';
+import { EntitySchema, ObjectLiteral } from 'typeorm';
 
-// biome-ignore lint/style/useImportType: DI.
 import { TypeORMDBRepository } from '../repository/typeorm.repository.js';
 
 export class TypeORMDBEntityService<

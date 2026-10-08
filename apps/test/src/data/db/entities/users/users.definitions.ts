@@ -1,4 +1,4 @@
-import type {
+import {
   DataDefaultData,
   DataFindOnePrivateOptions,
   DataFindPrivateOptions,

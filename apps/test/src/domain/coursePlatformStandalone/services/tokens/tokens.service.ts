@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
-
-import type {
+import {
   DataDefaultData,
-  DomainEntityServiceDefaultData
+  DomainEntityService,
+  DomainEntityServiceDefaultData,
+  LoggerService
 } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import { DomainEntityService, LoggerService } from '@node-c/core';
 
-import type { DataCacheStandaloneToken } from '../../../../data/cacheStandalone/entities/tokens/tokens.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataCacheStandaloneToken } from '../../../../data/cacheStandalone/entities/tokens/tokens.entity.js';
 import { DataCacheStandaloneTokensEntityService } from '../../../../data/cacheStandalone/entities/tokens/tokens.service.js';
 
 @Injectable()

@@ -1,11 +1,11 @@
 import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import type { IAMUserWithPermissionsData } from '@node-c/domain-iam';
+import { IAMUserWithPermissionsData } from '@node-c/domain-iam';
 
 import {
   getDefaultEntitySchema,
   type RedisEntity
 } from '../../../cacheBase/entity/base.redis.entity.js';
-import type { DataDBUser } from '../../../db/entities/users/users.entity.js';
+import { DataDBUser } from '../../../db/entities/users/users.entity.js';
 
 const defaultSchema = getDefaultEntitySchema(
   EntitySchemaColumnType.Integer,

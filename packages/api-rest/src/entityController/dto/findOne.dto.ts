@@ -1,7 +1,7 @@
-import type {
+import {
   DataOrderByDirection,
   DomainFindOneOptions,
-  GenericObject
+  type GenericObject
 } from '@node-c/core';
 
 import {

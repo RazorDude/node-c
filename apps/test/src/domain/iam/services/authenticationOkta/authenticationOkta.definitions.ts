@@ -1,4 +1,4 @@
-import type {
+import {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
@@ -6,7 +6,7 @@ import type {
   IAMAuthenticationOktaGetUserDataFromExternalTokenPayloadsResult
 } from '@node-c/domain-iam-okta';
 
-import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
+import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 
 export type DomainIAMAuthenticationOktaCompleteData =
   IAMAuthenticationOktaCompleteData;

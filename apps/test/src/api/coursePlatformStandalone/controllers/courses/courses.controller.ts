@@ -2,11 +2,9 @@ import { Controller, Injectable } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
 import { RESTAPIEntityControler } from '@node-c/api-rest';
-// biome-ignore lint/style/useImportType: DI.
 import { LoggerService } from '@node-c/core';
 
-import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
 import { DomainCoursePlatformStandaloneCoursesService } from '../../../../domain/coursePlatformStandalone/services/courses/courses.service.js';
 
 @AccessControlContext('CoursePlatformCoursesEntityController')

@@ -6,10 +6,10 @@ import {
   LoggerService
 } from '@node-c/core';
 
-import type { Cluster, Redis } from 'ioredis';
+import { Cluster, Redis } from 'ioredis';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RedisStoreModuleOptions } from './redis.store.definitions.js';
+import { RedisStoreModuleOptions } from './redis.store.definitions.js';
 import { RedisStoreService } from './redis.store.service.js';
 
 @Module({})

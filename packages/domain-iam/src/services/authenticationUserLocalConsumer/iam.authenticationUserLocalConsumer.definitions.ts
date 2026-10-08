@@ -1,9 +1,9 @@
-import type {
+import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerInitiateResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
-import type {
+import {
   IAMAuthenticationUserLocalCompleteData,
   IAMAuthenticationUserLocalCompleteOptions,
   IAMAuthenticationUserLocalCompleteResult,

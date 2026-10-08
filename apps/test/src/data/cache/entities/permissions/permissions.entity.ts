@@ -1,11 +1,11 @@
 import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import type { IAMPermission } from '@node-c/domain-iam';
+import { IAMPermission } from '@node-c/domain-iam';
 
 import {
   getDefaultEntitySchema,
   type RedisEntity
 } from '../../../cacheBase/entity/base.redis.entity.js';
-import type {
+import {
   DataDBPermission,
   DataDBRole
 } from '../../../db/entities/db.entities.js';

@@ -1,4 +1,4 @@
-import type { HttpException } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 
 export const cleanUpAxiosError = (exception: HttpException): HttpException => {
   let actualException = exception;

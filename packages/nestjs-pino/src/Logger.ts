@@ -1,8 +1,7 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { Level } from 'pino';
 import { PinoLogger } from './PinoLogger.js';
-import type { Params } from './params.js';
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
+import { PARAMS_PROVIDER_TOKEN, type Params } from './params.js';
 
 @Injectable()
 export class Logger implements LoggerService {

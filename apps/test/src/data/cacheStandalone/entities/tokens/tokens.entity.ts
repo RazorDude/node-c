@@ -1,5 +1,5 @@
 import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
-import type { TokenType as TokenTypeBase } from '@node-c/domain-iam';
+import { TokenType as TokenTypeBase } from '@node-c/domain-iam';
 
 import ld from 'lodash';
 

@@ -1,10 +1,10 @@
-import type { DynamicModule } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 
 import { loadDynamicModules } from '@node-c/core';
 
 import { Constants } from '../common/definitions/common.constants.js';
 
-import type { DomainIAMModuleOptions } from './iam.definitions.js';
+import { DomainIAMModuleOptions } from './iam.definitions.js';
 
 export class DomainIAMModule {
   static register(options: DomainIAMModuleOptions): DynamicModule {

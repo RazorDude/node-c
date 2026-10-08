@@ -4,7 +4,7 @@ import {
   type DBEntity,
   DBEntitySchema
 } from '../../../dbBase/entity/base.db.entity.js';
-import type { DataDBPermission } from '../permissions/permissions.entity.js';
+import { DataDBPermission } from '../permissions/permissions.entity.js';
 
 export interface DataDBRole<User extends DBEntity = DBEntity> extends DBEntity {
   permissions?: DataDBPermission[];

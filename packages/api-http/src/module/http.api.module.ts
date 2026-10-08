@@ -1,27 +1,26 @@
 import {
-  type DynamicModule,
+  DynamicModule,
   Inject,
-  type MiddlewareConsumer,
-  type ModuleMetadata,
+  MiddlewareConsumer,
+  ModuleMetadata,
   ValidationPipe
 } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 
-// biome-ignore lint/style/useImportType: DI.
 import { ConfigProviderService, loadDynamicModules } from '@node-c/core';
 
 import cookieParser from 'cookie-parser';
-import express, { type Response } from 'express';
+import express, { Response } from 'express';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 import { HttpExceptionFilter } from '../filters/http.filtes.exception.js';
 import { HTTPAccessControlInterceptor } from '../interceptors/http.interceptors.accessControl.js';
 import { HTTPErrorInterceptor } from '../interceptors/http.interceptors.error.js';
 import { HTTPAuthorizationMiddleware } from '../middlewares/http.middlewares.authorization.js';
 import { HTTPCORSMiddleware } from '../middlewares/http.middlewares.cors.js';
 import { HTTPRequestLoggingMiddleware } from '../middlewares/http.middlewares.requestLogging.js';
-import type { HTTPAPIModuleOptions } from './http.api.module.definitions.js';
+import { HTTPAPIModuleOptions } from './http.api.module.definitions.js';
 
 export class HTTPAPIModule {
   constructor(

@@ -1,4 +1,4 @@
-import type {
+import {
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationGetUserDataFromExternalTokenPayloadsResult,
   IAMAuthenticationOAuth2CompleteData,

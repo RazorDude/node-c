@@ -1,12 +1,11 @@
-import { Inject, Injectable, type NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { LoggerService } from '@node-c/core';
 
-import type { NextFunction, Response } from 'express';
+import { NextFunction, Response } from 'express';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { RequestWithLocals } from '../common/definitions/common.definitions.js';
 
 @Injectable()
 export class HTTPRequestLoggingMiddleware implements NestMiddleware {

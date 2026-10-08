@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainDataEntityServiceType,
@@ -8,15 +7,13 @@ import {
 } from '@node-c/core';
 import { type IAMPermission, IAMUsersService } from '@node-c/domain-iam';
 
-import type { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataCacheUser } from '../../../../data/cache/entities/users/users.entity.js';
 import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
-import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
-import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 import { DataDBUsersService } from '../../../../data/db/entities/users/users.service.js';
 
-import type {
+import {
   DomainIAMUsersDomainEntityServiceData,
   DomainIAMUsersGetUserWithPermissionsDataOptions,
   DomainIAMUsersGetUserWithPermissionsDataPrivateOptions

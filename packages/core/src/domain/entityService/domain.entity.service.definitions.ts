@@ -1,6 +1,6 @@
-import type { GenericObject } from '../../common/definitions/common.definitions.js';
+import { GenericObject } from '../../common/definitions/common.definitions.js';
 
-import type {
+import {
   DataBulkCreatePrivateOptions,
   DataCreatePrivateOptions,
   DataDeleteOptions,

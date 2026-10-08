@@ -1,4 +1,4 @@
-import type { DomainDeleteOptions, GenericObject } from '@node-c/core';
+import { DomainDeleteOptions, type GenericObject } from '@node-c/core';
 
 import {
   IsBoolean,

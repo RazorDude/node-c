@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { DomainEntityService, LoggerService } from '@node-c/core';
 
-import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
 import { DataDBCoursesService } from '../../../../data/db/entities/courses/courses.service.js';
 
 @Injectable()

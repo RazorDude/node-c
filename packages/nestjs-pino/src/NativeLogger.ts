@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 import { Level } from 'pino';
 import { PinoLogger } from './PinoLogger.js';
-import type { Params } from './params.js';
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
+import { PARAMS_PROVIDER_TOKEN, type Params } from './params.js';
 
 /**
  * NestJS v12 collects plain objects passed after the message into a single

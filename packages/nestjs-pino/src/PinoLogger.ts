@@ -1,7 +1,6 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import pino from 'pino';
-import type { Params } from './params.js';
-import { PARAMS_PROVIDER_TOKEN } from './params.js';
+import { PARAMS_PROVIDER_TOKEN, type Params } from './params.js';
 import {
   ensureRootLogger,
   getRootLogger,
@@ -198,15 +197,12 @@ export class PinoLogger<CustomLevels extends string = never>
         const firstArg = args[0];
         if (firstArg instanceof Error) {
           args = [
-            Object.assign(
-              { [this.contextName]: this.context },
-              { [this.errorKey]: firstArg }
-            ),
+            { [this.contextName]: this.context, [this.errorKey]: firstArg },
             ...args.slice(1)
           ];
         } else {
           args = [
-            Object.assign({ [this.contextName]: this.context }, firstArg),
+            { [this.contextName]: this.context, ...firstArg },
             ...args.slice(1)
           ];
         }

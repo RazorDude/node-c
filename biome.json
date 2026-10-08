@@ -78,6 +78,7 @@
         "useDestructuring": "off",
         "useExportsLast": "off",
         "useFilenamingConvention": "off",
+        "useImportType": "off",
         "useLiteralEnumMembers": "error",
         "useNamingConvention": "off"
       },

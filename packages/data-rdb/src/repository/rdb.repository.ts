@@ -1,6 +1,6 @@
-import type { GenericObject, GenericObjectType } from '@node-c/core';
+import { GenericObject, GenericObjectType } from '@node-c/core';
 
-import type { OrmSelectQueryBuilder } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import { OrmSelectQueryBuilder } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
 
 export abstract class RDBEntityManager {
   abstract getRepository<Entity extends GenericObject<unknown>>(

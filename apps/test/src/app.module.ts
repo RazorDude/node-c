@@ -11,7 +11,7 @@ import {
   LoggerModule
 } from '@node-c/core';
 
-import type { Params } from '@node-c/nestjs-pino';
+import { Params } from '@node-c/nestjs-pino';
 
 import ld from 'lodash';
 

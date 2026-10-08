@@ -1,5 +1,5 @@
-import type { GenericObject } from '../../definitions/common.definitions.js';
-import type { GetNestedOptions } from './getNested.definitions.js';
+import { GenericObject } from '../../definitions/common.definitions.js';
+import { GetNestedOptions } from './getNested.definitions.js';
 
 const regExps = {
   leadingDollar: new RegExp(/^\$/),

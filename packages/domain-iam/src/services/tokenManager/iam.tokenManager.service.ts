@@ -1,36 +1,35 @@
-import type {
+import {
   AppConfigDomainIAM,
+  ApplicationError,
+  ConfigProviderService,
   DataEntityService,
   DomainCreatePrivateOptions,
   DomainCreateResult,
   DomainEntityService,
-  GenericObject
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import {
-  ApplicationError,
-  ConfigProviderService,
+  GenericObject,
   LoggerService,
   setNested
 } from '@node-c/core';
 
-import * as jwt from 'jsonwebtoken';
+// biome-ignore lint/correctness/noUnresolvedImports: False positive.
+import jwt from 'jsonwebtoken';
 import ld from 'lodash';
 
 import { Constants } from '../../common/definitions/common.constants.js';
 import { IAMAuthenticationType } from '../authentication/iam.authentication.definitions.js';
-import type { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import type { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
-import type { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+
 import {
-  type DecodedTokenContent,
-  type TokenEntity,
-  type TokenManagerCreateData,
-  type TokenManagerCreateOptions,
-  type TokenManagerVerifyResult,
+  DecodedTokenContent,
+  TokenEntity,
+  TokenManagerCreateData,
+  TokenManagerCreateOptions,
+  TokenManagerVerifyResult,
   TokenType,
-  type VerifyAccessTokenOptions,
-  type VerifyAccessTokenReturnData
+  VerifyAccessTokenOptions,
+  VerifyAccessTokenReturnData
 } from './iam.tokenManager.definitions.js';
 
 /**

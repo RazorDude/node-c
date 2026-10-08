@@ -1,4 +1,4 @@
-import type { GenericObject } from '@node-c/core';
+import { type GenericObject } from '@node-c/core';
 
 import {
   IsBoolean,
@@ -8,7 +8,7 @@ import {
   IsOptional
 } from 'class-validator';
 
-import type {
+import {
   UpdateBody,
   UpdateOptions
 } from '../rest.entity.controller.definitions.js';

@@ -1,6 +1,6 @@
-import type { GenericObject } from '@node-c/core';
+import { GenericObject } from '@node-c/core';
 
-import type { ValidationSchema } from 'class-validator';
+import { ValidationSchema } from 'class-validator';
 
 export interface EntitySchema {
   columns: {

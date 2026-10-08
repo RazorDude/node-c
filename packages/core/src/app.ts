@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConsole: No other logging method at startup. */
 
-import type { DynamicModule, INestApplication } from '@nestjs/common';
+import { DynamicModule, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import {

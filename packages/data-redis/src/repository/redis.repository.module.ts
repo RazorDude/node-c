@@ -5,7 +5,7 @@ import { Constants as CoreConstants } from '@node-c/core';
 import { Constants } from '../common/definitions/common.constants.js';
 import { RedisStoreService } from '../store/redis.store.service.js';
 
-import type { RedisRepositoryModuleOptions } from './redis.repository.definitions.js';
+import { RedisRepositoryModuleOptions } from './redis.repository.definitions.js';
 import { RedisRepositoryService } from './redis.repository.service.js';
 
 @Module({})

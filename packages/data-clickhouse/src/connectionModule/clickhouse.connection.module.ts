@@ -1,6 +1,6 @@
 import { type ClickHouseClient, createClient } from '@clickhouse/client';
-import type { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config.js';
-import type { DynamicModule } from '@nestjs/common';
+import { NodeClickHouseClientConfigOptions } from '@clickhouse/client/dist/config.js';
+import { DynamicModule } from '@nestjs/common';
 
 import {
   type AppConfigDataRDB,
@@ -11,7 +11,7 @@ import {
 
 import { Constants } from '../common/definitions/common.constants.js';
 
-import type { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions.js';
+import { ClickHouseConnectionModuleOptions } from './clickhouse.connection.module.definitions.js';
 
 export class ClickHouseConnectionModule {
   static register(options: ClickHouseConnectionModuleOptions): DynamicModule {

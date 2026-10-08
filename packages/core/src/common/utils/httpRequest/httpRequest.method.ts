@@ -5,9 +5,9 @@ import axios, { type RawAxiosHeaders } from 'axios';
 import qs from 'qs';
 
 import { HttpMethod } from '../../definitions/common.constants.js';
-import type { GenericObject } from '../../definitions/common.definitions.js';
+import { GenericObject } from '../../definitions/common.definitions.js';
 import { ApplicationError } from '../../definitions/common.errors.js';
-import type {
+import {
   HTTPRequestData,
   HTTPRequestResponseData
 } from './httpRequest.definitions.js';

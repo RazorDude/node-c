@@ -3,9 +3,9 @@ import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 
-import type { DataSource, ObjectLiteral } from 'typeorm';
+import { DataSource, ObjectLiteral } from 'typeorm';
 
-import type { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions.js';
+import { TypeORMDBRepositoryModuleOptions } from './typeorm.repository.definitions.js';
 import { TypeORMDBRepository } from './typeorm.repository.js';
 
 @Module({})

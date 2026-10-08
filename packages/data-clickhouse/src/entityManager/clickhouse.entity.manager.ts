@@ -1,7 +1,7 @@
-import type { ClickHouseClient } from '@clickhouse/client';
+import { ClickHouseClient } from '@clickhouse/client';
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { GenericObject } from '@node-c/core';
+import { GenericObject } from '@node-c/core';
 import {
   Constants as RDBConstants,
   type RDBEntityManager,

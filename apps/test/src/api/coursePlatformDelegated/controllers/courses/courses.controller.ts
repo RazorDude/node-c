@@ -1,14 +1,13 @@
 import { Controller, Injectable } from '@nestjs/common';
 
 import { AccessControlContext } from '@node-c/api-http';
-import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
-// biome-ignore lint/style/useImportType: DI.
+import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
 import { LoggerService } from '@node-c/core';
 
-import type { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
 import { DomainCoursePlatformDelegatedCoursesService } from '../../../../domain/coursePlatformDelegated/services/courses/courses.service.js';
-import type { CoursePlatformStandaloneCoursesFindDto } from './dto/find.dto.js';
+
+import { CoursePlatformStandaloneCoursesFindDto } from './dto/find.dto.js';
 
 @AccessControlContext('CoursePlatformCoursesEntityController')
 @Injectable()

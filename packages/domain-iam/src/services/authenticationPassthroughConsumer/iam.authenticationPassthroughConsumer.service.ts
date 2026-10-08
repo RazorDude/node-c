@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
 
-import type { AppConfigDomainIAM } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
@@ -13,7 +12,7 @@ import ld from 'lodash';
 
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';
 
-import type {
+import {
   IAMAuthenticationPassthroughConsumerCompleteData,
   IAMAuthenticationPassthroughConsumerCompleteOptions,
   IAMAuthenticationPassthroughConsumerCompleteResult,

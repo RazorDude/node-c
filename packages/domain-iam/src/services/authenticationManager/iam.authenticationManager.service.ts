@@ -1,15 +1,12 @@
-import type {
-  AppConfigDomainIAM,
-  DataDefaultData,
-  DataEntityService,
-  DomainEntityServiceDefaultData,
-  GenericObject
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
+  DataDefaultData,
+  DataEntityService,
+  DomainEntityServiceDefaultData,
+  GenericObject,
   getNested,
   LoggerService,
   setNested
@@ -19,30 +16,28 @@ import ld from 'lodash';
 
 import { Constants } from '../../common/definitions/common.constants.js';
 import {
-  type IAMAuthenticationCompleteData,
-  type IAMAuthenticationCompleteOptions,
-  type IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
+  IAMAuthenticationCompleteData,
+  IAMAuthenticationCompleteOptions,
+  IAMAuthenticationGetUserDataFromExternalTokenPayloadsData,
   IAMAuthenticationType
 } from '../authentication/iam.authentication.definitions.js';
-import type { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
-import type { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
-import type { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
-import type { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
-import type { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
+import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
+import { IAMAuthenticationOAuth2CompleteResult } from '../authenticationOAuth2/iam.authenticationOAuth2.definitions.js';
+import { IAMAuthenticationOAuth2Service } from '../authenticationOAuth2/iam.authenticationOAuth2.service.js';
+import { IAMAuthenticationUserLocalCompleteResult } from '../authenticationUserLocal/iam.authenticationUserLocal.definitions.js';
+import { IAMAuthenticationUserLocalService } from '../authenticationUserLocal/iam.authenticationUserLocal.service.js';
 import { TokenType } from '../tokenManager/iam.tokenManager.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
 import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
-import type { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
+import { IAMUserWithPermissionsData } from '../users/iam.users.definitions.js';
 import { IAMUsersService } from '../users/iam.users.service.js';
 
 import {
-  type IAMAuthenticationManagerAuthenticateOptions,
-  type IAMAuthenticationManagerAuthenticateReturnData,
-  type IAMAuthenticationManagerExecuteStepData,
-  type IAMAuthenticationManagerExecuteStepOptions,
-  type IAMAuthenticationManagerExecuteStepResult,
-  type IAMAuthenticationManagerUserTokenEnityFields,
+  IAMAuthenticationManagerAuthenticateOptions,
+  IAMAuthenticationManagerAuthenticateReturnData,
+  IAMAuthenticationManagerExecuteStepData,
+  IAMAuthenticationManagerExecuteStepOptions,
+  IAMAuthenticationManagerExecuteStepResult,
+  IAMAuthenticationManagerUserTokenEnityFields,
   IAMAuthenticationManagerUserTokenUserIdentifier
 } from './iam.authenticationManager.definitions.js';
 

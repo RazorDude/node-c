@@ -1,4 +1,4 @@
-import type { GenericObject } from '@node-c/core';
+import { GenericObject } from '@node-c/core';
 
 export enum ErrorCodes {
   AUTH_INVALID = 'AUTH_INVALID',

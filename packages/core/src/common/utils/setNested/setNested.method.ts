@@ -1,4 +1,4 @@
-import type { SetNestedOptions } from './setNested.definitions.js';
+import { SetNestedOptions } from './setNested.definitions.js';
 
 const regExps = {
   leadingDollar: new RegExp(/^\$/),

@@ -1,15 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
+import {
   AppConfigCommonDataNoSQLValidationSettings,
   AppConfigDataNoSQL,
-  GenericObject
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import {
   ApplicationError,
   ConfigProviderService,
   Constants as CoreConstants,
+  GenericObject,
   getNested,
   setNested
 } from '@node-c/core';
@@ -23,7 +20,6 @@ import ld from 'lodash';
 import { v4 as uuid } from 'uuid';
 
 import { Constants } from '../common/definitions/common.constants.js';
-// biome-ignore lint/style/useImportType: DI.
 import { RedisStoreService } from '../store/redis.store.service.js';
 
 import * as RedisRepositoryDefinitions from './redis.repository.definitions.js';

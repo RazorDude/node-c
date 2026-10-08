@@ -1,15 +1,14 @@
 import {
-  type ArgumentsHost,
+  ArgumentsHost,
   Catch,
-  type ExceptionFilter,
-  type HttpException,
+  ExceptionFilter,
+  HttpException,
   HttpStatus
 } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import { LoggerService } from '@node-c/core';
 
-import type { Response } from 'express';
+import { Response } from 'express';
 
 import { cleanUpAxiosError } from '../common/utils/utils.cleanUpAxiosError.js';
 

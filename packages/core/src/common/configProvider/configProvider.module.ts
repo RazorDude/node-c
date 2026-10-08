@@ -1,6 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { Constants } from '../definitions/common.constants.js';
-import type {
+import {
   AppConfig,
   ConfigProviderModuleOptions
 } from './configProvider.definitions.js';

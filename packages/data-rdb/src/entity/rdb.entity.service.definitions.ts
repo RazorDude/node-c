@@ -1,4 +1,4 @@
-import type {
+import {
   DataBulkCreatePrivateOptions,
   DataCountOptions,
   DataCountPrivateOptions,
@@ -13,7 +13,7 @@ import type {
   DataUpdatePrivateOptions
 } from '@node-c/core';
 
-import type { RDBEntityManager } from '../repository/rdb.repository.js';
+import { RDBEntityManager } from '../repository/rdb.repository.js';
 
 export interface BaseOptions {
   forceTransaction?: boolean;

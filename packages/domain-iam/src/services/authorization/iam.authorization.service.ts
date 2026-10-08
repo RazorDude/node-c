@@ -1,10 +1,9 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods and false positives. */
 import crypto from 'node:crypto';
 
-import type { GenericObject } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
+  GenericObject,
   getNested,
   LoggerService,
   setNested
@@ -12,8 +11,8 @@ import {
 
 import ld from 'lodash';
 
-import type { DecodedTokenContent } from '../tokenManager/iam.tokenManager.definitions.js';
-import type { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
+import { DecodedTokenContent } from '../tokenManager/iam.tokenManager.definitions.js';
+import { IAMTokenManagerService } from '../tokenManager/iam.tokenManager.service.js';
 
 import {
   IAMAuthorizationCheckErrorCode,

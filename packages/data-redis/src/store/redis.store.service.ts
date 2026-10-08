@@ -1,29 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
+import {
   AppConfig,
   AppConfigDataNoSQL,
-  GenericObject,
-  LoggerService
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
-import {
   ApplicationError,
   ConfigProviderService,
   Constants as CoreConstants,
+  GenericObject,
+  LoggerService,
   NoSQLType
 } from '@node-c/core';
 
-import Redis, {
-  type ChainableCommander,
-  Cluster,
-  type RedisOptions
-} from 'ioredis';
-import Valkey, { type ClusterOptions as ValkeyClusterOptions } from 'iovalkey';
+import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
+import Valkey, { ClusterOptions as ValkeyClusterOptions } from 'iovalkey';
 import { v4 as uuid } from 'uuid';
 
 import { Constants } from '../common/definitions/common.constants.js';
-import type {
+
+import {
   GetOptions,
   ScanOptions,
   SetOptions,

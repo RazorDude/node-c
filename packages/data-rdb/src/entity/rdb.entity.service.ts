@@ -1,53 +1,49 @@
-import type {
-  DataDefaultData,
-  DataDeleteResult,
-  DataFindResults,
-  DataOrderBy,
-  DataRelationItem,
-  DataUpdateResult,
-  GenericObject
-} from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
   ApplicationError,
   ConfigProviderService,
+  DataDefaultData,
+  DataDeleteResult,
   DataEntityService,
+  DataFindResults,
+  DataOrderBy,
+  DataRelationItem,
   DataSelectOperator,
+  DataUpdateResult,
+  GenericObject,
   LoggerService,
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
-import type { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
-import type { RDBEntityManager } from '../repository/rdb.repository.js';
-// biome-ignore lint/style/useImportType: DI.
-import { RDBRepository } from '../repository/rdb.repository.js';
-import type {
+import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
+import {
+  RDBEntityManager,
+  RDBRepository
+} from '../repository/rdb.repository.js';
+import {
   IncludeItems,
   ParsedFilter
 } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
 import { SQLQueryBuilderService } from '../sqlQueryBuilder/rdb.sqlQueryBuilder.service.js';
 
-// biome-ignore lint/style/useImportType: DI.
 import { RDBEntitySchema } from './rdb.entity.schema.js';
 import {
-  type BulkCreateOptions,
-  type BulkCreatePrivateOptions,
-  type CountOptions,
-  type CountPrivateOptions,
-  type CreateOptions,
-  type CreatePrivateOptions,
-  type DeleteOptions,
-  type DeletePrivateOptions,
-  type FindOneOptions,
-  type FindOnePrivateOptions,
-  type FindOptions,
-  type FindPrivateOptions,
+  BulkCreateOptions,
+  BulkCreatePrivateOptions,
+  CountOptions,
+  CountPrivateOptions,
+  CreateOptions,
+  CreatePrivateOptions,
+  DeleteOptions,
+  DeletePrivateOptions,
+  FindOneOptions,
+  FindOnePrivateOptions,
+  FindOptions,
+  FindPrivateOptions,
   PostgresErrorCode,
-  type ProcessManyToManyColumnSettingsItem,
+  ProcessManyToManyColumnSettingsItem,
   // ProcessRelationsDataOptions,
-  type UpdateOptions,
-  type UpdatePrivateOptions
+  UpdateOptions,
+  UpdatePrivateOptions
 } from './rdb.entity.service.definitions.js';
 
 // TODO: support for the "select" options in find and findOne (a.k.a. which fields to return)

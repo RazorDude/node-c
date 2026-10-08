@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
 
-import type { AppConfigDomainIAM } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ConfigProviderService,
   LoggerService
@@ -12,7 +11,7 @@ import ld from 'lodash';
 
 import { IAMAuthenticationService } from '../authentication/iam.authentication.service.js';
 
-import type {
+import {
   IAMAuthenticationPassthroughCompleteData,
   IAMAuthenticationPassthroughCompleteOptions,
   IAMAuthenticationPassthroughCompleteResult,
@@ -21,6 +20,7 @@ import type {
   IAMAuthenticationPassthroughInitiateOptions,
   IAMAuthenticationPassthroughInitiateResult
 } from './iam.authenticationPassthrough.definitions.js';
+
 /**
  * A service for skipping authentication in order to use the rest of the AuthenticationManager.authenticate functionality (passthrough).
  *

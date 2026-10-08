@@ -1,6 +1,6 @@
-import type { DomainCreateOptions } from '@node-c/core';
+import { DomainCreateOptions } from '@node-c/core';
 
-import type {
+import {
   IAMAuthenticationType,
   IAMAuthenticationVerifyExternalAccessTokenResult
 } from '../authentication/iam.authentication.definitions.js';

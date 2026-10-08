@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-// biome-ignore lint/style/useImportType: DI.
 import {
   ConfigProviderService,
   Constants as CoreConstants,
@@ -9,21 +8,15 @@ import {
 import { IAMAuthenticationManagerService } from '@node-c/domain-iam';
 
 import { Constants } from '../../../../common/definitions/common.constants.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DataCacheAuthUserStepDataItemsEntityService } from '../../../../data/cacheAuth/entities/userStepDataItems/userStepDataItems.service.js';
-import type { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
-import type { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
+import { DataDBUsersDataEntityServiceData } from '../../../../data/db/entities/users/users.definitions.js';
+import { DataDBUser } from '../../../../data/db/entities/users/users.entity.js';
 
-// biome-ignore lint/style/useImportType: DI.
 import { DomainIAMAuthenticationOktaService } from '../authenticationOkta/authenticationOkta.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainIAMAuthenticationPassthroughService } from '../authenticationPassthrough/authenticationPassthrough.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainIAMAuthenticationUserLocalService } from '../authenticationUserLocal/authenticationUserLocal.service.js';
-// biome-ignore lint/style/useImportType: DI.
 import { DomainIAMTokenManagerService } from '../tokenManager/tokenManager.service.js';
-import type { DomainIAMUsersDomainEntityServiceData } from '../users/users.definitions.js';
-// biome-ignore lint/style/useImportType: DI.
+import { DomainIAMUsersDomainEntityServiceData } from '../users/users.definitions.js';
 import { DomainIAMUsersService } from '../users/users.service.js';
 
 @Injectable()

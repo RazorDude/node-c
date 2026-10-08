@@ -4,8 +4,8 @@ import {
   type DBEntity,
   DBEntitySchema
 } from '../../../dbBase/entity/base.db.entity.js';
-import type { DataDBCourse } from '../courses/courses.entity.js';
-import type { DataDBLessonType } from '../lessonTypes/lessonTypes.entity.js';
+import { DataDBCourse } from '../courses/courses.entity.js';
+import { DataDBLessonType } from '../lessonTypes/lessonTypes.entity.js';
 
 export interface DataDBLesson extends DBEntity {
   courses?: DataDBCourse[];

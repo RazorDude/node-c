@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
 
-import type { AppConfigDomainIAM } from '@node-c/core';
-// biome-ignore lint/style/useImportType: DI.
 import {
+  AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
   ConfigProviderService,
@@ -12,7 +11,7 @@ import { IAMAuthenticationOAuth2Service } from '@node-c/domain-iam';
 
 import ld from 'lodash';
 
-import type {
+import {
   IAMAuthenticationOktaCompleteData,
   IAMAuthenticationOktaCompleteOptions,
   IAMAuthenticationOktaCompleteResult,
