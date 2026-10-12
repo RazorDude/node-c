@@ -168,24 +168,24 @@ export class IAMAuthorizationService<
       const apData = currentPermissions[apId];
       permissionsCount++;
       // RBAC - check whether the user has general access to the module.
-      options.logger?.info({
-        apDataModuleName: apData.moduleName,
-        moduleName,
-        isEqual: apData.moduleName === moduleName
-      });
+      // options.logger?.info({
+      //   apDataModuleName: apData.moduleName,
+      //   moduleName,
+      //   isEqual: apData.moduleName === moduleName
+      // });
       if (moduleName !== apData.moduleName) {
         permissionsForDifferentModules++;
         continue;
       }
-      options.logger?.info({
-        hasResource,
-        apDataResourceContext: apData.resourceContext,
-        resourceContext,
-        rcIsEqual: apData.resourceContext === resourceContext,
-        apDataResources: apData.resources,
-        resource,
-        resourceIsIncluded: apData.resources?.includes(resource!)
-      });
+      // options.logger?.info({
+      //   hasResource,
+      //   apDataResourceContext: apData.resourceContext,
+      //   resourceContext,
+      //   rcIsEqual: apData.resourceContext === resourceContext,
+      //   apDataResources: apData.resources,
+      //   resource,
+      //   resourceIsIncluded: apData.resources?.includes(resource!)
+      // });
       // RBAC - check whether the user has general access to the resource.
       if (
         hasResource &&

@@ -5,7 +5,8 @@ import { ApplicationError } from '../../common/definitions/common.errors.js';
 import { LoggerService } from '../../common/logger/logger.service.js';
 import {
   DataDefaultData,
-  DataFindResults
+  DataFindResults,
+  DataSelectOperator
 } from '../../data/entityService/data.entity.service.definitions.js';
 import { DataEntityService } from '../../data/entityService/data.entity.service.js';
 
@@ -214,12 +215,10 @@ export class DomainEntityService<
       dataServices = [DomainDataEntityServiceType.Main],
       saveAdditionalResultsInFirstService,
       ...otherOptions
-    } = options || {};
+    } = options;
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    let result = await this.getDataService(firstServiceName).find(
-      otherOptions,
-      privateOptions
-    );
+    const firstService = this.getDataService(firstServiceName);
+    let result = await firstService.find(otherOptions, privateOptions);
     const hasFirstServiceResult = result.items.length > 0;
     const resultsByService = await this.runMethodInAdditionalServices<
       DataFindResults<Entity>
@@ -231,17 +230,16 @@ export class DomainEntityService<
       optionsArgIndex: 0,
       optionsOverridesByService
     });
-    this.logger.log('DomainEntityService: ====>', { options, privateOptions });
     if (saveAdditionalResultsInFirstService && resultsByService) {
-      const { saveOptions, serviceName, useResultsForFirstService } =
+      const { saveOptions, serviceName, useResultsForFirstServiceReturnData } =
         saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService?.items?.length) {
-        const bulkCreateResult = await this.dataEntityService.bulkCreate(
+        const bulkCreateResult = await firstService.bulkCreate(
           dataFromAdditionalService.items,
           saveOptions
         );
-        if (useResultsForFirstService && !hasFirstServiceResult) {
+        if (useResultsForFirstServiceReturnData && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         } else {
           result = {
@@ -279,9 +277,11 @@ export class DomainEntityService<
       ...otherOptions
     } = options || {};
     const [firstServiceName, ...otherServiceNames] = dataServices;
-    let result: Entity | null = await this.getDataService(
-      firstServiceName
-    ).findOne(otherOptions, privateOptions);
+    const firstService = this.getDataService(firstServiceName);
+    let result: Entity | null = await firstService.findOne(
+      otherOptions,
+      privateOptions
+    );
     const hasFirstServiceResult =
       typeof result !== 'undefined' && result !== null;
     const resultsByService =
@@ -297,15 +297,12 @@ export class DomainEntityService<
         }
       );
     if (saveAdditionalResultsInFirstService && resultsByService) {
-      const { saveOptions, serviceName, useResultsForFirstService } =
+      const { saveOptions, serviceName, useResultsForFirstServiceReturnData } =
         saveAdditionalResultsInFirstService;
       const dataFromAdditionalService = resultsByService[serviceName];
       if (dataFromAdditionalService) {
-        await this.dataEntityService.create(
-          dataFromAdditionalService,
-          saveOptions
-        );
-        if (useResultsForFirstService && !hasFirstServiceResult) {
+        await firstService.create(dataFromAdditionalService, saveOptions);
+        if (useResultsForFirstServiceReturnData && !hasFirstServiceResult) {
           result = dataFromAdditionalService;
         }
       }
@@ -335,7 +332,7 @@ export class DomainEntityService<
     serviceNames: string[],
     options: DomainRunMethodInAdditionalServicesOptions<unknown>
   ): Promise<GenericObject<ServiceReturnData> | undefined> {
-    if (!serviceNames.length) {
+    if (serviceNames.length === 0) {
       return undefined;
     }
     const {
@@ -379,15 +376,12 @@ export class DomainEntityService<
       } = serviceMethodOptionsOverrides;
       // be extra careful when working with data that has TTL as the main service,
       // since there is no way to check for limited results here.
-      if (
-        (runOnNoFirstServiceResultOnly === true ||
-          runOnNoFirstServiceResultOnly === 'true') &&
-        hasFirstServiceResult
-      ) {
+      if (runOnNoFirstServiceResultOnly === true && hasFirstServiceResult) {
         continue;
       }
       const serviceMethodArgs = ld.cloneDeep(methodArgs);
-      if (typeof serviceMethodArgs[optionsArgIndex!] === 'undefined') {
+      const optionsArgValue = serviceMethodArgs[optionsArgIndex!];
+      if (typeof optionsArgValue === 'undefined') {
         if (optionsArgIndex! > serviceMethodArgs.length - 1) {
           serviceMethodArgs.push(actualMethodOptionsOverrides);
         } else {
@@ -395,9 +389,19 @@ export class DomainEntityService<
         }
       } else {
         serviceMethodArgs[optionsArgIndex!] = {
-          ...(serviceMethodArgs[optionsArgIndex!] as object),
-          ...actualMethodOptionsOverrides
+          ...(optionsArgValue as object),
+          ...ld.omit(actualMethodOptionsOverrides, ['filters'])
         };
+        const existingServiceMethodArgs = optionsArgValue as Record<string, unknown>;
+        const overridesFilters = (actualMethodOptionsOverrides as { filters: unknown }).filters;
+        if (existingServiceMethodArgs.filters && overridesFilters) {
+          (serviceMethodArgs[optionsArgIndex!] as { filters: unknown }).filters = {
+            [DataSelectOperator.And]: [
+              existingServiceMethodArgs.filters,
+              overridesFilters
+            ]
+          }
+        }
       }
       if (
         filterByFirstServiceResultFields &&

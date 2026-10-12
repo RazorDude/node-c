@@ -1,8 +1,8 @@
-import { FindDto } from '@node-c/api-rest';
+import { dtoTransformBoolean, FindDto } from '@node-c/api-rest';
 
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
-  IsBooleanString,
+  IsBoolean,
   IsDefined,
   IsNotEmpty,
   IsObject,
@@ -10,8 +10,6 @@ import {
   IsString,
   ValidateNested
 } from 'class-validator';
-
-import { DataDBCourse } from '../../../../../data/db/entities/db.entities.js';
 
 export class CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServiceOptions {
   @IsObject()
@@ -24,12 +22,13 @@ export class CoursePlatformStandaloneCoursesFindSaveAdditionalResultsInFirstServ
   serviceName: string;
 
   @IsOptional()
-  @IsBooleanString()
-  useResultsForFirstService?: boolean;
+  @IsBoolean()
+  @Transform(dtoTransformBoolean)
+  useResultsForFirstServiceReturnData?: boolean;
 }
 
 /** We need this class to specifically enable saveAdditionalResultsInFirstService, since we don't want it enabled by default on all controllers in NodeC. */
-export class CoursePlatformStandaloneCoursesFindDto extends FindDto<DataDBCourse> {
+export class CoursePlatformStandaloneCoursesFindDto extends FindDto {
   @IsOptional()
   @IsObject()
   @Type(

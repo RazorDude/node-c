@@ -131,8 +131,6 @@ export class RedisRepositoryService<Entity> {
     });
   }
 
-  // protected async delete
-
   async find<ResultItem extends Entity | string = Entity>(
     options: RedisRepositoryDefinitions.RepositoryFindOptions,
     privateOptions?: RedisRepositoryDefinitions.RepositoryFindPrivateOptions
@@ -257,10 +255,8 @@ export class RedisRepositoryService<Entity> {
           )
         )) as ResultItem[];
       } else {
-        // TODO: if no filters are provided, this will not return anything
-        // TODO: (reply, some point later) WDYIM, Rumen?
         const scanData = await store.scan(
-          `${entityStoreKey}${storeEntityKeys[0]}`,
+          `${entityStoreKey}${storeEntityKeys[0] || '*'}`,
           {
             parseToJSON: true,
             scanAll: findAll,

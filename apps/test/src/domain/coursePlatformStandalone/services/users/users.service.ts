@@ -63,7 +63,7 @@ export class DomainCoursePlatformStandaloneUsersService extends DomainEntityServ
               dataServices: ['cache', DomainDataEntityServiceType.Main],
               saveAdditionalResultsInFirstService: {
                 serviceName: DomainDataEntityServiceType.Main,
-                useResultsForFirstService: true
+                useResultsForFirstServiceReturnData: true
               }
             }
           : { dataServices: ['cache'] })

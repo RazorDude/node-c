@@ -1,14 +1,14 @@
 import {
   DataBulkCreatePrivateOptions,
   DataCountOptions,
-  DataCountPrivateOptions,
+  DataCountPrivateOptionsBase,
   DataCreatePrivateOptions,
   DataDeleteOptions,
   DataDeletePrivateOptions,
   DataFindOneOptions,
-  DataFindOnePrivateOptions,
+  DataFindOnePrivateOptionsBase,
   DataFindOptions,
-  DataFindPrivateOptions,
+  DataFindPrivateOptionsBase,
   DataUpdateOptions,
   DataUpdatePrivateOptions
 } from '@node-c/core';
@@ -29,11 +29,12 @@ export interface BulkCreatePrivateOptions extends DataBulkCreatePrivateOptions {
   validate?: boolean;
 }
 
-export interface CountOptions
-  extends BaseOptions,
-    Omit<DataCountOptions, 'withDeleted'> {}
+export type CountOptions = DataCountOptions;
 
-export type CountPrivateOptions = DataCountPrivateOptions;
+export type CountPrivateOptions = Omit<
+  DataCountPrivateOptionsBase,
+  'withDeleted'
+>;
 
 export type CreateOptions = BaseCreateOptions;
 
@@ -52,10 +53,11 @@ export interface FindOneOptions
   extends BaseOptions,
     Omit<
       DataFindOneOptions,
-      'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'
+      'include' | 'orderBy' | 'select' | 'selectOperator'
     > {}
 
-export interface FindOnePrivateOptions extends DataFindOnePrivateOptions {
+export interface FindOnePrivateOptions
+  extends Omit<DataFindOnePrivateOptionsBase, 'withDeleted'> {
   requirePrimaryKeys?: boolean;
 }
 
@@ -63,10 +65,11 @@ export interface FindOptions
   extends BaseOptions,
     Omit<
       DataFindOptions,
-      'include' | 'orderBy' | 'select' | 'selectOperator' | 'withDeleted'
+      'include' | 'orderBy' | 'select' | 'selectOperator'
     > {}
 
-export interface FindPrivateOptions extends DataFindPrivateOptions {
+export interface FindPrivateOptions
+  extends Omit<DataFindPrivateOptionsBase, 'withDeleted'> {
   requirePrimaryKeys?: boolean;
 }
 

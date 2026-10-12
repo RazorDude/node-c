@@ -166,8 +166,7 @@ export class RDBEntityService<
       filters,
       forceTransaction,
       include: optInclude,
-      transactionManager,
-      withDeleted = false
+      transactionManager
     } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
@@ -178,8 +177,11 @@ export class RDBEntityService<
         );
       }) as Promise<number>;
     }
-    const { allowCountWithoutFilters, processFiltersAllowedFieldsEnabled } =
-      actualPrivateOptions;
+    const {
+      allowCountWithoutFilters,
+      processFiltersAllowedFieldsEnabled,
+      withDeleted = false
+    } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.name;
     const queryBuilder =
@@ -334,14 +336,12 @@ export class RDBEntityService<
     const {
       filters,
       forceTransaction,
-      getTotalCount = true,
       page: optPage,
       perPage: optPerPage,
       findAll: optFindAll,
       include: optRelations,
       orderBy: optOrderBy,
-      transactionManager,
-      withDeleted = false
+      transactionManager
     } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
@@ -352,6 +352,7 @@ export class RDBEntityService<
         );
       }) as Promise<DataFindResults<Entity>>;
     }
+    const { getTotalCount = true, withDeleted = false } = actualPrivateOptions;
     const page = optPage
       ? Number.parseInt(optPage as unknown as string, 10)
       : 1; // make sure it's truly a number - it could come as string from GET requests
@@ -446,8 +447,7 @@ export class RDBEntityService<
       transactionManager,
       selectOperator,
       include: optRelations,
-      orderBy: optOrderBy,
-      withDeleted = false
+      orderBy: optOrderBy
     } = options;
     const actualPrivateOptions = privateOptions || {};
     if (!transactionManager && forceTransaction) {
@@ -458,6 +458,7 @@ export class RDBEntityService<
         );
       }) as Promise<Entity | null>;
     }
+    const { withDeleted = false } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const queryBuilder =
       this.getRepository(transactionManager).createQueryBuilder(entityName);

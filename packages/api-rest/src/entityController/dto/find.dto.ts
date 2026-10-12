@@ -1,39 +1,51 @@
 import {
+  DataFindOptions,
   DataOrderByDirection,
+  DomainDataServicesKey,
   DomainFindOptions,
   type GenericObject
 } from '@node-c/core';
 
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
-  IsBooleanString,
+  IsBoolean,
   IsNotEmptyObject,
-  IsNumberString,
+  IsNumber,
   IsObject,
-  IsOptional
+  IsOptional,
+  ValidateNested
 } from 'class-validator';
 
-import { BaseDto } from './base.dto.js';
+import {
+  dtoTransformBoolean,
+  dtoTransformNumber
+  // biome-ignore lint/correctness/noUnresolvedImports: False positive.
+} from '../../utils/dtoTransformers.utils.js';
 
-export class FindDto<Options extends DomainFindOptions>
-  extends BaseDto<Options>
-  implements DomainFindOptions
-{
+import {
+  BaseAdditionalServiceOptionsOverridesDto,
+  BaseDto
+} from './base.dto.js';
+
+export class BaseFindDto implements DataFindOptions {
   @IsNotEmptyObject()
   @IsObject()
   @IsOptional()
   filters?: GenericObject;
 
-  @IsBooleanString()
+  @IsBoolean()
   @IsOptional()
+  @Transform(dtoTransformBoolean)
   findAll?: boolean;
 
   @IsArray()
   @IsOptional()
   include?: string[];
 
-  @IsBooleanString()
+  @IsBoolean()
   @IsOptional()
+  @Transform(dtoTransformBoolean)
   individualSearch?: boolean;
 
   @IsObject()
@@ -41,15 +53,48 @@ export class FindDto<Options extends DomainFindOptions>
   @IsNotEmptyObject()
   orderBy?: GenericObject<DataOrderByDirection>;
 
-  @IsNumberString()
+  @IsNumber()
   @IsOptional()
+  @Transform(dtoTransformNumber)
   page?: number;
 
-  @IsNumberString()
+  @IsNumber()
   @IsOptional()
+  @Transform(dtoTransformNumber)
   perPage?: number;
 
   @IsArray()
   @IsOptional()
   select?: string[];
+}
+
+export class FindAdditionalServiceOptionsOverridesDto
+  extends BaseFindDto
+  implements BaseAdditionalServiceOptionsOverridesDto
+{
+  @IsNotEmptyObject()
+  @IsOptional()
+  filterByFirstServiceResultFields?: GenericObject<string>;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(dtoTransformBoolean)
+  returnData?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(dtoTransformBoolean)
+  runOnNoFirstServiceResultOnly?: boolean;
+}
+
+export class FindDto extends BaseFindDto implements BaseDto, DomainFindOptions {
+  @IsArray()
+  @IsOptional()
+  dataServices?: DomainDataServicesKey[];
+
+  @IsNotEmptyObject()
+  @IsOptional()
+  @Type(() => FindAdditionalServiceOptionsOverridesDto)
+  @ValidateNested({ each: true })
+  declare optionsOverridesByService?: GenericObject<FindAdditionalServiceOptionsOverridesDto>;
 }

@@ -199,14 +199,16 @@ export class RedisEntityService<
     const { repository } = this;
     const {
       filters,
-      getTotalCount = true,
       individualSearch,
       page: optPage,
       perPage: optPerPage,
       findAll: optFindAll
     } = options;
-    const { processFiltersAllowedFieldsEnabled, requirePrimaryKeys } =
-      privateOptions || {};
+    const {
+      getTotalCount = true,
+      processFiltersAllowedFieldsEnabled,
+      requirePrimaryKeys
+    } = privateOptions || {};
     // make sure it's truly a number - it could come as string from GET requests
     const page = optPage
       ? Number.parseInt(optPage as unknown as string, 10)
@@ -235,7 +237,13 @@ export class RedisEntityService<
       findResults.perPage = perPage;
     }
     const { items, more } = await repository.find(
-      { filters: parsedFilters, findAll, individualSearch, page, perPage },
+      {
+        filters: parsedFilters,
+        findAll,
+        individualSearch,
+        page,
+        perPage
+      },
       { requirePrimaryKeys }
     );
     if (findAll) {

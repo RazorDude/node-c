@@ -1,24 +1,33 @@
 import { GenericObject } from '../../common/definitions/common.definitions.js';
 
-export interface DataBulkCreatePrivateOptions extends GenericObject {
+export interface DataBulkCreatePrivateOptionsBase {
   processInputAllowedFieldsEnabled?: boolean;
 }
+
+export type DataBulkCreatePrivateOptions = DataBulkCreatePrivateOptionsBase &
+  GenericObject;
 
 export interface DataCountOptions {
   filters?: GenericObject;
   findAll?: boolean;
   include?: string[];
+}
+
+export interface DataCountPrivateOptionsBase {
+  allowCountWithoutFilters?: boolean;
+  processFiltersAllowedFieldsEnabled?: boolean;
   withDeleted?: boolean;
 }
 
-export interface DataCountPrivateOptions extends GenericObject {
-  allowCountWithoutFilters?: boolean;
-  processFiltersAllowedFieldsEnabled?: boolean;
-}
+export type DataCountPrivateOptions = DataCountPrivateOptionsBase &
+  GenericObject;
 
-export interface DataCreatePrivateOptions {
+export interface DataCreatePrivateOptionsBase {
   processInputAllowedFieldsEnabled?: boolean;
 }
+
+export type DataCreatePrivateOptions = DataCreatePrivateOptionsBase &
+  GenericObject;
 
 export interface DataDefaultData<Entity> {
   BulkCreate: Partial<Entity>[];
@@ -32,10 +41,13 @@ export interface DataDeleteOptions {
   softDelete?: boolean;
 }
 
-export interface DataDeletePrivateOptions extends GenericObject {
+export interface DataDeletePrivateOptionsBase {
   processFiltersAllowedFieldsEnabled?: boolean;
   requirePrimaryKeys?: boolean;
 }
+
+export type DataDeletePrivateOptions = DataDeletePrivateOptionsBase &
+  GenericObject;
 
 export interface DataDeleteResult<Item> {
   count?: number;
@@ -48,29 +60,34 @@ export interface DataFindOneOptions {
   orderBy?: GenericObject<DataOrderByDirection>;
   select?: string[];
   selectOperator?: DataSelectOperator;
+}
+
+export interface DataFindOnePrivateOptionsBase {
+  processFiltersAllowedFieldsEnabled?: boolean;
   withDeleted?: boolean;
 }
 
-export interface DataFindOnePrivateOptions extends GenericObject {
-  processFiltersAllowedFieldsEnabled?: boolean;
-}
+export type DataFindOnePrivateOptions = DataFindOnePrivateOptionsBase &
+  GenericObject;
 
 export interface DataFindOptions {
   filters?: GenericObject;
   findAll?: boolean;
-  getTotalCount?: boolean;
   include?: string[];
   individualSearch?: boolean;
   orderBy?: GenericObject<DataOrderByDirection>;
   page?: number;
   perPage?: number;
   select?: string[];
+}
+
+export interface DataFindPrivateOptionsBase {
+  getTotalCount?: boolean;
+  processFiltersAllowedFieldsEnabled?: boolean;
   withDeleted?: boolean;
 }
 
-export interface DataFindPrivateOptions extends GenericObject {
-  processFiltersAllowedFieldsEnabled?: boolean;
-}
+export type DataFindPrivateOptions = DataFindPrivateOptionsBase & GenericObject;
 
 export interface DataFindResults<Item> {
   items: Item[];
@@ -95,6 +112,7 @@ export enum DataOrderByDirection {
 }
 
 export enum DataSelectOperator {
+  And = '$and',
   Between = '$between',
   Contains = '$contains',
   Equals = '$eq',
@@ -114,12 +132,15 @@ export interface DataUpdateOptions {
   returnOriginalItems?: boolean;
 }
 
-export interface DataUpdatePrivateOptions extends GenericObject {
+export interface DataUpdatePrivateOptionsBase {
   processFiltersAllowedFieldsEnabled?: boolean;
   processInputAllowedFieldsEnabled?: boolean;
   requirePrimaryKeys?: boolean;
   withDeleted?: boolean;
 }
+
+export type DataUpdatePrivateOptions = DataUpdatePrivateOptionsBase &
+  GenericObject;
 
 export interface DataUpdateResult<Item> {
   count?: number;

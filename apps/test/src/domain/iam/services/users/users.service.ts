@@ -57,7 +57,7 @@ export class DomainIAMUsersService extends IAMUsersService<
               dataServices: ['cache', DomainDataEntityServiceType.Main],
               saveAdditionalResultsInFirstService: {
                 serviceName: DomainDataEntityServiceType.Main,
-                useResultsForFirstService: true
+                useResultsForFirstServiceReturnData: true
               }
             }
           : { dataServices: ['cache'] })

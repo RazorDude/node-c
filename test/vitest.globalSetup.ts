@@ -12,7 +12,7 @@ import process from 'node:process';
 import * as clickHouse from '@clickhouse/client';
 import { AppEnvironment } from '@node-c/core';
 import * as dotenv from 'dotenv';
-// import Redis, { ChainableCommander, Cluster, RedisOptions } from 'ioredis';
+import Redis from 'ioredis';
 import * as mysql from 'mysql2';
 
 process.env.NODE_ENV = 'endToEndTests';
@@ -357,10 +357,31 @@ export async function setup(): Promise<void> {
       'userId bigint unsigned not null' +
       ') engine Log'
   });
+  await clickHouseClient.close();
   console.info(
-    '[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs...'
+    '[TestLogs]: Audit DB set up. Cleaning up valkey from data from previous runs (slave client)...'
   );
-  // TODO: cleanup valkey
+  const slaveClient = new Redis({
+    host: envVars.DATA_CACHE_AUTH_HOST,
+    lazyConnect: true,
+    password: envVars.DATA_CACHE_AUTH_PASSWORD,
+    port: Number.parseInt(envVars.DATA_CACHE_AUTH_PORT!, 10)
+  });
+  await slaveClient.connect();
+  await slaveClient.flushall();
+  slaveClient.disconnect();
+  console.info(
+    '[TestLogs]: Cleaning up valkey from data from previous runs (main client)...'
+  );
+  const mainClient = new Redis({
+    host: envVars.DATA_CACHE_HOST,
+    lazyConnect: true,
+    password: envVars.DATA_CACHE_PASSWORD,
+    port: Number.parseInt(envVars.DATA_CACHE_PORT!, 10)
+  });
+  await mainClient.connect();
+  await mainClient.flushall();
+  mainClient.disconnect();
   console.info('[TestLogs]: Valkey cleaned up. Setting up logs...');
   const logsFilePath = path.resolve(
     import.meta.dirname,

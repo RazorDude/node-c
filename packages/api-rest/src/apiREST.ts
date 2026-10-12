@@ -9,3 +9,6 @@ export * from './entityController/dto/uploadFile.dto.js';
 export * from './entityController/rest.entity.controller.definitions.js';
 export * from './entityController/rest.entity.controller.dto.definitions.js';
 export * from './entityController/rest.entity.controller.js';
+// biome-ignore lint/correctness/noUnresolvedImports: False positive.
+export * from './utils/dtoTransformers.utils.js';
+export * from './utils/updateableValidationPipe.utils.js';

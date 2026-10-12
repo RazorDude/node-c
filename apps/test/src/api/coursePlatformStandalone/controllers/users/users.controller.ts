@@ -9,9 +9,10 @@ import {
   Query,
   Req
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 import * as NodeCApiHttp from '@node-c/api-http';
-import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { DefaultDtos, RESTAPIEntityController } from '@node-c/api-rest';
 import {
   AppConfigDomainIAMAuthenticationStep,
   DataDefaultData,
@@ -34,7 +35,7 @@ import { APICoursePlatformStandaloneUsersAuthenticateOAuth2CallbackDto } from '.
 @NodeCApiHttp.AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
-export class APICoursePlatformStandaloneUsersEntityController extends RESTAPIEntityControler<
+export class APICoursePlatformStandaloneUsersEntityController extends RESTAPIEntityController<
   DataDBUser,
   DomainCoursePlatformStandaloneUsersService,
   DefaultDtos<DataDBUser>,
@@ -47,12 +48,14 @@ export class APICoursePlatformStandaloneUsersEntityController extends RESTAPIEnt
   constructor(
     domainEntityService: DomainCoursePlatformStandaloneUsersService,
     protected domainAuthenticationManagerService: DomainCoursePlatformStandaloneAuthenticationManagerService,
-    logger: LoggerService
+    logger: LoggerService,
+    reflector: Reflector
   ) {
     super(
       domainEntityService,
-      RESTAPIEntityControler.getDefaultDtos<DataDBUser>(),
+      RESTAPIEntityController.getDefaultDtos<DataDBUser>(),
       logger,
+      reflector,
       ['find', 'findOne', 'update']
     );
   }

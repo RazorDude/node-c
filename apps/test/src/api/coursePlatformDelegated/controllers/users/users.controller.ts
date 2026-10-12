@@ -1,11 +1,12 @@
 import { Controller, Get, Injectable, Req } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 import {
   AccessControlContext,
   AccessControlResource,
   type RequestWithLocals
 } from '@node-c/api-http';
-import { type DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { type DefaultDtos, RESTAPIEntityController } from '@node-c/api-rest';
 import {
   DataDefaultData,
   DomainEntityServiceDefaultData,
@@ -23,7 +24,7 @@ import { DomainCoursePlatformDelegatedUsersService } from '../../../../domain/co
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
-export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEntityControler<
+export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEntityController<
   DataDBUser,
   DomainCoursePlatformDelegatedUsersService,
   DefaultDtos<DataDBUser>,
@@ -35,12 +36,14 @@ export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEnti
 > {
   constructor(
     domainEntityService: DomainCoursePlatformDelegatedUsersService,
-    logger: LoggerService
+    logger: LoggerService,
+    reflector: Reflector
   ) {
     super(
       domainEntityService,
-      RESTAPIEntityControler.getDefaultDtos<DataDBUser>(),
+      RESTAPIEntityController.getDefaultDtos<DataDBUser>(),
       logger,
+      reflector,
       ['find', 'findOne', 'update']
     );
   }

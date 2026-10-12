@@ -1,6 +1,6 @@
-import { GenericObject } from '../../common/definitions/common.definitions.js';
+import type { GenericObject } from '../../common/definitions/common.definitions.js';
 
-import {
+import type {
   DataBulkCreatePrivateOptions,
   DataCreatePrivateOptions,
   DataDeleteOptions,
@@ -26,10 +26,10 @@ export type DomainBaseOptions<Options> = Options &
   DomainBaseOptionsForAdditionalServices<Options>;
 
 export interface DomainBaseOptionsForAdditionalServices<Options> {
+  dataServices?: DomainDataServicesKey[];
   optionsOverridesByService?: GenericObject<
     Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides
   >;
-  dataServices?: DomainDataServicesKey[];
 }
 
 export type DomainBaseOptionsForAdditionalServicesFull<
@@ -44,7 +44,7 @@ export interface DomainBaseOptionsWithSearchData<
   saveAdditionalResultsInFirstService?: {
     saveOptions?: SaveAdditionalResultsOptions;
     serviceName: string;
-    useResultsForFirstService?: boolean;
+    useResultsForFirstServiceReturnData?: boolean;
   };
 }
 

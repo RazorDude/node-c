@@ -1,7 +1,8 @@
 import { Controller, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 import { AccessControlContext } from '@node-c/api-http';
-import { RESTAPIEntityControler } from '@node-c/api-rest';
+import { RESTAPIEntityController } from '@node-c/api-rest';
 import { LoggerService } from '@node-c/core';
 
 import { DataDBCourse } from '../../../../data/db/entities/courses/courses.entity.js';
@@ -10,18 +11,20 @@ import { DomainCoursePlatformStandaloneCoursesService } from '../../../../domain
 @AccessControlContext('CoursePlatformCoursesEntityController')
 @Injectable()
 @Controller('courses')
-export class APICoursePlatformStandaloneCoursesEntityController extends RESTAPIEntityControler<
+export class APICoursePlatformStandaloneCoursesEntityController extends RESTAPIEntityController<
   DataDBCourse,
   DomainCoursePlatformStandaloneCoursesService
 > {
   constructor(
     domainEntityService: DomainCoursePlatformStandaloneCoursesService,
-    logger: LoggerService
+    logger: LoggerService,
+    reflector: Reflector
   ) {
     super(
       domainEntityService,
-      RESTAPIEntityControler.getDefaultDtos<DataDBCourse>(),
-      logger
+      RESTAPIEntityController.getDefaultDtos<DataDBCourse>(),
+      logger,
+      reflector
     );
   }
 }

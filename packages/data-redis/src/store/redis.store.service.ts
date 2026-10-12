@@ -63,8 +63,8 @@ export class RedisStoreService {
     const {
       clusterMode,
       failOnConnectionError = true,
-      password,
       host,
+      password,
       port,
       sentinelMasterName,
       sentinelMode,

@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   ValidationPipe
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 import {
   HTTPAccessControlInterceptor,
@@ -29,15 +30,38 @@ import {
   type DomainFindOptions,
   DomainFindResult,
   DomainUpdateResult,
+  GenericObject,
   LoggerService
 } from '@node-c/core';
 
-import { BulkCreateDto as BaseBulkCreateDto } from './dto/bulkCreate.dto.js';
-import { CreateDto as BaseCreateDto } from './dto/create.dto.js';
-import { DeleteDto as BaseDeleteDto } from './dto/delete.dto.js';
-import { FindDto as BaseFindDto } from './dto/find.dto.js';
-import { FindOneDto as BaseFindOneDto } from './dto/findOne.dto.js';
-import { UpdateDto as BaseUpdateDto } from './dto/update.dto.js';
+import { UpdatableValidationPipe } from '../utils/updateableValidationPipe.utils.js';
+
+import { BaseAdditionalServiceOptionsOverridesDto } from './dto/base.dto.js';
+import {
+  BulkCreateDto as BaseBulkCreateDto,
+  BulkCreateDto
+} from './dto/bulkCreate.dto.js';
+import { CreateDto as BaseCreateDto, CreateDto } from './dto/create.dto.js';
+import {
+  DeleteDto as BaseDeleteDto,
+  DeleteAdditionalServiceOptionsOverridesDto,
+  DeleteDto
+} from './dto/delete.dto.js';
+import {
+  FindDto as BaseFindDto,
+  FindAdditionalServiceOptionsOverridesDto,
+  FindDto
+} from './dto/find.dto.js';
+import {
+  FindOneDto as BaseFindOneDto,
+  FindOneAdditionalServiceOptionsOverridesDto,
+  FindOneDto
+} from './dto/findOne.dto.js';
+import {
+  UpdateDto as BaseUpdateDto,
+  UpdateAdditionalServiceOptionsOverridesDto,
+  UpdateDto
+} from './dto/update.dto.js';
 import type {
   BulkCreateBody,
   CreateBody,
@@ -49,7 +73,7 @@ import { DefaultDtos } from './rest.entity.controller.dto.definitions.js';
 // TODO: a middleware for converting string booleans to booleans
 // TODO: add the ability to specify which dataServices are exposed by the domainService and for which methods
 @UseInterceptors(HTTPAccessControlInterceptor, HTTPErrorInterceptor)
-export class RESTAPIEntityControlerWithoutDto<
+export class RESTAPIEntityControllerWithoutDto<
   Entity,
   EntityDomainService extends DefaultDomainEntityService<
     Entity,
@@ -129,7 +153,8 @@ export class RESTAPIEntityControlerWithoutDto<
 
   public findOne(
     _id: number | string,
-    _query: DomainFindOneOptions,
+    _query: Omit<DomainFindOneOptions, 'filters'> &
+      Partial<Pick<DomainFindOneOptions, 'filters'>>,
     ..._args: unknown[]
   ): Promise<DomainFindOneResult<Entity> | void>;
   @Get('/item/:id')
@@ -147,7 +172,7 @@ export class RESTAPIEntityControlerWithoutDto<
     return await this.domainEntityService.findOne(query);
   }
 
-  refreshDefaultRoutes(newDefaultRoutes?: string[]): void {
+  protected refreshDefaultRoutes(newDefaultRoutes?: string[]): void {
     const defaultRouteMethods = newDefaultRoutes || this.defaultRouteMethods;
     this.inUseDefaultRoutes = {};
     if (Array.isArray(defaultRouteMethods)) {
@@ -178,7 +203,7 @@ export class RESTAPIEntityControlerWithoutDto<
  *
  * At this point, it's a decade-old issue.
  */
-export class RESTAPIEntityControler<
+export class RESTAPIEntityController<
   Entity,
   EntityDomainService extends DefaultDomainEntityService<
     Entity,
@@ -190,14 +215,15 @@ export class RESTAPIEntityControler<
     DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
   DataEntityServiceData extends
     DataDefaultData<Entity> = DataDefaultData<Entity>
-> extends RESTAPIEntityControlerWithoutDto<Entity, EntityDomainService> {
+> extends RESTAPIEntityControllerWithoutDto<Entity, EntityDomainService> {
   protected settings: { validationWhitelist?: boolean } = {
     validationWhitelist: true
   };
   protected validationPipe: ValidationPipe;
 
+  // biome-ignore lint/complexity/useMaxParams: DI.
   constructor(
-    protected domainEntityService: EntityDomainService,
+    domainEntityService: EntityDomainService,
     protected dto: {
       bulkCreate?: Dto['BulkCreate'];
       create?: Dto['Create'];
@@ -206,18 +232,17 @@ export class RESTAPIEntityControler<
       findOne?: Dto['FindOne'];
       update?: Dto['Update'];
     },
-    protected logger: LoggerService,
-    defaultRouteMethods?: string[]
+    logger: LoggerService,
+    protected readonly reflector: Reflector,
+    defaultRouteMethods: string[] = []
   ) {
     super(
       domainEntityService,
       logger,
-      Object.keys(dto).concat(defaultRouteMethods || [])
+      Object.keys(dto).concat(defaultRouteMethods)
     );
-    // const finalDto: typeof dto = {};
-    // finalDto.bulkCreate = dto?.bulkCreate || BaseBulkCreateDto<Entity, BulkCreateOptions<Entity>>;
     const { validationWhitelist } = this.settings;
-    this.validationPipe = new ValidationPipe({
+    this.validationPipe = new UpdatableValidationPipe(reflector, {
       whitelist: validationWhitelist
     });
   }
@@ -228,9 +253,10 @@ export class RESTAPIEntityControler<
     ...args: unknown[]
   ): Promise<DomainBulkCreateResult<Entity> | void> {
     return await super.bulkCreate.apply(this, [
-      await this.validationPipe.transform(body, {
-        metatype: this.dto.bulkCreate as unknown as Type,
-        type: 'body'
+      await this.processNestedValidations<BulkCreateDto<Entity>>(body, {
+        dto: this.dto.bulkCreate,
+        dtoType: 'body',
+        optionsOverridesByServiceDto: BaseAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
@@ -244,9 +270,10 @@ export class RESTAPIEntityControler<
     ...args: unknown[]
   ): Promise<DomainCreateResult<Entity> | void> {
     return await super.create.apply(this, [
-      await this.validationPipe.transform(body, {
-        metatype: this.dto.create as unknown as Type,
-        type: 'body'
+      await this.processNestedValidations<CreateDto<Entity>>(body, {
+        dto: this.dto.create,
+        dtoType: 'body',
+        optionsOverridesByServiceDto: BaseAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
@@ -259,9 +286,10 @@ export class RESTAPIEntityControler<
     ...args: unknown[]
   ): Promise<DomainDeleteResult<Entity> | void> {
     return await super.delete.apply(this, [
-      await this.validationPipe.transform(body, {
-        metatype: this.dto.delete as unknown as Type,
-        type: 'body'
+      await this.processNestedValidations<DeleteDto>(body, {
+        dto: this.dto.delete,
+        dtoType: 'body',
+        optionsOverridesByServiceDto: DeleteAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
@@ -274,9 +302,10 @@ export class RESTAPIEntityControler<
     ...args: unknown[]
   ): Promise<DomainFindResult<Entity> | void> {
     return await super.find.apply(this, [
-      await this.validationPipe.transform(query, {
-        metatype: this.dto.find as unknown as Type,
-        type: 'query'
+      await this.processNestedValidations<FindDto>(query, {
+        dto: this.dto.find,
+        dtoType: 'query',
+        optionsOverridesByServiceDto: FindAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
@@ -291,9 +320,11 @@ export class RESTAPIEntityControler<
   ): Promise<DomainFindOneResult<Entity> | void> {
     return await super.findOne.apply(this, [
       id,
-      await this.validationPipe.transform(query, {
-        metatype: this.dto.findOne as unknown as Type,
-        type: 'query'
+      await this.processNestedValidations<FindOneDto>(query, {
+        dto: this.dto.findOne,
+        dtoType: 'query',
+        optionsOverridesByServiceDto:
+          FindOneAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])
@@ -320,15 +351,58 @@ export class RESTAPIEntityControler<
     };
   }
 
+  protected async processNestedValidations<
+    InputData extends {
+      optionsOverridesByService?: GenericObject<BaseAdditionalServiceOptionsOverridesDto>;
+    }
+  >(
+    data: InputData,
+    options: {
+      dto: unknown;
+      dtoType: 'body' | 'query';
+      optionsOverridesByServiceDto: unknown;
+    }
+  ): Promise<InputData> {
+    const { dto, dtoType, optionsOverridesByServiceDto } = options;
+    const validatedData = await this.validationPipe.transform(data, {
+      metatype: dto as Type,
+      type: dtoType
+    });
+    const { optionsOverridesByService } = data;
+    if (
+      typeof optionsOverridesByService === 'object' &&
+      optionsOverridesByService !== null &&
+      !(optionsOverridesByService instanceof Date) &&
+      !Array.isArray(optionsOverridesByService)
+    ) {
+      const validatedOptionsOverridesByService: typeof optionsOverridesByService =
+        {};
+      for (const serviceName in optionsOverridesByService) {
+        validatedOptionsOverridesByService[serviceName] =
+          await this.validationPipe.transform(
+            optionsOverridesByService[serviceName],
+            {
+              metatype: optionsOverridesByServiceDto as Type,
+              type: dtoType
+            }
+          );
+      }
+      validatedData.optionsOverridesByService =
+        validatedOptionsOverridesByService;
+    }
+    return validatedData;
+  }
+
   @Patch()
   async update(
     @Body() body: Dto['Update'],
     ...args: unknown[]
   ): Promise<DomainUpdateResult<Entity> | void> {
     return await super.update.apply(this, [
-      await this.validationPipe.transform(body, {
-        metatype: this.dto.update as unknown as Type,
-        type: 'body'
+      await this.processNestedValidations<UpdateDto<Entity>>(body, {
+        dto: this.dto.update,
+        dtoType: 'body',
+        optionsOverridesByServiceDto: UpdateAdditionalServiceOptionsOverridesDto
       }),
       // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
       ...(args || [])

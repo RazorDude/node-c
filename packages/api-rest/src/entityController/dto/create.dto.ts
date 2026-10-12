@@ -1,15 +1,10 @@
 import { IsDefined, IsNotEmptyObject, IsObject } from 'class-validator';
 
-import {
-  CreateBody,
-  CreateOptions
-} from '../rest.entity.controller.definitions.js';
+import { CreateBody } from '../rest.entity.controller.definitions.js';
+
 import { BaseDto } from './base.dto.js';
 
-export class CreateDto<Entity, Options extends CreateOptions<Entity>>
-  extends BaseDto<Options>
-  implements CreateBody<Entity>
-{
+export class CreateDto<Entity> extends BaseDto implements CreateBody<Entity> {
   @IsDefined()
   @IsNotEmptyObject()
   @IsObject()

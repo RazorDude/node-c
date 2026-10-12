@@ -10,11 +10,25 @@
   - Cleanup of old, unused unit tests.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.
+- `packages/api-rest`
+  - BREAKING: The BaseDto is no longer generic.
+  - Added boolean string transforms everywhere possible in the DTOs, so that more options can be passed through the various app layers as query params.
+  - Added a new dto util for transforming records to maps.
+  - BREAKING: Fixed the typos where we had "Controler" instead of "Controller".
+  - Fixed the validation of the optionsOverridesByService object by introducing the processNestedValidations method - custom validation processor for nested records - to all endpoint handlers.
+  - BREAKING: The RESTAPIEntityController now requires the injection of Reflector in its constructor.
+  - Added a custom ValidationPipe which allows ovveriding per-class whitelisting.
+  - Re-did the DTOs so that they include proper optionsOverridesByService with validation.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
   - Vendored in nestjs-pino due to its lack of ESM support.
+  - Fixed the saveAdditionalResultsInFirstService functionality in the DomainEntityService.find and DomainEntityService.findOne methods for cases where the first service is different than the main dataEntityService.
+  - BREAKING: Moved DataCountOptions, DataFindOneOptions and DataFindOptions's withDeleted property to the privateOptions, along with DataFindOptions's getTotalCount property.
+  - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
 - `packages/data-rdb`
   - Fix for the SQLQueryBuilder's parseRelations allowed include method.
+- `packages/data-redis`
+  - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
 - `packages/nestjs-pino`
   - New package, identical copy of nestjs-pino, but with an ESM build.
 

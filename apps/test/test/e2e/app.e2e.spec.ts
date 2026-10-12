@@ -1,5 +1,8 @@
 /** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
+/** biome-ignore-all lint/style/noMagicNumbers: Test file. */
 /** biome-ignore-all lint/suspicious/noConsole: Test file. */
+
+import { HttpStatus } from '@nestjs/common';
 
 import { HttpMethod } from '@node-c/core';
 
@@ -10,6 +13,7 @@ const BASE_URL_SSO = 'http://localhost:2081';
 
 // Course Platform (Delegated) only;
 // TODO: other apps' suites
+// TODO: redis - hashmap methods, sentinel and cluster suites; valkey - full suites (same as redis)
 describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   let adminAccessToken = '';
   // ----
@@ -18,11 +22,11 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: make this error 404 in the future
   it('should return an error with status 401 when calling non-existent routes', async () => {
     const response = await fetch(BASE_URL_SSO);
-    expect(response.status).toEqual(401);
+    expect(response.status).toEqual(HttpStatus.UNAUTHORIZED);
   });
   it('should return an error with status 401 when calling non-implemented routes', async () => {
     const response = await fetch(`${BASE_URL_SSO}/tokens`);
-    expect(response.status).toEqual(401);
+    expect(response.status).toEqual(HttpStatus.UNAUTHORIZED);
   });
   // TODO: make sure query params are ignored in originalUrl
   // TODO: issue an access token - bad request on invalid body vs dto
@@ -46,7 +50,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       method: HttpMethod.POST
     });
     const responseBody = await response.json();
-    expect(response.status).toEqual(201);
+    expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('accessToken');
     expect(responseBody).toHaveProperty('idToken');
     expect(responseBody).toHaveProperty('refreshToken');
@@ -66,7 +70,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -93,7 +97,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -120,7 +124,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -147,7 +151,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(2);
@@ -170,7 +174,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(2);
@@ -197,7 +201,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -226,7 +230,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -252,7 +256,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -279,7 +283,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -308,7 +312,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -338,7 +342,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     const responseBody = await response.json();
     console.log(responseBody.result.items);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -366,7 +370,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -394,7 +398,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     const responseBody = await response.json();
     console.log(responseBody.result.items);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -424,7 +428,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -451,7 +455,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -479,7 +483,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -506,7 +510,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -533,7 +537,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -560,7 +564,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -587,7 +591,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -614,7 +618,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -652,7 +656,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -736,7 +740,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -781,7 +785,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(2);
@@ -801,6 +805,31 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.result.items[1].lessons[1].id).toEqual(2);
     expect(responseBody.result.items[1].lessons[2].id).toEqual(3);
     expect(responseBody.result.items[1].lessons[3].id).toEqual(4);
+  });
+  // throw an error when searching for courses in the cache if findAll=true and individualSearch is set to true explicitly
+  it('should throw an error when searching for courses in the cache if findAll=true and individualSearch is set to true explicitly', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+        'dataServices[]=cache&' +
+        'findAll=true&' +
+        'individualSearch=true',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    // we expect multiple new items to be created
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[RedisRepositoryService course][Error]: Primary key filters are required when findAll and individualSearchEnabled are enabled in the find method.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(HttpStatus.BAD_REQUEST);
   });
   // ----
   // -- end of admin cases - login and single-service find
@@ -833,7 +862,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(201);
+    expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(5);
     expect(responseBody.result.courseTypeId).toEqual(1);
@@ -889,7 +918,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    expect(response.status).toEqual(201);
+    expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(4);
     expect(responseBody.result.courseTypeId).toEqual(3);
@@ -897,16 +926,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       'Cooking: A Day In Hell With Gordon Ramsey'
     );
   });
-  // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)
-  it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstService=true)', async () => {
+  // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)
+  it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
         'dataServices[]=cache&dataServices[]=main&' +
         'filters[id][]=1&filters[id][]=2&' +
-        'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true' +
-        'optionsOverridesByService[cache][individualSearch]=true&' +
-        'saveAdditionalResultsInFirstService[serviceName]=main' +
-        'saveAdditionalResultsInFirstService[useResultsForFirstService]=true',
+        'individualSearch=false&' +
+        'optionsOverridesByService[main][runOnNoFirstServiceResultOnly]=true&' +
+        'saveAdditionalResultsInFirstService[serviceName]=main&' +
+        'saveAdditionalResultsInFirstService[useResultsForFirstServiceReturnData]=true',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -916,9 +945,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    console.log('==> [1]:', responseBody);
-    console.log('==> [2]:', responseBody.result.items);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(2);
@@ -944,54 +971,104 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseCheckBody = await responseCheck.json();
-    expect(responseCheckBody.result.items).toHaveLength(2);
-    expect(responseCheckBody.result.items[0].id).toEqual(1);
-    expect(responseCheckBody.result.items[1].id).toEqual(2);
+    expect(responseCheckBody.result.items).toHaveLength(3);
+    const idsToFind: Record<number, boolean> = {
+      1: false,
+      2: false,
+      4: false
+    }
+    responseCheckBody.result.items.forEach((item: { id: number }) => {
+      if (idsToFind[item.id] === false) {
+        idsToFind[item.id] = true;
+      }
+    });
+    for (const id in idsToFind) {
+      expect(idsToFind[id]).toEqual(true);
+    }
   });
-  // throw an error
-  // it('should throw an error when searching for courses in the cache using the db if findAll=true and filterByFirstServiceResultFields is not set (runOnFirstServiceResultOnly=false)', async () => {
-  //   const response = await fetch(
-  //     `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
-  //       'dataServices[]=cache&dataServices[]=main&' +
-  //       'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true&' +
-  //       'findAll=true',
-  //     {
-  //       headers: {
-  //         authorization: `Bearer ${adminAccessToken}`,
-  //         'content-type': 'application/json'
-  //       },
-  //       method: HttpMethod.GET
-  //     }
-  //   );
-  //   // we expect multiple new items to be created
-  //   const responseBody = await response.json();
-  //   console.log('==> [3]:', responseBody);
-  //   console.log('==> [4]:', responseBody.result.items);
-  //   console.log('==> [5]:', responseBody.resultsByService.items);
-  //   expect(response.status).toEqual(200);
-  //   expect(responseBody).toHaveProperty('result');
-  //   expect(responseBody.result).toHaveProperty('items');
-  //   expect(responseBody.result.items).toHaveLength(8);
-  //   expect(responseBody.result.items[0].id).toEqual(7);
-  //   expect(responseBody.result.items[1].id).toEqual(8);
-  //   expect(responseBody.result.items[2].id).toEqual(6);
-  //   expect(responseBody).toHaveProperty('resultsByService');
-  //   expect(responseBody.resultsByService).toHaveProperty('main');
-  //   expect(responseBody.resultsByService.main).toHaveProperty('items');
-  //   expect(responseBody.resultsByService.main.items).toHaveLength(7);
-  //   expect(responseBody.resultsByService.main.items[0].id).toEqual(7);
-  //   expect(responseBody.resultsByService.main.items[1].id).toEqual(6);
-  //   expect(responseBody.resultsByService.main.items[1].id).toEqual(5);
-  // });
-  // search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false)
-  // TODO: finish this
-  it('should search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false)', async () => {
+  // search for courses in the cache and their counterparts in the DB (runOnFirstServiceResultOnly=false, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=false, filterByFirstServiceResultFields set to id)
+  it('should search for courses in the cache and their counterparts in the DB (runOnFirstServiceResultOnly=false, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=false, filterByFirstServiceResultFields set to id)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
         'dataServices[]=cache&dataServices[]=main&' +
-        'optionsOverridesByService[cache][filterByFirstServiceResultFields][id]=id&' +
-        'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=true&' +
-        'findAll=true',
+        'findAll=true&' +
+        'individualSearch=false&' +
+        'optionsOverridesByService[main][filterByFirstServiceResultFields][id]=id&' +
+        'optionsOverridesByService[main][orderBy][id]=desc&' +
+        'optionsOverridesByService[main][runOnNoFirstServiceResultOnly]=false&' +
+        'saveAdditionalResultsInFirstService[serviceName]=main&' +
+        'saveAdditionalResultsInFirstService[useResultsForFirstServiceReturnData]=false',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    // we expect multiple new items to be created
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.OK);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(3);
+    const resultIdsToFind: Record<number, boolean> = {
+      1: false,
+      2: false,
+      4: false
+    }
+    responseBody.result.items.forEach((item: { id: number }) => {
+      if (resultIdsToFind[item.id] === false) {
+        resultIdsToFind[item.id] = true;
+      }
+    });
+    for (const id in resultIdsToFind) {
+      expect(resultIdsToFind[id]).toEqual(true);
+    }
+    expect(responseBody).toHaveProperty('resultsByService');
+    expect(responseBody.resultsByService).toHaveProperty('main');
+    expect(responseBody.resultsByService.main).toHaveProperty('items');
+    expect(responseBody.resultsByService.main.items).toHaveLength(3);
+    expect(responseBody.resultsByService.main.items[0].id).toEqual(4);
+    expect(responseBody.resultsByService.main.items[1].id).toEqual(2);
+    expect(responseBody.resultsByService.main.items[2].id).toEqual(1);
+    const responseCheck = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?dataServices[]=cache&findAll=true`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseCheckBody = await responseCheck.json();
+    expect(responseCheckBody.result.items).toHaveLength(3);
+    const idsToFind: Record<number, boolean> = {
+      1: false,
+      2: false,
+      4: false
+    }
+    responseCheckBody.result.items.forEach((item: { id: number }) => {
+      if (idsToFind[item.id] === false) {
+        idsToFind[item.id] = true;
+      }
+    });
+    for (const id in idsToFind) {
+      expect(idsToFind[id]).toEqual(true);
+    }
+  });
+  // search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=false, filterByFirstServiceResultFields not set)
+  it('should search for courses in the cache and create using the db data all of the entries found in the DB (runOnFirstServiceResultOnly=false, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=false, filterByFirstServiceResultFields not set)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?` +
+        'dataServices[]=cache&dataServices[]=main&' +
+        'findAll=true&' +
+        'individualSearch=false&' +
+        'optionsOverridesByService[main][orderBy][id]=desc&' +
+        'optionsOverridesByService[main][runOnNoFirstServiceResultOnly]=false&' +
+        'saveAdditionalResultsInFirstService[serviceName]=main&' +
+        'saveAdditionalResultsInFirstService[useResultsForFirstServiceReturnData]=false',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1004,22 +1081,65 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     const responseBody = await response.json();
     console.log('==> [3]:', responseBody);
     console.log('==> [4]:', responseBody.result.items);
-    console.log('==> [5]:', responseBody.resultsByService.items);
-    expect(response.status).toEqual(200);
+    console.log('==> [5]:', responseBody.resultsByService.main);
+    expect(response.status).toEqual(HttpStatus.OK);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
-    expect(responseBody.result.items).toHaveLength(8);
-    expect(responseBody.result.items[0].id).toEqual(7);
-    expect(responseBody.result.items[1].id).toEqual(8);
-    expect(responseBody.result.items[2].id).toEqual(6);
+    expect(responseBody.result.items).toHaveLength(5);
+    const resultIdsToFind: Record<number, boolean> = {
+      1: false,
+      2: false,
+      3: false,
+      4: false,
+      5: false
+    }
+    responseBody.result.items.forEach((item: { id: number }) => {
+      if (resultIdsToFind[item.id] === false) {
+        resultIdsToFind[item.id] = true;
+      }
+    });
+    for (const id in resultIdsToFind) {
+      expect(resultIdsToFind[id]).toEqual(true);
+    }
     expect(responseBody).toHaveProperty('resultsByService');
     expect(responseBody.resultsByService).toHaveProperty('main');
     expect(responseBody.resultsByService.main).toHaveProperty('items');
-    expect(responseBody.resultsByService.main.items).toHaveLength(7);
-    expect(responseBody.resultsByService.main.items[0].id).toEqual(7);
-    expect(responseBody.resultsByService.main.items[1].id).toEqual(6);
-    expect(responseBody.resultsByService.main.items[1].id).toEqual(5);
+    expect(responseBody.resultsByService.main.items).toHaveLength(5);
+    expect(responseBody.resultsByService.main.items[0].id).toEqual(5);
+    expect(responseBody.resultsByService.main.items[1].id).toEqual(4);
+    expect(responseBody.resultsByService.main.items[2].id).toEqual(3);
+    expect(responseBody.resultsByService.main.items[3].id).toEqual(2);
+    expect(responseBody.resultsByService.main.items[4].id).toEqual(1);
+    const responseCheck = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?dataServices[]=cache&findAll=true`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseCheckBody = await responseCheck.json();
+    console.log('==> [5][5]:', responseCheckBody);
+    expect(responseCheckBody.result.items).toHaveLength(5);
+    const idsToFind: Record<number, boolean> = {
+      1: false,
+      2: false,
+      3: false,
+      4: false,
+      5: false
+    }
+    responseCheckBody.result.items.forEach((item: { id: number }) => {
+      if (idsToFind[item.id] === false) {
+        idsToFind[item.id] = true;
+      }
+    });
+    for (const id in idsToFind) {
+      expect(idsToFind[id]).toEqual(true);
+    }
   });
+  // TODO: test filters in optionsOverridesByService
   // find users - full range of options (filters, included relations, ordering), multi-data-service search: filterByFirstServiceResultFields.id, runOnNoFirstServiceResultOnly=false, individualSearch=true
   // TODO: finish this
   it('should find users: full range of options (filters, included relations, ordering), multi-data-service search', async () => {
@@ -1041,7 +1161,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     const responseBody = await response.json();
     console.log('==> [6]:', responseBody.result.items);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(HttpStatus.OK);
   });
   // TODO: update (incl. processManyToMany) and delete
   // TODO: refresh token flow

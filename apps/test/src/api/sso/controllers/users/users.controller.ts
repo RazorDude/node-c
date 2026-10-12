@@ -8,8 +8,9 @@ import {
   Post,
   Query
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
-import { DefaultDtos, RESTAPIEntityControler } from '@node-c/api-rest';
+import { DefaultDtos, RESTAPIEntityController } from '@node-c/api-rest';
 import {
   AppConfigDomainIAMAuthenticationStep,
   LoggerService
@@ -34,7 +35,7 @@ import { SSOUsersAuthenticatePassthroughDto } from './dto/authenticatePassthroug
  */
 @Injectable()
 @Controller('users')
-export class SSOUsersEntityController extends RESTAPIEntityControler<
+export class SSOUsersEntityController extends RESTAPIEntityController<
   DataDBUser,
   DomainIAMUsersService,
   DefaultDtos<DataDBUser>,
@@ -44,9 +45,10 @@ export class SSOUsersEntityController extends RESTAPIEntityControler<
   constructor(
     domainEntityService: DomainIAMUsersService,
     protected domainAuthenticationManagerService: DomainIAMAuthenticationManagerService,
-    logger: LoggerService
+    logger: LoggerService,
+    reflector: Reflector
   ) {
-    super(domainEntityService, {}, logger, ['find', 'findOne']);
+    super(domainEntityService, {}, logger, reflector, ['find', 'findOne']);
   }
 
   // Delegated or federated authentication - completion step
