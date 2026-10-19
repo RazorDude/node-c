@@ -63,10 +63,7 @@ export interface FindOnePrivateOptions
 
 export interface FindOptions
   extends BaseOptions,
-    Omit<
-      DataFindOptions,
-      'include' | 'orderBy' | 'select' | 'selectOperator'
-    > {}
+    Omit<DataFindOptions, 'include' | 'select' | 'selectOperator'> {}
 
 export interface FindPrivateOptions
   extends Omit<DataFindPrivateOptionsBase, 'withDeleted'> {

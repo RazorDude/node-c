@@ -8,6 +8,7 @@ import {
   Constants as CoreConstants,
   GenericObject,
   getNested,
+  LoggerService,
   setNested
 } from '@node-c/core';
 
@@ -62,10 +63,12 @@ export class RedisRepositoryService<Entity> {
     return this._primaryKeysMap;
   }
 
+  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     @Inject(CoreConstants.DATA_MODULE_NAME)
     protected _dataModuleName: string,
+    protected logger: LoggerService,
     @Inject(Constants.REDIS_REPOSITORY_SCHEMA)
     protected schema: RedisRepositoryDefinitions.EntitySchema,
     protected store: RedisStoreService
@@ -457,11 +460,13 @@ export class RedisRepositoryService<Entity> {
     let allPKValuesExist = true;
     let preparedData = ld.cloneDeep(data) as GenericObject | GenericObject[];
     let storeEntityKey = '';
+    // TODO: check this, doesn't look right
     const preparedDataForPrimaryKeyFilters = (
       isArray && Array.isArray(data) ? data[0] : data
     ) as GenericObject;
     // set up the construction of the store keys by primary keys
     // additionally, perform the generation of primary keys, if doing a create opearation
+    // TODO: this doesn't work properly with isArray
     for (const columnName of primaryKeys) {
       const { generated, type } = columns[columnName];
       const value = preparedDataForPrimaryKeyFilters[columnName];
@@ -473,6 +478,19 @@ export class RedisRepositoryService<Entity> {
       if (generated) {
         if (valueExists) {
           storeEntityKey += `${value}${storeDelimiter}`;
+          // update the current max value in the index
+          if (
+            type === RedisRepositoryDefinitions.EntitySchemaColumnType.Integer
+          ) {
+            const incrementKey = `increment${storeDelimiter}${entityStoreKey}${storeDelimiter}${columnName}`;
+            const currentMaxValue =
+              (await store.get<number>(incrementKey, {
+                parseToJSON: true
+              })) || 0;
+            if (currentMaxValue < (value as number)) {
+              await store.set(incrementKey, value);
+            }
+          }
           continue;
         }
         if (allPKValuesExist) {
@@ -488,19 +506,15 @@ export class RedisRepositoryService<Entity> {
         if (
           type === RedisRepositoryDefinitions.EntitySchemaColumnType.Integer
         ) {
+          const incrementKey = `increment${storeDelimiter}${entityStoreKey}${storeDelimiter}${columnName}`;
           let currentMaxValue =
-            (await store.get<number>(
-              `${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`,
-              {
-                parseToJSON: true
-              }
-            )) || 0;
+            (await store.get<number>(incrementKey, {
+              parseToJSON: true
+            })) || 0;
           currentMaxValue++;
-          await store.set(
-            `${entityStoreKey}${storeDelimiter}increment${storeDelimiter}${columnName}`,
-            currentMaxValue
-          );
-          preparedDataForPrimaryKeyFilters[columnName] = currentMaxValue;
+          await store.set(incrementKey, currentMaxValue);
+          // TODO: this will fail if data is an array
+          (preparedData as GenericObject)[columnName] = currentMaxValue;
           storeEntityKey += `${currentMaxValue}${storeDelimiter}`;
           continue;
         }
@@ -509,6 +523,7 @@ export class RedisRepositoryService<Entity> {
           if (storeDelimiter === '-') {
             newValue = newValue.replace(/-/g, '_');
           }
+          // TODO: this will fail if data is an array
           (preparedData as GenericObject)[columnName] = newValue;
           storeEntityKey += `${newValue}${storeDelimiter}`;
           continue;
@@ -533,9 +548,10 @@ export class RedisRepositoryService<Entity> {
       );
     }
     if (optValidate) {
+      // TODO: this will fail if data is an array
       const validationErrors = await validate(
         entityName,
-        data as GenericObject<unknown>
+        preparedData as GenericObject<unknown>
       );
       if (validationErrors.length > 0) {
         throw new ApplicationError(

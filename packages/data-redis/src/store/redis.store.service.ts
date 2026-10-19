@@ -44,7 +44,8 @@ export class RedisStoreService {
     @Inject(Constants.REDIS_CLIENT)
     protected client: Redis.default | Cluster,
     @Inject(CoreConstants.DATA_MODULE_NAME)
-    protected dataModuleName: string
+    protected dataModuleName: string,
+    protected logger: LoggerService
   ) {
     const { defaultTTL, storeDelimiter, storeKey, useHashmap } = configProvider
       .config.data[dataModuleName] as AppConfigDataNoSQL;

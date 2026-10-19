@@ -5,6 +5,7 @@ import {
   DataDeleteResult,
   DataEntityService,
   DataFindResults,
+  DataOrderByDirection,
   DataUpdateResult,
   GenericObject,
   LoggerService,
@@ -200,6 +201,7 @@ export class RedisEntityService<
     const {
       filters,
       individualSearch,
+      orderBy,
       page: optPage,
       perPage: optPerPage,
       findAll: optFindAll
@@ -248,7 +250,32 @@ export class RedisEntityService<
     );
     if (findAll) {
       findResults.perPage = items.length;
+      if (orderBy) {
+        findResults.items = (items as Record<string, number | string>[]).sort(
+          (a, b) => {
+            let result = 0;
+            for (const fieldName in orderBy) {
+              const aValue = a[fieldName];
+              const bValue = b[fieldName];
+              const orderDirection = orderBy[fieldName];
+              if (aValue === bValue) {
+                break;
+              }
+              if (orderDirection === DataOrderByDirection.Desc) {
+                result = aValue > bValue ? 1 : -1;
+                break;
+              }
+              result = aValue < bValue ? 1 : -1;
+              break;
+            }
+            return result;
+          }
+        ) as Entity[];
+      } else {
+        findResults.items = items;
+      }
     } else {
+      findResults.items = items;
       findResults.more = more;
       if (getTotalCount) {
         findResults.totalCount = await this.count(options, {
@@ -256,7 +283,6 @@ export class RedisEntityService<
         });
       }
     }
-    findResults.items = items;
     return findResults;
   }
 

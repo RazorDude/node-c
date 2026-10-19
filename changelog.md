@@ -30,6 +30,8 @@
   - Fixed the error handling, so that error 400 is now thrown for handled error codes.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
+  - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.
+  - Added sorting to the RedisEntityService.find method when findAll=true.
 - `packages/nestjs-pino`
   - New package, identical copy of nestjs-pino, but with an ESM build.
 
