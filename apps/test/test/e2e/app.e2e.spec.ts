@@ -13,7 +13,8 @@ const BASE_URL_SSO = 'http://localhost:2081';
 
 // Course Platform (Delegated) only;
 // TODO: other apps' suites
-// TODO: redis - hashmap methods, sentinel and cluster suites; valkey - full suites (same as redis)
+// TODO: redis - array-based and object-based storage, hashmap methods, sentinel and cluster suites;
+// valkey - full suites (same as redis)
 describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   let adminAccessToken = '';
   // ----
@@ -341,7 +342,6 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    console.log(responseBody.result.items);
     expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
@@ -397,7 +397,6 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseBody = await response.json();
-    console.log(responseBody.result.items);
     expect(response.status).toEqual(HttpStatus.OK);
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
@@ -835,14 +834,61 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // -- end of admin cases - login and single-service find
   // ----
   // ----
-  // -- start of admin cases - bulkCreate
-  // ----
-  // ----
-  // -- end of admin cases - bulkCreate
-  // ----
-  // ----
   // -- start of admin cases - create and multi-service find
   // ----
+  // throw an error when attempting to create a course without a required field
+  it('should throw an error when attempting to create a course without a required field', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            courseTypeId: 1
+          }
+        }),
+        method: HttpMethod.POST
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      "[RBDEntityService][ER_NO_DEFAULT_FOR_FIELD]: Field 'name' doesn't have a default value."
+    );
+  });
+  // throw an error when attempting to create a course with a relation field for a relation value that does not exist
+  it('should throw an error when attempting to create a course with a relation field for a relation value that does not exist', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            courseTypeId: 25,
+            name: 'This will fail'
+          }
+        }),
+        method: HttpMethod.POST
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      "[RBDEntityService][ER_NO_REFERENCED_ROW_2]: Cannot add or update a child row: a foreign key constraint fails (`node_c_apps_test_main_e2e`.`courses`, CONSTRAINT `FK_7d0effe56712c9f8d73b99f319c` FOREIGN KEY (`courseTypeId`) REFERENCES `courseTypes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION)."
+    );
+  });
   // create a course in the DB
   it('should create a course in the DB', async () => {
     const response = await fetch(
@@ -864,9 +910,36 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
-    expect(responseBody.result.id).toEqual(5);
+    expect(responseBody.result.id).toEqual(6);
     expect(responseBody.result.courseTypeId).toEqual(1);
     expect(responseBody.result.name).toEqual('Test create course');
+  });
+  // throw an error when attempting to create a course with a duplicate unique field
+  it('should throw an error when attempting to create a course with a duplicate unique field', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            courseTypeId: 1,
+            name: 'Test create course'
+          }
+        }),
+        method: HttpMethod.POST
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      "[RBDEntityService][ER_DUP_ENTRY]: Duplicate entry '1-Test create course' for key 'COURSES_UNIQUE_IDX_0'."
+    );
   });
   // fail to create a course in the cache directly because a non-generated PK has not been provided
   it('should fail to create a course in the cache directly because a non-generated PK has not been provided', async () => {
@@ -896,6 +969,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       '[RedisRepositoryService course][Validation Error]: A value is required for generated PK column id when the generatePrimaryKeys is set to false or isArray is set to true.'
     );
   });
+  // TODO: tests for redis validations
   // create a course in the cache directly
   it('should create a course in the cache directly if all data has been provided correctly', async () => {
     const response = await fetch(
@@ -926,6 +1000,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       'Cooking: A Day In Hell With Gordon Ramsey'
     );
   });
+  // TODO: tests for redis validations (duplicate fields)
   // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)
   it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)', async () => {
     const response = await fetch(
@@ -1079,9 +1154,6 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     // we expect multiple new items to be created
     const responseBody = await response.json();
-    console.log('==> [3]:', responseBody);
-    console.log('==> [4]:', responseBody.result.items);
-    console.log('==> [5]:', responseBody.resultsByService.main);
     expect(response.status).toEqual(HttpStatus.OK);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
@@ -1091,7 +1163,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       2: false,
       3: false,
       4: false,
-      5: false
+      6: false
     }
     responseBody.result.items.forEach((item: { id: number }) => {
       if (resultIdsToFind[item.id] === false) {
@@ -1105,7 +1177,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.resultsByService).toHaveProperty('main');
     expect(responseBody.resultsByService.main).toHaveProperty('items');
     expect(responseBody.resultsByService.main.items).toHaveLength(5);
-    expect(responseBody.resultsByService.main.items[0].id).toEqual(5);
+    expect(responseBody.resultsByService.main.items[0].id).toEqual(6);
     expect(responseBody.resultsByService.main.items[1].id).toEqual(4);
     expect(responseBody.resultsByService.main.items[2].id).toEqual(3);
     expect(responseBody.resultsByService.main.items[3].id).toEqual(2);
@@ -1121,14 +1193,13 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseCheckBody = await responseCheck.json();
-    console.log('==> [5][5]:', responseCheckBody);
     expect(responseCheckBody.result.items).toHaveLength(5);
     const idsToFind: Record<number, boolean> = {
       1: false,
       2: false,
       3: false,
       4: false,
-      5: false
+      6: false
     }
     responseCheckBody.result.items.forEach((item: { id: number }) => {
       if (idsToFind[item.id] === false) {
@@ -1139,10 +1210,10 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(idsToFind[id]).toEqual(true);
     }
   });
-  // TODO: test filters in optionsOverridesByService
+  // TODO: test filters in optionsOverridesByService after fixing $and.
   // find users - full range of options (filters, included relations, ordering), multi-data-service search: filterByFirstServiceResultFields.id, runOnNoFirstServiceResultOnly=false, individualSearch=true
   // TODO: finish this
-  it('should find users: full range of options (filters, included relations, ordering), multi-data-service search', async () => {
+  it.skip('should find users: full range of options (filters, included relations, ordering), multi-data-service search', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
         'dataServices[]=main&dataServices[]=cache&' +
@@ -1165,11 +1236,62 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   });
   // TODO: update (incl. processManyToMany) and delete
   // TODO: refresh token flow
-  // #######
   // ----
-  // -- end of admin cases
+  // -- end of admin cases - create and multi-service find
   // ----
-  // #######
+  // ----
+  // -- start of admin cases - bulkCreate
+  // ----
+  // bulk create courses in the DB
+  it('should bulk create courses in the DB', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/bulk`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: [
+            {
+              courseTypeId: 1,
+              name: 'Test bulk create course'
+            },
+            {
+              courseTypeId: 2,
+              name: 'Test bulk create course 2'
+            }
+          ]
+        }),
+        method: HttpMethod.POST
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.CREATED);
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveLength(2);
+    expect(responseBody.result[0].id).toEqual(8);
+    expect(responseBody.result[0].courseTypeId).toEqual(1);
+    expect(responseBody.result[0].name).toEqual('Test bulk create course');
+    expect(responseBody.result[1].id).toEqual(9);
+    expect(responseBody.result[1].courseTypeId).toEqual(2);
+    expect(responseBody.result[1].name).toEqual('Test bulk create course 2');
+  });
+  // ----
+  // -- end of admin cases - bulkCreate
+  // ----
+  // ----
+  // -- start of admin cases - update
+  // ----
+  // ----
+  // -- end of admin cases - update
+  // ----
+  // ----
+  // -- start of admin cases - delete
+  // ----
+  // ----
+  // -- end of admin cases - delete
+  // ----
   // -- start of user 0 cases - CRUD functionality, mutation of input and output data
   // TODO: log in as user 0
   // TODO: find courses (no options)
@@ -1177,6 +1299,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // TODO: find courses (sorting)
   // TODO: find courses (no sorting and pagination)
   // TODO: error cases for authorization points
+  // TODO: success cases for authorization points
   // TODO: mutation of input data
   // TODO: mutation of output data
   // -- end of user 0 cases

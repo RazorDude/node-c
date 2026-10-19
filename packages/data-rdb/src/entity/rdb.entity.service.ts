@@ -1,3 +1,5 @@
+import { HttpStatus } from '@nestjs/common';
+
 import {
   ApplicationError,
   ConfigProviderService,
@@ -59,6 +61,14 @@ export class RDBEntityService<
   protected columNames: string[];
   protected deletedColumnName?: string;
   protected primaryKeys: string[];
+
+  static handledErrorCodes = new Set([
+    'ER_DUP_ENTRY',
+    'ER_NO_DEFAULT_FOR_FIELD',
+    'ER_NO_REFERENCED_ROW',
+    'ER_NO_REFERENCED_ROW_2',
+    PostgresErrorCode.UniqueViolation
+  ]);
 
   // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
@@ -705,16 +715,29 @@ export class RDBEntityService<
           dataToSave as Partial<Entity>
         )) as ReturnData;
       }
-      return repository.save(dataToSave as Partial<Entity>) as ReturnData;
+      return (await repository.save(
+        dataToSave as Partial<Entity>
+      )) as ReturnData;
     } catch (e) {
       const error = e as Record<string, unknown>;
-      // TODO: move this functionality out of here and make this abstract
-      if (error.code === PostgresErrorCode.UniqueViolation) {
-        const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
-        const result = extractVariableName.exec(error.detail as string);
+      const errorMessage = (error.message as string) || '';
+      if (RDBEntityService.handledErrorCodes.has(`${error.code}`)) {
+        // TODO: move this functionality out of here and make this abstract
+        if (error.code === PostgresErrorCode.UniqueViolation) {
+          const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
+          const result = extractVariableName.exec(errorMessage);
+          throw new ApplicationError(
+            `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
+            { cause: e, satus: HttpStatus.BAD_REQUEST }
+          );
+        }
+        // yes, I am a grammer n*zi :)
         throw new ApplicationError(
-          `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
-          { cause: e }
+          `[RBDEntityService][${error.code}]: ${errorMessage}${errorMessage.endsWith('.') ? '' : '.'}`,
+          {
+            cause: e,
+            satus: HttpStatus.BAD_REQUEST
+          }
         );
       }
       throw e;
