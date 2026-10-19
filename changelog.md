@@ -27,6 +27,7 @@
   - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
 - `packages/data-rdb`
   - Fix for the SQLQueryBuilder's parseRelations allowed include method.
+  - Fixed the error handling, so that error 400 is now thrown for handled error codes.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
 - `packages/nestjs-pino`
