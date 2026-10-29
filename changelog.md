@@ -19,6 +19,7 @@
   - BREAKING: The RESTAPIEntityController now requires the injection of Reflector in its constructor.
   - Added a custom ValidationPipe which allows ovveriding per-class whitelisting.
   - Re-did the DTOs so that they include proper optionsOverridesByService with validation.
+  - Fixed the issue where the id param is not parsed properly due to a typo.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
   - Vendored in nestjs-pino due to its lack of ESM support.
@@ -26,8 +27,9 @@
   - BREAKING: Moved DataCountOptions, DataFindOneOptions and DataFindOptions's withDeleted property to the privateOptions, along with DataFindOptions's getTotalCount property.
   - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
 - `packages/data-rdb`
-  - Fix for the SQLQueryBuilder's parseRelations allowed include method.
+  - Multiple fixes for the SQLQueryBuilder's parseRelations allowed include method.
   - Fixed the error handling, so that error 400 is now thrown for handled error codes.
+  - Fixed the SQLQueryBuilder's parseFilters method - it now appends the entity name to the param name, so that relation fields that have the same name as the parent are not having their values replaced.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
   - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.

@@ -203,9 +203,9 @@ export class SQLQueryBuilderService {
     operator?: DataSelectOperator
   ): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
-    const escapedFieldAlias = fieldAlias.replace(regExps.dollarSign, '__ds__');
     const escapedFieldName = fieldName.replace(regExps.dollarSign, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${escapedFieldName}${cqs}`;
+    const paramName = `${entityName}___${fieldAlias.replace(regExps.dollarSign, '__ds__')}`;
     let parsedInnerValue =
       fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === DataSelectOperator.Contains) {
@@ -216,38 +216,38 @@ export class SQLQueryBuilderService {
         dbType === RDBType.ClickHouse ||
         dbType === RDBType.MySQL
       ) {
-        query = `JSON_CONTAINS(${fieldString}, :${escapedFieldAlias})`;
+        query = `JSON_CONTAINS(${fieldString}, :${paramName})`;
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
-        query = `${fieldString} ? :${escapedFieldAlias}`;
+        query = `${fieldString} ? :${paramName}`;
       }
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
+        params: { [paramName]: parsedInnerValue },
         query
       };
     }
     if (operator === DataSelectOperator.GreaterThan) {
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString} > :${escapedFieldAlias}`
+        params: { [paramName]: parsedInnerValue },
+        query: `${fieldString} > :${paramName}`
       };
     }
     if (operator === DataSelectOperator.GreaterThanOrEqual) {
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString} >= :${escapedFieldAlias}`
+        params: { [paramName]: parsedInnerValue },
+        query: `${fieldString} >= :${paramName}`
       };
     }
     if (operator === DataSelectOperator.LessThan) {
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString} < :${escapedFieldAlias}`
+        params: { [paramName]: parsedInnerValue },
+        query: `${fieldString} < :${paramName}`
       };
     }
     if (operator === DataSelectOperator.LessThanOrEqual) {
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
-        query: `${fieldString} <= :${escapedFieldAlias}`
+        params: { [paramName]: parsedInnerValue },
+        query: `${fieldString} <= :${paramName}`
       };
     }
     if (
@@ -255,23 +255,19 @@ export class SQLQueryBuilderService {
       (operator === DataSelectOperator.ILike && !this.iLikeSupported)
     ) {
       return {
-        params: { [escapedFieldAlias]: parsedInnerValue },
-        query:
-          `${fieldString}${isNot ? ' not ' : ' '}` +
-          `like :${escapedFieldAlias}`
+        params: { [paramName]: parsedInnerValue },
+        query: `${fieldString}${isNot ? ' not ' : ' '}like :${paramName}`
       };
     }
     if (operator === DataSelectOperator.ILike) {
       return {
-        params: { [escapedFieldAlias]: typeof parsedInnerValue },
-        query:
-          `${fieldString}${isNot ? ' not ' : ' '}` +
-          `ilike :${escapedFieldAlias}`
+        params: { [paramName]: typeof parsedInnerValue },
+        query: `${fieldString}${isNot ? ' not ' : ' '}ilike :${paramName}`
       };
     }
     return {
-      params: { [escapedFieldAlias]: parsedInnerValue },
-      query: `${fieldString} ${isNot ? '!=' : '='} :${escapedFieldAlias}`
+      params: { [paramName]: parsedInnerValue },
+      query: `${fieldString} ${isNot ? '!=' : '='} :${paramName}`
     };
   }
 
@@ -639,9 +635,6 @@ export class SQLQueryBuilderService {
     }
   ): IncludeItems {
     const { allowedInclude, throwErrorOnForbiddenInclude } = options;
-    if (allowedInclude.length === 0) {
-      return {};
-    }
     const { currentInclude, newIncludeItems, unparsedInclude } = data;
     const allowedIncludeMap: GenericObject<boolean> = {};
     const resultInclude: IncludeItems = { ...(currentInclude || {}) };

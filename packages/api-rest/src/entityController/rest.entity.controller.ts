@@ -159,7 +159,7 @@ export class RESTAPIEntityControllerWithoutDto<
   ): Promise<DomainFindOneResult<Entity> | void>;
   @Get('/item/:id')
   async findOne(
-    @Param() id: number | string,
+    @Param('id') id: number | string,
     @Query() query: DomainFindOneOptions
   ): Promise<DomainFindOneResult<Entity> | void> {
     this.checkRoute('findOne');
@@ -314,7 +314,7 @@ export class RESTAPIEntityController<
 
   @Get('/item/:id')
   async findOne(
-    @Param() id: number | string,
+    @Param('id') id: number | string,
     @Query() query: Dto['FindOne'],
     ...args: unknown[]
   ): Promise<DomainFindOneResult<Entity> | void> {
