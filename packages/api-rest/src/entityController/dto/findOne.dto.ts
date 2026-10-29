@@ -23,6 +23,7 @@ import {
   BaseAdditionalServiceOptionsOverridesDto,
   BaseDto
 } from './base.dto.js';
+import { FindSaveAdditionalResultsInFirstServiceOptionsDto } from './find.dto.js';
 
 type DataFindOneOptionsWithOptionalFilters = Omit<
   DataFindOneOptions,
@@ -88,4 +89,12 @@ export class FindOneDto
   @Type(() => FindOneAdditionalServiceOptionsOverridesDto)
   @ValidateNested({ each: true })
   declare optionsOverridesByService?: GenericObject<FindOneAdditionalServiceOptionsOverridesDto>;
+}
+
+export class FindOneWithSaveAddtionalOptionsDto extends FindOneDto {
+  @IsOptional()
+  @IsObject()
+  @Type(() => FindSaveAdditionalResultsInFirstServiceOptionsDto)
+  @ValidateNested()
+  saveAdditionalResultsInFirstService?: FindSaveAdditionalResultsInFirstServiceOptionsDto;
 }

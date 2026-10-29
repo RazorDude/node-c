@@ -20,6 +20,7 @@
   - Added a custom ValidationPipe which allows ovveriding per-class whitelisting.
   - Re-did the DTOs so that they include proper optionsOverridesByService with validation.
   - Fixed the issue where the id param is not parsed properly due to a typo.
+  - Added extended DTOs for find and findOne with saveAdditionalResultsInFirstService support.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
   - Vendored in nestjs-pino due to its lack of ESM support.

@@ -10,10 +10,13 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsDefined,
+  IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
   IsObject,
   IsOptional,
+  IsString,
   ValidateNested
 } from 'class-validator';
 
@@ -97,4 +100,28 @@ export class FindDto extends BaseFindDto implements BaseDto, DomainFindOptions {
   @Type(() => FindAdditionalServiceOptionsOverridesDto)
   @ValidateNested({ each: true })
   declare optionsOverridesByService?: GenericObject<FindAdditionalServiceOptionsOverridesDto>;
+}
+
+export class FindSaveAdditionalResultsInFirstServiceOptionsDto {
+  @IsObject()
+  @IsOptional()
+  serviceOptions?: unknown;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @IsString()
+  serviceName: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(dtoTransformBoolean)
+  useResultsForFirstServiceReturnData?: boolean;
+}
+
+export class FindWithSaveAddtionalOptionsDto extends FindDto {
+  @IsOptional()
+  @IsObject()
+  @Type(() => FindSaveAdditionalResultsInFirstServiceOptionsDto)
+  @ValidateNested()
+  saveAdditionalResultsInFirstService?: FindSaveAdditionalResultsInFirstServiceOptionsDto;
 }
