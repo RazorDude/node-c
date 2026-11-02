@@ -42,7 +42,6 @@ export class HTTPAPIModule {
       .apply(express.json({ verify: HTTPAPIModule.rawBodyBuffer }))
       .forRoutes('*');
     consumer.apply(cookieParser()).forRoutes('*');
-    // configure logging
     consumer.apply(HTTPRequestLoggingMiddleware).forRoutes('*');
     consumer.apply(HTTPCORSMiddleware).forRoutes('*');
     consumer.apply(HTTPAuthorizationMiddleware).forRoutes('*');

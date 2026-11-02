@@ -24,8 +24,8 @@
     "lint:fix:all:parallel": "npm run lint:fix --workspace=packages/core & npm run lint:fix --workspace=packages/data-rdb & npm run lint:fix --workspace=packages/data-typeorm & npm run lint:fix --workspace=packages/data-clickhouse & npm run lint:fix --workspace=packages/data-redis & npm run lint:fix --workspace=packages/domain-iam & npm run lint:fix --workspace=packages/domain-iam-okta & npm run lint:fix --workspace=packages/api-http & npm run lint:fix --workspace=packages/api-rest & npm run lint:fix --workspace=apps/test",
     "publish-package:all": "npm run publish-package --workspace=packages/core && npm run publish-package --workspace=packages/data-rdb && npm run publish-package --workspace=packages/data-typeorm && npm run publish-package --workspace=packages/data-clickhouse && npm run publish-package --workspace=packages/data-redis && npm run publish-package --workspace=packages/domain-iam && npm run publish-package --workspace=packages/domain-iam-okta && npm run publish-package --workspace=packages/api-http && npm run publish-package --workspace=packages/api-rest",
     "start:apps-test:direct": "NODE_ENV=endToEndTests node apps/test/dist/main.js",
-    "test": "vitest --config test/vitest.config.ts",
-    "test:coverage": "rm -rf coverage && NODE_ENV=endToEndTests vitest --config test/vitest.config.ts --coverage"
+    "test": "rm -rf coverage/results-data/* && vitest --config test/vitest.config.ts",
+    "test:report-coverage": "npx c8 report --temp-directory coverage/results-data --reports-dir coverage/report --exclude-after-remap --all --include 'packages/*/src/**' --include 'apps/test/src/**' --exclude 'packages/nestjs-pino' --exclude 'packages/data-typeorm/src/typeormCli.ts' --exclude 'apps/test/src/data/*/migrations' --exclude 'apps/test/src/data/*/seeds' --reporter text --reporter html"
   },
   "packageManager": "npm@12.2.0",
   "workspaces": [
@@ -35,6 +35,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@vitest/coverage-v8": "^5.0.5",
+    "c8": "^9.1.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5",
     "yargs": "^18.2.0"

@@ -15,7 +15,7 @@ import {
 import { Constants } from './common/definitions/common.constants.js';
 
 (async () => {
-  await NodeCApp.start(
+  const apps = await NodeCApp.start(
     [
       AppModuleCoursePlatformDelegated,
       AppModuleCoursePlatformFederated,
@@ -42,6 +42,11 @@ import { Constants } from './common/definitions/common.constants.js';
       loadConfigOptions: AppModuleBase.configProviderModuleRegisterOptions
     }
   );
+  // On kill -INT (e.g. from the e2e teardown), close the apps and exit normally,
+  // so that V8 writes the coverage data from NODE_V8_COVERAGE before the process ends.
+  process.once('SIGINT', () => {
+    Promise.all(apps.map((app) => app.close())).finally(() => process.exit(0));
+  });
 })().then(
   () => console.info('App started.'),
   (err) => {

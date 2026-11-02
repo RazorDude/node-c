@@ -34,6 +34,10 @@ export class BaseUpdateDto implements DataUpdateOptionsWithOptionalFilters {
   @IsOptional()
   @IsBoolean()
   returnData?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  returnOriginalItems?: boolean;
 }
 
 export class UpdateAdditionalServiceOptionsOverridesDto

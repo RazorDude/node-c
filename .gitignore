@@ -1,7 +1,7 @@
 .DS_Store
 *.env
 *.tsbuildinfo
-.nyc_output
+.claude
 .vscode
 assets
 coverage

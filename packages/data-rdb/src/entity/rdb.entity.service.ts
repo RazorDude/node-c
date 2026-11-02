@@ -332,11 +332,15 @@ export class RDBEntityService<
       entityManager: this.repository.manager,
       where
     });
-    const result = await queryBuilder.execute();
-    return {
-      ...dataToReturn,
-      count: typeof result.affected === 'number' ? result.affected : undefined
-    };
+    try {
+      const result = await queryBuilder.execute();
+      return {
+        ...dataToReturn,
+        count: typeof result.affected === 'number' ? result.affected : undefined
+      };
+    } catch (e) {
+      throw this.processDBError(e);
+    }
   }
 
   async find(
@@ -719,29 +723,38 @@ export class RDBEntityService<
         dataToSave as Partial<Entity>
       )) as ReturnData;
     } catch (e) {
-      const error = e as Record<string, unknown>;
-      const errorMessage = (error.message as string) || '';
-      if (RDBEntityService.handledErrorCodes.has(`${error.code}`)) {
-        // TODO: move this functionality out of here and make this abstract
-        if (error.code === PostgresErrorCode.UniqueViolation) {
-          const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
-          const result = extractVariableName.exec(errorMessage);
-          throw new ApplicationError(
-            `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
-            { cause: e, satus: HttpStatus.BAD_REQUEST }
-          );
-        }
-        // yes, I am a grammer n*zi :)
-        throw new ApplicationError(
-          `[RBDEntityService][${error.code}]: ${errorMessage}${errorMessage.endsWith('.') ? '' : '.'}`,
-          {
-            cause: e,
-            satus: HttpStatus.BAD_REQUEST
-          }
-        );
-      }
-      throw e;
+      throw this.processDBError(e);
     }
+  }
+
+  /*
+   * Converts the known DB errors (see handledErrorCodes) into ApplicationErrors with status 400.
+   * Any other error is returned as is. The result is meant to be thrown by the caller.
+   */
+  protected processDBError(e: unknown): unknown {
+    const error = e as Record<string, unknown>;
+    const errorMessage = (error.message as string) || '';
+    if (!RDBEntityService.handledErrorCodes.has(`${error.code}`)) {
+      return e;
+    }
+    // TODO: move this functionality out of here and make this abstract
+    if (error.code === PostgresErrorCode.UniqueViolation) {
+      const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
+      const result = extractVariableName.exec(errorMessage);
+      return new ApplicationError(
+        // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+        `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
+        { cause: e, statusCode: HttpStatus.BAD_REQUEST }
+      );
+    }
+    // yes, I am a grammer n*zi :)
+    return new ApplicationError(
+      `[RBDEntityService][${error.code}]: ${errorMessage}${errorMessage.endsWith('.') ? '' : '.'}`,
+      {
+        cause: e,
+        statusCode: HttpStatus.BAD_REQUEST
+      }
+    );
   }
 
   async update(
@@ -831,48 +844,52 @@ export class RDBEntityService<
     if (returnOriginalItems) {
       dataToReturn.originalItems = originalItems;
     }
-    // find the updated data
-    if (returnData) {
-      let result: OrmUpdateQueryBuilderUpdateResult;
-      // if returning is supported by the db, it's easy
-      if (this.qb.returningSupported) {
-        result = await queryBuilder.returning('*').execute();
-      }
-      // otherwise, run a find on the db to get all items by the originally provided filters
-      // that are already used for the update
-      else {
-        result = await queryBuilder.execute();
-        const { items: updatedItems } = await this.find(
-          {
-            filters: processedFilters,
-            findAll: true,
-            transactionManager
-          },
-          { processFiltersAllowedFieldsEnabled: false }
-        );
-        // remove any related entities that might have been joined for the search
-        if (hasInclude) {
-          const keysToDelete: string[] = [];
-          for (const includeEntityName in include) {
-            keysToDelete.push(includeEntityName.split('.')[0]);
-          }
-          updatedItems.forEach((updatedItem, updatedItemIndex) => {
-            keysToDelete.forEach((keyToDelete) => {
-              delete updatedItem[keyToDelete];
-            });
-            updatedItems[updatedItemIndex] = updatedItem;
-          });
+    try {
+      // find the updated data
+      if (returnData) {
+        let result: OrmUpdateQueryBuilderUpdateResult;
+        // if returning is supported by the db, it's easy
+        if (this.qb.returningSupported) {
+          result = await queryBuilder.returning('*').execute();
         }
-        result.raw = updatedItems;
+        // otherwise, run a find on the db to get all items by the originally provided filters
+        // that are already used for the update
+        else {
+          result = await queryBuilder.execute();
+          const { items: updatedItems } = await this.find(
+            {
+              filters: processedFilters,
+              findAll: true,
+              transactionManager
+            },
+            { processFiltersAllowedFieldsEnabled: false }
+          );
+          // remove any related entities that might have been joined for the search
+          if (hasInclude) {
+            const keysToDelete: string[] = [];
+            for (const includeEntityName in include) {
+              keysToDelete.push(includeEntityName.split('.')[0]);
+            }
+            updatedItems.forEach((updatedItem, updatedItemIndex) => {
+              keysToDelete.forEach((keyToDelete) => {
+                delete updatedItem[keyToDelete];
+              });
+              updatedItems[updatedItemIndex] = updatedItem;
+            });
+          }
+          result.raw = updatedItems;
+        }
+        // TODO: consider using generatedMaps, instead of raw (only applies to returningSupported=true)
+        dataToReturn.count = (result.raw as Entity[]).length;
+        dataToReturn.items = result.raw as Entity[];
+      } else {
+        const result = await queryBuilder.execute();
+        dataToReturn.count =
+          typeof result.affected === 'number' ? result.affected : undefined;
       }
-      // TODO: consider using generatedMaps, instead of raw (only applies to returningSupported=true)
-      dataToReturn.count = (result.raw as Entity[]).length;
-      dataToReturn.items = result.raw as Entity[];
-    } else {
-      const result = await queryBuilder.execute();
-      dataToReturn.count =
-        typeof result.affected === 'number' ? result.affected : undefined;
+      return dataToReturn;
+    } catch (e) {
+      throw this.processDBError(e);
     }
-    return dataToReturn;
   }
 }

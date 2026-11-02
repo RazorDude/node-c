@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConsole: No other logging method at startup. */
 
-import { DynamicModule, INestApplication } from '@nestjs/common';
+import { DynamicModule, HttpStatus, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import {
@@ -11,6 +11,9 @@ import {
 } from './common/configProvider/configProvider.definitions.js';
 import { ConfigProviderService } from './common/configProvider/configProvider.service.js';
 import { LoggerService } from './common/logger/logger.service.js';
+
+// not included in Nest's HttpStatus enum
+const HTTP_STATUS_REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
 
 export interface NodeCAppGenerateOrmConfigModuleOptions {
   [moduleName: string]: {
@@ -113,6 +116,7 @@ export class NodeCApp {
             `[Node-C][${i}/${apiModuleName}]: Starting listeners...`
           );
           // TODO: move the following app.set and app.use to the http module
+          // fix the problem where query is immutable in expressjs v5+
           (app as unknown as { set: (...args: unknown[]) => void }).set(
             'query parser',
             'extended'
@@ -125,6 +129,61 @@ export class NodeCApp {
                 writable: true
               });
               next();
+            }
+          );
+          // handle client errors so that we don't wonder what happenhd and why we're getting 400 or 431 without a body
+          app.getHttpServer().on(
+            'clientError',
+            (
+              err:
+                | {
+                    code?: string;
+                    message?: string;
+                    rawPacket?: Buffer;
+                    reason?: string;
+                  }
+                | undefined,
+              socket: {
+                destroy: () => void;
+                end: (message: string) => void;
+                writable: boolean;
+              }
+            ) => {
+              app.get(LoggerService).error({
+                errorCode: err?.code,
+                errorReason: err?.reason ?? err?.message,
+                errorType: 'clientError'
+                // won't be logging this for now, cause we could have auth headers and other unsanitize things here
+                // rawPacket: err?.rawPacket?.toString()
+              });
+              // the client has already disconnected - nothing to respond to
+              if (err?.code === 'ECONNRESET' || !socket.writable) {
+                socket.destroy();
+                return;
+              }
+              let statusCode: number;
+              let statusText: string;
+              if (err?.code === 'HPE_HEADER_OVERFLOW') {
+                statusCode = HTTP_STATUS_REQUEST_HEADER_FIELDS_TOO_LARGE;
+                statusText = 'Request Header Fields Too Large';
+              } else {
+                statusCode = HttpStatus.BAD_REQUEST;
+                statusText = 'Bad Request';
+              }
+              // don't include the rawPacket in the response, as it may contain credentials
+              const body = JSON.stringify({
+                error: statusText,
+                message: err?.code,
+                statusCode
+              });
+              socket.end(
+                `HTTP/1.1 ${statusCode} ${statusText}\r\n` +
+                  'Content-Type: application/json; charset=utf-8\r\n' +
+                  `Content-Length: ${Buffer.byteLength(body)}\r\n` +
+                  'Connection: close\r\n' +
+                  '\r\n' +
+                  body
+              );
             }
           );
           await app.listen(port as number, hostname as string);

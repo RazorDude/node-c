@@ -395,9 +395,15 @@ export async function setup(): Promise<void> {
   }
   console.info('[TestLogs]: Logs set up. Starting apps...');
   await new Promise<void>((resolve, reject) => {
-    // used to be start:apps-test:nyc:direct
     const appsProcess = spawn('npm', ['run', 'start:apps-test:direct'], {
-      env: { NODE_ENV: AppEnvironment.Test, PATH: process.env.PATH }
+      env: {
+        NODE_ENV: AppEnvironment.Test,
+        NODE_V8_COVERAGE: path.resolve(
+          import.meta.dirname,
+          '../coverage/results-data'
+        ),
+        PATH: process.env.PATH
+      }
     });
     appsProcess.on('exit', () => {
       if (appPromiseFulfilled) {

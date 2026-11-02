@@ -35,6 +35,16 @@ const regExps = {
 
 @Injectable()
 export class SQLQueryBuilderService {
+  allowedOperatorsUnderNot: Record<string, boolean> = {
+    [DataSelectOperator.Between]: true,
+    [DataSelectOperator.Contains]: true,
+    [DataSelectOperator.GreaterThan]: true,
+    [DataSelectOperator.GreaterThanOrEqual]: true,
+    [DataSelectOperator.ILike]: true,
+    [DataSelectOperator.LessThan]: true,
+    [DataSelectOperator.LessThanOrEqual]: true,
+    [DataSelectOperator.Like]: true
+  };
   allowedStringOperators: string[] = Object.values(DataSelectOperator);
   columnQuotesSymbol: string;
   dbType: RDBType | string;
@@ -136,14 +146,13 @@ export class SQLQueryBuilderService {
         if (isFirst) {
           isFirst = false;
         } else {
-          methodName =
-            fieldName === DataSelectOperator.Or ? 'orWhere' : 'andWhere';
+          methodName = 'andWhere';
         }
         (
           ormQueryBuilder as unknown as {
             [oqbMethodName: string]: (..._args: unknown[]) => void;
           }
-        )[methodName](whereItem.query, whereItem.params);
+        )[methodName](`(${whereItem.query})`, whereItem.params);
       }
     }
     if (orderBy && 'orderBy' in ormQueryBuilder) {
@@ -193,19 +202,28 @@ export class SQLQueryBuilderService {
     return deletedAtColumnName;
   }
 
-  // biome-ignore lint/complexity/useMaxParams: Legacy.
-  protected getValueForFilter(
-    entityName: string,
-    fieldName: string,
-    fieldAlias: string,
-    fieldValue: unknown,
-    isNot: boolean,
-    operator?: DataSelectOperator
-  ): ParsedFilter {
+  protected getValueForFilter(options: {
+    entityName: string;
+    fieldAlias: string;
+    fieldName: string;
+    fieldUniqueIteration: number;
+    fieldValue: unknown;
+    isNot?: boolean;
+    operator?: DataSelectOperator;
+  }): ParsedFilter {
     const { columnQuotesSymbol: cqs, dbType } = this;
+    const {
+      entityName,
+      fieldAlias,
+      fieldName,
+      fieldUniqueIteration,
+      fieldValue,
+      isNot,
+      operator
+    } = options;
     const escapedFieldName = fieldName.replace(regExps.dollarSign, '__ds__');
     const fieldString = `${cqs}${entityName}${cqs}.${cqs}${escapedFieldName}${cqs}`;
-    const paramName = `${entityName}___${fieldAlias.replace(regExps.dollarSign, '__ds__')}`;
+    const paramName = `${entityName}___${fieldAlias.replace(regExps.dollarSign, '__ds__')}_${fieldUniqueIteration}`;
     let parsedInnerValue =
       fieldValue instanceof Date ? fieldValue.valueOf() : fieldValue;
     if (operator === DataSelectOperator.Contains) {
@@ -216,10 +234,10 @@ export class SQLQueryBuilderService {
         dbType === RDBType.ClickHouse ||
         dbType === RDBType.MySQL
       ) {
-        query = `JSON_CONTAINS(${fieldString}, :${paramName})`;
+        query = `${isNot ? 'not ' : ''}JSON_CONTAINS(${fieldString}, :${paramName})`;
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
-        query = `${fieldString} ? :${paramName}`;
+        query = `${isNot ? 'not ' : ''}(${fieldString} ? :${paramName})`;
       }
       return {
         params: { [paramName]: parsedInnerValue },
@@ -229,25 +247,25 @@ export class SQLQueryBuilderService {
     if (operator === DataSelectOperator.GreaterThan) {
       return {
         params: { [paramName]: parsedInnerValue },
-        query: `${fieldString} > :${paramName}`
+        query: `${fieldString} ${isNot ? '<=' : '>'} :${paramName}`
       };
     }
     if (operator === DataSelectOperator.GreaterThanOrEqual) {
       return {
         params: { [paramName]: parsedInnerValue },
-        query: `${fieldString} >= :${paramName}`
+        query: `${fieldString} ${isNot ? '<' : '>='} :${paramName}`
       };
     }
     if (operator === DataSelectOperator.LessThan) {
       return {
         params: { [paramName]: parsedInnerValue },
-        query: `${fieldString} < :${paramName}`
+        query: `${fieldString} ${isNot ? '>=' : '<'} :${paramName}`
       };
     }
     if (operator === DataSelectOperator.LessThanOrEqual) {
       return {
         params: { [paramName]: parsedInnerValue },
-        query: `${fieldString} <= :${paramName}`
+        query: `${fieldString} ${isNot ? '>' : '<='} :${paramName}`
       };
     }
     if (
@@ -261,7 +279,7 @@ export class SQLQueryBuilderService {
     }
     if (operator === DataSelectOperator.ILike) {
       return {
-        params: { [paramName]: typeof parsedInnerValue },
+        params: { [paramName]: parsedInnerValue },
         query: `${fieldString}${isNot ? ' not ' : ' '}ilike :${paramName}`
       };
     }
@@ -272,25 +290,28 @@ export class SQLQueryBuilderService {
   }
 
   protected parseArrayOfFilters(
-    filtersArray: unknown[],
+    filtersArray: unknown,
     fieldAlias: string
   ): {
-    hasValues: boolean;
-    isSimple: boolean;
-    paramsForQuery: GenericObject;
-    queryTemplateParamNames: string;
+    hasNullValues?: boolean;
+    isArray?: boolean;
+    isSimple?: boolean;
+    paramsCount?: number;
+    paramsForQuery?: GenericObject;
+    queryTemplateParamNames?: string;
   } {
+    if (!Array.isArray(filtersArray)) {
+      return { isArray: false };
+    }
+    let hasNullValues = false;
     let isSimple = true;
-    let hasValues = false;
+    let paramsCount = 0;
     const paramsForQuery: GenericObject = {};
     let queryTemplateParamNames = '';
     for (const i in filtersArray) {
       const fieldValueItem = filtersArray[i];
       if (typeof fieldValueItem === 'undefined') {
         continue;
-      }
-      if (!hasValues) {
-        hasValues = true;
       }
       if (
         fieldValueItem === null ||
@@ -300,14 +321,20 @@ export class SQLQueryBuilderService {
         typeof fieldValueItem === 'symbol' ||
         typeof fieldValueItem === 'boolean'
       ) {
+        // inefficient recheck, but reasonable code quality
+        if (fieldValueItem === null && !hasNullValues) {
+          hasNullValues = true;
+        }
         const queryParamName = `${fieldAlias}_${i}`;
         queryTemplateParamNames += `:${queryParamName}, `;
+        paramsCount++;
         paramsForQuery[queryParamName] = fieldValueItem;
         continue;
       }
       if (fieldValueItem instanceof Date) {
         const queryParamName = `${fieldAlias}_${i}`;
         queryTemplateParamNames += `:${queryParamName}, `;
+        paramsCount++;
         paramsForQuery[queryParamName] = fieldValueItem.valueOf();
         continue;
       }
@@ -316,21 +343,43 @@ export class SQLQueryBuilderService {
         break;
       }
     }
-    return { hasValues, isSimple, paramsForQuery, queryTemplateParamNames };
+    return {
+      hasNullValues,
+      isArray: true,
+      isSimple,
+      paramsCount,
+      paramsForQuery,
+      queryTemplateParamNames
+    };
   }
 
-  // TODO: fieldAliases for nested fields
-  // TODO: top-level operators are not working!!
+  // TODO: fieldAliases for relations' fields
   /**
-   * This method is a tid bit complex, so it requires a proper explanation. The idea is that you can pass a deeply nested filters object (example below)
+   * This method is a tid bit complex, so it requires a proper explanation.
    *
-   * and receive back two objects - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder,
+   * The idea is that you can pass a deeply nested filters object (example below) and receive back two objects:
    *
-   * and an 'include' object, containing the relations that need to be joined for the parsed where clause partials, provided there are any. This effectively
+   * - a 'where' object containg the where clause partials and their paramters, ready to be fed to the query builder, and
    *
-   * enables search by deeply nested fields, for example relatedEntity.deepRelatedEntity.deeperRelatedEntity.field = 'test'.
+   * - an 'include' object, containing the relations that need to be joined for the parsed where clause partials, provided there are any.
    *
-   * For further low-level details, check these issues: https://github.com/typeorm/typeorm/issues/2707, https://github.com/typeorm/typeorm/issues/3890
+   * This effectively enables search by deeply nested fields, for example relatedEntity.deepRelatedEntity.deeperRelatedEntity.field = 'test'.
+   *
+   * It also allows for two-tiered nested combinations of filters with $not. Specifically, the allowed ones are:
+   *
+   * - $not -> $like/$ilike
+   *
+   * - $not -> $between
+   *
+   * - $not -> $gt/$gte/$lt/$lte
+   *
+   * - $not -> $contains
+   *
+   * - $not -> [] directly, where the array contains atomic values and is treated as the $in operator.
+   *
+   * For further low-level details on how it started, I had to work around these TypeOrm issues: https://github.com/typeorm/typeorm/issues/2707, https://github.com/typeorm/typeorm/issues/3890
+   *
+   * Note: The $contains operator checks whether a JSON column contains a given string value.
    *
    * Example object:
    *
@@ -339,7 +388,7 @@ export class SQLQueryBuilderService {
    *
    *   field1: { $not: null },
    *
-   *   field2: { $not: [ 1, new Date(), 2, null, 3, true, 'test' ] },
+   *   field2: { $and: [{ $not: [ 1, new Date(), 2, 3, true, 'test' ] }, { $not: null }] },
    *
    *   field3: [ 1, 2, 3 ],
    *
@@ -351,17 +400,28 @@ export class SQLQueryBuilderService {
    *
    *   field7: new Date(),
    *
-   *   field8: [ 1, new Date(), 2, null, 3, true, 'test' ],
+   *   field8: [ 1, new Date(), 2, 3, true, 'test' ],
    *
    *   field9: { $like: '%test%' },
    *
    *   entityName.innerEntityName.field10: { $between: [ 10, 20 ] },
    *
-   *   field11: { $or: [ { $not: null }, 20, [ false, { $ilike: '%test' } ] ] },
+   *   entityName.innerEntityName.field11: { $not: { $between: [ 10, 20 ] } },
    *
-   *   field12: undefined,
+   *   field12: { $or: [ { $not: null }, 20, [ false, { $ilike: '%test' } ] ] },
    *
-   *   $or: { ... }
+   *   field13: { $not: { $like: '%test%' } },
+   *
+   *   field14: { $contains: 'test' },
+   *
+   *   field15: { $not: { $contains: 'test' } },
+   *
+   *   field16: undefined,
+   *
+   *   $and: { ...all-of-the-above },
+   *
+   *   $or: { ...all-of-the-above }
+   *
    * }
    */
   parseFilters(
@@ -369,34 +429,34 @@ export class SQLQueryBuilderService {
     filters: GenericObject,
     options: {
       fieldAliases?: { [fieldName: string]: string };
-      isTopLevel?: boolean;
+      fieldUniqueIteration?: number;
+      isNot?: boolean;
       operator?: DataSelectOperator;
       parameterNamesToFieldAliasesMap?: { [fieldName: string]: string };
-    } = { isTopLevel: true }
+    } = {}
   ): {
-    where: { [fieldName: string]: ParsedFilter };
+    fieldUniqueIteration: number;
     include: IncludeItems;
+    where: { [fieldName: string]: ParsedFilter };
   } {
     const cqs = this.columnQuotesSymbol;
-    const { isTopLevel = true, operator } = options;
+    const { isNot, operator } = options;
     const fieldAliases = options.fieldAliases || {};
-    // const isTopLevelDebugPrefix = isTopLevel ? '' : '[inner]';
     const parameterNamesToFieldAliasesMap =
       options.parameterNamesToFieldAliasesMap || {};
     const where: { [fieldName: string]: ParsedFilter } = {};
+    let fieldUniqueIteration = Number(options.fieldUniqueIteration ?? -1);
     let include: IncludeItems = {};
-    // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[begin]:`, filters, options);
     for (const fieldName in filters) {
       const fieldValue = filters[fieldName];
+      // skip undefined filter values
       if (typeof fieldValue === 'undefined') {
-        // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[0]: No value for fieldName ${fieldName}`);
         continue;
       }
-      const isNot = operator === DataSelectOperator.Not;
       let fieldAlias = fieldAliases[fieldName];
+      fieldUniqueIteration++;
       // handle relation fields
       if (fieldName.match(regExps.dot)) {
-        // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[1.0]: No value for fieldName ${fieldName}`);
         const fieldData = fieldName.split('.');
         const finalItemIndex = fieldData.length - 1;
         const actualFieldName = fieldData[finalItemIndex];
@@ -413,26 +473,20 @@ export class SQLQueryBuilderService {
         }
         const actualFieldAlias =
           parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
-        // console.log(
-        //   `=> [parseFilters]${isTopLevelDebugPrefix}[1.1]: Running parseFilters recursively`,
-        //   { [actualFieldName]: fieldValue },
-        //   {
-        //     fieldAliases: { [actualFieldName]: actualFieldAlias },
-        //     isTopLevel: false,
-        //     operator
-        //   }
-        // );
         const itemData = this.parseFilters(
           entityAlias,
           { [actualFieldName]: fieldValue },
           {
-            fieldAliases: { [actualFieldName]: actualFieldAlias },
-            isTopLevel: false,
+            fieldAliases: {
+              [actualFieldName]: actualFieldAlias
+            },
+            fieldUniqueIteration,
             operator
           }
         );
         where[fieldName] = itemData.where[actualFieldName];
         include = { ...include, ...itemData.include };
+        fieldUniqueIteration = itemData.fieldUniqueIteration + 1;
         continue;
       }
       if (!fieldAlias) {
@@ -440,166 +494,203 @@ export class SQLQueryBuilderService {
       }
       const actualFieldAlias =
         parameterNamesToFieldAliasesMap[fieldAlias] || fieldAlias;
+      // handle a direct new value
       if (fieldValue === null) {
-        // console.log(
-        //   `=> [parseFilters]${isTopLevelDebugPrefix}[2]: Null value for fieldName ${fieldName}, alias ${actualFieldAlias}`
-        // );
+        // Note to self: we're using the real column here, rather than appending it to the field alias,
+        // since it's a direct query without any parameters.
         where[fieldName] = {
           query: `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs} is${isNot ? ' not ' : ' '}null`
         };
         continue;
       }
-      // handle array values
-      if (Array.isArray(fieldValue)) {
-        // console.log(
-        //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.0]: Array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
-        // );
-        // if all values are primitive types and/or dates, then use 'between' (if provided) or 'in'
-        const { hasValues, isSimple, paramsForQuery, queryTemplateParamNames } =
-          this.parseArrayOfFilters(fieldValue, actualFieldAlias);
-        if (!hasValues) {
-          // console.log(
-          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.1]: No values for array value for fieldName ${fieldName}, alias ${actualFieldAlias}`
-          // );
-          continue;
+      const arrayParamNameBase = `${entityName}___${actualFieldAlias}_${fieldUniqueIteration}`;
+      const arrayData = this.parseArrayOfFilters(
+        fieldValue,
+        arrayParamNameBase
+      );
+      if (arrayData.isArray && arrayData.isSimple && !arrayData.paramsCount) {
+        continue;
+      }
+      // If all values are primitive types and/or dates, then use 'between' (if provided) or 'in'.
+      // This is also combined with the potential $not operator, passed from the parent iteration.
+      if (arrayData.isSimple) {
+        if (arrayData.hasNullValues) {
+          throw new ApplicationError(
+            `[SQLQueryBuilderService][${entityName}]: Invalid simple array filter on field ${fieldName} ` +
+              ` (alias: ${actualFieldAlias}) - cannot contain null values.`
+          );
         }
-        if (isSimple) {
-          if (operator === DataSelectOperator.Between) {
-            // console.log(
-            //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.2.0]: Simple array value with BETWEEN operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-            // );
-            where[fieldName] = {
-              params: paramsForQuery,
-              query:
-                `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
-                `between :${actualFieldAlias}_0 and :${actualFieldAlias}_1`
-            };
-            continue;
+        if (operator === DataSelectOperator.Between) {
+          if (arrayData.paramsCount !== 2) {
+            throw new ApplicationError(
+              `[SQLQueryBuilderService][${entityName}]: Invalid params count ${arrayData.paramsCount} for ` +
+                `$between filter on field ${fieldName} (alias: ${actualFieldAlias}).`
+            );
           }
-          // console.log(
-          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.2.0]: Simple array value with IN operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-          // );
           where[fieldName] = {
-            params: paramsForQuery,
+            params: arrayData.paramsForQuery,
             query:
               `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
-              `in (${queryTemplateParamNames.replace(regExps.commaSpace, '')})`
+              `between :${arrayParamNameBase}_0 and :${arrayParamNameBase}_1`
           };
+          fieldUniqueIteration++;
           continue;
         }
-        // otherwise, go through the array's items recursively and build the query
-        if (isTopLevel && fieldName === DataSelectOperator.Or) {
-          // console.log(
-          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.3]: Complex array value with OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-          // );
-          const finalWhereValue = { params: {}, query: '' };
-          fieldValue.forEach((orFieldValue, orFieldIndex) => {
-            const itemData = this.parseInnerFilters(
-              entityName,
-              orFieldValue,
-              fieldName,
-              `${actualFieldAlias}_${orFieldIndex}_f`,
-              operator
-            );
-            finalWhereValue.params = {
-              ...finalWhereValue.params,
-              ...(itemData.parsedFilter.params || {})
-            };
-            finalWhereValue.query += `${finalWhereValue.query.length > 0 ? ' or ' : '('}${itemData.parsedFilter.query}`;
-            include = { ...include, ...itemData.include };
-          });
-          finalWhereValue.query += ')';
-          where[fieldName] = finalWhereValue;
-        } else {
-          // console.log(
-          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.0]: Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-          // );
-          const itemData = this.parseInnerFilters(
-            entityName,
-            fieldValue as unknown as GenericObject,
-            fieldName,
-            actualFieldAlias,
-            operator
+        // $or with a simple array is the same as $in
+        if (operator && operator !== DataSelectOperator.Or) {
+          throw new ApplicationError(
+            `[SQLQueryBuilderService][${entityName}]: Invalid operator ${operator} filter on field ${fieldName} ` +
+              `(alias: ${actualFieldAlias}) - ${isNot ? '$not ' : ''}$in operator already active.`
           );
-          if (itemData.parsedFilter.query === '()') {
-            // console.log(
-            //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.1]: (no values) Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-            // );
-            continue;
-          }
-          // console.log(
-          //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.4.2]: (yes values) Complex array value with non-OR operator for fieldName ${fieldName}, alias ${actualFieldAlias}`
-          // );
-          where[fieldName] = itemData.parsedFilter;
-          include = { ...include, ...itemData.include };
         }
+        where[fieldName] = {
+          params: arrayData.paramsForQuery,
+          query:
+            `${cqs}${entityName}${cqs}.${cqs}${actualFieldAlias}${cqs}${isNot ? ' not ' : ' '}` +
+            `in (${arrayData.queryTemplateParamNames!.replace(regExps.commaSpace, '')})`
+        };
+        fieldUniqueIteration++;
         continue;
       }
-      // handle non-date object values - go through the object's values recursively and build the query
+      // Nested array and non-date object values - go through the object's values recursively and build the query.
+      // The parent operator is intentionally not passed here, since it's not relevant for the child query.
       if (typeof fieldValue === 'object' && !(fieldValue instanceof Date)) {
-        // console.log(
-        //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.5]: Object value for fieldName ${fieldName}, alias ${actualFieldAlias}`
-        // );
         const itemData = this.parseInnerFilters(
-          entityName,
           fieldValue as unknown as GenericObject,
-          fieldName,
-          actualFieldAlias,
-          operator
+          {
+            entityName,
+            fieldAlias: actualFieldAlias,
+            fieldAliases,
+            fieldName,
+            fieldUniqueIteration,
+            isNot
+          }
         );
+        if (
+          itemData.parsedFilter.query === '' ||
+          itemData.parsedFilter.query === '()'
+        ) {
+          continue;
+        }
         where[fieldName] = itemData.parsedFilter;
         include = { ...include, ...itemData.include };
+        fieldUniqueIteration = itemData.fieldUniqueIteration + 1;
         continue;
       }
-      // handle the rest of the allowed operators and the $not operator, where applicable
-      // console.log(
-      //   `=> [parseFilters]${isTopLevelDebugPrefix}[3.6]: Simple value for fieldName ${fieldName}, alias ${actualFieldAlias}, parameter name ${fieldAlias}.`
-      // );
-      where[fieldName] = this.getValueForFilter(
+      // Handle the rest of the allowed operators and the $not operator, where applicable.
+      where[fieldName] = this.getValueForFilter({
         entityName,
-        actualFieldAlias,
         fieldAlias,
+        fieldName: actualFieldAlias,
+        fieldUniqueIteration,
         fieldValue,
         isNot,
         operator
-      );
+      });
+      fieldUniqueIteration++;
     }
-    // console.log(`=> [parseFilters]${isTopLevelDebugPrefix}[end]:`, where, include);
-    return { where, include };
+    return { fieldUniqueIteration, include, where };
   }
 
-  // biome-ignore lint/complexity/useMaxParams: Legacy.
   protected parseInnerFilters(
-    entityName: string,
     filtersObject: GenericObject,
-    fieldName: string,
-    fieldAlias: string,
-    operator?: DataSelectOperator
-  ): { parsedFilter: ParsedFilter; include: IncludeItems } {
-    const itemsCount = Array.isArray(filtersObject)
-      ? filtersObject.length
-      : Object.keys(filtersObject).length;
-    const hasBrackets = itemsCount > 1;
+    options: {
+      entityName: string;
+      fieldAlias: string;
+      fieldAliases: GenericObject<string>;
+      fieldName: string;
+      fieldUniqueIteration: number;
+      isNot?: boolean;
+    }
+  ): {
+    fieldUniqueIteration: number;
+    parsedFilter: ParsedFilter;
+    include: IncludeItems;
+  } {
+    const { entityName, fieldAlias, fieldAliases, fieldName } = options;
+    const isOperator = this.allowedStringOperators.indexOf(fieldName) !== -1;
+    let isGroup = false;
+    let isNot = false;
+    let isOr = false;
+    if (isOperator) {
+      if (fieldName === DataSelectOperator.Not) {
+        isNot = true;
+      } else if (fieldName === DataSelectOperator.Or) {
+        isGroup = true;
+        isOr = true;
+      } else if (fieldName === DataSelectOperator.And) {
+        isGroup = true;
+      } else {
+        throw new ApplicationError(
+          `[SQLQueryBuilderService][${entityName}]: Invalid nesting under operator ${fieldName}: ` +
+            'only $and, $or and $not can contain nested filters.'
+        );
+      }
+    } else if (Array.isArray(filtersObject)) {
+      // Arrays match any of their items, the same way simple arrays are treated as $in.
+      // When negated, the items are joined with 'and' instead, since NOT (a OR b) is (NOT a) AND (NOT b).
+      isOr = !options.isNot;
+    }
     const parsedFilterItem = { params: {}, query: '' };
+    let fieldUniqueIteration = Number(options.fieldUniqueIteration);
     let parsedValueCount = 0;
     let include = {};
     for (const key in filtersObject) {
-      let op: string | null = null;
+      let innerOperator: string | null = null;
       if (this.allowedStringOperators.indexOf(key) !== -1) {
-        op = key;
+        innerOperator = key;
+        if (isGroup) {
+          throw new ApplicationError(
+            `[SQLQueryBuilderService][${entityName}]: Invalid nested operators: ` +
+              `${isOr ? '$or' : '$and'} + ${innerOperator}`
+          );
+        }
+        if (
+          (isNot || options.isNot) &&
+          innerOperator === DataSelectOperator.Not
+        ) {
+          throw new ApplicationError(
+            `[SQLQueryBuilderService][${entityName}]: Invalid nesting of $not under $not.`
+          );
+        }
+        if (isNot && !this.allowedOperatorsUnderNot[innerOperator]) {
+          throw new ApplicationError(
+            `[SQLQueryBuilderService][${entityName}]: Invalid filter ${innerOperator} under $not: ` +
+              'allowed values are $like, $ilike, $between, $gt, $gte, $lt, $lte and $contains.'
+          );
+        }
       }
-      const actualFieldName =
-        fieldName === DataSelectOperator.Or ? key : fieldName;
-      const fieldParameterName = `${fieldAlias}_${parsedValueCount}`;
+      const actualFieldName = isGroup ? fieldAliases[key] || key : key;
+      const fieldParameterName = `${key}_${parsedValueCount}`;
       const innerValue = filtersObject[key];
+      const isFieldKey =
+        innerOperator === null && !Array.isArray(filtersObject);
+      const columnAlias = isFieldKey ? fieldAliases[key] || key : fieldAlias;
+      // Relation keys (e.g. relatedEntity.field) are resolved by parseFilters itself, which uses the last segment
+      // of the path as the column - setting an alias override here would turn the whole path into the column name.
+      const isRelationKey = isFieldKey && regExps.dot.test(key);
       const itemData = this.parseFilters(
         entityName,
         { [actualFieldName]: innerValue },
         {
-          fieldAliases: { [actualFieldName]: fieldParameterName },
-          isTopLevel: false,
-          operator: op as DataSelectOperator,
-          parameterNamesToFieldAliasesMap: { [fieldParameterName]: fieldAlias }
+          fieldAliases: isRelationKey
+            ? fieldAliases
+            : {
+                ...fieldAliases,
+                [actualFieldName]: fieldParameterName
+              },
+          fieldUniqueIteration,
+          parameterNamesToFieldAliasesMap: isRelationKey
+            ? {}
+            : {
+                [fieldParameterName]: columnAlias
+              },
+          ...(innerOperator === DataSelectOperator.Not
+            ? { isNot: true }
+            : {
+                isNot: options.isNot,
+                operator: innerOperator as DataSelectOperator
+              })
         }
       );
       const fieldWhereData = itemData.where[actualFieldName];
@@ -612,14 +703,18 @@ export class SQLQueryBuilderService {
         ...(fieldWhereData.params || {})
       };
       if (parsedValueCount > 0) {
-        parsedFilterItem.query +=
-          operator === DataSelectOperator.Or ? ' or ' : ' and ';
+        parsedFilterItem.query += isOr ? ' or ' : ' and ';
       }
-      parsedFilterItem.query += hasBrackets ? `(${innerQuery})` : innerQuery;
+      parsedFilterItem.query += `(${innerQuery})`;
       include = { ...include, ...itemData.include };
+      fieldUniqueIteration = itemData.fieldUniqueIteration + 1;
       parsedValueCount++;
     }
-    return { parsedFilter: parsedFilterItem, include };
+    return {
+      fieldUniqueIteration,
+      parsedFilter: parsedFilterItem,
+      include
+    };
   }
 
   parseRelations(

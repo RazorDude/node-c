@@ -11,6 +11,13 @@ import { describe, expect, it } from 'vitest';
 const BASE_URL_COURSE_PLATFORM_DELEGATED = 'http://localhost:2071';
 const BASE_URL_SSO = 'http://localhost:2081';
 
+interface TestCourse {
+  categoryId: number | null;
+  courseTypeId: number;
+  id: number;
+  name: string;
+}
+
 // Course Platform (Delegated) only;
 // TODO: allowed relations fields parsing
 // TODO: redis - array-based and object-based storage with interal primary keys, hashmap methods
@@ -39,7 +46,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of general checks
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - login and single-service find
   // ----
@@ -75,8 +84,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -98,8 +107,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -125,8 +134,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -152,8 +161,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -179,8 +188,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(2);
@@ -202,8 +211,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(2);
@@ -229,8 +238,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -258,8 +267,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -284,8 +293,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -311,8 +320,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -340,8 +349,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -355,12 +364,12 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(responseBody.result.items[i - 1].id).toEqual(i);
     }
   });
-  // TODO: find users in the DB (filters: array of items with a $gt operator inside - demonstrates deeply nested filters capability)
-  it.skip('should find users in the DB (filters: array of items with a $gt operator inside - demonstrates deeply nested filters capability)', async () => {
+  // find users in the DB (filters: array of items with a $gt operator inside - demonstrates deeply nested filters capability)
+  it('should find users in the DB (filters: array of items with a $gt operator inside - demonstrates deeply nested filters capability)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
-        'filters[id][]=1&filters[id][]=4&filters[id][][$gt]=0&' +
-        `filters[email][][$like]=${encodeURIComponent('%node-c.com%')}`,
+        'filters[id][0][$not]=24&filters[id][1][$gt]=0&filters[id][2][$lt]=5&' +
+        `filters[email][0][$like]=${encodeURIComponent('%node-c.com%')}`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -369,27 +378,26 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
     expect(responseBody.result.perPage).toEqual(10);
     expect(responseBody.result.more).toEqual(false);
-    expect(responseBody.result.totalCount).toEqual(4);
+    expect(responseBody.result.totalCount).toEqual(5);
     expect(responseBody.result).toHaveProperty('items');
-    expect(responseBody.result.items.length).toEqual(4);
+    expect(responseBody.result.items.length).toEqual(5);
     // check the properties of the returned items - should be ordered by id, asc
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 5; i++) {
       expect(responseBody.result.items[i - 1].id).toEqual(i);
     }
   });
-  // TODO: find users in the DB (filters - top-level $and operator on the same field)
-  // TODO: find users in the DB (filters - top-level $and operator on different fields)
-  it.skip('should find users in the DB (filters - top-level $and operator on different fields)', async () => {
+  // find users in the DB (filters - top-level $and operator on the same field)
+  it('should find users in the DB (filters - top-level $and operator on the same field)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
-        'filters[$and][][accountStatusId]=1&filters[$and][][hasTakenIntro]=false',
+        'filters[$and][0][id][$gte]=2&filters[$and][1][id][$lte]=4',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -398,8 +406,36 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    expect(responseBody.result.totalCount).toEqual(3);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(3);
+    // check the properties of the returned items - should be ordered by id, asc
+    for (let i = 2; i <= 4; i++) {
+      expect(responseBody.result.items[i - 2].id).toEqual(i);
+    }
+  });
+  // find users in the DB (filters - top-level $and operator on different fields)
+  it('should find users in the DB (filters - top-level $and operator on different fields)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
+        'filters[$and][0][accountStatusId]=1&filters[$and][1][hasTakenIntro]=1',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -409,11 +445,41 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items.length).toEqual(4);
     // check the properties of the returned items - should be ordered by id, asc
-    for (let i = 1; i <= 4; i++) {
-      expect(responseBody.result.items[i - 1].id).toEqual(i);
+    const expectedIds = [1, 2, 3, 5];
+    for (const i in expectedIds) {
+      expect(responseBody.result.items[i].id).toEqual(expectedIds[i]);
     }
   });
-  // TODO: find users in the DB (filters - top-level $and operator on different fields, with a nested $like operator inside)
+  // find users in the DB (filters - top-level $and operator on different fields, with a nested $like operator inside)
+  it('should find users in the DB (filters - top-level $and operator on different fields, with a nested $like operator inside)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
+        'filters[$and][0][accountStatusId]=1&' +
+        `filters[$and][1][email][$like]=${encodeURIComponent('%user%')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    expect(responseBody.result.totalCount).toEqual(3);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(3);
+    // check the properties of the returned items - should be ordered by id, asc
+    const expectedIds = [2, 3, 5];
+    for (const i in expectedIds) {
+      expect(responseBody.result.items[i].id).toEqual(expectedIds[i]);
+    }
+  });
   // find users in the DB (filters - $or operator inside a field)
   it('should find users in the DB (filters - $or operator inside a field)', async () => {
     const response = await fetch(
@@ -426,8 +492,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -441,10 +507,10 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(responseBody.result.items[i - 1].id).toEqual(i);
     }
   });
-  // TODO: find users in the DB (filters - top-level $or operator on different fields)
-  it.skip('should find users in the DB (filters - top-level $or operator on different fields)', async () => {
+  // find users in the DB (filters - top-level $or operator on different fields)
+  it('should find users in the DB (filters - top-level $or operator on different fields)', async () => {
     const response = await fetch(
-      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[$or][][id]=1&filters[$or][][accountStatusId]=2`,
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[$or][0][id]=1&filters[$or][1][accountStatusId]=2`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -453,8 +519,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -464,13 +530,116 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items.length).toEqual(2);
     // check the properties of the returned items - should be ordered by id, asc
-    for (let i = 1; i <= 2; i++) {
-      expect(responseBody.result.items[i - 1].id).toEqual(i);
+    const expectedIds = [1, 4];
+    for (const i in expectedIds) {
+      expect(responseBody.result.items[i].id).toEqual(expectedIds[i]);
     }
   });
-  // TODO: find users in the DB (filters - field + top-level $or operator)
-  // TODO: find users in the DB (filters - top-level $and operator + top-level $or operator)
-  // TODO: find users in the DB (filters - $ilike operator cases)
+  // find users in the DB (filters - field + top-level $or operator)
+  it('should find users in the DB (filters - field + top-level $or operator)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
+        'filters[accountStatusId]=1&filters[$or][0][id]=1&filters[$or][1][id]=4',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    // user 4 matches the $or, but not accountStatusId=1 - the field and the $or must be combined with AND
+    expect(responseBody.result.totalCount).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(1);
+    expect(responseBody.result.items[0].id).toEqual(1);
+  });
+  // find users in the DB (filters - top-level $and operator + top-level $or operator)
+  it('should find users in the DB (filters - top-level $and operator + top-level $or operator)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?` +
+        'filters[$and][0][accountStatusId]=1&filters[$and][1][isVerified]=1&' +
+        'filters[$or][0][id]=1&filters[$or][1][id][$gte]=4',
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    // $and matches users 1, 2 and 5; $or matches users 1, 4 and 5
+    expect(responseBody.result.totalCount).toEqual(2);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(2);
+    // check the properties of the returned items - should be ordered by id, asc
+    const expectedIds = [1, 5];
+    for (const i in expectedIds) {
+      expect(responseBody.result.items[i].id).toEqual(expectedIds[i]);
+    }
+  });
+  // find users in the DB (filters - $ilike operator)
+  it('should find users in the DB (filters - $ilike operator)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[email][$ilike]=${encodeURIComponent('%USER0%')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    expect(responseBody.result.totalCount).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(1);
+    expect(responseBody.result.items[0].id).toEqual(2);
+  });
+  // find users in the DB (filters - $not operator + $ilike operator)
+  it('should find users in the DB (filters - $not operator + $ilike operator)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[email][$not][$ilike]=${encodeURIComponent('%USER%')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    expect(responseBody.result.totalCount).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(1);
+    expect(responseBody.result.items[0].id).toEqual(1);
+  });
   // find users in the DB (filters - $not operator inside a field, as a single value)
   it('should find users in the DB (filters - $not operator inside a field, as a single value)', async () => {
     const response = await fetch(
@@ -483,8 +652,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -510,8 +679,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -525,7 +694,6 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(responseBody.result.items[i - 4].id).toEqual(i);
     }
   });
-  // TODO: find users in the DB (filters - $not operator ...can't remember the test case :D)
   // find users in the DB (filters - $gt operator)
   it('should find users in the DB (filters - $gt operator)', async () => {
     const response = await fetch(
@@ -538,8 +706,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -565,8 +733,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -592,8 +760,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -619,8 +787,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -646,8 +814,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -661,6 +829,132 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       expect(responseBody.result.items[i - 2].id).toEqual(i);
     }
   });
+  // throw an error when finding users in the DB with a $between operator that doesn't have exactly 2 values
+  it("should throw an error when finding users in the DB with a $between operator that doesn't have exactly 2 values", async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$between][]=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid params count 1 for $between filter on field $between (alias: id).'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when finding users in the DB with an operator other than $or or $between on a simple array
+  it('should throw an error when finding users in the DB with an operator other than $or or $between on a simple array', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gt][]=1&filters[id][$gt][]=2`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid operator $gt filter on field $gt (alias: id) - $in operator already active.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when finding users in the DB with nested filters under an operator other than $and, $or or $not
+  it('should throw an error when finding users in the DB with nested filters under an operator other than $and, $or or $not', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$gt][$lt]=5`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid nesting under operator $gt: only $and, $or and $not can contain nested filters.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when finding users in the DB with an operator directly inside a top-level $or operator
+  it('should throw an error when finding users in the DB with an operator directly inside a top-level $or operator', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[$or][$like]=${encodeURIComponent('%node-c%')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid nested operators: $or + $like'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when finding users in the DB with a $not operator nested under another $not operator
+  it('should throw an error when finding users in the DB with a $not operator nested under another $not operator', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$not][$not]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid nesting of $not under $not.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when finding users in the DB with an operator that is not allowed under $not
+  it('should throw an error when finding users in the DB with an operator that is not allowed under $not', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[id][$not][$or][]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][user]: Invalid filter $or under $not: allowed values are $like, $ilike, $between, $gt, $gte, $lt, $lte and $contains.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
   // find all users in the DB if findAll is set to true
   it('should find all users in the DB if findAll is set to true', async () => {
     const response = await fetch(
@@ -673,8 +967,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -684,7 +978,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.result.items.length).toEqual(5);
     // check the properties of the returned items - should be ordered by id, desc
     for (let i = 5; i >= 1; i--) {
-      expect(responseBody.result.items[i-1].id).toEqual(i);
+      expect(responseBody.result.items[i - 1].id).toEqual(i);
     }
   });
   // find all users in the DB if findAll is set to true even if pagination params are set
@@ -699,8 +993,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -710,7 +1004,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.result.items.length).toEqual(5);
     // check the properties of the returned items - should be ordered by id, desc
     for (let i = 5; i >= 1; i--) {
-      expect(responseBody.result.items[i-1].id).toEqual(i);
+      expect(responseBody.result.items[i - 1].id).toEqual(i);
     }
   });
   // TODO: find in the cache with pagination and filters
@@ -726,8 +1020,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -764,8 +1058,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -803,8 +1097,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -849,8 +1143,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -888,8 +1182,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.page).toEqual(1);
@@ -964,8 +1258,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(2);
@@ -1016,7 +1310,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of admin cases - login and single-service find
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - create and multi-service find
   // ----
@@ -1067,7 +1363,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // throw an error when attempting to create a course with a relation field for a relation value that does not exist
   it('should throw an error when attempting to create a course with a relation field for a relation value that does not exist', async () => {
@@ -1104,7 +1402,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.statusCode).toEqual(400);
     expect(responseBody).toHaveProperty('error');
     expect(responseBody.error).toEqual(
-      "[RBDEntityService][ER_NO_REFERENCED_ROW_2]: Cannot add or update a child row: a foreign key constraint fails (`node_c_apps_test_main_e2e`.`courses`, CONSTRAINT `FK_7d0effe56712c9f8d73b99f319c` FOREIGN KEY (`courseTypeId`) REFERENCES `courseTypes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION)."
+      '[RBDEntityService][ER_NO_REFERENCED_ROW_2]: Cannot add or update a child row: a foreign key constraint fails (`node_c_apps_test_main_e2e`.`courses`, CONSTRAINT `FK_7d0effe56712c9f8d73b99f319c` FOREIGN KEY (`courseTypeId`) REFERENCES `courseTypes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION).'
     );
     const dataPostCreate = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
@@ -1117,7 +1415,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // create a course in the DB
   it('should create a course in the DB', async () => {
@@ -1151,7 +1451,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
-    expect(responseBody.result.id).toEqual(dataPreCreateBody.result.items[0].id + 2);
+    expect(responseBody.result.id).toEqual(
+      dataPreCreateBody.result.items[0].id + 2
+    );
     expect(responseBody.result.courseTypeId).toEqual(1);
     expect(responseBody.result.name).toEqual('Test create course');
     const dataPostCreate = await fetch(
@@ -1165,7 +1467,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length + 1);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length + 1
+    );
   });
   // throw an error when attempting to create a course with a duplicate unique field
   it('should throw an error when attempting to create a course with a duplicate unique field', async () => {
@@ -1215,7 +1519,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // fail to create a course in the cache directly because a non-generated PK has not been provided
   it('should fail to create a course in the cache directly because a non-generated PK has not been provided', async () => {
@@ -1267,7 +1573,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     const dataPostCreateBody = await dataPostCreate.json();
     expect(dataPostCreateBody.result.items.length).toEqual(0);
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // TODO: tests for redis validations
   // create a course in the cache directly
@@ -1321,7 +1629,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length + 1);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length + 1
+    );
   });
   // search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)
   it('should search for courses in the cache and create using db data because its not in the cache (runOnFirstServiceResultOnly=true, saveAdditionalResultsInFirstService enabled with useResultsForFirstServiceReturnData=true)', async () => {
@@ -1352,8 +1662,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(2);
@@ -1379,12 +1689,14 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseCheckBody = await responseCheck.json();
-    expect(responseCheckBody.result.items).toHaveLength(dataPreCreateBody.result.items.length + 2);
+    expect(responseCheckBody.result.items).toHaveLength(
+      dataPreCreateBody.result.items.length + 2
+    );
     const idsToFind: Record<number, boolean> = {
       1: false,
       2: false,
       4: false
-    }
+    };
     responseCheckBody.result.items.forEach((item: { id: number }) => {
       if (idsToFind[item.id] === false) {
         idsToFind[item.id] = true;
@@ -1415,8 +1727,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     // we expect multiple new items to be created
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(3);
@@ -1424,7 +1736,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       1: false,
       2: false,
       4: false
-    }
+    };
     responseBody.result.items.forEach((item: { id: number }) => {
       if (resultIdsToFind[item.id] === false) {
         resultIdsToFind[item.id] = true;
@@ -1456,7 +1768,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       1: false,
       2: false,
       4: false
-    }
+    };
     responseCheckBody.result.items.forEach((item: { id: number }) => {
       if (idsToFind[item.id] === false) {
         idsToFind[item.id] = true;
@@ -1497,8 +1809,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     // we expect multiple new items to be created
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items).toHaveLength(5);
@@ -1508,7 +1820,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       3: false,
       4: false,
       6: false
-    }
+    };
     responseBody.result.items.forEach((item: { id: number }) => {
       if (resultIdsToFind[item.id] === false) {
         resultIdsToFind[item.id] = true;
@@ -1537,14 +1849,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const responseCheckBody = await responseCheck.json();
-    expect(responseCheckBody.result.items).toHaveLength(dataPreCreateBody.result.items.length + 2);
+    expect(responseCheckBody.result.items).toHaveLength(
+      dataPreCreateBody.result.items.length + 2
+    );
     const idsToFind: Record<number, boolean> = {
       1: false,
       2: false,
       3: false,
       4: false,
       6: false
-    }
+    };
     responseCheckBody.result.items.forEach((item: { id: number }) => {
       if (idsToFind[item.id] === false) {
         idsToFind[item.id] = true;
@@ -1558,7 +1872,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of admin cases - create and multi-service find
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - single-service findOne
   // ----
@@ -1588,8 +1904,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
@@ -1606,8 +1922,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
   });
@@ -1624,8 +1940,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result.courseTypeId).toEqual(1);
@@ -1643,8 +1959,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(1);
   });
@@ -1661,8 +1977,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toEqual(null);
   });
@@ -1670,7 +1986,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should find a course in the DB (filters - $like operator with a match)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?` +
-      `filters[name][$like]=${encodeURIComponent('%Cooking%')}`,
+        `filters[name][$like]=${encodeURIComponent('%Cooking%')}`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1679,8 +1995,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
   });
@@ -1688,7 +2004,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should not find a course in the DB (filters - $like operator without a match)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?` +
-      `filters[name][$like]=${encodeURIComponent('%booking%')}`,
+        `filters[name][$like]=${encodeURIComponent('%booking%')}`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1697,8 +2013,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
   });
@@ -1716,8 +2032,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(3);
   });
@@ -1735,8 +2051,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
   });
@@ -1756,8 +2072,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result).toHaveProperty('lessons');
@@ -1777,8 +2093,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result).toHaveProperty('lessons');
@@ -1789,8 +2105,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should not find a course due to filters on inner join (included relations with filters on relations - ягьввду, include added also)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?` +
-      `filters[lessons.name][$like]=${encodeURIComponent('%Boogie%')}&` +
-      `include[]=lessons`,
+        `filters[lessons.name][$like]=${encodeURIComponent('%Boogie%')}&` +
+        'include[]=lessons',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1799,10 +2115,10 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
-    expect(responseBody.result).toBeNull()
+    expect(responseBody.result).toBeNull();
   });
   // throw a forbidden relation error when trying to find a course in the DB (included relations with filters on relations - shallow, include not added)
   it('should throw a forbidden relation error when trying to find a course in the DB (included relations with filters on relations - shallow, include not added)', async () => {
@@ -1830,8 +2146,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should find a course (included relations with filters on relations - deep, include added also)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?` +
-      `filters[lessons.lessonType.name][$like]=${encodeURIComponent('%stan%')}&` +
-      `include[]=lessons.lessonType`,
+        `filters[lessons.lessonType.name][$like]=${encodeURIComponent('%stan%')}&` +
+        'include[]=lessons.lessonType',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1840,8 +2156,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result).toHaveProperty('lessons');
@@ -1854,8 +2170,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should not find a course due to filters on inner join (included relations with filters on relations - deep, include added also)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?` +
-      `filters[lessons.lessonType.name][$like]=${encodeURIComponent('%Intro%')}&` +
-      `include[]=lessons.lessonType`,
+        `filters[lessons.lessonType.name][$like]=${encodeURIComponent('%Intro%')}&` +
+        'include[]=lessons.lessonType',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1864,10 +2180,10 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
-    expect(responseBody.result).toBeNull()
+    expect(responseBody.result).toBeNull();
   });
   // throw a forbidden relation error when trying to find a course in the DB (included relations with filters on relations - deep, include not added at lvl 1)
   it('should throw a forbidden relation error when trying to find a course in the DB (included relations with filters on relations - deep, include not added at lvl 1)', async () => {
@@ -1925,8 +2241,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     // check the basic properties of the request
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
@@ -1943,8 +2259,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
   });
@@ -1952,7 +2268,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it.skip('should not find a course in the cache by id if there is no match (simple filters)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?dataServices[]=cache&` +
-        `filters[courseTypeId]=105`,
+        'filters[courseTypeId]=105',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1961,8 +2277,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
   });
@@ -1970,7 +2286,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should find a course in the cache by id (simple filters)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?dataServices[]=cache&` +
-        `filters[courseTypeId]=1`,
+        'filters[courseTypeId]=1',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1979,8 +2295,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result.courseTypeId).toEqual(1);
@@ -1989,7 +2305,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it.skip('should not find a course in the cache by id if there is no match (array of filters)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?dataServices[]=cache&` +
-        `filters[courseTypeId][]=105&filters[courseTypeId][]=185`,
+        'filters[courseTypeId][]=105&filters[courseTypeId][]=185',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -1998,8 +2314,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
   });
@@ -2007,7 +2323,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   it('should find a course in the cache by id (array of filters)', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/2?dataServices[]=cache&` +
-        `filters[courseTypeId][]=1&filters[courseTypeId][]=2`,
+        'filters[courseTypeId][]=1&filters[courseTypeId][]=2',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -2016,8 +2332,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(2);
     expect(responseBody.result.courseTypeId).toEqual(1);
@@ -2026,7 +2342,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of admin cases - single-service findOne
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - bulkCreate
   // ----
@@ -2101,7 +2419,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length + 6);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length + 6
+    );
   });
   // throw an error for a duplicate in one of the items - no items should be created
   it('should throw an error for a duplicate in one of the items - no items should be created', async () => {
@@ -2157,7 +2477,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // throw an error for a missing field in one of the items - no items should be created
   it('should throw an error for a missing field in one of the items - no items should be created', async () => {
@@ -2212,7 +2534,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
   });
   // bulk create courses in the cache
   it('should bulk create courses in the cache', async () => {
@@ -2254,10 +2578,14 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toHaveLength(2);
-    expect(responseBody.result[0].id).toEqual(dataPreCreateBody.result.items[0].id + 1);
+    expect(responseBody.result[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id + 1
+    );
     expect(responseBody.result[0].courseTypeId).toEqual(1);
     expect(responseBody.result[0].name).toEqual('Test bulk create course');
-    expect(responseBody.result[1].id).toEqual(dataPreCreateBody.result.items[0].id + 2);
+    expect(responseBody.result[1].id).toEqual(
+      dataPreCreateBody.result.items[0].id + 2
+    );
     expect(responseBody.result[1].courseTypeId).toEqual(2);
     expect(responseBody.result[1].name).toEqual('Test bulk create course 2');
     const dataPostCreate = await fetch(
@@ -2271,7 +2599,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length + 2);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length + 2
+    );
   });
   // TODO: bulk create courses in the DB, then the cache using the input data - when the relevant functionality is implemented in the DomainEntityService
   // bulk create courses in the DB and NOT in the cache due to runOnNoFirstServiceResultOnly not being provided (it's true by default)
@@ -2344,7 +2674,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateDBBody = await dataPostCreateDB.json();
-    expect(dataPostCreateDBBody.result.items.length).toEqual(dataPreCreateDBBody.result.items.length + 2);
+    expect(dataPostCreateDBBody.result.items.length).toEqual(
+      dataPreCreateDBBody.result.items.length + 2
+    );
     const dataPostCreateCache = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc&dataServices[]=cache`,
       {
@@ -2356,10 +2688,12 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateCacheBody = await dataPostCreateCache.json();
-    expect(dataPostCreateCacheBody.result.items.length).toEqual(dataPreCreateCacheBody.result.items.length);
+    expect(dataPostCreateCacheBody.result.items.length).toEqual(
+      dataPreCreateCacheBody.result.items.length
+    );
   });
   // bulk create courses in the DB and NOT in the cache due to runOnNoFirstServiceResultOnly being provided as true
-  it("should bulk create courses in the DB and NOT in the cache due to runOnNoFirstServiceResultOnly being provided as true", async () => {
+  it('should bulk create courses in the DB and NOT in the cache due to runOnNoFirstServiceResultOnly being provided as true', async () => {
     const dataPreCreateDB = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
       {
@@ -2430,7 +2764,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateDBBody = await dataPostCreateDB.json();
-    expect(dataPostCreateDBBody.result.items.length).toEqual(dataPreCreateDBBody.result.items.length + 2);
+    expect(dataPostCreateDBBody.result.items.length).toEqual(
+      dataPreCreateDBBody.result.items.length + 2
+    );
     const dataPostCreateCache = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc&dataServices[]=cache`,
       {
@@ -2442,7 +2778,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateCacheBody = await dataPostCreateCache.json();
-    expect(dataPostCreateCacheBody.result.items.length).toEqual(dataPreCreateCacheBody.result.items.length);
+    expect(dataPostCreateCacheBody.result.items.length).toEqual(
+      dataPreCreateCacheBody.result.items.length
+    );
   });
   // bulk create courses in the DB and the cache using the first service (DB) data due to runOnNoFirstServiceResultOnly being set to false
   it('should bulk create courses in the DB and the cache using the first service (DB) data due to runOnNoFirstServiceResultOnly being set to false', async () => {
@@ -2504,10 +2842,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.resultsByService.cache).toHaveLength(2);
     for (let i = 0; i < 2; i++) {
       expect(responseBody.result[i].id).toEqual(benchmarkOldIdDB + i);
-      expect(responseBody.result[i].id).toEqual(responseBody.resultsByService.cache[i].id);
+      expect(responseBody.result[i].id).toEqual(
+        responseBody.resultsByService.cache[i].id
+      );
       expect(responseBody.result[i].courseTypeId).toEqual(i % 2 === 0 ? 1 : 2);
-      expect(responseBody.result[i].courseTypeId).toEqual(responseBody.resultsByService.cache[i].courseTypeId);
-      expect(responseBody.result[i].name).toEqual(responseBody.resultsByService.cache[i].name);
+      expect(responseBody.result[i].courseTypeId).toEqual(
+        responseBody.resultsByService.cache[i].courseTypeId
+      );
+      expect(responseBody.result[i].name).toEqual(
+        responseBody.resultsByService.cache[i].name
+      );
     }
     const dataPostCreateDB = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
@@ -2520,7 +2864,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateDBBody = await dataPostCreateDB.json();
-    expect(dataPostCreateDBBody.result.items.length).toEqual(dataPreCreateDBBody.result.items.length + 2);
+    expect(dataPostCreateDBBody.result.items.length).toEqual(
+      dataPreCreateDBBody.result.items.length + 2
+    );
     const dataPostCreateCache = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc&dataServices[]=cache`,
       {
@@ -2532,12 +2878,16 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateCacheBody = await dataPostCreateCache.json();
-    expect(dataPostCreateCacheBody.result.items.length).toEqual(dataPreCreateCacheBody.result.items.length + 2);
+    expect(dataPostCreateCacheBody.result.items.length).toEqual(
+      dataPreCreateCacheBody.result.items.length + 2
+    );
   });
   // ----
   // -- end of admin cases - bulkCreate
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - multi-service findOne
   // ----
@@ -2553,8 +2903,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
     expect(responseBody).toHaveProperty('resultsByService');
@@ -2576,7 +2926,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     const dataPreCreateCacheBody = await dataPreCreateCache.json();
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/11?dataServices[]=cache&dataServices[]=main&` +
-      'saveAdditionalResultsInFirstService[serviceName]=main&',
+        'saveAdditionalResultsInFirstService[serviceName]=main&',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -2585,8 +2935,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result).toBeNull();
     expect(responseBody).toHaveProperty('resultsByService');
@@ -2603,14 +2953,20 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateCacheBody = await dataPostCreateCache.json();
-    expect(dataPostCreateCacheBody.result.items.length).toEqual(dataPreCreateCacheBody.result.items.length + 1);
-    expect((dataPostCreateCacheBody.result.items as { id: number }[]).find(item => item.id === 11)?.id).toEqual(11);
+    expect(dataPostCreateCacheBody.result.items.length).toEqual(
+      dataPreCreateCacheBody.result.items.length + 1
+    );
+    expect(
+      (dataPostCreateCacheBody.result.items as { id: number }[]).find(
+        (item) => item.id === 11
+      )?.id
+    ).toEqual(11);
   });
   // find a course in the DB and retrieve its data from the cache
   it('should find a course in the DB and retrieve its data from the cache', async () => {
     const response = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/item/11?dataServices[]=main&dataServices[]=cache&` +
-      'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=false&',
+        'optionsOverridesByService[cache][runOnNoFirstServiceResultOnly]=false&',
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
@@ -2619,8 +2975,8 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
         method: HttpMethod.GET
       }
     );
-    const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
     expect(responseBody).toHaveProperty('result');
     expect(responseBody.result.id).toEqual(11);
     expect(responseBody).toHaveProperty('resultsByService');
@@ -2630,12 +2986,14 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of admin cases - multi-service findOne
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - update
   // ----
-  // TODO: update courses in the DB - filter by id only
-  it.skip('should update courses in the DB - filter by id only', async () => {
+  // update courses in the DB - filter by id only, 1 item - and return count only by default
+  it('should update courses in the DB - filter by id only, 1 item - and return count only by default', async () => {
     const dataPreCreate = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
       {
@@ -2648,37 +3006,28 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     );
     const dataPreCreateBody = await dataPreCreate.json();
     const response = await fetch(
-      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses/bulk`,
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
       {
         headers: {
           authorization: `Bearer ${adminAccessToken}`,
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          data: [
-            {
-              courseTypeId: 1,
-              name: 'Test bulk create course'
-            },
-            {
-              courseTypeId: 2,
-              name: 'Test bulk create course 2'
-            }
-          ]
+          data: {
+            name: 'Test bulk create course updated'
+          },
+          filters: { id: dataPreCreateBody.result.items[0].id }
         }),
-        method: HttpMethod.POST
+        method: HttpMethod.PATCH.toUpperCase()
       }
     );
+    expect(response.status).toEqual(HttpStatus.OK);
     const responseBody = await response.json();
-    expect(response.status).toEqual(HttpStatus.CREATED);
     expect(responseBody).toHaveProperty('result');
-    expect(responseBody.result).toHaveLength(2);
-    expect(responseBody.result[0].id).toEqual(dataPreCreateBody.result.items[0].id + 2);
-    expect(responseBody.result[0].courseTypeId).toEqual(1);
-    expect(responseBody.result[0].name).toEqual('Test bulk create course');
-    expect(responseBody.result[1].id).toEqual(dataPreCreateBody.result.items[0].id + 3);
-    expect(responseBody.result[1].courseTypeId).toEqual(2);
-    expect(responseBody.result[1].name).toEqual('Test bulk create course 2');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result.items).toBeUndefined();
+    expect(responseBody.result.originalItems).toBeUndefined();
     const dataPostCreate = await fetch(
       `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
       {
@@ -2690,19 +3039,1002 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
       }
     );
     const dataPostCreateBody = await dataPostCreate.json();
-    expect(dataPostCreateBody.result.items.length).toEqual(dataPreCreateBody.result.items.length + 2);
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(dataPostCreateBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test bulk create course updated'
+    );
   });
-  // TODO: update courses in the DB - filter by id
-  // TODO: throw an error when trying to update courses in the DB without an id filter
-  // TODO: throw a validation error for duplicate unique fields
-  // TODO: update courses in the DB - filter by id + other fields (all filtering options from find)
-  // TODO: update courses in the cache - filter by id
+  // update courses in the DB - filter by id only, 1 item - and return updated data if specified
+  it('should update courses in the DB - filter by id only, 1 item - and return updated data if specified', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test bulk create course updated again'
+          },
+          filters: { id: dataPreCreateBody.result.items[0].id },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(1);
+    expect(responseBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(responseBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(responseBody.result.items[0].name).toEqual(
+      'Test bulk create course updated again'
+    );
+    expect(responseBody.result.originalItems).toBeUndefined();
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(dataPostCreateBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test bulk create course updated again'
+    );
+  });
+  // update courses in the DB - filter by id only, 1 item - and return both the updated and the original data if specified
+  it('should update courses in the DB - filter by id only, 1 item - and return both the updated and the original data if specified', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test bulk create course updated again and again'
+          },
+          filters: { id: dataPreCreateBody.result.items[0].id },
+          returnOriginalItems: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result.items).toBeUndefined();
+    expect(responseBody.result).toHaveProperty('originalItems');
+    expect(responseBody.result.originalItems).toHaveLength(1);
+    expect(responseBody.result.originalItems[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(responseBody.result.originalItems[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(responseBody.result.originalItems[0].name).toEqual(
+      dataPreCreateBody.result.items[0].name
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(dataPostCreateBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test bulk create course updated again and again'
+    );
+  });
+  // update courses in the DB - filter by id only, 1 item - and return both the updated and the original data if specified
+  it('should update courses in the DB - filter by id only, 1 item - and return both the updated and the original data if specified', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test bulk create course updated again final'
+          },
+          filters: { id: dataPreCreateBody.result.items[0].id },
+          returnData: true,
+          returnOriginalItems: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(1);
+    expect(responseBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(responseBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(responseBody.result.items[0].name).toEqual(
+      'Test bulk create course updated again final'
+    );
+    expect(responseBody.result).toHaveProperty('originalItems');
+    expect(responseBody.result.originalItems).toHaveLength(1);
+    expect(responseBody.result.originalItems[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(responseBody.result.originalItems[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(responseBody.result.originalItems[0].name).toEqual(
+      dataPreCreateBody.result.items[0].name
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(dataPostCreateBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test bulk create course updated again final'
+    );
+  });
+  // throw an error when trying to update courses in the DB without filters
+  it('should throw an error when trying to update courses in the DB without filters', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'This will fail'
+          },
+          filters: {}
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual('filters must be a non-empty object');
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items).toEqual(
+      dataPreCreateBody.result.items
+    );
+  });
+  // throw a validation error when trying to update courses in the DB with duplicate unique fields
+  it('should throw a validation error when trying to update courses in the DB with duplicate unique fields', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    // copy the unique fields (courseTypeId + name) of another existing course
+    const existingCourse = preItems[1];
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            courseTypeId: existingCourse.courseTypeId,
+            name: existingCourse.name
+          },
+          filters: { id: preItems[0].id }
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      `[RBDEntityService][ER_DUP_ENTRY]: Duplicate entry '${existingCourse.courseTypeId}-${existingCourse.name}' for key 'COURSES_UNIQUE_IDX_0'.`
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items).toEqual(
+      dataPreCreateBody.result.items
+    );
+  });
+  // throw an error when trying to update courses in the DB with a null value inside a simple array filter
+  it('should throw an error when trying to update courses in the DB with a null value inside a simple array filter', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'This will fail'
+          },
+          filters: { id: [dataPreCreateBody.result.items[0].id, null] }
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      '[SQLQueryBuilderService][courses]: Invalid simple array filter on field id  (alias: id) - cannot contain null values.'
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items).toEqual(
+      dataPreCreateBody.result.items
+    );
+  });
+  // update courses in the DB - filter by id + other fields - simple filters
+  it('should update courses in the DB - filter by id + other fields - simple filters', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test update course - simple filters'
+          },
+          filters: {
+            courseTypeId: dataPreCreateBody.result.items[0].courseTypeId,
+            id: dataPreCreateBody.result.items[0].id
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(1);
+    expect(responseBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(responseBody.result.items[0].courseTypeId).toEqual(
+      dataPreCreateBody.result.items[0].courseTypeId
+    );
+    expect(responseBody.result.items[0].name).toEqual(
+      'Test update course - simple filters'
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(
+      dataPreCreateBody.result.items[0].id
+    );
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test update course - simple filters'
+    );
+    expect(dataPostCreateBody.result.items.slice(1)).toEqual(
+      dataPreCreateBody.result.items.slice(1)
+    );
+  });
+  // update courses in the DB - filter by id + other fields - array of filters
+  it('should update courses in the DB - filter by id + other fields - array of filters', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    // the two courses must have different course types, so that the new name doesn't break the unique index
+    const firstCourse = preItems[0];
+    const secondCourse = preItems.find(
+      (item) => item.courseTypeId !== firstCourse.courseTypeId
+    ) as TestCourse;
+    const courseIds = [firstCourse.id, secondCourse.id];
+    const expectedItems = new Map<number, TestCourse>([
+      [firstCourse.id, firstCourse],
+      [secondCourse.id, secondCourse]
+    ]);
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test update course - array of filters'
+          },
+          filters: {
+            courseTypeId: [firstCourse.courseTypeId, secondCourse.courseTypeId],
+            id: courseIds
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(2);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(2);
+    const updatedItems: TestCourse[] = responseBody.result.items;
+    for (const i in updatedItems) {
+      const item = updatedItems[i];
+      expect(expectedItems.has(item.id)).toEqual(true);
+      expect(item.name).toEqual('Test update course - array of filters');
+    }
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    const postItems: TestCourse[] = dataPostCreateBody.result.items;
+    for (const i in postItems) {
+      const item = postItems[i];
+      if (expectedItems.has(item.id)) {
+        expect(item.name).toEqual('Test update course - array of filters');
+        continue;
+      }
+      expect(item).toEqual(preItems[i]);
+    }
+  });
+  // update courses in the DB - filter by id + other fields - $and operator on a field
+  it('should update courses in the DB - filter by id + other fields - $and operator on a field', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    const courseTypeId = preItems[0].courseTypeId;
+    const highId = preItems[0].id;
+    const lowId = preItems[5].id;
+    const expectedItems = new Map<number, TestCourse>();
+    for (const i in preItems) {
+      const item = preItems[i];
+      if (
+        item.id >= lowId &&
+        item.id <= highId &&
+        item.courseTypeId === courseTypeId
+      ) {
+        expectedItems.set(item.id, item);
+      }
+    }
+    expect(expectedItems.size).toBeGreaterThan(0);
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            categoryId: 1
+          },
+          filters: {
+            courseTypeId,
+            id: { $and: [{ $gte: lowId }, { $lte: highId }] }
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(expectedItems.size);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(expectedItems.size);
+    const updatedItems: TestCourse[] = responseBody.result.items;
+    for (const i in updatedItems) {
+      const item = updatedItems[i];
+      expect(expectedItems.has(item.id)).toEqual(true);
+      expect(item.categoryId).toEqual(1);
+    }
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    const postItems: TestCourse[] = dataPostCreateBody.result.items;
+    for (const i in postItems) {
+      const item = postItems[i];
+      if (expectedItems.has(item.id)) {
+        expect(item.categoryId).toEqual(1);
+        continue;
+      }
+      expect(item).toEqual(preItems[i]);
+    }
+  });
+  // update courses in the DB - filter by id + other fields - $or operator on a field
+  it('should update courses in the DB - filter by id + other fields - $or operator on a field', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    // the courseTypeId filter should exclude the second course, matched by the $or operator
+    const firstCourse = preItems[0];
+    const secondCourse = preItems.find(
+      (item) => item.courseTypeId !== firstCourse.courseTypeId
+    ) as TestCourse;
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            name: 'Test update course - $or operator'
+          },
+          filters: {
+            courseTypeId: firstCourse.courseTypeId,
+            id: { $or: [firstCourse.id, secondCourse.id] }
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(1);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(1);
+    expect(responseBody.result.items[0].id).toEqual(firstCourse.id);
+    expect(responseBody.result.items[0].name).toEqual(
+      'Test update course - $or operator'
+    );
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    expect(dataPostCreateBody.result.items[0].id).toEqual(firstCourse.id);
+    expect(dataPostCreateBody.result.items[0].name).toEqual(
+      'Test update course - $or operator'
+    );
+    expect(dataPostCreateBody.result.items.slice(1)).toEqual(
+      dataPreCreateBody.result.items.slice(1)
+    );
+  });
+  // update courses in the DB - filter by id + other fields - $gt and $lt operators on a field
+  it('should update courses in the DB - filter by id + other fields - $gt and $lt operators on a field', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    const courseTypeId = preItems[0].courseTypeId;
+    const highId = preItems[0].id;
+    const lowId = preItems[5].id;
+    const expectedItems = new Map<number, TestCourse>();
+    for (const i in preItems) {
+      const item = preItems[i];
+      if (
+        item.id > lowId &&
+        item.id < highId &&
+        item.courseTypeId === courseTypeId
+      ) {
+        expectedItems.set(item.id, item);
+      }
+    }
+    expect(expectedItems.size).toBeGreaterThan(0);
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            categoryId: 1
+          },
+          filters: {
+            courseTypeId,
+            id: { $gt: lowId, $lt: highId }
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(expectedItems.size);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(expectedItems.size);
+    const updatedItems: TestCourse[] = responseBody.result.items;
+    for (const i in updatedItems) {
+      const item = updatedItems[i];
+      expect(expectedItems.has(item.id)).toEqual(true);
+      expect(item.categoryId).toEqual(1);
+    }
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    const postItems: TestCourse[] = dataPostCreateBody.result.items;
+    for (const i in postItems) {
+      const item = postItems[i];
+      if (expectedItems.has(item.id)) {
+        expect(item.categoryId).toEqual(1);
+        continue;
+      }
+      expect(item).toEqual(preItems[i]);
+    }
+  });
+  // update courses in the DB - filter by id + other fields - $gte and $lte operators on a field
+  it('should update courses in the DB - filter by id + other fields - $gte and $lte operators on a field', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    // use the other course type, compared to the $gt and $lt case
+    const courseTypeId = (
+      preItems.find(
+        (item) => item.courseTypeId !== preItems[0].courseTypeId
+      ) as TestCourse
+    ).courseTypeId;
+    const highId = preItems[0].id;
+    const lowId = preItems[5].id;
+    const expectedItems = new Map<number, TestCourse>();
+    for (const i in preItems) {
+      const item = preItems[i];
+      if (
+        item.id >= lowId &&
+        item.id <= highId &&
+        item.courseTypeId === courseTypeId
+      ) {
+        expectedItems.set(item.id, item);
+      }
+    }
+    expect(expectedItems.size).toBeGreaterThan(0);
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            categoryId: 1
+          },
+          filters: {
+            courseTypeId,
+            id: { $gte: lowId, $lte: highId }
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(expectedItems.size);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(expectedItems.size);
+    const updatedItems: TestCourse[] = responseBody.result.items;
+    for (const i in updatedItems) {
+      const item = updatedItems[i];
+      expect(expectedItems.has(item.id)).toEqual(true);
+      expect(item.categoryId).toEqual(1);
+    }
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    const postItems: TestCourse[] = dataPostCreateBody.result.items;
+    for (const i in postItems) {
+      const item = postItems[i];
+      if (expectedItems.has(item.id)) {
+        expect(item.categoryId).toEqual(1);
+        continue;
+      }
+      expect(item).toEqual(preItems[i]);
+    }
+  });
+  // update courses in the DB - filter by id + other fields - full range of filters
+  it('should update courses in the DB - filter by id + other fields - full range of filters', async () => {
+    const dataPreCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreCreateBody = await dataPreCreate.json();
+    const preItems: TestCourse[] = dataPreCreateBody.result.items;
+    const firstCourse = preItems[0];
+    const firstCourseTypeId = firstCourse.courseTypeId;
+    const secondCourseTypeId = (
+      preItems.find(
+        (item) => item.courseTypeId !== firstCourse.courseTypeId
+      ) as TestCourse
+    ).courseTypeId;
+    const courseTypeIds = [firstCourseTypeId, secondCourseTypeId];
+    const courseTypeIdsMap = new Map<number, boolean>([
+      [firstCourseTypeId, true],
+      [secondCourseTypeId, true]
+    ]);
+    const highId = preItems[0].id;
+    const lowId = preItems[5].id;
+    const expectedItems = new Map<number, TestCourse>();
+    for (const i in preItems) {
+      const item = preItems[i];
+      if (
+        item.id >= lowId &&
+        item.id <= highId &&
+        item.id !== firstCourse.id &&
+        courseTypeIdsMap.has(item.courseTypeId) &&
+        item.name.includes('Test')
+      ) {
+        expectedItems.set(item.id, item);
+      }
+    }
+    expect(expectedItems.size).toBeGreaterThan(0);
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: {
+            categoryId: 1
+          },
+          filters: {
+            courseTypeId: courseTypeIds,
+            id: {
+              $and: [{ $gte: lowId }, { $lte: highId }],
+              $not: [firstCourse.id]
+            },
+            name: { $like: '%Test%' }
+          },
+          returnData: true
+        }),
+        method: HttpMethod.PATCH.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('count');
+    expect(responseBody.result.count).toEqual(expectedItems.size);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toHaveLength(expectedItems.size);
+    const updatedItems: TestCourse[] = responseBody.result.items;
+    for (const i in updatedItems) {
+      const item = updatedItems[i];
+      expect(expectedItems.has(item.id)).toEqual(true);
+      expect(item.categoryId).toEqual(1);
+    }
+    const dataPostCreate = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/courses?findAll=true&orderBy[id]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostCreateBody = await dataPostCreate.json();
+    expect(dataPostCreateBody.result.items.length).toEqual(
+      dataPreCreateBody.result.items.length
+    );
+    const postItems: TestCourse[] = dataPostCreateBody.result.items;
+    for (const i in postItems) {
+      const item = postItems[i];
+      if (expectedItems.has(item.id)) {
+        expect(item.categoryId).toEqual(1);
+        continue;
+      }
+      expect(item).toEqual(preItems[i]);
+    }
+  });
+  // TODO: update courses in the cache - filter by id only
   // TODO: throw an error when trying to update courses in the cache without an id filter
   // TODO: update courses in the cache - filter by id + other fields (all filtering options from find that are relevant to the cache)
   // ----
   // -- end of admin cases - update
   // ----
+
   // ###########################################################################################
+
   // ----
   // -- start of admin cases - delete
   // ----
@@ -2715,7 +4047,9 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- end of admin cases - delete
   // ----
+
   // ###########################################################################################
+
   // TODO: confirm findAll when there are more entries than the default perPage=10 (at the end of the admin suites)
   // ----
   // -- start of user 0 cases - CRUD functionality, mutation of input and output data
