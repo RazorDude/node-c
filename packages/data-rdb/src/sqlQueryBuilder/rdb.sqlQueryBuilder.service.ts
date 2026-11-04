@@ -28,9 +28,9 @@ import {
 } from './rdb.sqlQueryBuilder.definitions.js';
 
 const regExps = {
-  commaSpace: new RegExp(/,\s$/),
-  dollarSign: new RegExp(/\$/),
-  dot: new RegExp(/\./)
+  commaSpace: new RegExp(/,\s$/u),
+  dollarSign: new RegExp(/\$/u),
+  dot: new RegExp(/\./u)
 };
 
 @Injectable()
@@ -92,6 +92,7 @@ export class SQLQueryBuilderService {
       include,
       orderBy,
       select,
+      throwErrorOnForbiddenInclude,
       withDeleted,
       withDeletedPerRelation
     } = options;
@@ -128,7 +129,12 @@ export class SQLQueryBuilderService {
         }
       }
       if (select?.length) {
-        oqb.select(this.parseSelect(select, include));
+        oqb.select(
+          this.parseSelect(currentEntityName, select, {
+            include,
+            throwErrorOnForbiddenInclude
+          })
+        );
       }
     } else if (withDeleted === false && deletedColumnName) {
       where[deletedColumnName] = {
@@ -428,9 +434,11 @@ export class SQLQueryBuilderService {
     entityName: string,
     filters: GenericObject,
     options: {
+      currentDepth?: number;
       fieldAliases?: { [fieldName: string]: string };
       fieldUniqueIteration?: number;
       isNot?: boolean;
+      maxDepth?: number;
       operator?: DataSelectOperator;
       parameterNamesToFieldAliasesMap?: { [fieldName: string]: string };
     } = {}
@@ -440,13 +448,18 @@ export class SQLQueryBuilderService {
     where: { [fieldName: string]: ParsedFilter };
   } {
     const cqs = this.columnQuotesSymbol;
-    const { isNot, operator } = options;
+    const { currentDepth = 0, isNot, maxDepth = 10, operator } = options;
     const fieldAliases = options.fieldAliases || {};
     const parameterNamesToFieldAliasesMap =
       options.parameterNamesToFieldAliasesMap || {};
     const where: { [fieldName: string]: ParsedFilter } = {};
     let fieldUniqueIteration = Number(options.fieldUniqueIteration ?? -1);
     let include: IncludeItems = {};
+    if (currentDepth > maxDepth) {
+      throw new ApplicationError(
+        `[SQLQueryBuilderService][${entityName}]: Max depth of ${maxDepth} exceeded.`
+      );
+    }
     for (const fieldName in filters) {
       const fieldValue = filters[fieldName];
       // skip undefined filter values
@@ -477,10 +490,12 @@ export class SQLQueryBuilderService {
           entityAlias,
           { [actualFieldName]: fieldValue },
           {
+            currentDepth,
             fieldAliases: {
               [actualFieldName]: actualFieldAlias
             },
             fieldUniqueIteration,
+            maxDepth,
             operator
           }
         );
@@ -558,12 +573,14 @@ export class SQLQueryBuilderService {
         const itemData = this.parseInnerFilters(
           fieldValue as unknown as GenericObject,
           {
+            currentDepth,
             entityName,
             fieldAlias: actualFieldAlias,
             fieldAliases,
             fieldName,
             fieldUniqueIteration,
-            isNot
+            isNot,
+            maxDepth
           }
         );
         if (
@@ -595,19 +612,28 @@ export class SQLQueryBuilderService {
   protected parseInnerFilters(
     filtersObject: GenericObject,
     options: {
+      currentDepth: number;
       entityName: string;
       fieldAlias: string;
       fieldAliases: GenericObject<string>;
       fieldName: string;
       fieldUniqueIteration: number;
       isNot?: boolean;
+      maxDepth: number;
     }
   ): {
     fieldUniqueIteration: number;
     parsedFilter: ParsedFilter;
     include: IncludeItems;
   } {
-    const { entityName, fieldAlias, fieldAliases, fieldName } = options;
+    const {
+      currentDepth,
+      entityName,
+      fieldAlias,
+      fieldAliases,
+      fieldName,
+      maxDepth
+    } = options;
     const isOperator = this.allowedStringOperators.indexOf(fieldName) !== -1;
     let isGroup = false;
     let isNot = false;
@@ -673,6 +699,7 @@ export class SQLQueryBuilderService {
         entityName,
         { [actualFieldName]: innerValue },
         {
+          currentDepth: currentDepth + 1,
           fieldAliases: isRelationKey
             ? fieldAliases
             : {
@@ -680,6 +707,7 @@ export class SQLQueryBuilderService {
                 [actualFieldName]: fieldParameterName
               },
           fieldUniqueIteration,
+          maxDepth,
           parameterNamesToFieldAliasesMap: isRelationKey
             ? {}
             : {
@@ -747,7 +775,7 @@ export class SQLQueryBuilderService {
         const includeItemAlias = newIncludeItems[includeItemPath];
         if (
           !allowedIncludeMap[
-            includeItemPath.replace(/__/g, '.').replace(`${entityName}.`, '')
+            includeItemPath.replace(/__/gu, '.').replace(`${entityName}.`, '')
           ]
         ) {
           if (throwErrorOnForbiddenInclude) {
@@ -807,7 +835,7 @@ export class SQLQueryBuilderService {
         let previousEntityAlias = `${entityName}`;
         for (let i = 0; i < finalItemIndex; i++) {
           const currentEntityName = fieldData[i];
-          entityAlias += `_${currentEntityName}`;
+          entityAlias += `__${currentEntityName}`;
           include[`${previousEntityAlias}.${currentEntityName}`] = entityAlias;
           previousEntityAlias = `${entityAlias}`;
         }
@@ -822,21 +850,41 @@ export class SQLQueryBuilderService {
     };
   }
 
-  parseSelect(selectFields: string[], include?: IncludeItems): string[] {
+  parseSelect(
+    entityName: string,
+    selectFields: string[],
+    options?: {
+      include?: IncludeItems;
+      throwErrorOnForbiddenInclude?: boolean;
+    }
+  ): string[] {
+    const { include, throwErrorOnForbiddenInclude } = options || {};
     const actualInclude = include || {};
     const parsedSelect: string[] = [];
     selectFields.forEach((item) => {
       const itemData = item.split('.');
       if (itemData.length === 1) {
-        parsedSelect.push(item);
+        parsedSelect.push(`${entityName}.${item}`);
         return;
       }
       const fieldName = itemData.pop();
-      const entityAlias = actualInclude[itemData.join('.')];
-      if (!entityAlias) {
+      // the include keys are in the format parentAlias.relationName - e.g. course.lessons, course__lessons.lessonType
+      const relationName = itemData.pop();
+      let parentAlias = entityName;
+      for (const i in itemData) {
+        parentAlias += `__${itemData[i]}`;
+      }
+      const includeItemPath = `${parentAlias}.${relationName}`;
+      const includeItemAlias = actualInclude[includeItemPath];
+      if (!includeItemAlias) {
+        if (throwErrorOnForbiddenInclude) {
+          throw new ApplicationError(
+            `[SQLQueryBuilder][${entityName}]: Forbidden include item ${includeItemPath}.`
+          );
+        }
         return;
       }
-      parsedSelect.push(`${entityAlias}.${fieldName}`);
+      parsedSelect.push(`${includeItemAlias}.${fieldName}`);
     });
     return parsedSelect;
   }

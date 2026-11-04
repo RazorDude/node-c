@@ -29,7 +29,7 @@ export class DataDBUserSubscriber
   }
 
   listenTo(): string {
-    return (this.usersService.getEntityTarget() as string) || '';
+    return this.usersService.getEntityTarget() || '';
   }
 
   async beforeInsert(
@@ -40,7 +40,7 @@ export class DataDBUserSubscriber
     if (
       plainTextPassword &&
       !plainTextPassword.match(
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gmu
       )
     ) {
       throw new ApplicationError(
@@ -57,7 +57,7 @@ export class DataDBUserSubscriber
     if (
       plainTextPassword &&
       !plainTextPassword.match(
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gmu
       )
     ) {
       throw new ApplicationError(

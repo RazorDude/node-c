@@ -9,6 +9,7 @@ export interface BuildQueryOptions {
   include?: IncludeItems;
   orderBy?: DataOrderBy[];
   select?: string[];
+  throwErrorOnForbiddenInclude?: boolean;
   where?: GenericObject<ParsedFilter>;
   withDeleted?: boolean;
   withDeletedPerRelation?: GenericObject<boolean>;

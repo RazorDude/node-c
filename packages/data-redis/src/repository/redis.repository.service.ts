@@ -226,7 +226,7 @@ export class RedisRepositoryService<Entity> {
       });
       if (!hasNonPrimaryKeyFilters) {
         hasNonPrimaryKeyFilters =
-          primaryKeyFiltersCount === Object.keys(filters).length;
+          primaryKeyFiltersCount < Object.keys(filters).length;
       }
     } else if (!findAll) {
       throw new ApplicationError(
@@ -368,14 +368,23 @@ export class RedisRepositoryService<Entity> {
       const filterValue = filters[key];
       const itemValue = (item as GenericObject<unknown>)[key];
       if (Array.isArray(filterValue)) {
-        if (!filterValue.includes(itemValue)) {
+        // query string filters arrive as strings, while the stored values keep their types,
+        // so compare them as strings - the same way SQL databases coerce the values
+        let hasMatch = false;
+        for (const i in filterValue) {
+          if (`${filterValue[i]}` === `${itemValue}`) {
+            hasMatch = true;
+            break;
+          }
+        }
+        if (!hasMatch) {
           filterResult = false;
           break;
         }
         continue;
       }
       // TODO: filter operators
-      if (filterValue !== itemValue) {
+      if (`${filterValue}` !== `${itemValue}`) {
         filterResult = false;
         break;
       }
@@ -521,7 +530,7 @@ export class RedisRepositoryService<Entity> {
         if (type === RedisRepositoryDefinitions.EntitySchemaColumnType.UUIDV4) {
           let newValue = uuid();
           if (storeDelimiter === '-') {
-            newValue = newValue.replace(/-/g, '_');
+            newValue = newValue.replace(/-/gu, '_');
           }
           // TODO: this will fail if data is an array
           (preparedData as GenericObject)[columnName] = newValue;

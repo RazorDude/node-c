@@ -44,6 +44,7 @@ export interface DataDeleteOptions {
 export interface DataDeletePrivateOptionsBase {
   processFiltersAllowedFieldsEnabled?: boolean;
   requirePrimaryKeys?: boolean;
+  withDeleted?: false;
 }
 
 export type DataDeletePrivateOptions = DataDeletePrivateOptionsBase &

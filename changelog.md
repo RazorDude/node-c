@@ -1,4 +1,5 @@
 # 1.0.0-beta9
+
 - Common
   - BREAKING: Moved to ESM in praparation for TypeScript 7.
   - BREAKING: Upgraded to TypeScript 7.
@@ -36,6 +37,8 @@
   - Also, in addition to the above, fixed the parsing of top-level $and and $or filters with a major rewrite of the filter building functionality.
   - On top of that, added several checks for disallowed filter combinations, so that properly handled errors are thrown instead of SQL ones.
   - On top of the top of that (:D), added a configurable maxDepth with a default of 10.
+  - Fixed the parseSelect and parseOrderBy method, so that they have the full functionality of working with nested releations.
+  - Fixed the update and delete methods for the cases where filters by relations are added.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
   - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.
@@ -44,6 +47,7 @@
   - New package, identical copy of nestjs-pino, but with an ESM build.
 
 # 1.0.0-beta8
+
 - Common
   - Removed NestJS CLI as a dev depdendency - it's not used and it has unaddressed vulnerabilities.
   - Commnets fixes accross the board, so that descriptions appear on method and classes.
@@ -87,12 +91,14 @@
   - Naming convention unification across the board.
 
 # 1.0.0-beta7
+
 - Common
   - WIP: Testing improvements - proper nyc setup w/ coverage reports.
 - `packages/domain-iam`
   - Fixed the auth cache in the UserManager.
 
 # 1.0.0-beta6
+
 - `packages/core`
   - DomainEntityService: Fixed the passing of privateOptions to the entityService methods in the bulkCreate and create methods.
   - Fixed the refreshTokenExpiryTimeInHours parameter in the domain-iam config, as it was added as refreshTokenExpiryTimeInMinutes.
@@ -106,6 +112,7 @@
   - Updated the access token validation logic so that it allows for the renewal of an expired access token, even if it doesn't exist in the auth cache, as long as it has a refresh token.
 
 # 1.0.0-beta5
+
 - `packages/core`
   - More options for validating access and id tokens.
   - IDToken hotfix.
@@ -119,12 +126,14 @@
   - Changes to test the above.
 
 # 1.0.0-beta4
+
 - `packages/domain-iam`
   - AccessToken and idToken hotfix.
 - `packages/api-http`
   - AccessToken and idToken hotfix.
 
 # 1.0.0-beta3
+
 - `packages/domain-iam`
   - BREAKING: Switched from encoding user data in the local accessToken to encoding user data in the new local idToken.
 - `packages/api-http`
@@ -134,6 +143,7 @@
 
 
 # 1.0.0-beta2
+
 - `packages/data-clickhouse`
   - Fixed the DI for the connection initiation and added more logs.
 - `packages/data-redis`
@@ -142,12 +152,13 @@
   - Fixed the DI for the connection initiation and added more logs.
 
 # 1.0.0-beta1
+
 - Common
   - BREAKING: Logging via pino.
 - `packages/core`
   - New script for generating data source files.
 - `packages/data-rdb`
-  - Fixed the operator-based filters for fileds, i.e. ```{ createdAt: { '$gte': '2020-01-01', '$lte': '2030-01-01' } }```.
+  - Fixed the operator-based filters for fileds, i.e. `{ createdAt: { '$gte': '2020-01-01', '$lte': '2030-01-01' } }`.
 - `packages/api-http`
   - AccessControlContext and AccessControlResource decorators & their integration in the HTTPAccessControlInterceptor.
   - HTTPAccessControlInterceptor - removed the injection of the authorizationService, as it's only used statically.
@@ -158,6 +169,7 @@
   - Improvements to the tests config & basic tests up to 25% code coverage.
 
 # 1.0.0-beta0
+
 - Common
   - BREAKING: Renamed all "PERSISTANCE" occurrences into DATA - this was unintentionally omitted in v1.0.0-alpha62.
   - BREAKING: Migration to NestJS v11.
@@ -197,16 +209,19 @@
   - WIP: AccessControlContext and AccessControlResource decorators.
 
 # 1.0.0-alpha64
+
 - `packages/core`
   - The setNested method now creates objects along the path when they are missing.
 - `packages/domain-iam`
   - Typo fix in the authorization service.
 
 # 1.0.0-alpha63
+
 - `packages/domain-iam`
   - Typing and typo fixes for the authorization service.
 
 # 1.0.0-alpha62
+
 - Common
   - BREAKING: Renamed all "persistance" packages whose name is confusing, misleading, factually inaccurate and - worst of all - contains a typo. They're now "data" packages.
 - `packages/domain-iam`
@@ -220,21 +235,26 @@
   - Fixes for the breaking changes.
 
 # 1.0.0-alpha61
+
 - `packages/persistance-rdb`
   - Fixed the delete method for services whose entities don't have a deletedColumn.
 
 # 1.0.0-alpha60
+
 - `packages/persistance-rdb`
   - QueryBuilder fix for association fields with aliases.
 
 # 1.0.0-alpha59
+
 - Publishing errror fix.
 
 # 1.0.0-alpha58
+
 - `packages/persistance-rdb`
   - Debug log removal.
 
 # 1.0.0-alpha57
+
 - `packages/persistance-redis`
   - Repository - full support for nested objects and arrays for find operations.
   - Repository - support for nested objects and arrays for delete operations WIP.
@@ -244,6 +264,7 @@
   - Fixed the filtering by multiple operators.
 
 # 1.0.0-alpha56
+
 - `packages/api-rest`
   - Delete DTO - added the missing "returnOriginalItems" property.
 - `packages/core`
@@ -252,6 +273,7 @@
   - RDBEntityService - fixed the issue where "in" SQL search is borken.
 
 # 1.0.0-alpha55
+
 - `packages/persistance-redis`
   - BREAKING: entitySchema now has name and storeKey.
   - Repository service - fixes for the individualSearch functionality.
@@ -264,6 +286,7 @@
   - Auth fixes in accordance with the redis changes for individualSearch.
 
 # 1.0.0-alpha54
+
 - `packages/core`
   - WIP: support for supplying default options for triggering additional persistance entity services in the domain entity service.
 - `packages/persistance-typeorm`
@@ -275,6 +298,7 @@
   - Auth updates in accordance with the redis changes for individualSearch.
 
 # 1.0.0-alpha53
+
 - `packages/core`
   - BREAKING: getNested now returns paths and values, rather than just values, allowing for the correct processing of nested array objects.
   - WIP: support for supplying default options for triggering additional persistance entity services in the domain entity service.
@@ -292,4 +316,5 @@
 
 
 # 1.0.0-alpha52
+
 - Everything that was done up until this point :)

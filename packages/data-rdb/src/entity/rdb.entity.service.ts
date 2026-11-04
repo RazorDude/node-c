@@ -193,7 +193,6 @@ export class RDBEntityService<
       withDeleted = false
     } = actualPrivateOptions;
     const entityName = this.repository.metadata.name;
-    const tableName = this.repository.metadata.name;
     const queryBuilder =
       this.getRepository(transactionManager).createQueryBuilder(entityName);
     const parsedFilters = (await this.processObjectAllowedFields<GenericObject>(
@@ -210,14 +209,14 @@ export class RDBEntityService<
       );
     }
     const { where, include: includeFromFilters } = this.qb.parseFilters(
-      tableName,
+      entityName,
       parsedFilters,
       {
         fieldAliases: this.columnAliases
       }
     );
     const include = this.qb.parseRelations(
-      tableName,
+      entityName,
       {
         unparsedInclude: optInclude,
         newIncludeItems: includeFromFilters
@@ -225,10 +224,11 @@ export class RDBEntityService<
       { allowedInclude: optInclude || [], throwErrorOnForbiddenInclude: true }
     );
     this.qb.buildQuery<Entity>(queryBuilder, {
-      currentEntityName: this.getEntityTarget() as string,
+      currentEntityName: this.getEntityTarget()!,
       deletedColumnName: this.deletedColumnName,
       entityManager: this.repository.manager,
       include,
+      throwErrorOnForbiddenInclude: true,
       where,
       withDeleted
     });
@@ -285,7 +285,8 @@ export class RDBEntityService<
         );
       }) as Promise<DataDeleteResult<Entity>>;
     }
-    const { processFiltersAllowedFieldsEnabled } = actualPrivateOptions;
+    const { processFiltersAllowedFieldsEnabled, withDeleted } =
+      actualPrivateOptions;
     const entityName = this.repository.metadata.name;
     const tableName = this.repository.metadata.tableName;
     const dataToReturn: DataUpdateResult<Entity> = {};
@@ -314,12 +315,27 @@ export class RDBEntityService<
         fieldAliases: this.columnAliases
       }
     );
+    const includeKeys = Object.keys(include);
     let where: { [fieldName: string]: ParsedFilter } = {};
-    if (Object.keys(include).length > 0 || returnOriginalItems) {
-      const findData = await this.find({
-        filters: parsedFilters,
-        transactionManager
-      });
+    if (includeKeys.length > 0 || returnOriginalItems) {
+      const findData = await this.find(
+        {
+          filters: parsedFilters,
+          findAll: true,
+          include: includeKeys.map((item) => {
+            const [, ...itemData] = include[item].split('__');
+            return itemData.join('.');
+          }),
+          transactionManager
+        },
+        { processFiltersAllowedFieldsEnabled: false, withDeleted }
+      );
+      if (findData.items.length === 0) {
+        return {
+          count: 0,
+          ...(returnOriginalItems ? { originalItems: [] } : {})
+        };
+      }
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
       where[field] = value;
       dataToReturn.originalItems = findData.items;
@@ -327,9 +343,10 @@ export class RDBEntityService<
       where = parsedWhere;
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
-      currentEntityName: this.getEntityTarget() as string,
+      currentEntityName: this.getEntityTarget()!,
       deletedColumnName: this.deletedColumnName,
       entityManager: this.repository.manager,
+      throwErrorOnForbiddenInclude: true,
       where
     });
     try {
@@ -403,6 +420,11 @@ export class RDBEntityService<
       where = { ...parsedFiltersData.where };
       include = { ...parsedFiltersData.include };
     }
+    if (optOrderBy) {
+      const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
+      include = { ...parsedOrderByData.include, ...include };
+      orderBy = [...parsedOrderByData.orderBy];
+    }
     include = this.qb.parseRelations(
       entityName,
       {
@@ -411,18 +433,14 @@ export class RDBEntityService<
       },
       { allowedInclude: optRelations || [], throwErrorOnForbiddenInclude: true }
     );
-    if (optOrderBy) {
-      const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
-      include = { ...parsedOrderByData.include, ...include };
-      orderBy = [...parsedOrderByData.orderBy];
-    }
     this.qb.buildQuery<Entity>(queryBuilder, {
-      currentEntityName: this.getEntityTarget() as string,
+      currentEntityName: this.getEntityTarget()!,
       deletedColumnName: this.deletedColumnName,
       entityManager: this.repository.manager,
       include,
       orderBy,
       select: options.select,
+      throwErrorOnForbiddenInclude: true,
       where,
       withDeleted
     });
@@ -489,6 +507,7 @@ export class RDBEntityService<
         'At least one filter field is required for the findOne method.'
       );
     }
+    let include: IncludeItems = {};
     const { where, include: includeFromFilters } = this.qb.parseFilters(
       entityName,
       parsedFilters,
@@ -497,34 +516,44 @@ export class RDBEntityService<
         operator: selectOperator as DataSelectOperator
       }
     );
-    const include = this.qb.parseRelations(
-      entityName,
-      {
-        unparsedInclude: optRelations,
-        newIncludeItems: includeFromFilters
-      },
-      { allowedInclude: optRelations || [], throwErrorOnForbiddenInclude: true }
-    );
+    include = { ...includeFromFilters };
     let orderBy: DataOrderBy[] = [];
     if (optOrderBy) {
       const parsedOrderByData = this.qb.parseOrderBy(entityName, optOrderBy);
+      include = { ...parsedOrderByData.include, ...include };
       orderBy = [...parsedOrderByData.orderBy];
     }
+    include = this.qb.parseRelations(
+      entityName,
+      {
+        unparsedInclude: optRelations,
+        newIncludeItems: include
+      },
+      { allowedInclude: optRelations || [], throwErrorOnForbiddenInclude: true }
+    );
     this.qb.buildQuery<Entity>(queryBuilder, {
-      currentEntityName: this.getEntityTarget() as string,
+      currentEntityName: this.getEntityTarget()!,
       deletedColumnName: this.deletedColumnName,
       entityManager: this.repository.manager,
       include,
       orderBy,
       select: options.select,
+      throwErrorOnForbiddenInclude: true,
       where,
       withDeleted
     });
     return await queryBuilder.getOne();
   }
 
-  getEntityTarget(): unknown {
-    return this.repository.target;
+  getEntityTarget(): string | undefined {
+    const target = this.repository.target;
+    if (typeof target === 'string') {
+      return target;
+    }
+    if (typeof target === 'object' && target !== null) {
+      return (target as { options?: { name?: string } }).options?.name;
+    }
+    return undefined;
   }
 
   protected getRepository(
@@ -739,7 +768,7 @@ export class RDBEntityService<
     }
     // TODO: move this functionality out of here and make this abstract
     if (error.code === PostgresErrorCode.UniqueViolation) {
-      const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/g);
+      const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/gu);
       const result = extractVariableName.exec(errorMessage);
       return new ApplicationError(
         // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
@@ -755,6 +784,22 @@ export class RDBEntityService<
         statusCode: HttpStatus.BAD_REQUEST
       }
     );
+  }
+
+  protected stripRelationKeysFromItems(
+    items: Entity[],
+    include: IncludeItems
+  ): Entity[] {
+    const keysToDelete: string[] = [];
+    for (const includeEntityName in include) {
+      keysToDelete.push(includeEntityName.split('.')[1]);
+    }
+    return items.map((item) => {
+      keysToDelete.forEach((keyToDelete) => {
+        delete item[keyToDelete];
+      });
+      return item;
+    });
   }
 
   async update(
@@ -819,24 +864,43 @@ export class RDBEntityService<
         fieldAliases: this.columnAliases
       }
     );
-    const hasInclude = Object.keys(include).length;
+    const includeKeys = Object.keys(include);
+    const hasInclude = includeKeys.length;
+    let includeParsedForFind: string[] = [];
     let originalItems: Entity[] = [];
     let where: { [fieldName: string]: ParsedFilter } = {};
     if (hasInclude || returnOriginalItems) {
+      includeParsedForFind = includeKeys.map((item) => {
+        const [, ...itemData] = include[item].split('__');
+        return itemData.join('.');
+      });
       const findData = await this.find(
-        { filters: processedFilters, findAll: true, transactionManager },
-        { processFiltersAllowedFieldsEnabled: false }
+        {
+          filters: processedFilters,
+          findAll: true,
+          include: includeParsedForFind,
+          transactionManager
+        },
+        { processFiltersAllowedFieldsEnabled: false, withDeleted }
       );
+      if (findData.items.length === 0) {
+        return {
+          count: 0,
+          ...(returnData ? { items: [] } : {}),
+          ...(returnOriginalItems ? { originalItems: [] } : {})
+        };
+      }
       const { field, value } = this.buildPrimaryKeyWhereClause(findData.items);
-      originalItems = findData.items;
+      originalItems = this.stripRelationKeysFromItems(findData.items, include);
       where[field] = value;
     } else {
       where = parsedWhere;
     }
     this.qb.buildQuery<Entity>(queryBuilder, {
-      currentEntityName: this.getEntityTarget() as string,
+      currentEntityName: this.getEntityTarget()!,
       deletedColumnName: this.deletedColumnName,
       entityManager: this.repository.manager,
+      throwErrorOnForbiddenInclude: true,
       where,
       withDeleted
     });
@@ -856,26 +920,21 @@ export class RDBEntityService<
         // that are already used for the update
         else {
           result = await queryBuilder.execute();
-          const { items: updatedItems } = await this.find(
+          let { items: updatedItems } = await this.find(
             {
               filters: processedFilters,
               findAll: true,
+              include: includeParsedForFind,
               transactionManager
             },
-            { processFiltersAllowedFieldsEnabled: false }
+            { processFiltersAllowedFieldsEnabled: false, withDeleted }
           );
           // remove any related entities that might have been joined for the search
           if (hasInclude) {
-            const keysToDelete: string[] = [];
-            for (const includeEntityName in include) {
-              keysToDelete.push(includeEntityName.split('.')[0]);
-            }
-            updatedItems.forEach((updatedItem, updatedItemIndex) => {
-              keysToDelete.forEach((keyToDelete) => {
-                delete updatedItem[keyToDelete];
-              });
-              updatedItems[updatedItemIndex] = updatedItem;
-            });
+            updatedItems = this.stripRelationKeysFromItems(
+              updatedItems,
+              include
+            );
           }
           result.raw = updatedItems;
         }

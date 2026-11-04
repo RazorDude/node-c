@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "assist": {
     "enabled": true
   },
@@ -47,8 +47,7 @@
         "useImportExtensions": "off"
       },
       "nursery": {
-        "useExplicitType": "error",
-        "useThisInClassMethods": "off"
+        "useExplicitType": "error"
       },
       "performance": {
         "noAwaitInLoops": "off",
@@ -80,7 +79,8 @@
         "useFilenamingConvention": "off",
         "useImportType": "off",
         "useLiteralEnumMembers": "error",
-        "useNamingConvention": "off"
+        "useNamingConvention": "off",
+        "useThisInClassMethods": "off"
       },
       "suspicious": {
         "noConfusingVoidType": "off",
