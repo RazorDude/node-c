@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/suspicious/noConsole: Test file. */
+/** biome-ignore-all lint/complexity/useRegexpTest: Test file. */
 /** biome-ignore-all lint/style/noMagicNumbers: Test file. */
 /** biome-ignore-all lint/performance/useTopLevelRegex: Test file. */
 /** biome-ignore-all lint/style/noProcessEnv: Test file. */
