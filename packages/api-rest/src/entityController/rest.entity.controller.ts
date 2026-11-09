@@ -85,7 +85,16 @@ export class RESTAPIEntityControllerWithoutDto<
   DataEntityServiceData extends
     DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
-  inUseDefaultRoutes: { [handlerName: string]: boolean };
+  static allDefaultRoutes = [
+    'bulkCreate',
+    'create',
+    'count',
+    'delete',
+    'find',
+    'findOne',
+    'update'
+  ];
+  protected inUseDefaultRoutes: { [handlerName: string]: boolean };
 
   constructor(
     protected domainEntityService: EntityDomainService,
@@ -97,7 +106,10 @@ export class RESTAPIEntityControllerWithoutDto<
 
   protected checkRoute(handlerName: string): void {
     if (!this.inUseDefaultRoutes[handlerName]) {
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        { message: 'Not found', statusCode: HttpStatus.NOT_FOUND },
+        HttpStatus.NOT_FOUND
+      );
     }
   }
 
@@ -236,11 +248,28 @@ export class RESTAPIEntityController<
     protected readonly reflector: Reflector,
     defaultRouteMethods: string[] = []
   ) {
-    super(
-      domainEntityService,
-      logger,
-      Object.keys(dto).concat(defaultRouteMethods)
-    );
+    const filteredDefaultRoutesMap: GenericObject<boolean> = {};
+    const dtoKeys = Object.keys(dto);
+    if (defaultRouteMethods.length > 0) {
+      const potentiallyAllowedKeys: GenericObject<boolean> = {};
+      RESTAPIEntityControllerWithoutDto.allDefaultRoutes.forEach((item) => {
+        potentiallyAllowedKeys[item] = true;
+      });
+      defaultRouteMethods.forEach((item) => {
+        filteredDefaultRoutesMap[item] = true;
+      });
+      dtoKeys.forEach((item) => {
+        if (potentiallyAllowedKeys[item] && !filteredDefaultRoutesMap[item]) {
+          return;
+        }
+        filteredDefaultRoutesMap[item] = true;
+      });
+    } else {
+      dtoKeys.forEach((item) => {
+        filteredDefaultRoutesMap[item] = true;
+      });
+    }
+    super(domainEntityService, logger, Object.keys(filteredDefaultRoutesMap));
     const { validationWhitelist } = this.settings;
     this.validationPipe = new UpdatableValidationPipe(reflector, {
       whitelist: validationWhitelist

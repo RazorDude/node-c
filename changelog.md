@@ -23,6 +23,8 @@
   - Fixed the issue where the id param is not parsed properly due to a typo.
   - Added extended DTOs for find and findOne with saveAdditionalResultsInFirstService support.
   - Added the `returnOriginalItems` option to the base update DTO.
+  - Updated how the RESTEntityController processes defaultRoutes and their DTOs so that routes with DTOs aren't autmatically added when the defaultRoutes array has been provided.
+  - Better error messages for the non-enabled default routes.
 - `packages/core`
   - Changed how the LoggerModule accepts pinoParams - it now expects the full params object, rather than merging it with the default params. If default params are expected, then the merge should be done by the user, prior to passing the pinoParams to the module's register method.
   - Vendored in nestjs-pino due to its lack of ESM support.
@@ -30,6 +32,8 @@
   - BREAKING: Moved DataCountOptions, DataFindOneOptions and DataFindOptions's withDeleted property to the privateOptions, along with DataFindOptions's getTotalCount property.
   - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
   - Added better error handling for HTTP client errors that don't reach any middleware.
+- `packages/data-clickhouse`
+  - SQL injection prevention fixes to the query builder.
 - `packages/data-rdb`
   - Multiple fixes for the SQLQueryBuilder's parseRelations allowed include method.
   - Fixed the error handling, so that error 400 is now thrown for handled error codes.
@@ -43,6 +47,8 @@
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
   - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.
   - Added sorting to the RedisEntityService.find method when findAll=true.
+- `packages/domain-iam`
+  - Fix for the permissions system check, so that the proper error is thrown when overriding non-array input values.
 - `packages/nestjs-pino`
   - New package, identical copy of nestjs-pino, but with an ESM build.
 

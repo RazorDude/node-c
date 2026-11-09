@@ -18,6 +18,12 @@ interface TestCourse {
   name: string;
 }
 
+// userId is a 64-bit integer in ClickHouse, so it may be returned as a string
+interface TestUserLoginLog {
+  datetime: string;
+  userId: number | string;
+}
+
 // Course Platform (Delegated) only;
 // TODO: allowed relations fields parsing
 // TODO: redis - array-based and object-based storage with interal primary keys, hashmap methods
@@ -28,6 +34,11 @@ interface TestCourse {
 // TODO: other apps' suites
 describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   let adminAccessToken = '';
+  let adminLoginLogs: TestUserLoginLog[] = [];
+  let adminUserId = 0;
+  let user0AccessToken = '';
+  let user0Id = 0;
+  let user0LoginLogs: TestUserLoginLog[] = [];
   // ----
   // -- start of general checks
   // ----
@@ -1731,6 +1742,604 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
     expect(responseBody.statusCode).toEqual(HttpStatus.BAD_REQUEST);
   });
   // TODO: all of the above tests except relations, but with the cache
+  // log in as admin again, so that there are at least 2 login logs with different datetimes for the login logs cases
+  it('should log the admin user in successfully again', async () => {
+    // the datetime column has a precision of seconds, so this makes sure the new login log has a later datetime
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1100);
+    });
+    const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
+      body: JSON.stringify({
+        auth: {
+          password: 'AdminPassword'
+        },
+        filters: { email: 'admin@node-c.com' }
+      }),
+      headers: { 'content-type': 'application/json' },
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.CREATED);
+    expect(responseBody).toHaveProperty('accessToken');
+    expect(responseBody).toHaveProperty('idToken');
+    expect(responseBody).toHaveProperty('refreshToken');
+    adminAccessToken = responseBody.accessToken;
+  });
+  // find all login logs of the admin user (findAll, sorting) - the results are used as a benchmark in the next cases
+  it('should find all login logs of the admin user (findAll, sorting)', async () => {
+    const adminResponse = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[email]=${encodeURIComponent('admin@node-c.com')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const adminResponseBody = await adminResponse.json();
+    adminUserId = adminResponseBody.result.items[0].id;
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result).toHaveProperty('items');
+    const items: TestUserLoginLog[] = responseBody.result.items;
+    // 1 login from the start of the suite + 1 from the previous case
+    expect(items.length).toBeGreaterThanOrEqual(2);
+    expect(responseBody.result.perPage).toEqual(items.length);
+    for (const i in items) {
+      const item = items[i];
+      expect(Number(item.userId)).toEqual(adminUserId);
+      // the datetime column has a precision of seconds, so multiple logins can share the same datetime
+      if (Number(i) > 0) {
+        expect(item.datetime >= items[Number(i) - 1].datetime).toEqual(true);
+      }
+    }
+    adminLoginLogs = items;
+  });
+  // find login logs of the admin user (no options)
+  it('should find login logs of the admin user (no options)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(adminLoginLogs.length > 10);
+    expect(responseBody.result.totalCount).toEqual(adminLoginLogs.length);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(
+      Math.min(adminLoginLogs.length, 10)
+    );
+    const items: TestUserLoginLog[] = responseBody.result.items;
+    for (const i in items) {
+      expect(Number(items[i].userId)).toEqual(adminUserId);
+    }
+  });
+  // find login logs of the admin user (pagination, page 1)
+  it('should find login logs of the admin user (pagination, page 1)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?orderBy[datetime]=asc&page=1&perPage=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(1);
+    expect(responseBody.result.more).toEqual(adminLoginLogs.length > 1);
+    expect(responseBody.result.totalCount).toEqual(adminLoginLogs.length);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toEqual(adminLoginLogs.slice(0, 1));
+  });
+  // find login logs of the admin user (pagination, page 2)
+  it('should find login logs of the admin user (pagination, page 2)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?orderBy[datetime]=asc&page=2&perPage=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(2);
+    expect(responseBody.result.perPage).toEqual(1);
+    expect(responseBody.result.more).toEqual(adminLoginLogs.length > 2);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items).toEqual(adminLoginLogs.slice(1, 2));
+  });
+  // find all login logs of the admin user if findAll is set to true even if pagination params are set
+  it('should find all login logs of the admin user if findAll is set to true even if pagination params are set', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&page=2&perPage=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.perPage).toEqual(adminLoginLogs.length);
+    expect(responseBody.result.items).toEqual(adminLoginLogs);
+  });
+  // find login logs of the admin user (sorting, desc)
+  it('should find login logs of the admin user (sorting, desc)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=desc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    const expectedItems: TestUserLoginLog[] = [];
+    for (let i = adminLoginLogs.length - 1; i >= 0; i--) {
+      expectedItems.push(adminLoginLogs[i]);
+    }
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - simple)
+  it('should find login logs of the admin user (filters - simple)', async () => {
+    const { datetime } = adminLoginLogs[adminLoginLogs.length - 1];
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime === datetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&` +
+        `filters[datetime]=${encodeURIComponent(datetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - array of items)
+  it('should find login logs of the admin user (filters - array of items)', async () => {
+    const firstDatetime = adminLoginLogs[0].datetime;
+    const lastDatetime = adminLoginLogs[adminLoginLogs.length - 1].datetime;
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime === firstDatetime || item.datetime === lastDatetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[datetime][]=${encodeURIComponent(firstDatetime)}&` +
+        `filters[datetime][]=${encodeURIComponent(lastDatetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - $gt and $lte operators)
+  it('should find login logs of the admin user (filters - $gt and $lte operators)', async () => {
+    const firstDatetime = adminLoginLogs[0].datetime;
+    const lastDatetime = adminLoginLogs[adminLoginLogs.length - 1].datetime;
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime > firstDatetime && item.datetime <= lastDatetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[datetime][$gt]=${encodeURIComponent(firstDatetime)}&` +
+        `filters[datetime][$lte]=${encodeURIComponent(lastDatetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - $gte and $lt operators)
+  it('should find login logs of the admin user (filters - $gte and $lt operators)', async () => {
+    const firstDatetime = adminLoginLogs[0].datetime;
+    const lastDatetime = adminLoginLogs[adminLoginLogs.length - 1].datetime;
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime >= firstDatetime && item.datetime < lastDatetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[datetime][$gte]=${encodeURIComponent(firstDatetime)}&` +
+        `filters[datetime][$lt]=${encodeURIComponent(lastDatetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - $between operator)
+  it('should find login logs of the admin user (filters - $between operator)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[datetime][$between][]=${encodeURIComponent(adminLoginLogs[0].datetime)}&` +
+        `filters[datetime][$between][]=${encodeURIComponent(adminLoginLogs[adminLoginLogs.length - 1].datetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    // the range is inclusive and covers all of the items
+    expect(responseBody.result.items).toEqual(adminLoginLogs);
+  });
+  // find login logs of the admin user (filters - $not operator inside a field, as a single value)
+  it('should find login logs of the admin user (filters - $not operator inside a field, as a single value)', async () => {
+    const excludedDatetime = adminLoginLogs[0].datetime;
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime !== excludedDatetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[datetime][$not]=${encodeURIComponent(excludedDatetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // find login logs of the admin user (filters - top-level $or operator)
+  it('should find login logs of the admin user (filters - top-level $or operator)', async () => {
+    const firstDatetime = adminLoginLogs[0].datetime;
+    const lastDatetime = adminLoginLogs[adminLoginLogs.length - 1].datetime;
+    const expectedItems: TestUserLoginLog[] = [];
+    for (const i in adminLoginLogs) {
+      const item = adminLoginLogs[i];
+      if (item.datetime === firstDatetime || item.datetime >= lastDatetime) {
+        expectedItems.push(item);
+      }
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[$or][0][datetime]=${encodeURIComponent(firstDatetime)}&` +
+        `filters[$or][1][datetime][$gte]=${encodeURIComponent(lastDatetime)}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    // the userId filter added by the controller must still apply to all items, despite the top-level $or
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // return no login logs of the admin user if none match the provided filters
+  it('should return no login logs of the admin user if none match the provided filters', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?` +
+        `filters[datetime][$lt]=${encodeURIComponent('2000-01-01 00:00:00')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    // check the basic properties of the request
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.page).toEqual(1);
+    expect(responseBody.result.perPage).toEqual(10);
+    expect(responseBody.result.more).toEqual(false);
+    expect(responseBody.result.totalCount).toEqual(0);
+    expect(responseBody.result).toHaveProperty('items');
+    expect(responseBody.result.items.length).toEqual(0);
+  });
+  // find login logs of the admin user (sorting on multiple fields)
+  it('should find login logs of the admin user (sorting on multiple fields)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=desc&orderBy[userId]=asc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    // all items have the same userId, so the datetime ordering decides the order
+    const expectedItems: TestUserLoginLog[] = [];
+    for (let i = adminLoginLogs.length - 1; i >= 0; i--) {
+      expectedItems.push(adminLoginLogs[i]);
+    }
+    expect(responseBody.result.items).toEqual(expectedItems);
+  });
+  // throw an error when trying to find login logs of the admin user with specific fields selected (not implemented for ClickHouse)
+  it('should throw an error when trying to find login logs of the admin user with specific fields selected (not implemented for ClickHouse)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?select[]=datetime`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.select not implemented.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when trying to find login logs of the admin user with included relations (not implemented for ClickHouse)
+  it('should throw an error when trying to find login logs of the admin user with included relations (not implemented for ClickHouse)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?include[]=user`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.leftJoinAndSelect not implemented.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // find login logs of the admin user (filters - array of more than 10 items, so that parameter names like _1 and _10 coexist)
+  it('should find login logs of the admin user (filters - array of more than 10 items, so that parameter names like _1 and _10 coexist)', async () => {
+    const datetimes: string[] = [];
+    const datetimesMap: Record<string, boolean> = {};
+    for (const i in adminLoginLogs) {
+      const { datetime } = adminLoginLogs[i];
+      if (!datetimesMap[datetime]) {
+        datetimesMap[datetime] = true;
+        datetimes.push(datetime);
+      }
+    }
+    // pad the list with datetimes that don't match anything, up to 11 items
+    for (let i = 0; datetimes.length < 11; i++) {
+      datetimes.push(`2000-01-01 00:00:${i < 10 ? `0${i}` : i}`);
+    }
+    let datetimesQuery = '';
+    for (const i in datetimes) {
+      datetimesQuery += `&filters[datetime][]=${encodeURIComponent(datetimes[i])}`;
+    }
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc${datetimesQuery}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(adminLoginLogs);
+  });
+  // throw an error when trying to find login logs of the admin user with an SQL injection attempt in a filter value
+  it('should throw an error when trying to find login logs of the admin user with an SQL injection attempt in a filter value', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&` +
+        `filters[datetime]=${encodeURIComponent("2000-01-01'or'1'='1")}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    // the value is sent as a query param, so ClickHouse treats the whole of it as a string and fails to parse it as a datetime,
+    // instead of executing the injected condition and returning the stored login logs
+    expect(response.status).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(responseBody).not.toHaveProperty('result');
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
+  });
+  // throw an error when trying to find login logs of the admin user with an SQL injection attempt in a filter field name
+  it('should throw an error when trying to find login logs of the admin user with an SQL injection attempt in a filter field name', async () => {
+    const fieldName = 'datetime`=`datetime`or`1';
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?` +
+        `filters[${encodeURIComponent(fieldName)}]=1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    // the parameter name is built from the field name, so the injected characters make it invalid
+    expect(responseBody.error).toEqual(
+      `Method ClickHouseSelectQueryBuilder.where received an invalid parameter name: userLoginLog___${fieldName}_0.`
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when trying to find login logs of the admin user with an SQL injection attempt in a sorting field
+  it('should throw an error when trying to find login logs of the admin user with an SQL injection attempt in a sorting field', async () => {
+    const fieldName = 'datetime,(select(1))';
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?` +
+        `orderBy[${encodeURIComponent(fieldName)}]=asc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      `Method ClickHouseSelectQueryBuilder.orderBy received an invalid field: userLoginLog.${fieldName}.`
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when trying to find login logs of the admin user with a negative page value (invalid skip count)
+  it('should throw an error when trying to find login logs of the admin user with a negative page value (invalid skip count)', async () => {
+    // non-numeric values are dropped by the find DTO, so a negative page is used to get a negative skip count - (-1 - 1) * 10
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?page=-1`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.skip expects a non-negative integer input for skipCount.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw an error when trying to find login logs of the admin user with a negative perPage value (invalid take count)
+  it('should throw an error when trying to find login logs of the admin user with a negative perPage value (invalid take count)', async () => {
+    // on page 1 the skip count is 0, so only the take count (perPage + 1) is invalid
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?page=1&perPage=-5`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.take expects a non-negative integer input for takeCount.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
   // ----
   // -- end of admin cases - login and single-service find
   // ----
@@ -5309,6 +5918,89 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ----
   // -- start of admin cases - delete
   // ----
+  // throw a not found error when trying to delete users, since the delete route is not enabled in the users controller
+  it('should throw a not found error when trying to delete users, since the delete route is not enabled in the users controller', async () => {
+    const dataPreDelete = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?findAll=true`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPreDeleteBody = await dataPreDelete.json();
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters: { id: dataPreDeleteBody.result.items[0].id }
+        }),
+        method: HttpMethod.DELETE.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.NOT_FOUND);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual('Not found');
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(HttpStatus.NOT_FOUND);
+    const dataPostDelete = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?findAll=true`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostDeleteBody = await dataPostDelete.json();
+    expect(dataPostDeleteBody.result.items).toEqual(
+      dataPreDeleteBody.result.items
+    );
+  });
+  // throw an error when trying to delete login logs of the admin user (not implemented for ClickHouse)
+  it('should throw an error when trying to delete login logs of the admin user (not implemented for ClickHouse)', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters: { datetime: adminLoginLogs[0].datetime }
+        }),
+        method: HttpMethod.DELETE.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.delete not implemented.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+    const dataPostDelete = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const dataPostDeleteBody = await dataPostDelete.json();
+    expect(dataPostDeleteBody.result.items).toEqual(adminLoginLogs);
+  });
   // delete courses in the DB - filter by id
   it('should delete courses in the DB - filter by id', async () => {
     const dataPreDelete = await fetch(
@@ -5891,16 +6583,192 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated', () => {
   // ###########################################################################################
 
   // ----
-  // -- start of user 0 cases - CRUD functionality, mutation of input and output data
+  // -- start of user 0 cases - login and find with mutation of input data
   // ----
-  // TODO: log in as user 0
+  // log in as user 0
+  it('should log user 0 in successfully', async () => {
+    const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
+      body: JSON.stringify({
+        auth: {
+          password: 'User0Password'
+        },
+        filters: { email: 'user0@node-c.com' }
+      }),
+      headers: { 'content-type': 'application/json' },
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.CREATED);
+    expect(responseBody).toHaveProperty('accessToken');
+    expect(responseBody).toHaveProperty('idToken');
+    expect(responseBody).toHaveProperty('refreshToken');
+    user0AccessToken = responseBody.accessToken;
+    const user0Response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users?filters[email]=${encodeURIComponent('user0@node-c.com')}`,
+      {
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    const user0ResponseBody = await user0Response.json();
+    user0Id = user0ResponseBody.result.items[0].id;
+  });
+  // find only the login logs of user 0 when no userId filter is provided - the authorization point adds it
+  it('should find only the login logs of user 0 when no userId filter is provided', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    const items: TestUserLoginLog[] = responseBody.result.items;
+    // at least the login from the previous case
+    expect(items.length).toBeGreaterThan(0);
+    for (const i in items) {
+      expect(Number(items[i].userId)).toEqual(user0Id);
+    }
+    user0LoginLogs = items;
+  });
+  // find the login logs of user 0 when their own userId is provided as a filter
+  it('should find the login logs of user 0 when their own userId is provided as a filter', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&filters[userId]=${user0Id}`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(user0LoginLogs);
+  });
+  // find only the login logs of user 0 when an array of userIds, including another user's, is provided as a filter
+  it("should find only the login logs of user 0 when an array of userIds, including another user's, is provided as a filter", async () => {
+    // the authorization point narrows the array down to the userId of the current user
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&orderBy[datetime]=asc&` +
+        `filters[userId][]=${user0Id}&filters[userId][]=${adminUserId}`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.OK);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('result');
+    expect(responseBody.result.items).toEqual(user0LoginLogs);
+  });
+  // throw a forbidden error when user 0 tries to find the login logs of another user
+  it('should throw a forbidden error when user 0 tries to find the login logs of another user', async () => {
+    // the authorization point only allows the userId of the current user in the filters
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs?findAll=true&filters[userId]=${adminUserId}`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.GET
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.FORBIDDEN);
+    const responseBody = await response.json();
+    expect(responseBody).not.toHaveProperty('result');
+  });
+  // pass the authorization check when user 0 tries to delete their own login logs with a numeric userId filter
+  it('should pass the authorization check when user 0 tries to delete their own login logs with a numeric userId filter', async () => {
+    // the JSON body keeps the userId as a number, which the authorization point used to reject even when it matched;
+    // the request then reaches ClickHouse, where deleting is not implemented
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters: { userId: user0Id }
+        }),
+        method: HttpMethod.DELETE.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.delete not implemented.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // pass the authorization check when user 0 tries to delete their own login logs without a userId filter
+  it('should pass the authorization check when user 0 tries to delete their own login logs without a userId filter', async () => {
+    // the authorization point adds the userId of the current user to the filters
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters: { datetime: user0LoginLogs[0].datetime }
+        }),
+        method: HttpMethod.DELETE.toUpperCase()
+      }
+    );
+    const responseBody = await response.json();
+    expect(response.status).toEqual(400);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual(
+      'Method ClickHouseSelectQueryBuilder.delete not implemented.'
+    );
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(400);
+  });
+  // throw a forbidden error when user 0 tries to delete the login logs of another user
+  it('should throw a forbidden error when user 0 tries to delete the login logs of another user', async () => {
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/userLoginLogs`,
+      {
+        headers: {
+          authorization: `Bearer ${user0AccessToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters: { userId: adminUserId }
+        }),
+        method: HttpMethod.DELETE.toUpperCase()
+      }
+    );
+    expect(response.status).toEqual(HttpStatus.FORBIDDEN);
+    const responseBody = await response.json();
+    expect(responseBody).not.toHaveProperty('result');
+  });
   // TODO: find courses (no options)
   // TODO: find courses (pagination, page 1 and 2)
   // TODO: find courses (sorting)
   // TODO: find courses (no sorting and pagination)
-  // TODO: error cases for authorization points
-  // TODO: success cases for authorization points
-  // TODO: mutation of input data
+  // TODO: more error cases for authorization points
+  // TODO: more success cases for authorization points
+  // TODO: more mutation of input data
   // TODO: mutation of output data
   // ----
   // -- end of user 0 cases

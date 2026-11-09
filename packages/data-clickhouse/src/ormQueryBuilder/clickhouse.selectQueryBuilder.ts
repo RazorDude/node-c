@@ -12,6 +12,8 @@ import {
 import { ClickHouseEntityManager } from '../entityManager/clickhouse.entity.manager.js';
 import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.definitions.js';
 
+const paramNameRegex = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
 // TODO: field selection, join, update, delete
 export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
   implements OrmSelectQueryBuilder<Entity>
@@ -20,6 +22,9 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
   protected limitClause = '';
   protected offsetClause = '';
   protected orderByClause = '';
+  // the values are sent separately from the query, as query_params, so that they are escaped by the ClickHouse client
+  protected queryParams: { field: string; value: unknown }[] = [];
+  protected queryParamValues: GenericObject<unknown> = {};
   protected whereClause = '';
   protected withDeletedEnabled = false;
 
@@ -78,7 +83,8 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     } = this;
     const result = await this.manager.query<{ data: [{ 'count()': string }] }>(
       `select count() from \`${tableName}\` as \`${name}\` ` +
-        `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
+        `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`,
+      this.queryParams
     );
     return Number.parseInt(result.data[0]?.['count()'], 10);
   }
@@ -94,7 +100,8 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     } = this;
     const result = await this.manager.query<{ data: Entity[] }>(
       `select * from \`${tableName}\` as \`${name}\` ` +
-        `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`
+        `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`,
+      this.queryParams
     );
     return result.data;
   }
@@ -107,7 +114,8 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
       }
     } = this;
     const result = await this.manager.query<{ data: Entity }>(
-      `select * from \`${tableName}\` as \`${name}\` ${this.addDeletedToWhereClause()} ${orderByClause} limit 1`
+      `select * from \`${tableName}\` as \`${name}\` ${this.addDeletedToWhereClause()} ${orderByClause} limit 1`,
+      this.queryParams
     );
     return result.data || null;
   }
@@ -138,34 +146,87 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     field: string,
     direction: DataOrderByDirection
   ): string {
-    return `${field.replace(/[';]/g, '')} ${direction.replace(/[';]/g, '')}`;
+    const {
+      options: { columns, name }
+    } = this.schema;
+    // identifiers can't be sent as query params, so the field must be one of the schema's columns,
+    // optionally prefixed with the entity's alias - e.g. datetime or userLoginLog.datetime
+    const fieldData = field.split('.');
+    let columnName: string | undefined;
+    if (fieldData.length === 1) {
+      columnName = fieldData[0];
+    } else if (fieldData.length === 2 && fieldData[0] === name) {
+      columnName = fieldData[1];
+    }
+    if (!(columnName && Object.hasOwn(columns, columnName))) {
+      throw new ApplicationError(
+        `Method ClickHouseSelectQueryBuilder.orderBy received an invalid field: ${field}.`
+      );
+    }
+    if (
+      direction !== DataOrderByDirection.Asc &&
+      direction !== DataOrderByDirection.Desc
+    ) {
+      throw new ApplicationError(
+        `Method ClickHouseSelectQueryBuilder.orderBy received an invalid direction: ${direction}.`
+      );
+    }
+    return `\`${name}\`.\`${columnName}\` ${direction}`;
   }
 
   protected parseWhereClause(
     query: string,
     params?: GenericObject<unknown>
   ): string {
-    let queryWithReplacements = `${query.replace(/[';]/g, '')}`;
+    const { queryParamValues } = this;
+    let queryWithPlaceholders = `${query.replace(/[';]/g, '')}`;
     if (params) {
       for (const paramName in params) {
-        const rawValue = params[paramName];
-        if (typeof rawValue === 'undefined') {
+        const value = params[paramName];
+        if (typeof value === 'undefined') {
           continue;
         }
-        // TODO: process dates, arrays and stringifyable objects
-        let value = '';
-        if (typeof rawValue === 'string') {
-          value = `'${rawValue.replace(/'/g, "'")}'`;
-        } else {
-          value = `${rawValue}`;
+        // the name is used both in the query and in a regular expression below, so it must be a plain identifier
+        if (!paramNameRegex.test(paramName)) {
+          throw new ApplicationError(
+            `Method ClickHouseSelectQueryBuilder.where received an invalid parameter name: ${paramName}.`
+          );
         }
-        queryWithReplacements = queryWithReplacements.replace(
-          `:${paramName}`,
-          value
+        // TODO: arrays and stringifyable objects
+        let paramType: string;
+        if (typeof value === 'string') {
+          paramType = 'String';
+        } else if (typeof value === 'boolean') {
+          paramType = 'Bool';
+        } else if (typeof value === 'bigint') {
+          paramType = 'Int64';
+        } else if (typeof value === 'number') {
+          paramType = Number.isInteger(value) ? 'Int64' : 'Float64';
+        } else if (value instanceof Date) {
+          paramType = 'DateTime64(3)';
+        } else {
+          throw new ApplicationError(
+            `Method ClickHouseSelectQueryBuilder.where received an unsupported value type for parameter ${paramName}.`
+          );
+        }
+        if (Object.hasOwn(queryParamValues, paramName)) {
+          if (queryParamValues[paramName] !== value) {
+            throw new ApplicationError(
+              `Method ClickHouseSelectQueryBuilder.where received a different value for the already used parameter ${paramName}.`
+            );
+          }
+        } else {
+          queryParamValues[paramName] = value;
+          this.queryParams.push({ field: paramName, value });
+        }
+        // the lookahead prevents :name_1 from matching the start of :name_10
+        queryWithPlaceholders = queryWithPlaceholders.replace(
+          new RegExp(`:${paramName}(?![A-Za-z0-9_])`, 'g'),
+          `{${paramName}:${paramType}}`
         );
       }
     }
-    return queryWithReplacements;
+    return queryWithPlaceholders;
   }
 
   select(_selection: string[]): ClickHouseSelectQueryBuilder<Entity> {
@@ -175,10 +236,11 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
   }
 
   skip(skipCount: number): ClickHouseSelectQueryBuilder<Entity> {
-    // we need this to prevent SQL injection, since TS types don't work at runtime
-    if (typeof skipCount !== 'number') {
+    // we need this to prevent SQL injection, since TS types don't work at runtime;
+    // NaN and negative values are numbers too, but they would break the query
+    if (!Number.isInteger(skipCount) || skipCount < 0) {
       throw new ApplicationError(
-        'Method ClickHouseSelectQueryBuilder.skip expects a number input for skipCount.'
+        'Method ClickHouseSelectQueryBuilder.skip expects a non-negative integer input for skipCount.'
       );
     }
     this.offsetClause = `offset ${skipCount}`;
@@ -192,10 +254,11 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
   }
 
   take(takeCount: number): ClickHouseSelectQueryBuilder<Entity> {
-    // we need this to prevent SQL injection, since TS types don't work at runtime
-    if (typeof takeCount !== 'number') {
+    // we need this to prevent SQL injection, since TS types don't work at runtime;
+    // NaN and negative values are numbers too, but they would break the query
+    if (!Number.isInteger(takeCount) || takeCount < 0) {
       throw new ApplicationError(
-        'Method ClickHouseSelectQueryBuilder.take expects a number input for takeCount.'
+        'Method ClickHouseSelectQueryBuilder.take expects a non-negative integer input for takeCount.'
       );
     }
     this.limitClause += `limit ${takeCount}`;

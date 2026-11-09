@@ -11,6 +11,9 @@ export class InitialData1741714457251 implements MigrationInterface {
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
+        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
+        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
+        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ' +
         '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
       [
         // first item
@@ -73,12 +76,42 @@ export class InitialData1741714457251 implements MigrationInterface {
         null,
         '["CoursePlatformUsersEntityController"]',
         null,
-        '["bulkCreate", "count", "create", "delete", "find", "findLoginLogs", "findOne", "update"]',
+        '["bulkCreate", "count", "create", "delete", "find", "findOne", "update"]',
         null,
         '["coursePlatform"]',
         'AdminManageUsers',
         null,
-        null
+        null,
+        7,
+        null,
+        '["CoursePlatformUserLoginLogsEntityController"]',
+        null,
+        '["count", "create", "delete", "find", "findOne", "update"]',
+        null,
+        '["coursePlatform"]',
+        'AdminManageUserLoginLogs',
+        null,
+        null,
+        8,
+        null,
+        '["CoursePlatformUserLoginLogsEntityController"]',
+        null,
+        '["find"]',
+        'query.filters.userId',
+        '["coursePlatform"]',
+        'NonAdminFindOwnUserLoginLogs',
+        null,
+        'id',
+        9,
+        null,
+        '["CoursePlatformUserLoginLogsEntityController"]',
+        null,
+        '["delete"]',
+        'body.filters.userId',
+        '["coursePlatform"]',
+        'NonAdminDeleteOwnUserLoginLogs',
+        null,
+        'id'
       ]
     );
     await queryRunner.query(
@@ -161,10 +194,13 @@ export class InitialData1741714457251 implements MigrationInterface {
       'INSERT INTO `userTypeAuthorizationPoints` (`userTypeId`, `authorizationPointId`) VALUES ' +
         '(1, 5), ' +
         '(1, 6), ' +
+        '(1, 7), ' +
         '(2, 1), ' +
         '(2, 2), ' +
         '(2, 3), ' +
-        '(2, 4);'
+        '(2, 4), ' +
+        '(2, 8), ' +
+        '(2, 9);'
     );
     await queryRunner.query(
       'INSERT INTO `userTypeAssignedUsers` (`userTypeId`, `userId`) VALUES ' +

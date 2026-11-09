@@ -255,15 +255,17 @@ export class IAMAuthorizationService<
             setNestedArraysPerIndex: inputFieldPaths.length > 1
           });
         } else {
+          // for array inputs, this is the array of matching values; for single-value inputs, it's the matching
+          // value itself (which can be a number, so checking its length would deny access for a valid match);
+          // in both cases, it's undefined when nothing matches
           const allowedValues = IAMAuthorizationService.matchInputValues(
             innerMutatedInputData,
             {
               [inputDataFieldName]: userFieldValue
             }
-          )[inputDataFieldName] as unknown[];
+          )[inputDataFieldName];
           const inputValueIsArray = Array.isArray(inputFieldValue);
-          // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
-          if (!allowedValues?.length) {
+          if (typeof allowedValues === 'undefined') {
             hasAccess = false;
             continue;
           }

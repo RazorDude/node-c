@@ -17,6 +17,8 @@ import {
   DomainIAMAuthenticationUserLocalUserFields
 } from './authenticationUserLocal.definitions.js';
 
+const timestampFixRegex = new RegExp(/\.\d+Z$/);
+
 @Injectable()
 export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticationUserLocalService<
   DomainIAMAuthenticationUserLocalUserFields,
@@ -42,13 +44,13 @@ export class DomainIAMAuthenticationUserLocalService extends BaseIAMAuthenticati
     options: DomainIAMAuthenticationUserLocalCompleteOptions<DomainIAMAuthenticationUserLocalUserFields>
   ): Promise<DomainIAMAuthenticationUserLocalCompleteResult> {
     const result = await super.complete(data, options);
-    // await this.userLoginLogsService.create({
-    //   datetime: new Date()
-    //     .toISOString()
-    //     .replace('T', ' ')
-    //     .replace(/\.\d+Z$/, ''),
-    //   userId: options.context.id
-    // });
+    await this.userLoginLogsService.create({
+      datetime: new Date()
+        .toISOString()
+        .replace('T', ' ')
+        .replace(timestampFixRegex, ''),
+      userId: options.context.id
+    });
     return result;
   }
 }

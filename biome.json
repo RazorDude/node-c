@@ -80,7 +80,8 @@
         "useImportType": "off",
         "useLiteralEnumMembers": "error",
         "useNamingConvention": "off",
-        "useThisInClassMethods": "off"
+        "useThisInClassMethods": "off",
+        "useUnicodeRegex": "off"
       },
       "suspicious": {
         "noConfusingVoidType": "off",

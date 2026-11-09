@@ -36,9 +36,9 @@ export class ClickHouseEntityManager implements RDBEntityManager {
 
   async query<ReturnData = unknown>(
     query: string,
-    params?: { field: string; value: string | number }[]
+    params?: { field: string; value: unknown }[]
   ): Promise<ReturnData> {
-    let queryParams: Record<string, string | number> | undefined;
+    let queryParams: Record<string, unknown> | undefined;
     if (params?.length) {
       queryParams = {};
       params.forEach((item) => {

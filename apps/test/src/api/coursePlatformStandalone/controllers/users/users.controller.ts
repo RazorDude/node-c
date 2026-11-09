@@ -6,8 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-  Req
+  Query
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
@@ -17,7 +16,6 @@ import {
   AppConfigDomainIAMAuthenticationStep,
   DataDefaultData,
   DomainEntityServiceDefaultData,
-  GenericObject,
   LoggerService
 } from '@node-c/core';
 
@@ -110,20 +108,6 @@ export class APICoursePlatformStandaloneUsersEntityController extends RESTAPIEnt
       auth: { ...query, type: params.authType },
       mainFilterField: 'email',
       step: AppConfigDomainIAMAuthenticationStep.Complete
-    });
-  }
-
-  @NodeCApiHttp.AccessControlResource('findLoginLogs')
-  @Get('loginLogs')
-  findLoginLogs(
-    @Req() req: NodeCApiHttp.RequestWithLocals<DataDBUser>
-  ): ReturnType<DomainCoursePlatformStandaloneUsersService['findLoginLogs']> {
-    return this.domainEntityService.findLoginLogs({
-      ...req.query,
-      filters: {
-        ...((req.query as { filters: GenericObject }).filters || {}),
-        userId: req.locals?.user?.id
-      }
     });
   }
 }

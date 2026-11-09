@@ -9,5 +9,6 @@ export * from './authorization/authorization.service.js';
 export * from './courses/courses.service.js';
 export * from './tokenManager/tokenManager.service.js';
 export * from './tokens/tokens.service.js';
+export * from './userLoginLogs/userLoginLogs.service.js';
 export * from './users/users.definitions.js';
 export * from './users/users.service.js';

@@ -4,13 +4,9 @@ import {
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainEntityService,
   DomainEntityServiceDefaultData,
-  DomainFindOptions,
-  DomainFindResult,
   LoggerService
 } from '@node-c/core';
 
-import { DataAuditUserLoginLog } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.entity.js';
-import { DataAuditUserLoginLogsService } from '../../../../data/audit/entities/userLoginLogs/userLoginLogs.service.js';
 import { DataCacheUsersEntityService } from '../../../../data/cache/entities/users/users.service.js';
 import {
   DataDBUsersCreateUserData,
@@ -31,7 +27,6 @@ export class DomainCoursePlatformDelegatedUsersService extends DomainEntityServi
   }
 > {
   constructor(
-    protected dataAuditUserLoginLogsService: DataAuditUserLoginLogsService,
     protected dataCacheUsersService: DataCacheUsersEntityService,
     dataEntityService: DataDBUsersService,
     logger: LoggerService
@@ -39,11 +34,5 @@ export class DomainCoursePlatformDelegatedUsersService extends DomainEntityServi
     super(dataEntityService, DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS, logger, {
       cache: dataCacheUsersService
     });
-  }
-
-  async findLoginLogs(
-    options: DomainFindOptions
-  ): Promise<DomainFindResult<DataAuditUserLoginLog>> {
-    return { result: await this.dataAuditUserLoginLogsService.find(options) };
   }
 }

@@ -1,16 +1,11 @@
-import { Controller, Get, Injectable, Req } from '@nestjs/common';
+import { Controller, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import {
-  AccessControlContext,
-  AccessControlResource,
-  type RequestWithLocals
-} from '@node-c/api-http';
+import { AccessControlContext } from '@node-c/api-http';
 import { type DefaultDtos, RESTAPIEntityController } from '@node-c/api-rest';
 import {
   DataDefaultData,
   DomainEntityServiceDefaultData,
-  GenericObject,
   LoggerService
 } from '@node-c/core';
 
@@ -46,19 +41,5 @@ export class APICoursePlatformDelegatedUsersEntityController extends RESTAPIEnti
       reflector,
       ['find', 'findOne', 'update']
     );
-  }
-
-  @AccessControlResource('findLoginLogs')
-  @Get('loginLogs')
-  findLoginLogs(
-    @Req() req: RequestWithLocals<DataDBUser>
-  ): ReturnType<DomainCoursePlatformDelegatedUsersService['findLoginLogs']> {
-    return this.domainEntityService.findLoginLogs({
-      ...req.query,
-      filters: {
-        ...((req.query as { filters: GenericObject }).filters || {}),
-        userId: req.locals?.user?.id
-      }
-    });
   }
 }
