@@ -32,6 +32,7 @@
   - BREAKING: Moved DataCountOptions, DataFindOneOptions and DataFindOptions's withDeleted property to the privateOptions, along with DataFindOptions's getTotalCount property.
   - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
   - Added better error handling for HTTP client errors that don't reach any middleware.
+  - Fixed the issue in getNested where .
 - `packages/data-clickhouse`
   - SQL injection prevention fixes to the query builder.
 - `packages/data-rdb`
@@ -49,6 +50,7 @@
   - Added sorting to the RedisEntityService.find method when findAll=true.
 - `packages/domain-iam`
   - Fix for the permissions system check, so that the proper error is thrown when overriding non-array input values.
+  - Fix for the matchInputValues method, so that the valuesToSet variable is declared correctly for each valuePath.
 - `packages/nestjs-pino`
   - New package, identical copy of nestjs-pino, but with an ESM build.
 

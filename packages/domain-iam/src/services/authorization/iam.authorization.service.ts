@@ -369,8 +369,8 @@ export class IAMAuthorizationService<
       const allowedValues = Array.isArray(allowedValue)
         ? allowedValue
         : [allowedValue];
-      const valuesToSet: unknown[] = [];
       valuePaths.forEach((valuePath, valuePathIndex) => {
+        const valuesToSet: unknown[] = [];
         const valueAtIndex = foundValues[valuePathIndex];
         let valueIsArray = false;
         let valuesToCheck: unknown[] = [];

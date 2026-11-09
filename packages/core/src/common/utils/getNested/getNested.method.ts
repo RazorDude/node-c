@@ -84,7 +84,8 @@ export function getNested<ReturnData = unknown>(
         for (let j = i + 1; j < fieldDataLength; j++) {
           innerPath += `${fieldData[j]}${j < fieldDataLength - 1 ? '.' : ''}`;
         }
-        nextElement.forEach((item) => {
+        // biome-ignore lint/suspicious/noLoopFunc: False psoitive.
+        nextElement.forEach((item, itemIndex) => {
           const { paths: innerPaths, values: innerValue } = getNested(
             item,
             innerPath,
@@ -93,7 +94,7 @@ export function getNested<ReturnData = unknown>(
           if (typeof innerValue === 'undefined') {
             return;
           }
-          // flatten inner arrays
+          // flatten inner arrays - the item index locates the item, and the inner path locates the value inside it
           innerValue.forEach((innerValueItem, innerValueItemIndex) => {
             if (
               !arrayItemsShouldBeUnique ||
@@ -101,7 +102,7 @@ export function getNested<ReturnData = unknown>(
                 values.indexOf(innerValueItem as ReturnData) === -1)
             ) {
               paths.push(
-                `${currentPath}.${innerValueItemIndex}.${innerPaths[innerValueItemIndex]}`
+                `${currentPath}.${itemIndex}.${innerPaths[innerValueItemIndex]}`
               );
               values.push(innerValueItem as ReturnData);
             }

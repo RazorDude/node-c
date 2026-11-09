@@ -46,6 +46,7 @@ export class DomainIAMUsersService extends IAMUsersService<
     const include = [
       ...(options.include || []),
       'accountStatus',
+      'assignedCourses',
       'assignedRoles.permissions'
     ];
     const { result: user } = await this.findOne(

@@ -2,6 +2,7 @@ export interface TestCourse {
   categoryId: number | null;
   courseTypeId: number;
   createdAt?: string;
+  deletedAt?: string | null;
   id: number;
   name: string;
   updatedAt?: string;

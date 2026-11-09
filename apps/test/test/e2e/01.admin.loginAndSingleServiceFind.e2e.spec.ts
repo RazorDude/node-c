@@ -37,7 +37,26 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody).toHaveProperty('refreshToken');
     adminAccessToken = responseBody.accessToken;
   });
-  // TODO: non-enabled default routes
+  // throw a not found error when calling a default route that is not enabled in the controller
+  it('should throw a not found error when calling a default route that is not enabled in the controller', async () => {
+    // the users controller only enables the find, findOne and update routes
+    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`, {
+      body: JSON.stringify({
+        data: { email: 'not.created@node-c.com' }
+      }),
+      headers: {
+        authorization: `Bearer ${adminAccessToken}`,
+        'content-type': 'application/json'
+      },
+      method: HttpMethod.POST
+    });
+    const responseBody = await response.json();
+    expect(response.status).toEqual(HttpStatus.NOT_FOUND);
+    expect(responseBody).toHaveProperty('error');
+    expect(responseBody.error).toEqual('Not found');
+    expect(responseBody).toHaveProperty('statusCode');
+    expect(responseBody.statusCode).toEqual(HttpStatus.NOT_FOUND);
+  });
   // return no results if no users are found with the provided filters
   it('should return no results if no users are found with the provided filters', async () => {
     const response = await fetch(
