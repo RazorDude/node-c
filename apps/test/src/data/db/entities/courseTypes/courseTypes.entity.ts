@@ -1,3 +1,4 @@
+import ld from 'lodash';
 import { EntitySchema } from 'typeorm';
 
 import {
@@ -16,9 +17,14 @@ export const DataDBCourseTypeEntity = new EntitySchema<
   DataDBCourseType<DBEntity>
 >({
   columns: {
-    ...DBEntitySchema.columns,
+    ...ld.omit(DBEntitySchema.columns, ['deletedAt']),
     isActive: { type: 'boolean', default: true },
-    name: { name: 'course_type_name', type: 'varchar', unique: true }
+    name: { name: 'course_type_name', type: 'varchar', unique: true },
+    deletedAt: {
+      deleteDate: true,
+      name: 'deleted_at',
+      type: 'datetime'
+    }
   },
   name: 'courseType',
   relations: {
