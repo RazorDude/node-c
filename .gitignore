@@ -7,7 +7,7 @@ assets
 coverage
 datasource*
 dist
-docs
+docs-old
 logs
 node_modules
 ormconfig*

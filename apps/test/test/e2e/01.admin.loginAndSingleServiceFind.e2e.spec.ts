@@ -40,16 +40,19 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
   // throw a not found error when calling a default route that is not enabled in the controller
   it('should throw a not found error when calling a default route that is not enabled in the controller', async () => {
     // the users controller only enables the find, findOne and update routes
-    const response = await fetch(`${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`, {
-      body: JSON.stringify({
-        data: { email: 'not.created@node-c.com' }
-      }),
-      headers: {
-        authorization: `Bearer ${adminAccessToken}`,
-        'content-type': 'application/json'
-      },
-      method: HttpMethod.POST
-    });
+    const response = await fetch(
+      `${BASE_URL_COURSE_PLATFORM_DELEGATED}/users`,
+      {
+        body: JSON.stringify({
+          data: { email: 'not.created@node-c.com' }
+        }),
+        headers: {
+          authorization: `Bearer ${adminAccessToken}`,
+          'content-type': 'application/json'
+        },
+        method: HttpMethod.POST
+      }
+    );
     const responseBody = await response.json();
     expect(response.status).toEqual(HttpStatus.NOT_FOUND);
     expect(responseBody).toHaveProperty('error');
@@ -1173,6 +1176,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
       );
     }
   });
+  // TODO: find with filter on aliased field - shallow, include added
   // not find courses due to inner join filters (included relations with filters on relations - shallow, include added also)
   it('should not find courses due to inner join filters in the DB (included relations with filters on relations - shallow, include added also)', async () => {
     const response = await fetch(
@@ -1197,6 +1201,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items.length).toEqual(0);
   });
+  // TODO: not find with filter on aliased field - shallow, include added
   // throw a forbidden relation error on an attempt to find lessons (included relations with filters on relations - shallow, include not added)
   it('should throw a forbidden relation error on an attempt to find courses in the DB (included relations with filters on relations - shallow, include not added)', async () => {
     const response = await fetch(
@@ -1219,6 +1224,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody).toHaveProperty('statusCode');
     expect(responseBody.statusCode).toEqual(400);
   });
+  // TODO: throw error with filter on aliased field - shallow, include not added
   // find courses in the DB (included relations with filters on relations - deep, include added also)
   it('should find courses in the DB (included relations with filters on relations - deep, include added also)', async () => {
     const response = await fetch(
@@ -1258,6 +1264,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
       );
     }
   });
+  // TODO: find with filter on aliased field - deep, include added
   // not find courses in the DB due to inner join filters (included relations with filters on relations - deep, include added also)
   it('should not find courses in the DB due to inner join filters (included relations with filters on relations - deep, include added also)', async () => {
     const response = await fetch(
@@ -1282,6 +1289,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody.result).toHaveProperty('items');
     expect(responseBody.result.items.length).toEqual(0);
   });
+  // TODO: not find with filter on aliased field - deep, include added
   // throw a forbidden relation error on an attempt to find courses in the DB (included relations with filters on relations - deep, include not added at lvl 1)
   it('should throw a forbidden relation error on an attempt to find courses in the DB (included relations with filters on relations - deep, include not added at lvl 1)', async () => {
     const response = await fetch(
@@ -1305,6 +1313,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody).toHaveProperty('statusCode');
     expect(responseBody.statusCode).toEqual(400);
   });
+  // TODO: throw error with filter on aliased field - deep, include not added at lvl 1
   // throw a forbidden relation error on an attempt to find courses in the DB (included relations with filters on relations - deep, include not added at lvl 2)
   it('should throw a forbidden relation error on an attempt to find courses in the DB (included relations with filters on relations - deep, include not added at lvl 2)', async () => {
     const response = await fetch(
@@ -1328,6 +1337,7 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody).toHaveProperty('statusCode');
     expect(responseBody.statusCode).toEqual(400);
   });
+  // TODO: throw error with filter on aliased field - deep, include not added at lvl 2
   // find courses in the DB - select specific fields only, including aliased fields
   it('should find courses in the DB - select specific fields only, including aliased fields', async () => {
     const response = await fetch(
@@ -1536,10 +1546,6 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
   // TODO: all of the above tests except relations, but with the cache
   // log in as admin again, so that there are at least 2 login logs with different datetimes for the login logs cases
   it('should log the admin user in successfully again', async () => {
-    // the datetime column has a precision of seconds, so this makes sure the new login log has a later datetime
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1100);
-    });
     const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
       body: JSON.stringify({
         auth: {

@@ -9,6 +9,7 @@
   - Upgrade to vitest v4.
   - Removal of istanbuljs, as it doesn't work with TypeScript 7. Switched to v8 instead.
   - Cleanup of old, unused unit tests.
+  - Added documentation, as well as ai-generated ai guides for building apps based on the framework. Note: contributing should still be human based.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.
 - `packages/api-rest`

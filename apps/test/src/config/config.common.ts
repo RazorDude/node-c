@@ -42,7 +42,7 @@ export const appConfigCommon: AppConfigCommon = {
       allowedApiKeyRoutes: {
         '/users/auth/passthrough': [HttpMethod.PATCH, HttpMethod.POST]
       },
-      apiSecretAlgorigthm: 'sha256',
+      apiSecretAlgorithm: 'sha256',
       anonymousAccessRoutes: {
         '/users/auth/okta': [
           // special allowance for testing the oauth2 callback directly, since we don't have a UI

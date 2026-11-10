@@ -17,6 +17,15 @@ Node-C levereges NestJS's module system to expose 3 types of modules and a range
 - Api - these modules expose different sets of endpoints for external communication. They trigger your business logic by working with the Domain modules, and do not have access to the Data modules.
 
 
+## Documentation
+The full documentation is in the [docs](docs/index.md) folder:
+- [Architecture overview](docs/Architecture/overview.md) - the layers and how a request is processed
+- [Configuration, startup and logging](docs/Architecture/configuration.md)
+- [Defining entities](docs/Data/entities.md), [domain services](docs/Architecture/domain-services.md) and [REST controllers](docs/API/rest-controllers.md)
+- [Authentication](docs/Architecture/authentication.md) and [access control](docs/Architecture/access-control.md)
+- [Contributing](docs/contributing.md) - building, checking and testing the monorepo
+
+
 ## Getting Started
 The best way to get started is to take a look at the example Test App in our repository.
 

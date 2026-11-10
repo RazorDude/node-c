@@ -18,7 +18,7 @@ export const DataDBCourseTypeEntity = new EntitySchema<
   columns: {
     ...DBEntitySchema.columns,
     isActive: { type: 'boolean', default: true },
-    name: { type: 'varchar', unique: true }
+    name: { name: 'course_type_name', type: 'varchar', unique: true }
   },
   name: 'courseType',
   relations: {

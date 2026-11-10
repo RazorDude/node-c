@@ -145,7 +145,7 @@ export interface AppConfigCommon {
 export interface AppConfigCommonAPIHTTP {
   allowedOrigins?: string[];
   allowedApiKeyRoutes?: Record<string, HttpMethod[]>;
-  apiSecretAlgorigthm?: string;
+  apiSecretAlgorithm?: string;
   anonymousAccessRoutes?: Record<string, HttpMethod[]>;
   endpointSecurityMode?: EndpointSecurityMode;
   hostname?: string;
