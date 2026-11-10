@@ -12,3 +12,6 @@ logs
 node_modules
 ormconfig*
 tmp
+*.sqlite
+docs/.vitepress/cache
+docs/.vitepress/dist

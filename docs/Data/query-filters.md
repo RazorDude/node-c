@@ -1,8 +1,6 @@
 # Query Filters
 
-All data entity services accept the same options for find, findOne, count, update and delete. The RDB implementation is in `SQLQueryBuilderService` (`@node-c/data-rdb`). The other storages support a subset (see <a href='./clickhouse.md' target='_blank'>ClickHouse</a> and <a href='./redis.md' target='_blank'>Redis</a>).
-
-&nbsp;
+All data entity services accept the same options for find, findOne, count, update and delete. The RDB implementation is in `SQLQueryBuilderService` (`@node-c/data-rdb`). The other storages support a subset (see [ClickHouse](./clickhouse.md) and [Redis](./redis.md)).
 
 ## Filters
 
@@ -35,8 +33,6 @@ Rules:
 - Filters can be nested at most 10 levels deep (`Max depth of 10 exceeded`). Through the REST query string, `qs` limits this further to 5.
 - Filters, `orderBy` and `select` on `relation.field` join the relation automatically, but the relation must also be in `include`, otherwise the request fails with `Forbidden include item`.
 
-&nbsp;
-
 ## Other options
 
 - `include: string[]` - relations to join, e.g. `['courseType', 'lessons.lessonType']`. Soft-deleted related rows are left out of the join.
@@ -44,6 +40,16 @@ Rules:
 - `orderBy: { field: 'ASC' | 'DESC' }` - the direction isn't case-sensitive. Relation fields need the relation in `include`.
 - `page` (default 1) and `perPage` (default 10) - find only. The result is `{ items, page, perPage, more, totalCount? }`.
 - `findAll: boolean` - find only, ignores pagination.
-- `individualSearch: boolean` - find only, Redis-specific (see <a href='./redis.md' target='_blank'>Redis</a>).
+- `individualSearch: boolean` - find only, Redis-specific (see [Redis](./redis.md)).
 
 Soft-deleted rows are excluded by default. `withDeleted` is a *private* option - only code calling the data service can pass it, not the REST API.
+
+> [!WARNING]
+> Through the REST API, filters come from the query string, so their values are strings and `qs` only parses 5 levels deep. A relation used in `filters`, `select` or `orderBy` that isn't in `include` fails with `Forbidden include item`.
+
+> [!TIP]
+> Access control can add to, narrow or remove `filters` and `include` before they reach the data layer. When results differ from what the request asked for, check the permission's input rules (see [Access Control](../Security/access-control.md)).
+
+---
+
+Previous: [Defining entities](./entities.md) · Next: [Relational databases](./rdb.md)

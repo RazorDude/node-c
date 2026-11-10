@@ -1,8 +1,26 @@
 # Relational Databases (RDB / TypeORM)
 
-`@node-c/data-rdb` has the storage-agnostic RDB entity service (`RDBEntityService`) and the SQL query builder. `@node-c/data-typeorm` plugs TypeORM in as the implementation. The reference app uses MySQL for its main (`db`) and configs (`dbConfigs`) databases. To define an entity, see <a href='./entities.md' target='_blank'>Defining entities</a>.
+Relational databases are the main storage of most NodeC apps. `@node-c/data-rdb` has the storage-agnostic RDB entity service (`RDBEntityService`) and the SQL query builder that turns [query filters](./query-filters.md) into SQL, and `@node-c/data-typeorm` plugs TypeORM in as the implementation. The reference app uses MySQL for its main (`db`) and configs (`dbConfigs`) databases. To define an entity, see [Defining entities](./entities.md).
 
-&nbsp;
+## Supported databases
+
+| `type` in the data module config | Driver package (install it in your app) | Notes |
+|---|---|---|
+| `mysql` | `mysql2` | |
+| `aurora` | `mysql2` | treated as MySQL; the generated ormconfig turns `synchronize` on |
+| `postgres` | `pg` | `RETURNING` is used for `returnData` updates |
+| `sqlite` | `sqlite3` | needs no server - `database` is the file path. `$contains` isn't supported |
+
+SQLite is the quickest way to start:
+
+```typescript
+data: {
+  db: { connectionName: 'db_connection', database: 'my-app.sqlite', type: RDBType.SQLite }
+}
+```
+
+> [!WARNING]
+> `sqlite3` builds a native binding in an install script. npm 12 blocks install scripts that aren't approved - approve it once with `npm install-scripts approve sqlite3` (or add it to `allowScripts` in `package.json`) and run `npm rebuild sqlite3`.
 
 ## Behaviour
 
@@ -11,11 +29,9 @@
   - When the filters use relation fields, or `returnOriginalItems` is set, they first find the matching rows and then run the update/delete filtered by the found primary keys. If nothing matches, they return early with `count: 0` (and empty `items`/`originalItems`, if requested).
   - Otherwise, the update/delete runs directly with the parsed filters.
 - **Errors.** Only some database errors are mapped to `ApplicationError`s with status 400:
-  - `ER_DUP_ENTRY`, `ER_NO_DEFAULT_FOR_FIELD`, `ER_NO_REFERENCED_ROW` and `ER_NO_REFERENCED_ROW_2` → `[RBDEntityService][<CODE>]: <message>.`
+  - `ER_DUP_ENTRY`, `ER_NO_DEFAULT_FOR_FIELD`, `ER_NO_REFERENCED_ROW`, `ER_NO_REFERENCED_ROW_2` and `SQLITE_CONSTRAINT` → `[RBDEntityService][<CODE>]: <message>.`
   - Postgres unique violations → `<table>: <column> needs to be unique`
   - any other database error is rethrown as is, and becomes a 500 through the REST API.
-
-&nbsp;
 
 ## Transactions
 
@@ -35,10 +51,15 @@ async update(data: DataDBUsersUpdateUserData, options: UpdateOptions): Promise<D
 
 (From `apps/test/src/data/db/entities/users/users.service.ts`.) The protected `processManyToMany` helper syncs a many-to-many join table for a set of items, always inside a transaction.
 
-&nbsp;
-
 ## Migrations and seeds
 
 - Migrations live in `apps/test/src/data/<module>/migrations`, seeds in `apps/test/src/data/<module>/seeds/common`.
 - Both run from `dist` and are ordered by their timestamp prefix, so a seed runs between the migrations around it. **Rebuild `apps/test` after changing either.**
-- Generate the datasource files for an environment with `DATASOURCE_ENV=<env> MODULE_NAMES=<module> npm run generate:datasource-files:local`, then run `npm run typeorm:migration:run:<module>` (both in `apps/test`). See <a href='./entities.md' target='_blank'>Defining entities</a> for generating migrations.
+- Generate the datasource files for an environment with `DATASOURCE_ENV=<env> MODULE_NAMES=<module> npm run generate:datasource-files:local`, then run `npm run typeorm:migration:run:<module>` (both in `apps/test`). See [Defining entities](./entities.md#datasource-files-and-migrations) for generating migrations, and the [Seeding data recipe](../Recipes/seeding-data.md) for seeds.
+
+> [!TIP]
+> Seed data is raw SQL, and JSON columns are inserted as strings - escape backslashes twice in regexes (`\\\\.` in the TypeScript source for `\.`).
+
+---
+
+Previous: [Query filters](./query-filters.md) · Next: [Redis / Valkey](./redis.md)

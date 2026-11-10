@@ -3,7 +3,8 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  NestMiddleware
+  NestMiddleware,
+  Optional
 } from '@nestjs/common';
 import {
   AppConfigAPIHTTP,
@@ -40,14 +41,17 @@ export class HTTPAuthorizationMiddleware<User extends object>
 {
   // biome-ignore lint/complexity/useMaxParams: DI in constructor.
   constructor(
+    @Optional()
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)
-    protected authorizationService: IAMAuthorizationService,
+    protected authorizationService: IAMAuthorizationService | undefined,
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,
     @Inject(Constants.API_MODULE_NAME)
     protected moduleName: string,
+    @Optional()
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_AUTHENTICATION_MANAGER_SERVICE)
     protected authenticationManager?: IAMAuthenticationManagerService<User>,
+    @Optional()
     @Inject(Constants.AUTHORIZATION_MIDDLEWARE_TOKEN_MANAGER_SERVICE)
     protected tokenManager?: IAMTokenManagerService<IAMAuthenticationManagerUserTokenEnityFields>
   ) {}
@@ -59,6 +63,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
   ): void {
     const {
       authenticationManager,
+      authorizationService,
       configProvider,
       logger,
       moduleName,
@@ -82,7 +87,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
         for (const route in anonymousAccessRoutes) {
           if (
             checkRoutes(originalUrl, [route]) &&
-            anonymousAccessRoutes[route].find(
+            anonymousAccessRoutes[route].some(
               (method) => method === requestMethod
             )
           ) {
@@ -95,6 +100,18 @@ export class HTTPAuthorizationMiddleware<User extends object>
           next();
           return;
         }
+      }
+      if (!authorizationService) {
+        logger.error(
+          'No authorizationService set up for a non-anonymous route.'
+        );
+        throw new HttpException(
+          {
+            message: ErrorCodes.AUTH_MISSING,
+            statusCode: HttpStatus.UNAUTHORIZED
+          },
+          HttpStatus.UNAUTHORIZED
+        );
       }
       const hasApiKey = Boolean(
         req.headers.authorization?.match(regExps.apiKey)
@@ -122,7 +139,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
         if (signatureContent.length === 0) {
           signatureContent = req.originalUrl.split('?')[0];
         }
-        const { valid } = await this.authorizationService.authorizeApiKey(
+        const { valid } = await authorizationService.authorizeApiKey(
           {
             apiKey: apiKeyFromHeader,
             signature: requestSignature,
@@ -149,7 +166,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
           for (const route in allowedApiKeyRoutes) {
             if (
               checkRoutes(originalUrl, [route]) &&
-              allowedApiKeyRoutes[route].find(
+              allowedApiKeyRoutes[route].some(
                 (method) => method === requestMethod
               )
             ) {
@@ -202,7 +219,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
         useCookie = true;
       }
       const { newAccessToken, newRefreshToken, tokenContent, valid } =
-        await this.authorizationService.authorizeBearer<IAMAuthenticationManagerUserTokenEnityFields>(
+        await authorizationService.authorizeBearer<IAMAuthenticationManagerUserTokenEnityFields>(
           { authToken, refreshToken },
           { identifierDataField: authenticationManager ? 'userId' : undefined }
         );

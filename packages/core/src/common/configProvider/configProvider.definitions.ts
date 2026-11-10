@@ -492,7 +492,8 @@ export enum RDBType {
   Aurora = 'aurora',
   ClickHouse = 'clickhouse',
   MySQL = 'mysql',
-  PG = 'postgres'
+  PG = 'postgres',
+  SQLite = 'sqlite'
 }
 
 export type LoadConfigAppConfigs<

@@ -10,8 +10,13 @@
   - Removal of istanbuljs, as it doesn't work with TypeScript 7. Switched to v8 instead.
   - Cleanup of old, unused unit tests.
   - Added documentation, as well as ai-generated ai guides for building apps based on the framework. Note: contributing should still be human based.
+  - Added a VitePress site for the documentation (`npm run docs:dev`).
+- `apps/first-steps`
+  - New package - the minimal SQLite-based app built in the First steps tutorial.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.
+- `packages/api-http`
+  - The authorization, authentication manager and token manager providers of the HTTP API modules are now optional, so that an API module with only anonymous routes needs no IAM setup.
 - `packages/api-rest`
   - BREAKING: The BaseDto is no longer generic.
   - Added boolean string transforms everywhere possible in the DTOs, so that more options can be passed through the various app layers as query params.
@@ -33,7 +38,9 @@
   - BREAKING: Moved DataCountOptions, DataFindOneOptions and DataFindOptions's withDeleted property to the privateOptions, along with DataFindOptions's getTotalCount property.
   - Fixed the DomainEntityService.runMethodInAdditionalServices functionality where optionsOverridesPerService can override base options filters. Instead, these are now merged with a global '$and' and not overwritten.
   - Added better error handling for HTTP client errors that don't reach any middleware.
-  - Fixed the issue in getNested where .
+  - Fixed the issue in getNested where deeply nested arrays aren't parse properly.
+  - Added `RDBType.SQLite`.
+  - The default pino params now create the `logs` folder if it doesn't exist, instead of crashing at startup.
 - `packages/data-clickhouse`
   - SQL injection prevention fixes to the query builder.
 - `packages/data-rdb`
@@ -45,6 +52,7 @@
   - On top of the top of that (:D), added a configurable maxDepth with a default of 10.
   - Fixed the parseSelect and parseOrderBy method, so that they have the full functionality of working with nested releations.
   - Fixed the update and delete methods for the cases where filters by relations are added.
+  - Added SQLite support (except for the `$contains` operator). `SQLITE_CONSTRAINT` errors are now handled as 400 errors.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
   - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.

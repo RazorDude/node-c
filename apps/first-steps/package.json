@@ -1,0 +1,37 @@
+{
+  "name": "@node-c/app-first-steps",
+  "version": "1.0.0-beta9",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build",
+    "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "format": "npx @biomejs/biome format --write",
+    "format:check": "npx @biomejs/biome format",
+    "generate:datasource-files": "DATASOURCE_ENV=${DATASOURCE_ENV:-local} MODULE_NAMES=${MODULE_NAMES:-db} node ../../node_modules/@node-c/core/dist/scripts/generateDatasourceFiles.js",
+    "lint": "npx @biomejs/biome check",
+    "lint:fix": "npx @biomejs/biome check --write",
+    "start": "node dist/main.js",
+    "start:dev": "node --watch dist/main.js",
+    "migration:generate": "typeorm migration:generate -d datasource-db-${DATASOURCE_ENV:-local}.js src/data/db/migrations/${MIGRATION_NAME}",
+    "migration:run": "typeorm migration:run -d datasource-db-${DATASOURCE_ENV:-local}.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.3",
+    "@nestjs/core": "^12.1.2",
+    "@node-c/api-http": "^1.0.0-beta9",
+    "@node-c/api-rest": "^1.0.0-beta9",
+    "@node-c/core": "^1.0.0-beta9",
+    "@node-c/data-rdb": "^1.0.0-beta9",
+    "@node-c/data-typeorm": "^1.0.0-beta9",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.4",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "rxjs": "^7.8.1",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.31"
+  }
+}

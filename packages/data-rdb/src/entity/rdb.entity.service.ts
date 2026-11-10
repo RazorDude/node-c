@@ -67,6 +67,7 @@ export class RDBEntityService<
     'ER_NO_DEFAULT_FOR_FIELD',
     'ER_NO_REFERENCED_ROW',
     'ER_NO_REFERENCED_ROW_2',
+    'SQLITE_CONSTRAINT',
     PostgresErrorCode.UniqueViolation
   ]);
 

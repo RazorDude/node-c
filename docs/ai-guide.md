@@ -1,8 +1,6 @@
 # Working with NodeC - Guide for AI Assistants (and Humans)
 
-A condensed map of the repository, its conventions and the mistakes that are easy to make. Read this first, then the AI guide of the section you're working in (<a href='./Architecture/ai-guide.md' target='_blank'>Architecture</a>, <a href='./API/ai-guide.md' target='_blank'>API</a>, <a href='./Data/ai-guide.md' target='_blank'>Data</a>, <a href='./Testing/ai-guide.md' target='_blank'>Testing</a>), and the topic pages linked below.
-
-&nbsp;
+A condensed map of the repository, its conventions and the mistakes that are easy to make. Read this first, then the AI guide of the section you're working in ([Overview](./Overview/ai-guide.md), [Fundamentals](./Fundamentals/ai-guide.md), [Data](./Data/ai-guide.md), [Security](./Security/ai-guide.md), [Testing](./Testing/ai-guide.md)), and the topic pages linked below.
 
 ## Repository map
 
@@ -14,10 +12,11 @@ packages/
   domain-iam        - authentication, authorization (permissions), users, tokens
   domain-iam-okta   - Okta-based authentication
   data-rdb          - storage-agnostic RDB entity service + SQL query builder
-  data-typeorm      - TypeORM implementation of data-rdb
+  data-typeorm      - TypeORM implementation of data-rdb (MySQL, PostgreSQL, SQLite)
   data-clickhouse   - ClickHouse entity service (audit-style data)
   data-redis        - Redis/Valkey entity service (cache, auth data)
   nestjs-pino       - logging
+apps/first-steps    - the smallest complete app (SQLite, no IAM) - built in docs/first-steps.md
 apps/test           - the reference app, used by the e2e tests
   src/api/<module>/controllers      - coursePlatformDelegated, coursePlatformFederated, coursePlatformStandalone, sso
   src/domain/<module>/services      - one domain service per entity, plus iam
@@ -25,28 +24,25 @@ apps/test           - the reference app, used by the e2e tests
   src/data/<module>/migrations, seeds/common
   test/e2e                          - numbered e2e spec files + common helpers
 test/               - vitest config and global setup
-docs/               - this documentation
+docs/               - this documentation: Overview, Fundamentals, Data, Security, Recipes, Testing
+                      (+ first-steps, faq, glossary, migration-guide); VitePress config in docs/.vitepress
 ```
-
-&nbsp;
 
 ## Conventions
 
 - **Files** are named `<entity>.<kind>.ts` - `courses.entity.ts`, `courses.module.ts`, `courses.service.ts`, `courses.controller.ts`.
 - **Types and interfaces** go in a `<name>.definitions.ts` file next to the code that uses them.
-- **Index files.** Every entities/services/controllers folder has an index file (`db.entities.ts`, `coursePlatformDelegated.services.ts`, `coursePlatformDelegated.controllers.ts`) that re-exports everything in it. Modules are built with `loadDynamicModules(FolderData)` from these exports - **a class that isn't exported from the index file isn't registered**, and neither is one whose export name doesn't end with `Module`, `Entity`, `Service` or `Controller` (see <a href='./Architecture/core-utilities.md' target='_blank'>Core utilities</a>).
+- **Index files.** Every entities/services/controllers folder has an index file (`db.entities.ts`, `coursePlatformDelegated.services.ts`, `coursePlatformDelegated.controllers.ts`) that re-exports everything in it. Modules are built with `loadDynamicModules(FolderData)` from these exports - **a class that isn't exported from the index file isn't registered**, and neither is one whose export name doesn't end with `Module`, `Entity`, `Service` or `Controller` (see [Core utilities](./Fundamentals/core-utilities.md)).
 - **Imports** use the `.js` extension (ESM).
 - No `any` in TypeScript.
-
-&nbsp;
 
 ## Recipes
 
 ### Add an entity end to end
 
-1. **Data** - in `apps/test/src/data/<module>/entities/<entity>/`, add the entity, module and service (see <a href='./Data/entities.md' target='_blank'>Defining entities</a> for each storage, or copy an existing entity, e.g. `db/entities/courses`). The module registers the repository (e.g. `TypeORMDBRepositoryModule.register({ connectionName, entityClass, dataModuleName })`) and provides/exports the service. Export all three from the module's entities index file (e.g. `db.entities.ts`) - the data module (`DataDBModule`) registers everything it exports.
-2. **Schema** - add a migration in `src/data/<module>/migrations` (or, for ClickHouse, the table creation - see <a href='./Data/clickhouse.md' target='_blank'>ClickHouse</a>).
-3. **Domain** - add a domain entity service in `src/domain/<apiModule>/services/<entity>/` and export it from the services index file. Do this for every domain module that needs it. See <a href='./Architecture/domain-services.md' target='_blank'>Domain services</a> for overriding and adding methods.
+1. **Data** - in `apps/test/src/data/<module>/entities/<entity>/`, add the entity, module and service (see [Defining entities](./Data/entities.md) for each storage, or copy an existing entity, e.g. `db/entities/courses`). The module registers the repository (e.g. `TypeORMDBRepositoryModule.register({ connectionName, entityClass, dataModuleName })`) and provides/exports the service. Export all three from the module's entities index file (e.g. `db.entities.ts`) - the data module (`DataDBModule`) registers everything it exports.
+2. **Schema** - add a migration in `src/data/<module>/migrations` (or, for ClickHouse, the table creation - see [ClickHouse](./Data/clickhouse.md)).
+3. **Domain** - add a domain entity service in `src/domain/<apiModule>/services/<entity>/` and export it from the services index file. Do this for every domain module that needs it. See [Domain services](./Overview/domain-services.md) for overriding and adding methods.
    ```typescript
    @Injectable()
    export class DomainCoursePlatformDelegatedCoursesService extends DomainEntityService<
@@ -96,9 +92,7 @@ docs/               - this documentation
 
 ### Add a permission
 
-See <a href='./Architecture/access-control.md' target='_blank'>Access Control</a>. In short: pick the id order deliberately, anchor regexes, start input paths with `body`/`headers`/`params`/`query`, and make sure the user relations it uses are loaded.
-
-&nbsp;
+See [Access Control](./Security/access-control.md). In short: pick the id order deliberately, anchor regexes, start input paths with `body`/`headers`/`params`/`query`, and make sure the user relations it uses are loaded.
 
 ## Pitfalls
 
@@ -125,16 +119,18 @@ See <a href='./Architecture/access-control.md' target='_blank'>Access Control</a
 | An empty 401 | The authorization middleware rejected the request (no/expired token, or a route not in `anonymousAccessRoutes`) - also for unknown routes |
 | `Authentication failed.` | Any login failure - the reason is only in the logs |
 
-&nbsp;
-
 ## Where to go next
 
-- <a href='./Architecture/overview.md' target='_blank'>Architecture overview</a> - layers, request lifecycle, multi-data-service options
-- <a href='./Architecture/configuration.md' target='_blank'>Configuration, startup and logging</a>
-- <a href='./Architecture/domain-services.md' target='_blank'>Domain services</a>
-- <a href='./Architecture/authentication.md' target='_blank'>Authentication</a>, <a href='./Architecture/access-control.md' target='_blank'>Access Control</a>
-- <a href='./Architecture/core-utilities.md' target='_blank'>Core utilities</a>
-- <a href='./API/http-module.md' target='_blank'>HTTP API module</a>, <a href='./API/rest-controllers.md' target='_blank'>REST controllers</a>
-- <a href='./Data/entities.md' target='_blank'>Defining entities</a>, <a href='./Data/query-filters.md' target='_blank'>Query filters</a>, <a href='./Data/rdb.md' target='_blank'>RDB</a>, <a href='./Data/clickhouse.md' target='_blank'>ClickHouse</a>, <a href='./Data/redis.md' target='_blank'>Redis</a>
-- <a href='./Testing/e2e.md' target='_blank'>End-to-end tests</a>
-- <a href='./contributing.md' target='_blank'>Contributing</a> - building and checking the monorepo
+- [Layers](./Overview/layers.md), [Request lifecycle](./Overview/request-lifecycle.md), [Multiple data services](./Fundamentals/multiple-data-services.md)
+- [First steps](./first-steps.md) - the minimal app, file by file
+- [Configuration](./Fundamentals/configuration.md), [Logging](./Fundamentals/logging.md)
+- [Domain services](./Overview/domain-services.md)
+- [Authentication](./Security/authentication.md), [Access Control](./Security/access-control.md)
+- [Core utilities](./Fundamentals/core-utilities.md)
+- [HTTP API module](./Fundamentals/http-module.md), [Controllers](./Overview/controllers.md)
+- [API keys and CORS](./Security/api-keys-and-cors.md)
+- [Recipes](./Recipes/index.md) - caching, audit logs, permissions, seeds, Okta, federated login
+- [FAQ](./faq.md), [Glossary](./glossary.md), [Migration guide](./migration-guide.md)
+- [Defining entities](./Data/entities.md), [Query filters](./Data/query-filters.md), [RDB](./Data/rdb.md), [ClickHouse](./Data/clickhouse.md), [Redis](./Data/redis.md)
+- [End-to-end tests](./Testing/e2e.md)
+- [Contributing](./contributing.md) - building and checking the monorepo

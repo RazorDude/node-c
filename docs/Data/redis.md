@@ -1,8 +1,6 @@
 # Redis / Valkey
 
-`@node-c/data-redis` stores entities as key-value data. The reference app uses it as a cache in front of the RDB services (the `cache` data service) and to store auth data (tokens and login step data, in `cacheAuth`). To define a Redis entity, see <a href='./entities.md' target='_blank'>Defining entities</a>.
-
-&nbsp;
+`@node-c/data-redis` stores entities as key-value data. The reference app uses it as a cache in front of the RDB services (the `cache` data service) and to store auth data (tokens and login step data, in `cacheAuth`). To define a Redis entity, see [Defining entities](./entities.md).
 
 ## How items are stored
 
@@ -31,8 +29,6 @@ flowchart LR
   SCAN --> FLT
 ```
 
-&nbsp;
-
 ## Configuration
 
 `config.data.<moduleName>`:
@@ -51,9 +47,7 @@ flowchart LR
 | `sentinelMode`, `sentinelMasterName`, `sentinelRole`, `usePasswordForSentinelPassword` | Connect through Sentinel |
 | `failOnConnectionError` | Fail startup when the connection fails |
 
-The host, port, user, password and sentinel password come from the environment (see <a href='../Architecture/configuration.md' target='_blank'>Configuration</a>).
-
-&nbsp;
+The host, port, user, password and sentinel password come from the environment (see [Configuration](../Fundamentals/configuration.md)).
 
 ## Behaviour
 
@@ -62,4 +56,14 @@ The host, port, user, password and sentinel password come from the environment (
 - `find` needs either `filters` or `findAll: true`. Non-primary-key filters are applied to the loaded items.
 - **Generated primary keys** - `integer` keys use a counter stored at `increment<delimiter><storeKey><delimiter><column>`; `uuidv4` keys get a new UUID (with `-` replaced by `_` when the delimiter is `-`). `isArray` entities need their primary keys provided.
 - Transactions use a `transactionId` (Redis `MULTI`), not a transaction manager.
-- Typically used through multi-data-service options - e.g. `dataServices: ['cache', 'main']` with `saveAdditionalResultsInFirstService` - see <a href='../Architecture/overview.md' target='_blank'>Architecture overview</a>.
+- Typically used through multi-data-service options - e.g. `dataServices: ['cache', 'main']` with `saveAdditionalResultsInFirstService` - see [Multiple data services](../Fundamentals/multiple-data-services.md).
+
+> [!WARNING]
+> With the default `useHashmap: true`, nothing expires - set `useHashmap: false` for anything that relies on a TTL, such as tokens and caches.
+
+> [!TIP]
+> Cached data isn't invalidated by changes made directly in the database (seeds, SQL). Flush Redis/Valkey, or wait for the TTL.
+
+---
+
+Previous: [Relational databases](./rdb.md) · Next: [ClickHouse](./clickhouse.md)

@@ -17,6 +17,7 @@ export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
         {
           options: {
             destination: path.resolve(cwd(), 'logs/app_logs.txt'),
+            mkdir: true,
             sync: false
           },
           target: 'pino/file'

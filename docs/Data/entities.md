@@ -24,9 +24,7 @@ flowchart LR
   SV --> DOM[Domain entity service]
 ```
 
-`loadDynamicModules` sorts exports by their **name suffix** - `...Module`, `...Entity`, `...Service`, `...Controller` - and skips names starting with `base` (see <a href='../Architecture/core-utilities.md' target='_blank'>Core utilities</a>). An entity module that isn't exported from the index file, or is named without the `Module` suffix, is never registered.
-
-&nbsp;
+`loadDynamicModules` sorts exports by their **name suffix** - `...Module`, `...Entity`, `...Service`, `...Controller` - and skips names starting with `base` (see [Core utilities](../Fundamentals/core-utilities.md)). An entity module that isn't exported from the index file, or is named without the `Module` suffix, is never registered.
 
 ## Relational databases (TypeORM)
 
@@ -82,9 +80,9 @@ export class DataDBCoursesService extends TypeORMDBEntityService<DataDBCourse> {
 ```
 
 - The shared columns are in `apps/test/src/data/dbBase/entity/base.db.entity.ts`. A column with `deleteDate: true` turns on soft deletes for the entity.
-- Relation names (`courseType`, `lessons`, ...) are what `include` refers to (see <a href='./query-filters.md' target='_blank'>Query filters</a>).
+- Relation names (`courseType`, `lessons`, ...) are what `include` refers to (see [Query filters](./query-filters.md)).
 - Files named `*.subscriber.*` in an entity folder are added to the generated ormconfig as subscribers.
-- The data module connects with `TypeORMDBModule.register({ connectionName, folderData, moduleClass, moduleName })`. Its config is `config.data.<moduleName>`: `type` (`mysql`, `postgres` or `aurora`), `connectionName`, `failOnConnectionError` (default `true` - when `false`, a failed connection is logged and retried every minute) and `typeormExtraOptions`. The credentials come from the environment (see <a href='../Architecture/configuration.md' target='_blank'>Configuration</a>).
+- The data module connects with `TypeORMDBModule.register({ connectionName, folderData, moduleClass, moduleName })`. Its config is `config.data.<moduleName>`: `type` (`mysql`, `postgres` or `aurora`), `connectionName`, `failOnConnectionError` (default `true` - when `false`, a failed connection is logged and retried every minute) and `typeormExtraOptions`. The credentials come from the environment (see [Configuration](../Fundamentals/configuration.md)).
 
 ### Datasource files and migrations
 
@@ -102,9 +100,7 @@ npm run build
 DATASOURCE_ENV=local npm run typeorm:migration:run:db
 ```
 
-&nbsp;
-
-## Redis / Valkey
+## Redis and Valkey
 
 Redis entities are plain schema objects from `@node-c/data-redis`:
 
@@ -161,9 +157,7 @@ Schema fields:
 - `isArray` - each key holds an array of items (e.g. all of a user's tokens of one type)
 - `nestedObjectContainerPath` - the items are stored inside an object, at this path
 
-The data module connects with `RedisModule.register({ folderData, moduleClass, moduleName })`. Its config is `config.data.<moduleName>` - see <a href='./redis.md' target='_blank'>Redis / Valkey</a> for the options and how keys are built.
-
-&nbsp;
+The data module connects with `RedisModule.register({ folderData, moduleClass, moduleName })`. Its config is `config.data.<moduleName>` - see [Redis / Valkey](./redis.md) for the options and how keys are built.
 
 ## ClickHouse
 
@@ -215,10 +209,15 @@ export class DataAuditUserLoginLogsService extends ClickHouseDBEntityService<Dat
 - There are no migrations for ClickHouse - create the tables yourself (the e2e global setup does it with plain SQL).
 - `orderBy` fields are checked against the schema's columns, so every column you sort by must be in the schema.
 
-&nbsp;
-
 ## Using the entity
 
-1. Inject the entity service into a domain entity service - as the main data service, or as an additional one (e.g. `{ cache: DataCacheCoursesEntityService }`). See <a href='../Architecture/domain-services.md' target='_blank'>Domain services</a>.
+1. Inject the entity service into a domain entity service - as the main data service, or as an additional one (e.g. `{ cache: DataCacheCoursesEntityService }`). See [Domain services](../Overview/domain-services.md).
 2. For RDB entities, add a migration and rebuild before running it.
-3. Add the API controller (see <a href='../API/rest-controllers.md' target='_blank'>REST controllers</a>) and its permissions (see <a href='../Architecture/access-control.md' target='_blank'>Access Control</a>).
+3. Add the API controller (see [Controllers](../Overview/controllers.md)) and its permissions (see [Access Control](../Security/access-control.md)).
+
+> [!TIP]
+> The [First steps](../first-steps.md) tutorial walks through this page end to end for one SQLite entity - schema, module, service, datasource files and the first migration.
+
+---
+
+Previous: [Core utilities](../Fundamentals/core-utilities.md) · Next: [Query filters](./query-filters.md)

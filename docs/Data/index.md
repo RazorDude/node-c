@@ -1,8 +1,9 @@
-# NodeC Documentation - Data
+# Data
 
-## Table of Contents
-- <a href='./entities.md' target='_blank'>Defining entities (TypeORM, Redis, ClickHouse) and migrations</a>
-- <a href='./query-filters.md' target='_blank'>Query filters</a> - the filter, include, select, ordering and pagination syntax shared by all data services
-- <a href='./rdb.md' target='_blank'>Relational databases (RDB / TypeORM)</a>
-- <a href='./clickhouse.md' target='_blank'>ClickHouse</a>
-- <a href='./redis.md' target='_blank'>Redis / Valkey</a>
+Storing and querying data - the same interface for every storage.
+
+- [Defining entities](./entities.md) - entities for TypeORM, Redis and ClickHouse, and migrations
+- [Query filters](./query-filters.md) - the filter, include, select, ordering and pagination syntax shared by all data services
+- [Relational databases](./rdb.md) - MySQL, PostgreSQL and SQLite: soft deletes, transactions, errors
+- [Redis / Valkey](./redis.md) - key layout, TTLs and lookups
+- [ClickHouse](./clickhouse.md) - append-mostly data such as audit logs

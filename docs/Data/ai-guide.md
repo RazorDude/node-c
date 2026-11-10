@@ -1,8 +1,6 @@
 # AI Guide - Data
 
-Checklists for working with the data layer. See the <a href='../ai-guide.md' target='_blank'>main AI guide</a> for the repo map and conventions.
-
-&nbsp;
+Checklists for working with the data layer. See the [main AI guide](../ai-guide.md) for the repo map and conventions.
 
 ## Key files
 
@@ -17,8 +15,6 @@ Checklists for working with the data layer. See the <a href='../ai-guide.md' tar
 | Datasource/ormconfig generation | `packages/core/src/common/configProvider/configProvider.service.ts` (`generateOrmconfig`) |
 | Entity examples (reference app) | `apps/test/src/data/db/entities/courses`, `apps/test/src/data/cache/entities/courses`, `apps/test/src/data/audit/entities/userLoginLogs` |
 
-&nbsp;
-
 ## Which storage supports what
 
 | | RDB (TypeORM) | ClickHouse | Redis / Valkey |
@@ -29,8 +25,6 @@ Checklists for working with the data layer. See the <a href='../ai-guide.md' tar
 | include (joins) | yes | no | no |
 | soft delete | yes, if the entity has a deleted column | no | no |
 
-&nbsp;
-
 ## Before adding an entity
 
 1. Follow the export name suffixes - `...Entity` (TypeORM schema), `...Module`, `...Service` - and export all of them from the data module's index file.
@@ -39,16 +33,12 @@ Checklists for working with the data layer. See the <a href='../ai-guide.md' tar
 4. ClickHouse: create the table yourself - there are no migrations - and list every column you filter or sort by in the schema.
 5. Rebuild and generate the datasource files before generating a migration.
 
-&nbsp;
-
 ## Before writing a query or a filter
 
 1. Every relation used in `filters`, `select` or `orderBy` must also be in `include`.
 2. No `null` inside value arrays (`[null, 1]` throws, with or without `$or`). Combine separate filter objects instead: `{ $or: [{ field: null }, { field: [1, 2] }] }`.
 3. `$between` takes exactly two values.
 4. `withDeleted` is a private option - pass it as the second argument to the data service, not in the options.
-
-&nbsp;
 
 ## Before writing a migration or a seed
 
@@ -57,8 +47,6 @@ Checklists for working with the data layer. See the <a href='../ai-guide.md' tar
 3. No explanatory or numbering comments in the data.
 4. Seed data is raw SQL and JSON columns are strings - escape backslashes twice in regexes (`\\\\.` in the TS source for `\.`).
 5. Rebuild `apps/test` - migrations and seeds run from `dist`.
-
-&nbsp;
 
 ## Things that are easy to get wrong
 

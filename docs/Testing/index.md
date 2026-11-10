@@ -1,4 +1,3 @@
-# NodeC Documentation - Testing
+# Testing
 
-## Table of Contents
-- <a href='./e2e.md' target='_blank'>End-to-end tests</a>
+- [End-to-end tests](./e2e.md) - the e2e suite: setup, layout, seeded users and how to write tests

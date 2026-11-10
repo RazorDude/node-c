@@ -73,6 +73,10 @@ export class SQLQueryBuilderService {
       this.columnQuotesSymbol = '"';
       this.iLikeSupported = true;
       this.returningSupported = true;
+    } else if (type === RDBType.SQLite) {
+      this.columnQuotesSymbol = '"';
+      this.iLikeSupported = false;
+      this.returningSupported = false;
     }
   }
 
@@ -244,6 +248,10 @@ export class SQLQueryBuilderService {
         parsedInnerValue = `"${parsedInnerValue}"`;
       } else if (dbType === RDBType.PG) {
         query = `${isNot ? 'not ' : ''}(${fieldString} ? :${paramName})`;
+      } else if (dbType === RDBType.SQLite) {
+        throw new ApplicationError(
+          `[SQLQueryBuilderService][${entityName}]: The $contains operator is not supported for SQLite.`
+        );
       }
       return {
         params: { [paramName]: parsedInnerValue },
