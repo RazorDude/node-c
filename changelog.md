@@ -11,6 +11,7 @@
   - Cleanup of old, unused unit tests.
   - Added documentation, as well as ai-generated ai guides for building apps based on the framework. Note: contributing should still be human based.
   - Added a VitePress site for the documentation (`npm run docs:dev`).
+  - Migrated linting & formatting from eslint & prettier ot oxlint & oxfmt.
 - `apps/first-steps`
   - New package - the minimal SQLite-based app built in the First steps tutorial.
 - `apps/test`

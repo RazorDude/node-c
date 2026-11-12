@@ -16,7 +16,7 @@ import { DomainIAMTokensService } from '../tokens/tokens.service.js';
 
 @Injectable()
 export class DomainIAMTokenManagerService extends IAMTokenManagerService<DataCacheAuthToken> {
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     protected authenticationOktaService: DomainIAMAuthenticationOktaService,
     protected authenticationPassthroughService: DomainIAMAuthenticationPassthroughService,

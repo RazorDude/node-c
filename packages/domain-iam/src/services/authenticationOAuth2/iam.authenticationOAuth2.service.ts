@@ -171,7 +171,7 @@ export class IAMAuthenticationOAuth2Service<
   }
 
   protected generateUrlEncodedString(length: number): string {
-    // biome-ignore lint/style/noMagicNumbers: False positive.
+    // oxlint-disable-next-line eslint/no-magic-numbers -- False positive.
     const octetSize = Math.ceil((length * 3) / 4);
     const octets = crypto.getRandomValues(new Uint8Array(octetSize));
     return base64UrlEncode(octets.buffer).slice(0, length);
@@ -332,7 +332,7 @@ export class IAMAuthenticationOAuth2Service<
       );
       throw new ApplicationError('Authentication failed.');
     }
-    // biome-ignore lint/style/noMagicNumbers: False positive.
+    // oxlint-disable-next-line eslint/no-magic-numbers -- False positive.
     const state = this.generateUrlEncodedString(16);
     let challenge: string | undefined;
     let nonce: string | undefined;
@@ -352,7 +352,7 @@ export class IAMAuthenticationOAuth2Service<
       url += `&code_challenge=${challenge}&code_challenge_method=${codeChallengeMethod}`;
     }
     if (generateNonce) {
-      // biome-ignore lint/style/noMagicNumbers: False positive.
+      // oxlint-disable-next-line eslint/no-magic-numbers -- False positive.
       nonce = this.generateUrlEncodedString(16);
       url += `&nonce=${nonce}`;
     }

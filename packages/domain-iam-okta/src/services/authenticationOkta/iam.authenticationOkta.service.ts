@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+/* oxlint-disable eslint/require-await -- Abstract methods. */
 
 import {
   AppConfigDomainIAM,

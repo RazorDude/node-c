@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noConsole: No other logging method at startup. */
+/* oxlint-disable eslint/no-console -- No other logging method at startup. */
 
 import { DynamicModule, HttpStatus, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';

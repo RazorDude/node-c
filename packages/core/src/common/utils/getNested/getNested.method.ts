@@ -84,7 +84,7 @@ export function getNested<ReturnData = unknown>(
         for (let j = i + 1; j < fieldDataLength; j++) {
           innerPath += `${fieldData[j]}${j < fieldDataLength - 1 ? '.' : ''}`;
         }
-        // biome-ignore lint/suspicious/noLoopFunc: False psoitive.
+        // oxlint-disable-next-line eslint/no-loop-func -- False psoitive.
         nextElement.forEach((item, itemIndex) => {
           const { paths: innerPaths, values: innerValue } = getNested(
             item,

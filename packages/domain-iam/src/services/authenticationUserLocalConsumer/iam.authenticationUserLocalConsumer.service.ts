@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+/* oxlint-disable eslint/require-await -- Abstract methods. */
 import { ConfigProviderService, LoggerService } from '@node-c/core';
 
 import { IAMAuthenticationConsumerService } from '../authenticationConsumer/iam.authenticationConsumer.service.js';

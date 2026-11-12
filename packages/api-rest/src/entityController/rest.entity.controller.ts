@@ -233,7 +233,7 @@ export class RESTAPIEntityController<
   };
   protected validationPipe: ValidationPipe;
 
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     domainEntityService: EntityDomainService,
     protected dto: {
@@ -287,7 +287,7 @@ export class RESTAPIEntityController<
         dtoType: 'body',
         optionsOverridesByServiceDto: BaseAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }
@@ -304,7 +304,7 @@ export class RESTAPIEntityController<
         dtoType: 'body',
         optionsOverridesByServiceDto: BaseAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }
@@ -320,7 +320,7 @@ export class RESTAPIEntityController<
         dtoType: 'body',
         optionsOverridesByServiceDto: DeleteAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }
@@ -336,7 +336,7 @@ export class RESTAPIEntityController<
         dtoType: 'query',
         optionsOverridesByServiceDto: FindAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }
@@ -355,7 +355,7 @@ export class RESTAPIEntityController<
         optionsOverridesByServiceDto:
           FindOneAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }
@@ -433,7 +433,7 @@ export class RESTAPIEntityController<
         dtoType: 'body',
         optionsOverridesByServiceDto: UpdateAdditionalServiceOptionsOverridesDto
       }),
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       ...(args || [])
     ]);
   }

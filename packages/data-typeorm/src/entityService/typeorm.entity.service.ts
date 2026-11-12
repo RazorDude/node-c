@@ -13,7 +13,7 @@ export class TypeORMDBEntityService<
   Entity extends ObjectLiteral,
   Data extends DataDefaultData<Entity> = DataDefaultData<Entity>
 > extends RDBEntityService<Entity, Data> {
-  // biome-ignore lint/complexity/useMaxParams: DI in contructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in contructor.
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,

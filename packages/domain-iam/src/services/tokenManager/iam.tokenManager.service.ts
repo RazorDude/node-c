@@ -11,7 +11,6 @@ import {
   setNested
 } from '@node-c/core';
 
-// biome-ignore lint/correctness/noUnresolvedImports: False positive.
 import jwt from 'jsonwebtoken';
 import ld from 'lodash';
 
@@ -36,7 +35,7 @@ import {
  * Service for managing local access and refresh JWTs.
  */
 export class IAMTokenManagerService<TokenEntityFields extends object> {
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     protected authServices: {
       [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<

@@ -10,10 +10,10 @@
     "build:watch": "npm run build -- -w",
     "build:watch:clean": "rm -rf dist/* && rm -f *.tsbuildinfo && npm run build:watch",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
-    "format": "npx @biomejs/biome format --write",
-    "format:check": "npx @biomejs/biome format",
-    "lint": "npx @biomejs/biome check",
-    "lint:fix": "npx @biomejs/biome check --write",
+    "format": "npx oxfmt -c ../../.oxfmtrc.json src",
+    "format:check": "npx oxfmt -c ../../.oxfmtrc.json --check src",
+    "lint": "npx oxlint -c ../../.oxlintrc.json src && npm run format:check",
+    "lint:fix": "npx oxlint -c ../../.oxlintrc.json --fix src && npm run format",
     "publish-package": "npm run build:clean && npm publish --access public"
   },
   "dependencies": {

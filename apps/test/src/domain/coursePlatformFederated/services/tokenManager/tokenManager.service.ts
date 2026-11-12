@@ -15,7 +15,7 @@ import { DomainCoursePlatformFederatedTokensService } from '../tokens/tokens.ser
 
 @Injectable()
 export class DomainCoursePlatformFederatedTokenManagerService extends IAMTokenManagerService<DataCacheAuthToken> {
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     protected authenticationOktaConsumerService: DomainCoursePlatformFederatedAuthenticationOktaConsumerService,
     protected authenticationUserLocalConsumerService: DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService,

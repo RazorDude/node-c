@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noConsole: CLI script context. */
+/* oxlint-disable eslint/no-console -- CLI script context. */
 import path from 'node:path';
 import process, { cwd, env } from 'node:process';
 import {

@@ -1,9 +1,5 @@
-/** biome-ignore-all lint/suspicious/noConsole: Test file. */
-/** biome-ignore-all lint/complexity/useRegexpTest: Test file. */
-/** biome-ignore-all lint/style/noMagicNumbers: Test file. */
-/** biome-ignore-all lint/performance/useTopLevelRegex: Test file. */
-/** biome-ignore-all lint/style/noProcessEnv: Test file. */
-/** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
+/* oxlint-disable eslint/no-console -- Test file. */
+/* oxlint-disable eslint/no-magic-numbers -- Test file. */
 
 import { type ExecException, exec, spawn } from 'node:child_process';
 import * as fs from 'node:fs/promises';

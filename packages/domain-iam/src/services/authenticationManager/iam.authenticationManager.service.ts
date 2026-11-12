@@ -54,7 +54,7 @@ export class IAMAuthenticationManagerService<
     Partial<User>
   > = DataDefaultData<Partial<User>>
 > {
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     protected authServices: {
       [IAMAuthenticationType.OAuth2]?: IAMAuthenticationOAuth2Service<
@@ -656,7 +656,7 @@ export class IAMAuthenticationManagerService<
       const mainFilterFieldResult = await domainUsersEntityService.findOne({
         filters
       });
-      // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       if (!mainFilterFieldResult.result) {
         return null;
       }

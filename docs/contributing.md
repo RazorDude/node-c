@@ -40,8 +40,8 @@ Per package (`npm run <script> --workspace=packages/<name>`):
 | `build` / `build:clean`             | Compile with `tsc -p tsconfig.build.json` (clean: delete `dist` first) |
 | `build:watch` / `build:watch:clean` | Compile in watch mode                                                  |
 | `check-types`                       | Type check without emitting                                            |
-| `lint` / `lint:fix`                 | Biome checks                                                           |
-| `format` / `format:check`           | Biome formatting                                                       |
+| `lint` / `lint:fix`                 | oxlint checks, then the oxfmt format check / format                    |
+| `format` / `format:check`           | oxfmt formatting                                                       |
 | `publish-package`                   | Clean build and publish to npm                                         |
 
 Root scripts: `lint:all`, `lint:all:parallel`, `lint:fix:all:parallel`, `publish-package:all`, `clean-dependencies`.
@@ -54,7 +54,7 @@ After changing a package, rebuild it **and everything that depends on it** befor
 - TypeScript 7. No `any`.
 - Types and interfaces go in a `<name>.definitions.ts` file next to the code that uses them.
 - No barrel `index.ts` files. Folders that are imported as a whole (`import * as FolderData`) have a named index file (`db.entities.ts`, `coursePlatformDelegated.services.ts`) - see [loadDynamicModules](./Fundamentals/core-utilities.md).
-- Biome is the linter and formatter - run `lint` before submitting.
+- oxlint is the linter and oxfmt is the formatter, both configured at the repo root (`.oxlintrc.json`, `.oxfmtrc.json`) - run `lint` before submitting.
 
 ## Testing
 

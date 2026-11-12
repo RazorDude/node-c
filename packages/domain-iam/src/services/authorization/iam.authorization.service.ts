@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Abstract methods and false positives. */
+/* oxlint-disable eslint/require-await -- Abstract methods and false positives. */
 import crypto from 'node:crypto';
 
 import {

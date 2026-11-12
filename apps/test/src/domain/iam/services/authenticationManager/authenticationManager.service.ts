@@ -25,7 +25,7 @@ export class DomainIAMAuthenticationManagerService extends IAMAuthenticationMana
   DomainIAMUsersDomainEntityServiceData<DataDBUser>,
   DataDBUsersDataEntityServiceData<DataDBUser>
 > {
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     protected authenticationOktaService: DomainIAMAuthenticationOktaService,
     protected authenticationPassthroughService: DomainIAMAuthenticationPassthroughService,

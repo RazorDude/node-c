@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noConsole: No other way before the logger service is initialized. */
+/* oxlint-disable eslint/no-console -- No other way before the logger service is initialized. */
 import process from 'node:process';
 
 import { DynamicModule } from '@nestjs/common';

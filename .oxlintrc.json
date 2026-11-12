@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": ["dist", "node_modules", "packages/nestjs-pino"],
+  "options": {
+    "reportUnusedDisableDirectives": "warn",
+    "typeAware": true
+  },
+  "plugins": ["eslint", "import", "typescript", "vitest"],
+  "rules": {
+    "eslint/default-param-last": "error",
+    "eslint/eqeqeq": "error",
+    "eslint/max-params": ["error", { "max": 4 }],
+    "eslint/no-console": "error",
+    "eslint/no-empty": "error",
+    "eslint/no-loop-func": "error",
+    "eslint/no-magic-numbers": [
+      "error",
+      {
+        "ignore": [-1, 0, 1, 2],
+        "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true,
+        "ignoreEnums": true,
+        "ignoreNumericLiteralTypes": true,
+        "ignoreReadonlyClassProperties": true,
+        "ignoreTypeIndexes": true
+      }
+    ],
+    "eslint/no-param-reassign": ["error", { "props": false }],
+    "eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "eslint/no-use-before-define": "error",
+    "eslint/require-await": "error",
+    "eslint/sort-imports": [
+      "error",
+      {
+        "ignoreCase": false,
+        "ignoreDeclarationSort": true,
+        "ignoreMemberSort": false,
+        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }
+    ],
+    "import/no-cycle": "error",
+    "typescript/explicit-function-return-type": "error",
+    "typescript/explicit-module-boundary-types": "error",
+    "typescript/no-deprecated": "error",
+    "typescript/no-empty-function": "off",
+    "typescript/no-empty-interface": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-literal-enum-member": "error",
+    "vitest/no-disabled-tests": "error"
+  }
+}

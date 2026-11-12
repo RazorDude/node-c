@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Enforced by parent class definitions */
+/* oxlint-disable eslint/require-await -- Enforced by parent class definitions */
 import {
   CallHandler,
   ExecutionContext,
@@ -21,7 +21,7 @@ import {
   Constants as NodeCDomainIAMConstants
 } from '@node-c/domain-iam';
 
-// biome-ignore lint/suspicious/noDeprecatedImports: False positive.
+// oxlint-disable-next-line typescript/no-deprecated -- False positive.
 import { map, Observable } from 'rxjs';
 
 import { RequestWithLocals } from '../common/definitions/common.definitions.js';

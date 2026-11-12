@@ -63,7 +63,7 @@ export class RedisRepositoryService<Entity> {
     return this._primaryKeysMap;
   }
 
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     @Inject(CoreConstants.DATA_MODULE_NAME)
@@ -697,7 +697,7 @@ export class RedisRepositoryService<Entity> {
       // this is kind of a repeat of find, but with the key paths included and with dedicated
       // filtering by inner primary keys
       if (
-        // biome-ignore lint/suspicious/noUnnecessaryConditions: WIP functionality for future use.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition -- WIP functionality for future use.
         experimentalDeletionEnabled &&
         (isArray || nestedObjectContainerPath) &&
         innerPrimaryKeys.length > 0 &&

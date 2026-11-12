@@ -16,7 +16,7 @@ import { DomainCoursePlatformStandaloneTokensService } from '../tokens/tokens.se
 
 @Injectable()
 export class DomainCoursePlatformStandaloneTokenManagerService extends BaseIAMTokenManagerService<DataCacheStandaloneToken> {
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     protected authenticationOktaService: DomainCoursePlatformStandaloneAuthenticationOktaService,
     protected authenticationPassthroughConsumerService: CoursePlatformStandaloneAuthenticationPassthroughConsumerService,

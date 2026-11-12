@@ -1,0 +1,84 @@
+/* wrap long lines in code blocks instead of scrolling horizontally */
+.vp-doc div[class*='language-'] pre,
+.vp-doc div[class*='language-'] code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.vp-doc div[class*='language-'] code {
+  width: auto;
+}
+
+/* mermaid diagram viewer (see mermaidZoom.ts) */
+.vp-doc .mermaid {
+  cursor: zoom-in;
+}
+
+.mermaid-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background: var(--vp-c-bg);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.mermaid-zoom.dragging {
+  cursor: grabbing;
+}
+
+.mermaid-zoom-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.mermaid-zoom-content svg {
+  display: block;
+  pointer-events: none;
+}
+
+.mermaid-zoom-close {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 50%;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mermaid-zoom-close:hover {
+  background: var(--vp-c-default-soft);
+}
+
+.mermaid-zoom-hint {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  max-width: calc(100% - 32px);
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* hanging indent: lines after the first one in a wrapped line start 2 characters further in */
+.vp-doc div[class*='language-'] code .line {
+  display: inline-block;
+  width: 100%;
+  padding-left: 2ch;
+  text-indent: -2ch;
+}

@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Inheritance. */
+/* oxlint-disable eslint/require-await -- Inheritance. */
 import { Inject } from '@nestjs/common';
 
 import {

@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Reasons. */
+/* oxlint-disable eslint/require-await -- Reasons. */
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationError, ConfigProviderService } from '@node-c/core';

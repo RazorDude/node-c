@@ -76,7 +76,7 @@ export class RedisStoreService {
       user
     } = config.data[dataModuleName] as AppConfigDataNoSQL;
     const actualHost = host || '0.0.0.0';
-    // biome-ignore lint/suspicious/noUnnecessaryConditions: Incorrect type defined by another npm package.
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- Incorrect type defined by another npm package.
     const actualPassword = password?.length ? password : undefined;
     const actualPort = port || DEFAULT_REDIS_SERVER_PORT;
     const actualUser = user?.length ? user : undefined;
@@ -87,7 +87,6 @@ export class RedisStoreService {
       sentinelRetryStrategy?: RedisOptions['sentinelRetryStrategy'];
     } = {};
     let lastRetryAt = Date.now();
-    // biome-ignore lint/correctness/useQwikValidLexicalScope: False positive.
     const retryMethod = (): number | null => {
       const now = Date.now();
       // 1 minute retry interval
@@ -329,7 +328,7 @@ export class RedisStoreService {
     if (scanAll) {
       if (useHashmap) {
         // TODO: remove repeating code
-        // biome-ignore lint/suspicious/noUnnecessaryConditions: As God intended.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition -- As God intended.
         while (true) {
           const [newCursor, newKeys] = await client.hscan(
             storeKey,
@@ -361,7 +360,7 @@ export class RedisStoreService {
         }
       } else {
         // TODO: remove repeating code
-        // biome-ignore lint/suspicious/noUnnecessaryConditions: As God intended.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition -- As God intended.
         while (true) {
           const [newCursor, newKeys] = await client.scan(
             cursor,

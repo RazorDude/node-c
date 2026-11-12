@@ -16,7 +16,6 @@ import {
   ValidateNested
 } from 'class-validator';
 
-// biome-ignore lint/correctness/noUnresolvedImports: False positive.
 import { dtoTransformBoolean } from '../../utils/dtoTransformers.utils.js';
 
 import {

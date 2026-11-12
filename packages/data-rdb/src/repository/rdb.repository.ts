@@ -34,7 +34,7 @@ export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
       relationType: string;
       target: string | unknown;
       // unfortunately, we need to use this type definition here, otherwise it won't match the one in TypeOrm
-      // biome-ignore lint/complexity/noBannedTypes: No other way.
+      // oxlint-disable-next-line typescript/no-unsafe-function-type -- No other way.
       type: string | Function;
     }[];
     tableName: string;

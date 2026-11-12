@@ -1,7 +1,6 @@
-/** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
-/** biome-ignore-all lint/suspicious/noSkippedTests: Test file. */
-/** biome-ignore-all lint/style/noMagicNumbers: Test file. */
-/** biome-ignore-all lint/suspicious/noConsole: Test file. */
+/* oxlint-disable vitest/no-disabled-tests -- Test file. */
+/* oxlint-disable eslint/no-magic-numbers -- Test file. */
+/* oxlint-disable eslint/no-console -- Test file. */
 
 import { HttpStatus } from '@nestjs/common';
 

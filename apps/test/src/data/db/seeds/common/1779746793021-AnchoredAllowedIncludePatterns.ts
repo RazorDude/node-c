@@ -19,6 +19,6 @@ export class AnchoredAllowedIncludePatterns1779746793021
     );
   }
 
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: Personal preference.
+  // oxlint-disable-next-line eslint/no-empty -- Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

@@ -71,7 +71,7 @@ export class RDBEntityService<
     PostgresErrorCode.UniqueViolation
   ]);
 
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,
@@ -628,7 +628,7 @@ export class RDBEntityService<
     insertQuery = `${insertQuery.substring(0, insertQuery.length - 2)}) values `;
     insertQueryItem = `${insertQueryItem.substring(0, insertQueryItem.length - 2)})`;
     deleteQueryItem = `${
-      // biome-ignore lint/style/noMagicNumbers: False positive.
+      // oxlint-disable-next-line eslint/no-magic-numbers -- False positive.
       deleteQueryItem.substring(0, deleteQueryItem.length - 4)
     })`;
     items.forEach((item) => {
@@ -772,7 +772,7 @@ export class RDBEntityService<
       const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/gu);
       const result = extractVariableName.exec(errorMessage);
       return new ApplicationError(
-        // biome-ignore lint/suspicious/noUnnecessaryConditions: False positive.
+        // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
         `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
         { cause: e, statusCode: HttpStatus.BAD_REQUEST }
       );

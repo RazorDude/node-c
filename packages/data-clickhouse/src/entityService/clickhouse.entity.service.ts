@@ -15,7 +15,7 @@ export class ClickHouseDBEntityService<
 > extends RDBEntityService<Entity, Data> {
   protected primaryKeys: string[];
 
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,

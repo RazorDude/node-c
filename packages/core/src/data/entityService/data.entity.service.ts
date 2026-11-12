@@ -112,7 +112,7 @@ export abstract class DataEntityService<
   }
 
   // TODO: handle relations' fields
-  // biome-ignore lint/suspicious/useAwait: Legacy.
+  // oxlint-disable-next-line eslint/require-await -- Legacy.
   protected async processObjectAllowedFields<DataObject = Partial<Entity>>(
     data: DataObject | DataObject[],
     options: ProcessObjectAllowedFieldsOptions

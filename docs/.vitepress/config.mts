@@ -8,6 +8,10 @@ export default withMermaid(
       'A batteries-included NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.',
     cleanUrls: true,
     lastUpdated: true,
+    vite: {
+      // mermaid imports the CommonJS fastdom package, which vitepress-plugin-mermaid doesn't pre-bundle
+      optimizeDeps: { include: ['fastdom', 'fastdom/extensions/fastdom-promised.js'] }
+    },
     themeConfig: {
       // every page has its own Previous / Next links, which also work on GitHub
       docFooter: { prev: false, next: false },

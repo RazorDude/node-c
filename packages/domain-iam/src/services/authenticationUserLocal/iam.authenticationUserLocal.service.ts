@@ -33,7 +33,7 @@ export class IAMAuthenticationUserLocalService<
   CompleteContext extends object,
   InitiateContext extends object
 > extends IAMAuthenticationService<CompleteContext, InitiateContext> {
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     configProvider: ConfigProviderService,
     logger: LoggerService,

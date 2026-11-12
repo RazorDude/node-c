@@ -15,7 +15,7 @@ import { DomainCoursePlatformFederatedTokenManagerService } from '../tokenManage
 
 @Injectable()
 export class DomainCoursePlatformFederatedAuthenticationManagerService extends IAMAuthenticationManagerService {
-  // biome-ignore lint/complexity/useMaxParams: DI.
+  // oxlint-disable-next-line eslint/max-params -- DI.
   constructor(
     protected authenticationOktaConsumerService: DomainCoursePlatformFederatedAuthenticationOktaConsumerService,
     protected authenticationUserLocalConsumerService: DomainCoursePlatformFederatedAuthenticationUserLocalConsumerService,

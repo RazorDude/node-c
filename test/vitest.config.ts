@@ -4,13 +4,12 @@ import { BaseSequencer, type TestSpecification } from 'vitest/node';
 // The e2e test files share the same running apps and data, and each one builds on the data of the previous ones,
 // so they are run one by one, in the order of their names.
 class AlphabeticalSequencer extends BaseSequencer {
-  // biome-ignore lint/suspicious/useAwait: The base method is async.
+  // oxlint-disable-next-line eslint/require-await -- The base method is async.
   async sort(files: TestSpecification[]): Promise<TestSpecification[]> {
     return [...files].sort((a, b) => a.moduleId.localeCompare(b.moduleId));
   }
 }
 
-// biome-ignore lint/style/noDefaultExport: Test file.
 export default defineConfig({
   test: {
     fileParallelism: false,

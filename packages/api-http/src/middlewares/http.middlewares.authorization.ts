@@ -39,7 +39,7 @@ const regExps = {
 export class HTTPAuthorizationMiddleware<User extends object>
   implements NestMiddleware
 {
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor.
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     @Optional()
     @Inject(Constants.API_MODULE_AUTHORIZATION_SERVICE)

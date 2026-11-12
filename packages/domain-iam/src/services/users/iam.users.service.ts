@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: Abstract methods. */
+/* oxlint-disable eslint/require-await -- Abstract methods. */
 
 import { Injectable } from '@nestjs/common';
 
@@ -37,7 +37,7 @@ export class IAMUsersService<
 > {
   constructor(
     dataEntityService: EntityService,
-    // biome-ignore lint/style/useDefaultParameterLast: False positive.
+    // oxlint-disable-next-line eslint/default-param-last -- False positive.
     defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
     logger: LoggerService,
     additionalDataEntityServices?: AdditionalEntityServices

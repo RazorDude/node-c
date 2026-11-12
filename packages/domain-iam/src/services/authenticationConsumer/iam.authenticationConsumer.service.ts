@@ -117,7 +117,7 @@ export class IAMAuthenticationConsumerService<
     return ld.merge(defaultConfig, steps || {});
   }
 
-  // biome-ignore lint/suspicious/useAwait: Abstract method.
+  // oxlint-disable-next-line eslint/require-await -- Abstract method.
   async getUserDataFromExternalTokenPayloads(
     data: IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsData
   ): Promise<IAMAuthenticationConsumerGetUserDataFromExternalTokenPayloadsResult | null> {

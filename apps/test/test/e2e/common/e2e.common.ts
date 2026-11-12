@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/correctness/noUndeclaredDependencies: Test file. */
 
 import { HttpStatus } from '@nestjs/common';
 

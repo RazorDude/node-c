@@ -52,10 +52,10 @@ export class DomainEntityService<
   DataEntityServiceData extends
     DataDefaultData<Entity> = DataDefaultData<Entity>
 > {
-  // biome-ignore lint/complexity/useMaxParams: DI in constructor
+  // oxlint-disable-next-line eslint/max-params -- DI in constructor
   constructor(
     protected dataEntityService: EntityService,
-    // biome-ignore lint/style/useDefaultParameterLast: Rule doesn't apply here.
+    // oxlint-disable-next-line eslint/default-param-last -- Rule doesn't apply here.
     protected defaultMethods: string[] = DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
     protected logger: LoggerService,
     protected additionalDataEntityServices?: AdditionalEntityServices,
