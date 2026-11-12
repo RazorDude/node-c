@@ -18,7 +18,8 @@ import {
   type GenerateOrmconfigOptions,
   type LoadConfigAppConfigs,
   type LoadConfigOptions,
-  RDBType
+  RDBType,
+  typeORMTypesByRDBType
 } from './configProvider.definitions.js';
 
 const regExps = {
@@ -115,10 +116,7 @@ export class ConfigProviderService<
           name: moduleConfig.connectionName,
           synchronize: moduleConfig.type === RDBType.Aurora,
           subscribers: [...subscribers],
-          type:
-            moduleConfig.type === RDBType.Aurora
-              ? RDBType.MySQL
-              : moduleConfig.type,
+          type: typeORMTypesByRDBType[moduleConfig.type] || moduleConfig.type,
           ...(moduleConfig.typeormExtraOptions || {})
         })
       )
@@ -157,7 +155,7 @@ export class ConfigProviderService<
         `  port: ${moduleConfig.port},\n` +
         '  subscribers: [],\n' +
         `  synchronize: ${moduleConfig.type === RDBType.Aurora},\n` +
-        `  type: '${moduleConfig.type === RDBType.Aurora ? RDBType.MySQL : moduleConfig.type}',\n` +
+        `  type: '${typeORMTypesByRDBType[moduleConfig.type] || moduleConfig.type}',\n` +
         `  username: '${moduleConfig.user}'\n` +
         '});\n'
     );

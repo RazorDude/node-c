@@ -1,13 +1,15 @@
 # Node-C
-A batteries-included NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.
+The human-built framework for the AI age.
+
+Node-C is a batteries-included, AI-optimized NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.
 
 This family of packages has 2 main goals:
-- To speed up development as much as possible while maintaining high quality, and
+- To speed up development as much as possible while maintaining high quality.
 - To provide a robust and standardized way of building back-end applications with Node and NestJS.
 
 Node-C provides a clean, reliable and customizable back-end setup out of the box, at the cost of being opinionated.
 
-You get to focus on building your project, instead of building the tools you need to build a project.
+Whether you're coding by hand or using AI, you get to focus on building your project, instead of spending time or tokens building the tools you need to build a project.
 
 
 ## Overview

@@ -1,60 +1,28 @@
 # NodeC Documentation
+The human-built framework for the AI age.
 
-NodeC is a batteries-included NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.
+Node-C is a batteries-included, AI-optimized NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.
 
 This family of packages has 2 main goals:
-- To speed up development as much as possible while maintaining high quality, and
+- To speed up development as much as possible while maintaining high quality.
 - To provide a robust and standardized way of building back-end applications with Node and NestJS.
 
-NodeC provides a clean, reliable and customizable back-end setup out of the box, at the cost of being opinionated.
+Node-C provides a clean, reliable and customizable back-end setup out of the box, at the cost of being opinionated.
 
-You get to focus on building your project, instead of building the tools you need to build a project.
+Whether you're coding by hand or using AI, you get to focus on building your project, instead of spending time or tokens building the tools you need to build a project.
 
 > [!TIP]
 > **New here?** Build a working REST API in about 15 minutes with the [First steps](./first-steps.md) tutorial - it needs nothing but Node.js.
 
-## What you write, and what you get
-
-Three small classes - an entity, a domain service and a controller:
-
-```typescript
-export const DataDBTaskEntity = new EntitySchema<DataDBTask>({
-  columns: { ...DBEntitySchema.columns, done: { type: 'boolean', default: false }, title: { type: 'varchar' } },
-  name: 'task',
-  tableName: 'tasks'
-});
-
-export class DomainTasksService extends DomainEntityService<DataDBTask, DataDBTasksService> {
-  constructor(dataEntityService: DataDBTasksService, logger: LoggerService) {
-    super(dataEntityService, undefined, logger);
-  }
-}
-
-@Controller('tasks')
-export class APITasksEntityController extends RESTAPIEntityController<DataDBTask, DomainTasksService> {
-  constructor(domainEntityService: DomainTasksService, logger: LoggerService, reflector: Reflector) {
-    super(domainEntityService, RESTAPIEntityController.getDefaultDtos<DataDBTask>(), logger, reflector);
-  }
-}
-```
-
-...and a complete, validated REST API for them:
-
-```bash
-curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{"data":{"title":"Try NodeC"}}'
-curl -g 'localhost:3000/tasks?filters[title][$like]=%25NodeC%25&orderBy[createdAt]=desc&page=1&perPage=20'
-curl -X PATCH localhost:3000/tasks -H 'content-type: application/json' -d '{"data":{"done":true},"filters":{"id":1}}'
-```
-
 ## Features
 
+- **AI optimized** - detailed documentation and instructions for agents, so you can spin projects up quickly, without compromising on quality.
 - **CRUD without boilerplate** - filtering with operators (`$like`, `$between`, `$or`, ...), relations, field selection, ordering, pagination and soft deletes on every entity.
-- **Several storages, one API** - MySQL, PostgreSQL and SQLite (TypeORM), ClickHouse and Redis/Valkey, all behind the same data service interface.
-- **Cache-first reads in one option** - read from Redis, fall back to the database and fill the cache, without writing that logic yourself.
-- **Logins included** - email and password, OAuth2/Okta with PKCE, and federated login through your own SSO app, with JWT access, refresh and id tokens.
-- **Role-based and fine-grained permissions** - per route, plus rules on what a user may ask for and see, stored in the database.
-- **Config from files and the environment** - one config object for every module, with per-environment profiles and secrets kept out of code.
-- **Tested end to end** - the reference app's e2e suite runs real requests against real databases.
+- **Unified API across different storages** - RDBs (MySQL, PostgreSQL and SQLite (TypeORM)), ClickHouse and Redis/Valkey, all share the same data service interface. You get interchangeable storage services, with features like **cache-first reads** coming out of the box (read from Redis or Valkey, fall back to the database and fill the cache).
+- **Authentication included** - email and password with 2FA, OAuth2/Okta with PKCE, and federated login through your own SSO app, with JWT access, refresh and id tokens.
+- **Role-based and fine-grained permissions** - detailed roles and permissions system, which supports both simple role-based access, as well as granular permissions-based access control. You can mutate incoming request data, as well as outgoing response data, based on users' metadata and other complex conditions, stored in the database.
+- **Robust configuration** - your apps are configured using a fully typed, rich configuration object, which provides deeply granular level of control. Support for overrides using config profiles (development, staging, production) come out of the box.
+- **Full coverage via E2E tests** - the reference app's e2e suite runs real requests against real databases.
 
 ## Overview
 
@@ -62,6 +30,8 @@ NodeC leverages NestJS's module system to expose 3 types of modules and a range 
 - Data - where the code related to any kind of data processing lives. That includes modules for both permanent storage (such as databases) and cache (such as key-value stores).
 - Domain - the modules here contain your business logic, split by domain. They work with the Data modules and with each other.
 - Api - these modules expose different sets of endpoints for external communication. They trigger your business logic by working with the Domain modules, and do not have access to the Data modules.
+
+See the First steps page below for practical examples, or jump straight to Layers and modules for a deep-dive on Node-C's 3-layer Domain-Driven architecture.
 
 ## Table of Contents
 

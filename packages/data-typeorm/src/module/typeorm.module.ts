@@ -7,7 +7,7 @@ import {
   ConfigProviderService,
   LoggerService,
   loadDynamicModules,
-  RDBType
+  typeORMTypesByRDBType
 } from '@node-c/core';
 import { SQLQueryBuilderModule } from '@node-c/data-rdb';
 
@@ -117,7 +117,7 @@ export class TypeORMDBModule {
               password,
               port,
               synchronize: false,
-              type: type === RDBType.Aurora ? RDBType.MySQL : type,
+              type: typeORMTypesByRDBType[type] || type,
               username: user,
               ...(typeormExtraOptions || {})
             } as TypeOrmModuleOptions;

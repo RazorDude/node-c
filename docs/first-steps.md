@@ -19,15 +19,15 @@ mkdir my-tasks && cd my-tasks
 npm init -y
 npm pkg set type=module
 npm install @nestjs/common @nestjs/core @node-c/core @node-c/api-http @node-c/api-rest @node-c/data-rdb @node-c/data-typeorm \
-  class-transformer class-validator cookie-parser express rxjs sqlite3 typeorm
+  better-sqlite3 class-transformer class-validator cookie-parser express rxjs typeorm
 npm install --save-dev typescript
 ```
 
-`sqlite3` builds a native binding when it's installed. If npm reports that its install script was blocked, approve it and build it:
+`better-sqlite3` installs a native binding when it's installed. If npm reports that its install script was blocked, approve it and build it:
 
 ```bash
-npm install-scripts approve sqlite3
-npm rebuild sqlite3
+npm install-scripts approve better-sqlite3
+npm rebuild better-sqlite3
 ```
 
 Add a `tsconfig.json`:

@@ -84,7 +84,17 @@ LoggerModule.register({
 
 **`nestjs-pino` is vendored.** Import types such as `Params` from `@node-c/nestjs-pino` instead of `nestjs-pino`. See [Logging](./Fundamentals/logging.md).
 
-## 7. New, and worth knowing
+## 7. TypeORM 1
+
+`@node-c/data-typeorm` now uses TypeORM 1. In your app:
+
+- Upgrade `typeorm` to `^1.1.3`, and `mysql2` to `^3.15.3` or later.
+- For SQLite, replace `sqlite3` with `better-sqlite3` (v12). Keep `type: RDBType.SQLite` in the config - NodeC passes it to TypeORM as `better-sqlite3`.
+- If your own code calls TypeORM directly (e.g. `repository.findBy(...)` or `manager.update(...)` in a custom data service), `null` and `undefined` values in `where` objects now throw instead of being skipped. Use `IsNull()` to match `NULL`s, or set `typeormExtraOptions: { invalidWhereValuesBehavior: { null: 'ignore', undefined: 'ignore' } }` in the data module config to get the old behaviour back. NodeC's own data services aren't affected - they build their queries with the query builder.
+
+For everything else that changed, see TypeORM's [Upgrading from 0.3 to 1.0](https://typeorm.io/docs/releases/1.0/upgrading-from-0.3/).
+
+## 8. New, and worth knowing
 
 Not breaking, but new in beta9:
 - SQLite support (`type: 'sqlite'`) - see [Relational databases](./Data/rdb.md#supported-databases)

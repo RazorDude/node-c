@@ -12,8 +12,10 @@
   - Added documentation, as well as ai-generated ai guides for building apps based on the framework. Note: contributing should still be human based.
   - Added a VitePress site for the documentation (`npm run docs:dev`).
   - Migrated linting & formatting from eslint & prettier ot oxlint & oxfmt.
+  - BREAKING: Upgraded to TypeORM 1 (`typeorm@^1.1.3`, `mysql2@^3.15.3`). See the migration guide.
 - `apps/first-steps`
   - New package - the minimal SQLite-based app built in the First steps tutorial.
+  - Uses `better-sqlite3` instead of `sqlite3`, as TypeORM 1 dropped the `sqlite3` driver.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.
 - `packages/api-http`
@@ -41,6 +43,7 @@
   - Added better error handling for HTTP client errors that don't reach any middleware.
   - Fixed the issue in getNested where deeply nested arrays aren't parse properly.
   - Added `RDBType.SQLite`.
+  - Added `typeORMTypesByRDBType` - the TypeORM driver types for the `RDBType` values that differ from them (`aurora` → `mysql`, `sqlite` → `better-sqlite3`). Used for the generated ormconfig and datasource files.
   - The default pino params now create the `logs` folder if it doesn't exist, instead of crashing at startup.
 - `packages/data-clickhouse`
   - SQL injection prevention fixes to the query builder.
@@ -53,11 +56,13 @@
   - On top of the top of that (:D), added a configurable maxDepth with a default of 10.
   - Fixed the parseSelect and parseOrderBy method, so that they have the full functionality of working with nested releations.
   - Fixed the update and delete methods for the cases where filters by relations are added.
-  - Added SQLite support (except for the `$contains` operator). `SQLITE_CONSTRAINT` errors are now handled as 400 errors.
+  - Added SQLite support (except for the `$contains` operator). `SQLITE_CONSTRAINT` errors (including the `SQLITE_CONSTRAINT_CHECK`, `_FOREIGNKEY`, `_NOTNULL`, `_PRIMARYKEY` and `_UNIQUE` extended codes reported by `better-sqlite3`) are now handled as 400 errors.
 - `packages/data-redis`
   - Fixed the RedisEntityService's find method by fixing the repository's find and store's scan methods for the cases without filters.
   - Added the LoggerService as a dependency of the RedisRepositoryService and the RedisStoreService.
   - Added sorting to the RedisEntityService.find method when findAll=true.
+- `packages/data-typeorm`
+  - BREAKING: Upgraded to TypeORM 1. `RDBType.SQLite` connections now use the `better-sqlite3` driver.
 - `packages/domain-iam`
   - Fix for the permissions system check, so that the proper error is thrown when overriding non-array input values.
   - Fix for the matchInputValues method, so that the valuesToSet variable is declared correctly for each valuePath.

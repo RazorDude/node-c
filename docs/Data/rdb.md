@@ -9,7 +9,7 @@ Relational databases are the main storage of most NodeC apps. `@node-c/data-rdb`
 | `mysql` | `mysql2` | |
 | `aurora` | `mysql2` | treated as MySQL; the generated ormconfig turns `synchronize` on |
 | `postgres` | `pg` | `RETURNING` is used for `returnData` updates |
-| `sqlite` | `sqlite3` | needs no server - `database` is the file path. `$contains` isn't supported |
+| `sqlite` | `better-sqlite3` (v12) | needs no server - `database` is the file path. Passed to TypeORM as `better-sqlite3`. `$contains` isn't supported |
 
 SQLite is the quickest way to start:
 
@@ -20,7 +20,7 @@ data: {
 ```
 
 > [!WARNING]
-> `sqlite3` builds a native binding in an install script. npm 12 blocks install scripts that aren't approved - approve it once with `npm install-scripts approve sqlite3` (or add it to `allowScripts` in `package.json`) and run `npm rebuild sqlite3`.
+> `better-sqlite3` installs a native binding in an install script. npm 12 blocks install scripts that aren't approved - approve it once with `npm install-scripts approve better-sqlite3` (or add it to `allowScripts` in `package.json`) and run `npm rebuild better-sqlite3`.
 
 ## Behaviour
 
@@ -29,7 +29,7 @@ data: {
   - When the filters use relation fields, or `returnOriginalItems` is set, they first find the matching rows and then run the update/delete filtered by the found primary keys. If nothing matches, they return early with `count: 0` (and empty `items`/`originalItems`, if requested).
   - Otherwise, the update/delete runs directly with the parsed filters.
 - **Errors.** Only some database errors are mapped to `ApplicationError`s with status 400:
-  - `ER_DUP_ENTRY`, `ER_NO_DEFAULT_FOR_FIELD`, `ER_NO_REFERENCED_ROW`, `ER_NO_REFERENCED_ROW_2` and `SQLITE_CONSTRAINT` → `[RBDEntityService][<CODE>]: <message>.`
+  - `ER_DUP_ENTRY`, `ER_NO_DEFAULT_FOR_FIELD`, `ER_NO_REFERENCED_ROW`, `ER_NO_REFERENCED_ROW_2`, `SQLITE_CONSTRAINT` and its `_CHECK`, `_FOREIGNKEY`, `_NOTNULL`, `_PRIMARYKEY` and `_UNIQUE` variants → `[RBDEntityService][<CODE>]: <message>.`
   - Postgres unique violations → `<table>: <column> needs to be unique`
   - any other database error is rethrown as is, and becomes a 500 through the REST API.
 

@@ -49,6 +49,6 @@
     "yargs": "^18.2.0"
   },
   "allowScripts": {
-    "sqlite3@6.0.1": true
+    "better-sqlite3@12.11.1": true
   }
 }

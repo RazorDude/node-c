@@ -68,6 +68,12 @@ export class RDBEntityService<
     'ER_NO_REFERENCED_ROW',
     'ER_NO_REFERENCED_ROW_2',
     'SQLITE_CONSTRAINT',
+    // better-sqlite3 reports the extended result codes
+    'SQLITE_CONSTRAINT_CHECK',
+    'SQLITE_CONSTRAINT_FOREIGNKEY',
+    'SQLITE_CONSTRAINT_NOTNULL',
+    'SQLITE_CONSTRAINT_PRIMARYKEY',
+    'SQLITE_CONSTRAINT_UNIQUE',
     PostgresErrorCode.UniqueViolation
   ]);
 

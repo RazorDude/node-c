@@ -45,8 +45,8 @@ ClickHouse supports inserts, finds and counts only - no updates, deletes or join
 **My seed or migration has no effect.**
 Migrations and seeds run from `dist` - rebuild the app first. Also check that its timestamp is later than the migrations it depends on. See [Seeding data](./Recipes/seeding-data.md).
 
-**`sqlite3` fails to load ("Could not locate the bindings file").**
-Its install script was blocked by npm. Run `npm install-scripts approve sqlite3` and `npm rebuild sqlite3`.
+**`better-sqlite3` fails to load ("Could not locate the bindings file").**
+Its install script was blocked by npm. Run `npm install-scripts approve better-sqlite3` and `npm rebuild better-sqlite3`.
 
 ## Logins and permissions
 

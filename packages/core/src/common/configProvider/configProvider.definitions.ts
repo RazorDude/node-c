@@ -496,6 +496,12 @@ export enum RDBType {
   SQLite = 'sqlite'
 }
 
+// the TypeORM driver types that differ from the RDBType values
+export const typeORMTypesByRDBType: Partial<Record<RDBType, string>> = {
+  [RDBType.Aurora]: RDBType.MySQL,
+  [RDBType.SQLite]: 'better-sqlite3'
+};
+
 export type LoadConfigAppConfigs<
   AppConfigCommonType extends AppConfigCommon = AppConfigCommon,
   AppConfigProfileType extends AppConfigProfile = AppConfigProfile
