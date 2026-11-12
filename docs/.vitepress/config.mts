@@ -6,6 +6,8 @@ export default withMermaid(
     title: 'NodeC',
     description:
       'A batteries-included NodeJS framework for developing Domain-Driven Design applications, built on top of NestJS.',
+    // served from https://razordude.github.io/node-c/
+    base: '/node-c/',
     cleanUrls: true,
     lastUpdated: true,
     vite: {
