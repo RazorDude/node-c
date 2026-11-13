@@ -1,16 +1,17 @@
 # First Steps
-
-In this tutorial you'll build a small task-list API: a `tasks` table in SQLite, and REST routes to create, list, filter, update and delete tasks. It takes about 15 minutes, and needs nothing but Node.js - SQLite stores everything in a single file.
+In this tutorial, you'll build a small task-list API. You'll see the basics of NodeC's 3-layer architecture: a data layer with SQLite, a domain layer for the business logic and an API layer with REST routes to create, list, filter, update and delete tasks. It takes about 15 minutes, and needs nothing but Node.js.
 
 Along the way you'll write one class per [layer](./Overview/layers.md) - an entity in the data layer, a service in the domain layer and a controller in the API layer - and see what NodeC gives you for them.
 
 > [!NOTE]
-> This tutorial is written for NodeC **1.0.0-beta9**. The finished app is in the repository at [`apps/first-steps`](https://github.com/RazorDude/node-c/tree/master/apps/first-steps) - you can run it from there instead of creating a new project (see [Running the finished app](#running-the-finished-app)).
+> This tutorial is written for NodeC **1.0.0-beta9**. The finished app is in the repository at [`apps/first-steps`](https://github.com/RazorDude/node-c/tree/master/apps/first-steps) - you can run it from there instead of creating a new project (see [Running the premade finished app](#running-the-premade-finished-app)).
+
 
 ## Prerequisites
 
 - Node.js 22 or later, and npm
 - A terminal with `curl`, to try the API
+
 
 ## 1. Create the project
 
@@ -63,11 +64,12 @@ And these scripts to `package.json`:
 }
 ```
 
-NodeC uses ES modules, so relative imports end in `.js` - also in the TypeScript sources.
+NodeC uses ES modules, so relative imports end in `.js`, including in the TypeScript sources.
+
 
 ## 2. Configure the app
 
-One constants file for the module names, used everywhere below:
+Create a constants file for the module names:
 
 ```typescript
 // src/common/definitions/common.constants.ts
@@ -79,7 +81,7 @@ export const Constants = {
 };
 ```
 
-The common config - the database, and the routes anyone may call without logging in:
+Create the common config. It provides non-secret the database and describes the routes anyone may call without logging in:
 
 ```typescript
 // src/config/config.common.ts
@@ -115,7 +117,7 @@ export const appConfigCommon: AppConfigCommon = {
 };
 ```
 
-The `local` profile - where the API listens. It's used whenever `NODE_ENV` isn't set:
+Create the config for the `local` profile. It contains the host and port for the API server to listen on. It can also contain overrides for values in the common config, if neccesary. It's used whenever `NODE_ENV` isn't set or is set to `local`:
 
 ```typescript
 // src/config/profiles/config.profile.local.ts
@@ -129,12 +131,15 @@ export const appConfigProfileLocal: AppConfigProfile = {
 };
 ```
 
-And two index files that put them together:
+Create two index files that export the configs for further use by the built-in `ConfigProvider` service:
 
 ```typescript
 // src/config/profiles/config.profiles.ts
 export * from './config.profile.local.js';
+```
 
+
+```typescript
 // src/config/config.ts
 export * from './config.common.js';
 export * from './profiles/config.profiles.js';
@@ -143,9 +148,10 @@ export * from './profiles/config.profiles.js';
 > [!TIP]
 > The keys under `api` and `data` are module names: `config.data.db` configures the data module named `db`, and `config.api.tasks` the API module named `tasks`. See [Configuration](./Fundamentals/configuration.md).
 
-## 3. The data layer: an entity
 
-The columns every table shares:
+## 3. Set up the data layer
+
+Define a base schema for the columns that every table shares:
 
 ```typescript
 // src/data/dbBase/entity/base.db.entity.ts
@@ -170,7 +176,7 @@ export const DBEntitySchema: {
 };
 ```
 
-The task entity, its data service and its module:
+Create the `task` entity, its service for working with TypeORM and its module for registering the service:
 
 ```typescript
 // src/data/db/entities/tasks/tasks.entity.ts
@@ -242,7 +248,7 @@ import { DataDBTasksService } from './tasks.service.js';
 export class DataDBTasksModule {}
 ```
 
-The data module connects to the database and registers every entity exported from its index file:
+Create an index file to export all entities, entity services and modules. This is needed so that the framework can automatically pick them up and initialize them:
 
 ```typescript
 // src/data/db/entities/db.entities.ts
@@ -250,6 +256,8 @@ export * from './tasks/tasks.entity.js';
 export * from './tasks/tasks.module.js';
 export * from './tasks/tasks.service.js';
 ```
+
+Create the data module class. It connects to the database and registers every entity exported from the index file:
 
 ```typescript
 // src/data/db/db.module.ts
@@ -275,11 +283,12 @@ export class DataDBModule extends TypeORMDBModule {
 ```
 
 > [!WARNING]
-> Modules pick up the exports of their index file **by name suffix** - `...Entity`, `...Module`, `...Service`, `...Controller`. A class with another name, or one that isn't exported from the index file, is silently ignored.
+> Modules pick up the exports of their index file **by name suffix** - `...Entity`, `...Module`, `...Service`, `...Controller`. A class with another ending, or one that isn't exported from the index file, is silently ignored.
 
-## 4. The domain layer: a service
 
-This is where your business logic goes. For now it only needs the defaults - `find`, `findOne`, `create`, `bulkCreate`, `update` and `delete`:
+## 4. Set up the domain layer
+
+This is where your business logic goes. For now, we only need a basic domain layer entity service with its default methods - `find`, `findOne`, `create`, `bulkCreate`, `update` and `delete`:
 
 ```typescript
 // src/domain/tasks/services/tasks/tasks.service.ts
@@ -298,10 +307,14 @@ export class DomainTasksService extends DomainEntityService<DataDBTask, DataDBTa
 }
 ```
 
+Create the index file, similar to the data layer's index file:
+
 ```typescript
 // src/domain/tasks/services/tasks.services.ts
 export * from './tasks/tasks.service.js';
 ```
+
+Create the module, while will register the domain services:
 
 ```typescript
 // src/domain/tasks/tasks.module.ts
@@ -326,7 +339,10 @@ const { services } = loadDynamicModules(FolderData);
 export class DomainTasksModule {}
 ```
 
-## 5. The API layer: a controller
+
+## 5. Set up the API layer
+
+Create a controller for the `tasks` entity:
 
 ```typescript
 // src/api/tasks/controllers/tasks/tasks.controller.ts
@@ -348,10 +364,14 @@ export class APITasksEntityController extends RESTAPIEntityController<DataDBTask
 }
 ```
 
+Similar to the data and domain modules, export the controller(s) using an index file:
+
 ```typescript
 // src/api/tasks/controllers/tasks.controllers.ts
 export * from './tasks/tasks.controller.js';
 ```
+
+Create the module itself. It registers the controllers:
 
 ```typescript
 // src/api/tasks/tasks.module.ts
@@ -373,11 +393,12 @@ export class APITasksModule extends HTTPAPIModule {
 }
 ```
 
-This API has no logins, so it needs no IAM setup - its routes are public because they're listed in `anonymousAccessRoutes`. Adding logins and permissions later is covered in [Authentication](./Security/authentication.md).
+This API has no logins, so it doesn't need an IAM setup. Its routes are public because they're listed in `anonymousAccessRoutes`. Adding logins and permissions later is covered in [Authentication](./Security/authentication.md).
+
 
 ## 6. Put it together
 
-The app module imports one of each, plus the config and logger modules:
+The app module imports all layer modules, plus the config and logger modules:
 
 ```typescript
 // src/app.module.ts
@@ -409,6 +430,8 @@ export class AppModuleBase {
 export class AppModule extends AppModuleBase {}
 ```
 
+This is your main file, which is used to bootstrap the app:
+
 ```typescript
 // src/main.ts
 import process from 'node:process';
@@ -435,27 +458,36 @@ import { Constants } from './common/definitions/common.constants.js';
 );
 ```
 
-## 7. Create the table
 
-Build the app, generate the TypeORM datasource file, then generate and run the first migration:
+## 7. Initialize the database
+
+The final step is initializing the database by generating an initial migration based on the entity definitions.
+
+This is done by build the app, generating a TypeORM datasource file, then generating and running the initial migration:
 
 ```bash
+# build the app
 npm run build
+# generate a TypeORM datasource file
 npm run generate:datasource-files
+# generate the initial migration
 MIGRATION_NAME=CreateTasks npm run migration:generate
+# rebuild the app to get the migration file into the dist folder
 npm run build
+# execute the migration
 npm run migration:run
 ```
 
 `migration:generate` compares your entities with the (still empty) database and writes `src/data/db/migrations/<timestamp>-CreateTasks.ts`, with a `CREATE TABLE "tasks"` statement. The second build compiles it, because migrations run from `dist`. See [Defining entities](./Data/entities.md#datasource-files-and-migrations).
 
-## 8. Run it
+
+## 8. Run the app
 
 ```bash
 npm start
 ```
 
-The log ends with `Nest application successfully started`, and the API is at `http://localhost:3000`. In a second terminal:
+The log ends with `Nest application successfully started`, and the API is at `http://localhost:3000`. In a second terminal, you can call the API to get the pre-seeded tasks:
 
 ```bash
 curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{"data":{"title":"Read the NodeC docs"}}'
@@ -465,13 +497,13 @@ curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{"data
 {"result":{"title":"Read the NodeC docs","createdAt":"2026-11-10T19:07:22.000Z","deletedAt":null,"id":1,"updatedAt":"2026-11-10T19:07:22.000Z","done":false}}
 ```
 
-Create two more at once:
+Now, try creating two more tasks at once:
 
 ```bash
 curl -X POST localhost:3000/tasks/bulk -H 'content-type: application/json' -d '{"data":[{"title":"Build an app"},{"title":"Ship it","done":true}]}'
 ```
 
-Find the ones that aren't done, get one by id, and mark the first one as done:
+Find the tasks that aren't done, get one by id, and mark the first one as done:
 
 ```bash
 curl -g 'localhost:3000/tasks?filters[done]=0'
@@ -479,7 +511,7 @@ curl localhost:3000/tasks/item/1
 curl -X PATCH localhost:3000/tasks -H 'content-type: application/json' -d '{"data":{"done":true},"filters":{"id":1},"returnData":true}'
 ```
 
-The first one returns the two open tasks:
+The first request returns the two open tasks:
 
 ```json
 {"result":{"page":1,"perPage":10,"items":[{"createdAt":"2026-11-10T19:07:22.000Z","deletedAt":null,"id":1,"updatedAt":"2026-11-10T19:07:22.000Z","done":false,"title":"Read the NodeC docs"},{"createdAt":"2026-11-10T19:07:22.000Z","deletedAt":null,"id":2,"updatedAt":"2026-11-10T19:07:22.000Z","done":false,"title":"Build an app"}],"more":false,"totalCount":2}}
@@ -491,20 +523,20 @@ And the update returns the updated row, because of `returnData: true`:
 {"result":{"count":1,"items":[{"createdAt":"2026-11-10T19:07:22.000Z","deletedAt":null,"id":1,"updatedAt":"2026-11-10T19:07:22.000Z","done":true,"title":"Read the NodeC docs"}]}}
 ```
 
-Search, sort and pick fields:
+Then try searching, with sorting and picking of specific fields:
 
 ```bash
 curl -g 'localhost:3000/tasks?filters[title][$like]=%25app%25&orderBy[id]=desc&select[]=id&select[]=title'
 ```
 
-Delete one - it's a soft delete, so it disappears from the results but stays in the table with a `deletedAt`:
+Delete a task - it's a soft delete, so it disappears from the results but stays in the table with a timestamp set for `deletedAt`:
 
 ```bash
 curl -X DELETE localhost:3000/tasks -H 'content-type: application/json' -d '{"filters":{"id":3}}'
 curl -g 'localhost:3000/tasks?findAll=true'
 ```
 
-And send something invalid, to see the validation:
+You can also send something invalid to see the validation in action:
 
 ```bash
 curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{}'
@@ -520,6 +552,7 @@ curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{}'
 > [!WARNING]
 > Query string values are strings, and SQLite doesn't match the string `false` against a boolean column - use `0` and `1` for booleans in filters.
 
+
 ## What just happened
 
 - The **data service** turned the request's `filters`, `orderBy`, `select` and pagination into SQL - see [Query filters](./Data/query-filters.md).
@@ -527,7 +560,8 @@ curl -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{}'
 - The **controller** validated every request against its DTO, and mapped errors to `{ error, statusCode }` - see [Controllers](./Overview/controllers.md).
 - Around all of it, the **API module** ran the request pipeline - see [Request lifecycle](./Overview/request-lifecycle.md).
 
-## Running the finished app
+
+## Running the premade finished app
 
 From a clone of the repository:
 
@@ -539,6 +573,7 @@ npm run generate:datasource-files
 npm run migration:run
 npm start
 ```
+
 
 ## Next steps
 

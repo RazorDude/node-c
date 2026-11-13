@@ -7,12 +7,13 @@ This family of packages has 2 main goals:
 - To speed up development as much as possible while maintaining high quality.
 - To provide a robust and standardized way of building back-end applications with Node and NestJS.
 
-Node-C provides a clean, reliable and customizable back-end setup out of the box, at the cost of being opinionated.
+Node-C provides a clean, reliable and customizable back-end setup out of the box.
 
 Whether you're coding by hand or using AI, you get to focus on building your project, instead of spending time or tokens building the tools you need to build a project.
 
 > [!TIP]
 > **New here?** Build a working REST API in about 15 minutes with the [First steps](./first-steps.md) tutorial - it needs nothing but Node.js.
+
 
 ## Features
 
@@ -24,14 +25,6 @@ Whether you're coding by hand or using AI, you get to focus on building your pro
 - **Robust configuration** - your apps are configured using a fully typed, rich configuration object, which provides deeply granular level of control. Support for overrides using config profiles (development, staging, production) come out of the box.
 - **Full coverage via E2E tests** - the reference app's e2e suite runs real requests against real databases.
 
-## Overview
-
-NodeC leverages NestJS's module system to expose 3 types of modules and a range of services for each type. These types are:
-- Data - where the code related to any kind of data processing lives. That includes modules for both permanent storage (such as databases) and cache (such as key-value stores).
-- Domain - the modules here contain your business logic, split by domain. They work with the Data modules and with each other.
-- Api - these modules expose different sets of endpoints for external communication. They trigger your business logic by working with the Domain modules, and do not have access to the Data modules.
-
-See the First steps page below for practical examples, or jump straight to Layers and modules for a deep-dive on Node-C's 3-layer Domain-Driven architecture.
 
 ## Table of Contents
 
