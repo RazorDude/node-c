@@ -1,8 +1,8 @@
 # Domain Services
 
-A domain entity service (`DomainEntityService` from `@node-c/core`) is where an entity's business logic lives. It wraps a main data service and, optionally, additional ones, and is what controllers and other domain services call. Out of the box it already has `find`, `findOne`, `create`, `bulkCreate`, `update` and `delete` - you add or override only what's specific to your domain.
+A domain entity service (`DomainEntityService` from `@node-c/core`) is where an entity's business logic lives. It wraps a main data service for the entity and, optionally, additional data services for the same entity. It is what controllers and other domain services call. Out of the box, it already has `find`, `findOne`, `create`, `bulkCreate`, `update` and `delete` - you add or override only what's specific to your domain.
 
-The smallest one, from [First steps](../first-steps.md):
+Lets examine the smallest possible domain entity service, the one from [First steps](../first-steps.md):
 
 ```typescript
 @Injectable()
@@ -15,7 +15,7 @@ export class DomainTasksService extends DomainEntityService<DataDBTask, DataDBTa
 
 ## Anatomy
 
-A domain service with a Redis cache as an additional data service:
+A domain service with a SQLLite data service as the main one, and a Redis cache as an additional data service:
 
 ```typescript
 @Injectable()
@@ -38,22 +38,22 @@ export class DomainCoursePlatformDelegatedCoursesService extends DomainEntitySer
 Constructor arguments:
 1. `dataEntityService` - the main data service (`'main'` in `dataServices`)
 2. `defaultMethods` - the enabled methods; `undefined` means `DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS` (`bulkCreate`, `create`, `delete`, `find`, `findOne`, `update`). A method that's not in the list throws `Method <name> not implemented for class ...`.
-3. `logger`
+3. `logger` - the app's logger service, from `@node-c/core`.
 4. `additionalDataEntityServices` - the other data services, by name. The names are what `dataServices` and `optionsOverridesByService` use.
 
-Register the service by exporting it from the domain module's services index file (the export name must end with `Service`).
+The service is registered in and exported by the domain module class. For that to work, its file must be added as an export to the services index file for the module, and the class name must end with `Service`.
 
 ## Methods and options
 
-Every method takes the public options (and data, for creates and updates), plus an optional **private options** argument:
+Every method takes an options arg and an optional **private options** argument. For creates and updates, there is also a data argument in the start:
 
 ```typescript
-find(options: DomainFindOptions, privateOptions?)
-findOne(options: DomainFindOneOptions, privateOptions?)
-create(data, options?, privateOptions?)
-bulkCreate(data[], options?, privateOptions?)
-update(data, options, privateOptions?)
-delete(options, privateOptions?)
+find(options: DomainFindOptions, privateOptions?: DomainFindPrivateOptions): Promise<DomainFindResult<Entity>>
+findOne(options: DomainFindOneOptions, privateOptions?: DomainFindOnePrivateOptions): Promise<DomainFindOneResult<Entity>>
+create(data: Partial<Entity>, options?: DomainCreateOptions, privateOptions?: DomainCreatePrivateOptions): Promise<DomainCreateResult<Entity>>
+bulkCreate(data[]: Partial<Entity>[], options?: DomainBulkCreateOptions, privateOptions?: DomainBulkCreatePrivateOptions): Promise<DomainBulkCreateResult<Entity>>
+update(data: Partial<Entity>, options: DomainUpdateOptions, privateOptions?: DomainUpdatePrivateOptions): Promise<DomainUpdateResult<Entity>>
+delete(options: DomainDeleteOptions, privateOptions?: DomainDeletePrivateOptions): Promise<DomainDeleteResult<Entity>>
 ```
 
 - **Public options** can come from an API request: `filters`, `include`, `select`, `orderBy`, `page`, ... plus the multi-service options `dataServices`, `optionsOverridesByService` and `saveAdditionalResultsInFirstService` (see [Multiple data services](../Fundamentals/multiple-data-services.md)).
@@ -91,7 +91,7 @@ To turn off a default method entirely, leave it out of `defaultMethods`, and the
 
 Add a normal method and call the data services directly, or the default methods. `IAMUsersService.getUserWithPermissionsData` in the reference app is an example: it calls `this.findOne` with the relations the permissions need and a cache-first `dataServices` setup, then flattens the permissions into `currentPermissions`.
 
-To expose a custom method over HTTP, add a custom route to the controller (see [Controllers](./controllers.md#custom-routes)) and give it permissions - its access control resource is the handler's name.
+To expose a custom method over HTTP, add a custom route to the controller (see [Controllers](./controllers.md#custom-routes)) and give it permissions - its access control resource is the method's name.
 
 > [!TIP]
 > Keep business rules here, not in controllers or data services. Controllers should only map the request to a domain call, and data services should only talk to their storage.

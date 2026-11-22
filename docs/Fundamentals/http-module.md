@@ -4,7 +4,7 @@
 
 ## Defining an API module
 
-An API with only public routes needs nothing but its controllers:
+Let's take a look at one of the API modules from the First Steps app. It only has public routes, so it's very simple:
 
 ```typescript
 @Module({})
@@ -22,7 +22,7 @@ APITasksModule.register(APITasksModule.moduleOptions)
 
 Its routes must be listed in `config.api.tasks.anonymousAccessRoutes` - any other request gets a 401, because there's nothing to authenticate it with.
 
-An API with logins and permissions also provides the IAM services:
+Let's take a look at another API module, this time with logins and permissions. On top of the controller, the module also provides the IAM services:
 
 ```typescript
 @Module({})

@@ -23,8 +23,8 @@ flowchart TD
 
 | Layer | Contains | Talks to |
 |---|---|---|
-| **Data** | Entities and data entity services - one service per entity and storage | the storage |
-| **Domain** | Domain entity services - your business logic, one service per entity and domain | data services, other domain services |
+| **Data** | Entities and their data entity services. Every entity has its own data service for each storage it's saved in | the storage |
+| **Domain** | Domain entity services, which hold your business logic. Every entity has its own domain service in each domain module that uses it | data services, other domain services |
 | **API** | Controllers, plus the request pipeline (authorization, access control, validation, errors) | domain services only - never the data layer |
 
 ## One entity through all three layers

@@ -30,12 +30,10 @@ data: {
   - Otherwise, the update/delete runs directly with the parsed filters.
 - **Errors.** Only some database errors are mapped to `ApplicationError`s with status 400:
   - `ER_DUP_ENTRY`, `ER_NO_DEFAULT_FOR_FIELD`, `ER_NO_REFERENCED_ROW`, `ER_NO_REFERENCED_ROW_2`, `SQLITE_CONSTRAINT` and its `_CHECK`, `_FOREIGNKEY`, `_NOTNULL`, `_PRIMARYKEY` and `_UNIQUE` variants → `[RBDEntityService][<CODE>]: <message>.`
-  - Postgres unique violations → `<table>: <column> needs to be unique`
-  - any other database error is rethrown as is, and becomes a 500 through the REST API.
 
 ## Transactions
 
-All RDB methods accept a `transactionManager` (a TypeORM `EntityManager`) in their options, and `forceTransaction: true` to open one if none is given. To run several operations in one transaction, open it once and pass the manager down:
+All RDB methods accept an optional `transactionManager` (a TypeORM `EntityManager`) in their options, and `forceTransaction: true` to open one if none is given. To run several operations in one transaction, open it once and pass the manager down:
 
 ```typescript
 async update(data: DataDBUsersUpdateUserData, options: UpdateOptions): Promise<DataUpdateResult<DataDBUser>> {

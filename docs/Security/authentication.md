@@ -96,7 +96,7 @@ Each auth service has a default config for its two steps (`getUserAuthentication
 | `authReturnsTokens`, `useReturnedTokens`, `useReturnedTokensAsLocal`, `decodeReturnedTokens` | complete | Handling of tokens returned by the auth service (keep them inside the local tokens, use them *as* the local tokens, decode them for user data) |
 | `skipCompleteStepAllowedOnNoMFA` | initiate | Issue the tokens right after initiate when no MFA was used, without running complete |
 | `stepResultPublicFields` | both | Fields of the step result returned to the client when more steps are needed (e.g. `authorizationCodeRequestURL`) |
-| `cache.populate`, `cache.use`, `cache.settings` | both | Save step data (e.g. the PKCE verifier) in the auth cache, keyed by e.g. `state`, and restore it in the next step |
+| `cache.populate`, `cache.use`, `cache.settings` | both | Save step data (e.g. the PKCE verifier) in the auth cache under a key such as `state`, and restore it in the next step |
 
 The step data is stored by the data service passed to the authentication manager as `dataUsersAuthCacheService` - `userStepDataItems` in the reference app's `cacheAuth` module.
 
@@ -146,7 +146,7 @@ Config (`authServiceSettings.<authType>.nodeC`): `baseUrl`, `initiateEndpoint`/`
 
 ## Where tokens are stored
 
-`IAMTokenManagerService` stores every issued token through a tokens domain service - in the reference app, a Redis entity in `cacheAuth` (`apps/test/src/data/cacheAuth/entities/tokens`) with the primary keys `userId` + `type` and `isArray: true`, so each user has one list per token type. Issuing a new token of a type replaces the user's previously stored ones (`purgeOldFromData`). This doesn't end older sessions, though: `checkAccessTokenExistenceLocally` only checks that the user has *a* stored access token, not that it's the one in the request, so an older token stays valid until it expires. The store entry's TTL is derived from the token expiry and `accessTokenExpiryStorageTTLMultiplier` / `refreshTokenExpiryStorageTTLMultiplier`.
+`IAMTokenManagerService` stores every issued token through a tokens domain service - in the reference app, a Redis entity in `cacheAuth` (`apps/test/src/data/cacheAuth/entities/tokens`) with the primary keys `userId` + `type` and `isArray: true`. This means that every user has a separate list of stored tokens for each token type. Issuing a new token of a type replaces the user's previously stored ones (`purgeOldFromData`). This doesn't end older sessions, though: `checkAccessTokenExistenceLocally` only checks that the user has *a* stored access token, not that it's the one in the request, so an older token stays valid until it expires. The store entry's TTL is derived from the token expiry and `accessTokenExpiryStorageTTLMultiplier` / `refreshTokenExpiryStorageTTLMultiplier`.
 
 ## Authenticating requests
 

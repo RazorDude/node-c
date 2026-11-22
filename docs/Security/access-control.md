@@ -38,7 +38,7 @@ Permission fields:
 
 ## How the user's permissions are loaded
 
-The users domain service's `getUserWithPermissionsData` loads the user with `assignedRoles.permissions` (and any relations the permissions need, such as `assignedCourses` in the reference app), then flattens the permissions into `user.currentPermissions`, keyed by permission id. The authorization middleware puts the user in `req.locals.user` - either from the token payload or, if `localSearchForUsersEnabledOnAuthorization` is enabled for the API module, by loading it on every request.
+The users domain service's `getUserWithPermissionsData` loads the user with `assignedRoles.permissions` (and any relations the permissions need, such as `assignedCourses` in the reference app), then flattens the permissions into `user.currentPermissions` - an object whose keys are the permission ids. The authorization middleware puts the user in `req.locals.user` - either from the token payload or, if `localSearchForUsersEnabledOnAuthorization` is enabled for the API module, by loading it on every request.
 
 Any field referenced by a permission's `userFieldName` (e.g. `assignedCourses.id`) **must be loaded on that user object**, otherwise the check fails (see the FGA rules below).
 

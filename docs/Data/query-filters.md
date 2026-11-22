@@ -45,7 +45,10 @@ Rules:
 Soft-deleted rows are excluded by default. `withDeleted` is a *private* option - only code calling the data service can pass it, not the REST API.
 
 > [!WARNING]
-> Through the REST API, filters come from the query string, so their values are strings and `qs` only parses 5 levels deep. A relation used in `filters`, `select` or `orderBy` that isn't in `include` fails with `Forbidden include item`.
+> Through the REST API, filters come from the query string, so their values are strings and `qs` only parses 5 levels deep.
+
+> [!WARNING]
+> A relation used in `filters`, `select` or `orderBy` that isn't in `include` fails with `Forbidden include item`.
 
 > [!TIP]
 > Access control can add to, narrow or remove `filters` and `include` before they reach the data layer. When results differ from what the request asked for, check the permission's input rules (see [Access Control](../Security/access-control.md)).

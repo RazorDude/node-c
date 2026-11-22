@@ -1,6 +1,6 @@
 # ClickHouse
 
-`@node-c/data-clickhouse` is meant for append-mostly data such as audit logs. In the reference app, it stores `userLoginLogs` in the audit database. `ClickHouseDBEntityService` extends the RDB entity service, so filters work the same way (see [Query filters](./query-filters.md)). To define an entity, see [Defining entities](./entities.md).
+`@node-c/data-clickhouse` is meant for append-mostly data such as audit logs. For example, in the reference app, it stores `userLoginLogs` in the audit database. `ClickHouseDBEntityService` extends the RDB entity service, so filters work the same way (see [Query filters](./query-filters.md)). To define an entity, see [Defining entities](./entities.md).
 
 ## Supported operations
 

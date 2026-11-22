@@ -1,8 +1,8 @@
 # Configuration and Startup
 
-Every NodeC module reads its settings from one config object, so a data module, a domain module and an API module are configured the same way - and secrets never have to live in code. The object is built at startup from TypeScript files and environment variables, and `NodeCApp.start` then turns your app modules into running NestJS applications.
+Every NodeC module reads its settings from a single config object. A data module, a domain module and an API module are configured the same way - and secrets never have to live in code. The object is built at startup from TypeScript files and environment variables, and `NodeCApp.start` then turns your app modules into running NestJS applications.
 
-The whole config of the [First steps](../first-steps.md) app:
+Let's take a look at the common and local dev config files of the [First steps](../first-steps.md) app:
 
 ```typescript
 // src/config/config.common.ts - the same in every environment
@@ -53,7 +53,7 @@ The config files are passed to `ConfigProviderModule.register({ appConfigs, ... 
 
 ## Environment variables
 
-Each module declares its type with one variable, then gets its fields from others:
+Each module declares its type with a specific environment variable, then gets its fields from the other environment variables that share the same name prefix:
 
 ```bash
 # <CATEGORY>_<MODULE>_MODULE_TYPE=<TYPE>
@@ -94,7 +94,7 @@ await NodeCApp.start([AppModule], {
 
 `NodeCApp.start` (`packages/core/src/app.ts`):
 1. Loads the config. With `generateOrmConfig`, it also writes the TypeORM datasource files for the RDB data modules (see [Defining entities](../Data/entities.md#datasource-files-and-migrations)).
-2. Creates one NestJS application per app module:
+2. Creates a NestJS application for each app module:
    - with an API module name whose config has `hostname` and `port` → an HTTP server listening there
    - with an API module name but no listener config → an app without a listener
    - without an API module name → an application context (no HTTP), e.g. for workers
@@ -104,7 +104,7 @@ Each app module is a NestJS module importing:
 - `ConfigProviderModule.register(options)` and `LoggerModule.register(...)` - both global
 - the data modules (`DataDBModule.register()`, `DataCacheModule.register()`, ...)
 - the domain modules it needs
-- **one** HTTP API module (`APIXModule.register(APIXModule.moduleOptions)`)
+- **exactly one** HTTP API module (`APIXModule.register(APIXModule.moduleOptions)`)
 
 The reference app shares the common imports in `AppModuleBase.imports` and runs four app modules in one process - one per API.
 

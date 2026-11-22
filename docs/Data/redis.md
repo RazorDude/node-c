@@ -1,8 +1,8 @@
 # Redis / Valkey
 
-`@node-c/data-redis` stores entities as key-value data. The reference app uses it as a cache in front of the RDB services (the `cache` data service) and to store auth data (tokens and login step data, in `cacheAuth`). To define a Redis entity, see [Defining entities](./entities.md).
+`@node-c/data-redis` stores entities as key-value data. For example, the reference app uses it as a cache in front of the RDB services (the `cache` data service) and to store auth data (tokens and login step data, in `cacheAuth`). To define a Redis entity, see [Defining entities](./entities.md).
 
-## How items are stored
+## How items are stored and queried
 
 An item's **handle** is built from the entity's `storeKey` and its primary key values, in `primaryOrder` order:
 
@@ -10,14 +10,13 @@ An item's **handle** is built from the entity's `storeKey` and its primary key v
 <entity storeKey><delimiter><pk0><delimiter><pk1>...      e.g. token-5-access
 ```
 
-What happens with the handle depends on `useHashmap` (default `true`):
+Where the item is saved depends on the data module's `useHashmap` setting, which defaults to `true`.
 
-| | `useHashmap: true` (default) | `useHashmap: false` |
-|---|---|---|
-| Layout | One hash per data module, named after the module's `storeKey`. Each item is a field of it, keyed by its handle. | One key per item: `<module storeKey><delimiter><handle>` |
-| TTL | **Not applied** - items never expire | Applied with `EXPIRE` (seconds) |
+With `useHashmap: true`, the data module keeps all of its items in a single Redis hash, and the name of that hash is the module's `storeKey`. Each item is saved as a field of the hash - the field's name is the item's handle, and the field's value is the item itself. TTLs are **not applied** in this mode, so the items never expire.
 
-The reference app sets `useHashmap: false` for all of its Redis modules.
+With `useHashmap: false`, every item is saved under its own Redis key. The key is made of the module's `storeKey`, the delimiter and the item's handle (`<module storeKey><delimiter><handle>`). In this mode, the TTL is applied to each key with `EXPIRE`, in seconds.
+
+Here's how querying and filtering works on the redis repository & store level (the sub-layer after the redisEntityService methods):
 
 ```mermaid
 flowchart LR
@@ -52,7 +51,7 @@ The host, port, user, password and sentinel password come from the environment (
 ## Behaviour
 
 - **Primary keys required.** `update` and `delete` require the primary key filters by default (`requirePrimaryKeys: true`). Without them, the call fails with `The primary key field <name> is required when requirePrimaryKeys is set to true.`
-- **`individualSearch`** (defaults to the repository's setting) - when enabled, every item is read directly by its handle, built from the primary key filters (an array of primary key values gives one handle per value), and all primary keys are required. When disabled, missing or array primary keys become `*` wildcards and the store is scanned with a cursor.
+- **`individualSearch`** (defaults to the repository's setting) - when enabled, every item is read directly by its handle, built from the primary key filters, and all primary keys are required. If a primary key filter is an array of values, a separate handle is built for each of the values. When disabled, missing or array primary keys become `*` wildcards and the store is scanned with a cursor.
 - `find` needs either `filters` or `findAll: true`. Non-primary-key filters are applied to the loaded items.
 - **Generated primary keys** - `integer` keys use a counter stored at `increment<delimiter><storeKey><delimiter><column>`; `uuidv4` keys get a new UUID (with `-` replaced by `_` when the delimiter is `-`). `isArray` entities need their primary keys provided.
 - Transactions use a `transactionId` (Redis `MULTI`), not a transaction manager.

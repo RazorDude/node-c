@@ -1,6 +1,8 @@
 # Defining Entities
 
-Every storage has its own way of describing an entity, but the wiring is the same: an **entity** (schema), an **entity module** that registers the repository, and an **entity service** that the domain layer uses. All three live in one folder, and the data module picks them up from its index file.
+Every storage type has its own way of describing an entity, but the architecture is the same: an **entity** (schema), an **entity module** that registers the repository, and an **entity service** that the domain layer uses. All three live in one folder, and the data module picks them up from its index file.
+
+This allows us to create a unified set of interfaces across the different data storage types, which are storage type agnostic. We get a single programmatic API for all storage types - the `DataEntityService`.
 
 ```
 apps/test/src/data/<dataModule>/
@@ -79,26 +81,41 @@ export class DataDBCoursesService extends TypeORMDBEntityService<DataDBCourse> {
 }
 ```
 
+Key things to keep in mind:
 - The shared columns are in `apps/test/src/data/dbBase/entity/base.db.entity.ts`. A column with `deleteDate: true` turns on soft deletes for the entity.
 - Relation names (`courseType`, `lessons`, ...) are what `include` refers to (see [Query filters](./query-filters.md)).
 - Files named `*.subscriber.*` in an entity folder are added to the generated ormconfig as subscribers.
-- The data module connects with `TypeORMDBModule.register({ connectionName, folderData, moduleClass, moduleName })`. Its config is `config.data.<moduleName>`: `type` (`mysql`, `postgres` or `aurora`), `connectionName`, `failOnConnectionError` (default `true` - when `false`, a failed connection is logged and retried every minute) and `typeormExtraOptions`. The credentials come from the environment (see [Configuration](../Fundamentals/configuration.md)).
+- The data module connects with `TypeORMDBModule.register({ connectionName, folderData, moduleClass, moduleName })`. 
+- The module's config is `config.data.<moduleName>` and it has the following connection options:
+  - `type` - the connection type. Can be `mysql`, `postgres`, `sqlite` or `aurora` (support for more sql DB types to be added).
+  -`connectionName` - the unique name of the connection, generated automatically.
+  - `failOnConnectionError` - default `true`. When `false`, a failed connection is logged and retried every minute
+  - `typeormExtraOptions` - additional options for the typeorm constructor.
+- The credentials come from the environment, rather than the config file (see [Configuration](../Fundamentals/configuration.md)).
 
 ### Datasource files and migrations
 
-TypeORM's CLI needs a datasource file per data module and environment. They're generated at the project root as `ormconfig-<module>-<env>.json` and `datasource-<module>-<env>.js`:
+TypeORM's CLI needs a datasource file per data module and environment. They're generated at the project root as `ormconfig-<module>-<env>.json` and `datasource-<module>-<env>.js`. There are 2 ways of generating them:
 - on startup, when `NodeCApp.start` gets `generateOrmConfig: true` (for every RDB data module except ClickHouse, with the default paths `src/data/<module>/{entities,migrations,seeds}`), or
 - manually: `DATASOURCE_ENV=<env> MODULE_NAMES=<module> npm run generate:datasource-files:local` in `apps/test`.
 
 The datasource file loads the entities from the module's **built** index file (`dist/data/<module>/entities/<module>.entities.js`), and the migrations and `seeds/common` from `dist` too. Both files contain the database credentials in plain text - they're gitignored (`datasource*`, `ormconfig*`), so keep it that way.
 
+Generating and running a migration is simple once you have the datasource files generated:
+
 ```bash
 cd apps/test
+# build the project to get the latest entities
 npm run build
+# generate the migration
 DATASOURCE_ENV=local MIGRATION_NAME=src/data/db/migrations/AddCourseLevels npm run typeorm:migration:generate:db
+# rebuild the project with the new migration
 npm run build
+# run the migration
 DATASOURCE_ENV=local npm run typeorm:migration:run:db
 ```
+
+When
 
 ## Redis and Valkey
 

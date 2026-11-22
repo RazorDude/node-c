@@ -30,13 +30,13 @@ sequenceDiagram
   AC-->>C: response
 ```
 
-1. **Authorization middleware** (`HTTPAuthorizationMiddleware`) - lets anonymous routes through, checks API keys, or verifies the bearer token (or the `sid` cookie), renews it if needed and sets `req.locals.user`. A failure ends the request with an empty 401. See [Authentication](../Security/authentication.md).
-2. **Access control interceptor** (`HTTPAccessControlInterceptor`) - checks the user's permissions for the module, controller and handler, mutates the request input if a permission says so, and throws a 403 if access is denied. Skipped for anonymous and API-key routes. See [Access Control](../Security/access-control.md).
+1. **Authorization middleware** (`HTTPAuthorizationMiddleware`) - lets requests on routes that don't require auth through (anonymous routes), checks API keys, or verifies the bearer token (or the `sid` cookie), renews it if needed and sets `req.locals.user`. A failure ends the request with an empty 401. See [Authentication](../Security/authentication.md).
+2. **Access control interceptor (inbound)** (`HTTPAccessControlInterceptor`) - checks the user's permissions for the module, controller and handler, mutates the request input if a permission says so, and throws a 403 if access is denied. Skipped for anonymous and API-key routes. See [Access Control](../Security/access-control.md).
 3. **Error interceptor** (`HTTPErrorInterceptor`) - wraps the handler and turns any error it throws into a `{ error, statusCode }` response.
 4. **Controller handler** - checks that the route is enabled, validates the body or query string against the route's DTO, and calls the domain service.
 5. **Domain service** - runs the method on its first data service and, if requested, on additional ones (see [Multiple data services](../Fundamentals/multiple-data-services.md)).
-6. **Data service(s)** - turn the options into queries for their storage (see [Query filters](../Data/query-filters.md)).
-7. **On the way back**, the access control interceptor applies the output rules of the permission that granted access - e.g. removing fields the user may not see.
+6. **Data service(s)** - turn the options into queries and mutations for their corresponding storage (see [Query filters](../Data/query-filters.md)).
+7. **Access control interceptor (outbound)**, the access control interceptor applies the output rules of the permission that granted access - e.g. removing fields the user may not see.
 
 > [!WARNING]
 > Validation runs *inside* the handler, so access control sees the **raw** request input: query string values are still strings, and unknown properties haven't been stripped yet.
