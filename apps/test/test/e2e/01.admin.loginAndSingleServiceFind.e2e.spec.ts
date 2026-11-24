@@ -1,22 +1,29 @@
 /* oxlint-disable eslint/no-magic-numbers -- Test file. */
-/* oxlint-disable eslint/no-console -- Test file. */
+
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 
 import { HttpStatus } from '@nestjs/common';
 
 import { HttpMethod } from '@node-c/core';
 
+import * as dotenv from 'dotenv';
+import { Redis } from 'ioredis';
 import { describe, expect, it } from 'vitest';
 
 import { TestUserLoginLog } from './common/e2e.common.definitions.js';
 import {
   BASE_URL_COURSE_PLATFORM_DELEGATED,
   BASE_URL_SSO,
+  decodeTokenPayload,
   findUserByEmail
 } from './common/e2e.common.js';
 
 describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-service find', () => {
   let adminAccessToken = '';
+  let adminIdToken = '';
   let adminLoginLogs: TestUserLoginLog[] = [];
+  let adminRefreshToken = '';
   let adminUserId = 0;
   it('should log the admin user in successfully', async () => {
     const response = await fetch(`${BASE_URL_SSO}/users/auth/userLocal`, {
@@ -35,6 +42,54 @@ describe('NodeC.Apps.Test.CoursePlatformDelegated - admin - login and single-ser
     expect(responseBody).toHaveProperty('idToken');
     expect(responseBody).toHaveProperty('refreshToken');
     adminAccessToken = responseBody.accessToken;
+    adminIdToken = responseBody.idToken;
+    adminRefreshToken = responseBody.refreshToken;
+  });
+  it('should issue the tokens with the configured lifetimes', () => {
+    const accessTokenPayload = decodeTokenPayload(adminAccessToken);
+    const idTokenPayload = decodeTokenPayload(adminIdToken);
+    const refreshTokenPayload = decodeTokenPayload(adminRefreshToken);
+    // accessTokenExpiryTimeInMinutes is 1, and the id token gets the access token's lifetime
+    expect(accessTokenPayload.exp - accessTokenPayload.iat).toEqual(60);
+    expect(idTokenPayload.exp - idTokenPayload.iat).toEqual(60);
+    // refreshTokenExpiryTimeInHours is 24
+    expect(refreshTokenPayload.exp - refreshTokenPayload.iat).toEqual(
+      24 * 60 * 60
+    );
+  });
+  it('should keep the issued tokens in the token store for as long as the refresh token is valid', async () => {
+    const envVars = dotenv.parse(
+      (
+        await fs.readFile(
+          path.resolve(
+            import.meta.dirname,
+            '../../envFiles/.endToEndTests.env'
+          )
+        )
+      ).toString()
+    );
+    const client = new Redis({
+      host: envVars.DATA_CACHE_AUTH_HOST,
+      lazyConnect: true,
+      password: envVars.DATA_CACHE_AUTH_PASSWORD,
+      port: Number.parseInt(envVars.DATA_CACHE_AUTH_PORT!, 10)
+    });
+    await client.connect();
+    const { userId } = decodeTokenPayload(adminAccessToken).data;
+    // <Constants.DATA_CACHE_AUTH_STORE_KEY>:<tokens entity storeKey>:<userId>:<type>
+    const keyPrefix = `store-cache-auth:token:${userId}`;
+    const accessTokenTTL = await client.ttl(`${keyPrefix}:access`);
+    const idTokenTTL = await client.ttl(`${keyPrefix}:id`);
+    const refreshTokenTTL = await client.ttl(`${keyPrefix}:refresh`);
+    client.disconnect();
+    // the TTLs are in seconds - the refresh token's lifetime (24 hours) times the storage TTL multipliers (1)
+    const expectedTTL = 24 * 60 * 60;
+    expect(accessTokenTTL).toBeGreaterThan(expectedTTL - 60);
+    expect(accessTokenTTL).toBeLessThanOrEqual(expectedTTL);
+    expect(idTokenTTL).toBeGreaterThan(expectedTTL - 60);
+    expect(idTokenTTL).toBeLessThanOrEqual(expectedTTL);
+    expect(refreshTokenTTL).toBeGreaterThan(expectedTTL - 60);
+    expect(refreshTokenTTL).toBeLessThanOrEqual(expectedTTL);
   });
   // throw a not found error when calling a default route that is not enabled in the controller
   it('should throw a not found error when calling a default route that is not enabled in the controller', async () => {

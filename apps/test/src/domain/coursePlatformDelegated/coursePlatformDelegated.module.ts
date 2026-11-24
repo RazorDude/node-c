@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 
 import {
-  loadDynamicModules,
-  Constants as NodeCCoreConstants
+  Constants as NodeCCoreConstants,
+  loadDynamicModules
 } from '@node-c/core';
 
 import { Constants } from '../../common/definitions/common.constants.js';

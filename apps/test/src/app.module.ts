@@ -18,6 +18,7 @@ import ld from 'lodash';
 import { APICoursePlatformDelegatedModule } from './api/coursePlatformDelegated/coursePlatformDelegated.module.js';
 import { APICoursePlatformFederatedModule } from './api/coursePlatformFederated/coursePlatformFederated.module.js';
 import { APICoursePlatformStandaloneModule } from './api/coursePlatformStandalone/coursePlatformStandalone.module.js';
+import { APIOktaMockModule } from './api/oktaMock/oktaMock.module.js';
 import { APISSOModule } from './api/sso/sso.module.js';
 import * as AppConfigs from './config/config.js';
 import { DataAuditModule } from './data/audit/audit.module.js';
@@ -31,6 +32,7 @@ import { DomainCoursePlatformDelegatedModule } from './domain/coursePlatformDele
 import { DomainCoursePlatformFederatedModule } from './domain/coursePlatformFederated/coursePlatformFederated.module.js';
 import { DomainCoursePlatformStandaloneModule } from './domain/coursePlatformStandalone/coursePlatformStandalone.module.js';
 import { DomainIAMModule } from './domain/iam/iam.module.js';
+import { DomainOktaMockModule } from './domain/oktaMock/oktaMock.module.js';
 
 const processEnv: NodeJS.ProcessEnv = env;
 
@@ -118,7 +120,11 @@ export class AppModuleBase {
       pinoParams: {
         ...DEFAULT_PINO_PARAMS,
         pinoHttp: {
-          ...DEFAULT_PINO_PARAMS.pinoHttp,
+          // the default pinoHttp params are an object, not the [options, stream] tuple
+          ...(DEFAULT_PINO_PARAMS.pinoHttp as Exclude<
+            Params['pinoHttp'],
+            unknown[]
+          >),
           transport: {
             targets: [
               {
@@ -186,6 +192,16 @@ export class AppModuleCoursePlatformFederated extends AppModuleBase {}
   ]
 })
 export class AppModuleCoursePlatformStandalone extends AppModuleBase {}
+
+// a mock of the Okta API, for the e2e tests - it reads the Okta settings of the IAM domain module from the config
+@Module({
+  imports: [
+    ...AppModuleBase.imports,
+    APIOktaMockModule.register(APIOktaMockModule.moduleOptions),
+    DomainOktaMockModule
+  ]
+})
+export class AppModuleOktaMock extends AppModuleBase {}
 
 @Module({
   imports: [

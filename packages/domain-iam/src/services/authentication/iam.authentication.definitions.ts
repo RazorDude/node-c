@@ -23,11 +23,13 @@ export enum IAMAuthenticationType {
 
 export interface IAMAuthenticationCompleteResult {
   accessToken?: string;
+  // in seconds, like the OAuth2 expires_in
   accessTokenExpiresIn?: number;
   idToken?: string;
   mfaUsed?: boolean;
   mfaValid?: boolean;
   refreshToken?: string;
+  // in seconds, like the OAuth2 expires_in
   refreshTokenExpiresIn?: number;
   valid: boolean;
 }

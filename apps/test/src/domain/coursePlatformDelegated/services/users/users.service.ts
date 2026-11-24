@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
-  DataDefaultData,
   DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
+  DataDefaultData,
   DomainEntityService,
   DomainEntityServiceDefaultData,
   LoggerService

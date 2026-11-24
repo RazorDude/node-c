@@ -61,7 +61,9 @@ export async function teardown(): Promise<void> {
     });
     console.info('[TestLog]: Server process at port 2071 killed successfully.');
   }
+  // oxlint-disable-next-line no-use-before-define
   await teardownProcess(2061);
+  // oxlint-disable-next-line no-use-before-define
   await teardownProcess(2051);
   let ssoServerMatches: RegExpMatchArray | null = null;
   try {
@@ -448,7 +450,7 @@ export async function setup(): Promise<void> {
       reject();
     });
     const appLogsInterval = setInterval(() => {
-      (async () => {
+      (async (): Promise<void> => {
         try {
           const fileData = (await fs.readFile(logsFilePath)).toString();
           if (fileData.match(/Nest\sapplication\ssuccessfully\sstarted/)) {

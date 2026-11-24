@@ -4,8 +4,8 @@ import { TokenType as TokenTypeBase } from '@node-c/domain-iam';
 import ld from 'lodash';
 
 import {
-  getDefaultEntitySchema,
-  type RedisEntity
+  type RedisEntity,
+  getDefaultEntitySchema
 } from '../../../cacheBase/entity/base.redis.entity.js';
 
 export type DataCacheAuthTokenType = TokenTypeBase;

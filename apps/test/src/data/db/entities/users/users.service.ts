@@ -93,10 +93,10 @@ export class DataDBUsersService extends TypeORMDBEntityService<
     data: DataDBUsersUpdateUserData,
     options: UpdateOptions
   ): Promise<DataUpdateResult<DataDBUser>> {
-    const { transactionManager } = options || {};
+    const { transactionManager } = options;
     if (!transactionManager) {
       return this.repository.manager.transaction((tm) =>
-        this.update(data, { ...(options || {}), transactionManager: tm })
+        this.update(data, { ...options, transactionManager: tm })
       );
     }
     const updateResult = await TypeORMDBEntityService.prototype.update.call(

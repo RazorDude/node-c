@@ -10,17 +10,19 @@ import {
   AppModuleCoursePlatformDelegated,
   AppModuleCoursePlatformFederated,
   AppModuleCoursePlatformStandalone,
+  AppModuleOktaMock,
   AppModuleSSO
 } from './app.module.js';
 import { Constants } from './common/definitions/common.constants.js';
 
-(async () => {
+(async (): Promise<void> => {
   const apps = await NodeCApp.start(
     [
       AppModuleCoursePlatformDelegated,
       AppModuleCoursePlatformFederated,
       AppModuleCoursePlatformStandalone,
-      AppModuleSSO
+      AppModuleSSO,
+      AppModuleOktaMock
     ] as unknown as DynamicModule[],
     {
       apiModulesOptions: [
@@ -36,7 +38,11 @@ import { Constants } from './common/definitions/common.constants.js';
           appModuleIndex: 2,
           apiModuleName: Constants.API_COURSE_PLATFORM_STANDALONE_MODULE_NAME
         },
-        { appModuleIndex: 3, apiModuleName: Constants.API_SSO_MODULE_NAME }
+        { appModuleIndex: 3, apiModuleName: Constants.API_SSO_MODULE_NAME },
+        {
+          appModuleIndex: 4,
+          apiModuleName: Constants.API_OKTA_MOCK_MODULE_NAME
+        }
       ],
       generateOrmConfig: true,
       loadConfigOptions: AppModuleBase.configProviderModuleRegisterOptions
@@ -45,7 +51,9 @@ import { Constants } from './common/definitions/common.constants.js';
   // On kill -INT (e.g. from the e2e teardown), close the apps and exit normally,
   // so that V8 writes the coverage data from NODE_V8_COVERAGE before the process ends.
   process.once('SIGINT', () => {
-    Promise.all(apps.map((app) => app.close())).finally(() => process.exit(0));
+    void Promise.all(apps.map((app) => app.close())).finally(() =>
+      process.exit(0)
+    );
   });
 })().then(
   () => console.info('App started.'),

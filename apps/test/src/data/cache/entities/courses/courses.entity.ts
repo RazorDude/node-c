@@ -1,8 +1,8 @@
 import { type EntitySchema, EntitySchemaColumnType } from '@node-c/data-redis';
 
 import {
-  getDefaultEntitySchema,
-  type RedisEntity
+  type RedisEntity,
+  getDefaultEntitySchema
 } from '../../../cacheBase/entity/base.redis.entity.js';
 import { DataDBCourse } from '../../../db/entities/db.entities.js';
 

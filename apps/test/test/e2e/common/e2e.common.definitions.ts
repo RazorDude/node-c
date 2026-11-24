@@ -8,6 +8,14 @@ export interface TestCourse {
   updatedAt?: string;
 }
 
+// the decoded payload of a token issued by the IAM module
+export interface TestTokenPayload {
+  data: { userId: number | string };
+  exp: number;
+  iat: number;
+  iss: string;
+}
+
 export interface TestUser {
   email: string;
   firstName: string;

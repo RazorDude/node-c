@@ -46,9 +46,15 @@ apps/test/test/e2e/
   07.admin.delete.e2e.spec.ts
   08.user0.loginAndPermissions.e2e.spec.ts
   09.additionalUsers.noAccessChecks.e2e.spec.ts
+  10.federated.loginAndDelegatedParity.e2e.spec.ts
+  11.standalone.loginAndDelegatedParity.e2e.spec.ts
+  12.delegated.oktaLogin.e2e.spec.ts
   common/
-    e2e.common.ts              - BASE_URL_COURSE_PLATFORM_DELEGATED, BASE_URL_SSO, loginUser, findUserByEmail, findAllUserLoginLogs
-    e2e.common.definitions.ts  - TestCourse, TestUser, TestUserLoginLog
+    e2e.common.ts              - BASE_URL_COURSE_PLATFORM_DELEGATED, BASE_URL_COURSE_PLATFORM_FEDERATED,
+                                 BASE_URL_COURSE_PLATFORM_STANDALONE, BASE_URL_OKTA_MOCK, BASE_URL_SSO, loginUser,
+                                 findUserByEmail, findAllUserLoginLogs, requestCourses, decodeTokenPayload,
+                                 authorizeWithOktaMock
+    e2e.common.definitions.ts  - TestCourse, TestTokenPayload, TestUser, TestUserLoginLog
 ```
 
 - Only files matching `[0-9][0-9].*.e2e.spec.ts` are included.
@@ -79,7 +85,9 @@ The permissions are in the seeds in `apps/test/src/data/db/seeds/common` - see [
 - Put shared types in `common/e2e.common.definitions.ts`.
 
 > [!TIP]
-> The suite is a good map of what the framework does: filters, relations, multi-service reads, permissions and local logins all have tests in the numbered spec files. OAuth2/Okta logins and the token refresh flow aren't covered yet.
+> The suite is a good map of what the framework does: filters, relations, multi-service reads, permissions, local logins and Okta logins all have tests in the numbered spec files. The token refresh flow isn't covered yet.
+
+The Okta logins use the `oktaMock` API of the reference app (`apps/test/src/api/oktaMock`, port 2091) instead of Okta. It has no login page - the user is picked by the `login_hint` query param (`admin@node-c.com` or `user0@node-c.com`), and its tokens are signed with the client secret.
 
 ---
 

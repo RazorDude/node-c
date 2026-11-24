@@ -34,7 +34,6 @@ Permission fields:
 - `allowedOutputData: Record<string, unknown> | null`
 - `forbiddenOutputData: Record<string, unknown> | null`
 
-> Older versions used `authorizationPoints`, `userTypes`, `userTypeAuthorizationPoints`, `userTypeAssignedUsers`, `moduleNames`, `controllerNames` and `handlerNames`. These were renamed by the `PermissionsUpdates` and `PermissionsUpdate2` migrations - use the new names in any new SQL.
 
 ## How the user's permissions are loaded
 

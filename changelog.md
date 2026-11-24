@@ -18,6 +18,8 @@
   - Uses `better-sqlite3` instead of `sqlite3`, as TypeORM 1 dropped the `sqlite3` driver.
 - `apps/test`
   - The package now uses `@node-c/nestjs-pino`.
+  - Added the `oktaMock` API - a mock of Okta's authorization and token endpoints, used by the SSO app's Okta logins in the e2e tests.
+  - Added e2e tests for the federated and standalone APIs, and for the Okta login.
 - `packages/api-http`
   - The authorization, authentication manager and token manager providers of the HTTP API modules are now optional, so that an API module with only anonymous routes needs no IAM setup.
 - `packages/api-rest`
@@ -45,6 +47,7 @@
   - Added `RDBType.SQLite`.
   - Added `typeORMTypesByRDBType` - the TypeORM driver types for the `RDBType` values that differ from them (`aurora` → `mysql`, `sqlite` → `better-sqlite3`). Used for the generated ormconfig and datasource files.
   - The default pino params now create the `logs` folder if it doesn't exist, instead of crashing at startup.
+  - Fixed `httpRequest` throwing on error responses - axios threw for every non-2xx status, so `hasError` and `throwOnError` were never used. It now returns the error responses (`validateStatus` can still be overridden through `axiosConfig`).
 - `packages/data-clickhouse`
   - SQL injection prevention fixes to the query builder.
 - `packages/data-rdb`
@@ -64,6 +67,10 @@
 - `packages/data-typeorm`
   - BREAKING: Upgraded to TypeORM 1. `RDBType.SQLite` connections now use the `better-sqlite3` driver.
 - `packages/domain-iam`
+  - Fixed the default access token lifetime - without `accessTokenExpiryTimeInMinutes`, access tokens now expire after 24 hours, instead of 24 minutes.
+  - Fixed the logins through consumer services with `useReturnedTokensAsLocal` (e.g. federated logins) - they failed when the provider didn't return a `refreshTokenExpiresIn`. The external refresh token is now always added to the local refresh token, and the default lifetime is used when the provider doesn't return one.
+  - Fixed the token lifetimes from external providers. The `accessTokenExpiresIn` and `refreshTokenExpiresIn` step results (e.g. the OAuth2 `expires_in`) and the passthrough `externalAccessTokenExpiresIn` and `externalRefreshTokenExpiresIn` are in seconds, and were used as minutes - a one-hour Okta token resulted in a 60-hour local token.
+  - Fixed the tokens' store TTLs - they were calculated in minutes, but the store uses seconds, so the stored tokens were removed 60 times too early (e.g. after 24 minutes, instead of 24 hours).
   - Fix for the permissions system check, so that the proper error is thrown when overriding non-array input values.
   - Fix for the matchInputValues method, so that the valuesToSet variable is declared correctly for each valuePath.
 - `packages/nestjs-pino`

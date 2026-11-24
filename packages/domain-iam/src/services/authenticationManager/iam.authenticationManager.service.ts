@@ -205,7 +205,7 @@ export class IAMAuthenticationManagerService<
         externalRefreshToken = actualStepResult.refreshToken;
       }
     }
-    // 6. Token management. In this case, we will definitely have the user, or will be force to create it.
+    // 6. Token management. In this case, we will definitely have the user, or will be forced to create it.
     if (issueTokens) {
       if (!tokenManager) {
         throw new ApplicationError(
@@ -229,16 +229,19 @@ export class IAMAuthenticationManagerService<
       // 6.1. Create a local refresh token and save it. The payload contains the external refresh token, if it exists.
       if (externalRefreshToken || !externalAccessToken) {
         let externalTokenData: GenericObject = {};
+        if (externalRefreshToken) {
+          externalTokenData = {
+            externalToken: externalRefreshToken,
+            externalTokenAuthService: authType as IAMAuthenticationType
+          };
+        }
         if (
           externalRefreshToken &&
           'refreshTokenExpiresIn' in actualStepResult &&
           actualStepResult.refreshTokenExpiresIn
         ) {
-          externalTokenData = {
-            externalToken: externalRefreshToken,
-            externalTokenAuthService: authType as IAMAuthenticationType
-          };
-          refreshTokenExpiresIn = actualStepResult.refreshTokenExpiresIn;
+          // the step results have the expiry in seconds
+          refreshTokenExpiresIn = actualStepResult.refreshTokenExpiresIn / 60;
         } else if (!rememberUser) {
           refreshTokenExpiresIn =
             (refreshTokenExpiryTimeInHours
@@ -246,8 +249,10 @@ export class IAMAuthenticationManagerService<
               : Constants.DEFAULT_REFRESH_TOKEN_EXPIRY_TIME_IN_HOURS) * 60;
         }
         if (refreshTokenExpiresIn) {
+          // the store's TTL is in seconds
           refreshTokenTTL =
             refreshTokenExpiresIn *
+            60 *
             (moduleConfig.refreshTokenExpiryStorageTTLMultiplier ||
               Constants.DEFAULT_REFRESH_TOKEN_STORAGE_TTL_MULTIPLIER);
         }
@@ -274,17 +279,20 @@ export class IAMAuthenticationManagerService<
         refreshToken = localRefreshToken;
       }
       // 6.2. Create a local access token and save it. The payload contains the external access token, if it exists.
+      // the step results have the expiry in seconds
       const accessTokenExpiresIn =
         (externalAccessToken &&
           'accessTokenExpiresIn' in actualStepResult &&
-          actualStepResult.accessTokenExpiresIn) ||
+          actualStepResult.accessTokenExpiresIn &&
+          actualStepResult.accessTokenExpiresIn / 60) ||
         accessTokenExpiryTimeInMinutes ||
-        Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS;
+        Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS * 60;
+      // the store's TTL is in seconds
       const accessTokenTTL =
-        refreshTokenExpiresIn ||
-        accessTokenExpiresIn *
-          (moduleConfig.accessTokenExpiryStorageTTLMultiplier ||
-            Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER);
+        (refreshTokenExpiresIn ||
+          accessTokenExpiresIn *
+            (moduleConfig.accessTokenExpiryStorageTTLMultiplier ||
+              Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER)) * 60;
       const {
         result: { token: accessToken }
       } = await tokenManager.create(

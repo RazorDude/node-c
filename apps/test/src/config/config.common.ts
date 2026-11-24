@@ -38,6 +38,12 @@ export const appConfigCommon: AppConfigCommon = {
         '/users/auth/userLocal': [HttpMethod.PATCH, HttpMethod.POST]
       }
     },
+    oktaMock: {
+      anonymousAccessRoutes: {
+        '/oauth2/v1/authorize': [HttpMethod.GET],
+        '/oauth2/v1/token': [HttpMethod.POST]
+      }
+    },
     sso: {
       allowedApiKeyRoutes: {
         '/users/auth/passthrough': [HttpMethod.PATCH, HttpMethod.POST]

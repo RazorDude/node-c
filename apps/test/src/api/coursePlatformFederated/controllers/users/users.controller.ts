@@ -6,10 +6,11 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  UseInterceptors
 } from '@nestjs/common';
 
-import { AccessControlContext } from '@node-c/api-http';
+import { AccessControlContext, HTTPErrorInterceptor } from '@node-c/api-http';
 import {
   AppConfigDomainIAMAuthenticationStep,
   LoggerService
@@ -23,6 +24,7 @@ import { APICoursePlatformFederatedUsersAuthenticateOAuth2CallbackDto } from './
 @AccessControlContext('CoursePlatformUsersEntityController')
 @Injectable()
 @Controller('users')
+@UseInterceptors(HTTPErrorInterceptor)
 export class APICoursePlatformFederatedUsersEntityController {
   constructor(
     protected domainAuthenticationManagerService: DomainCoursePlatformFederatedAuthenticationManagerService,

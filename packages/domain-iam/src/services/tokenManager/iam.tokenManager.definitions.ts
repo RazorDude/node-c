@@ -34,6 +34,7 @@ export type TokenManagerCreateOptions = {
   persist?: boolean;
   purgeOldFromData?: boolean;
   tokenContentOnlyFields?: string[];
+  // in seconds
   ttl?: number;
   useExternalTokenAsLocal?: boolean;
 } & DomainCreateOptions;

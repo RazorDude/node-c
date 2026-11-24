@@ -1,3 +1,5 @@
+/* oxlint-disable eslint/no-magic-numbers -- Seed data. */
+
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AdditionalUsersNoAccessChecks1779746793020

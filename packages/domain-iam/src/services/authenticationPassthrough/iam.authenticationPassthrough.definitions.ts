@@ -11,9 +11,11 @@ import {
 export type IAMAuthenticationPassthroughCompleteData =
   IAMAuthenticationCompleteData & {
     externalAccessToken?: string;
+    // in seconds
     externalAccessTokenExpiresIn?: number;
     externalIdToken?: string;
     externalRefreshToken?: string;
+    // in seconds
     externalRefreshTokenExpiresIn?: number;
   };
 

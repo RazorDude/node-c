@@ -1,3 +1,5 @@
+/* oxlint-disable eslint/no-magic-numbers -- Seed data. */
+
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialData1741714457251 implements MigrationInterface {
