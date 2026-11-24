@@ -7,8 +7,9 @@ import {
   DBEntitySchema
 } from '../../../dbBase/entity/base.db.entity.js';
 
-export interface DataDBPermission<Role extends DBEntity = DBEntity>
-  extends DBEntity {
+export interface DataDBPermission<
+  Role extends DBEntity = DBEntity
+> extends DBEntity {
   allowedInputData?: GenericObject;
   allowedOutputData?: GenericObject;
   forbiddenInputData?: GenericObject;

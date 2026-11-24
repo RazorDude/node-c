@@ -6,10 +6,11 @@ import * as NestjsPino from '@node-c/nestjs-pino';
 
 import { v4 as uuid } from 'uuid';
 
-export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
+// satisfies instead of a type annotation, so that pinoHttp keeps its object type and can be spread
+export const DEFAULT_PINO_PARAMS = {
   pinoHttp: {
     // autoLogging: false,
-    genReqId: () => uuid(),
+    genReqId: (): string => uuid(),
     quietReqLogger: true,
     quietResLogger: true,
     transport: {
@@ -30,7 +31,7 @@ export const DEFAULT_PINO_PARAMS: NestjsPino.Params = {
       ]
     }
   }
-};
+} satisfies NestjsPino.Params;
 
 @Injectable()
 export class LoggerService extends NestjsPino.Logger {

@@ -3,6 +3,7 @@ export * from './common/definitions/common.constants.js';
 export * from './common/definitions/common.definitions.js';
 export * from './common/utils/utils.checkRoutes.js';
 export * from './common/utils/utils.cleanUpAxiosError.js';
+export * from './decorators/http.decorators.accessControl.definitions.js';
 export * from './decorators/http.decorators.accessControl.js';
 export * from './filters/http.filtes.exception.js';
 export * from './interceptors/http.interceptors.accessControl.js';

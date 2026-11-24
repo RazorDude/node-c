@@ -107,7 +107,7 @@ export class ConfigProviderService<
     await fs.writeFile(
       path.join(projectRootPath, `ormconfig-${moduleName}-${environment}.json`),
       JSON.stringify(
-        ld.merge(data[moduleName], {
+        ld.merge({}, data[moduleName], {
           cli: {
             migrationsDir: migrationsPath
           },
@@ -227,13 +227,13 @@ export class ConfigProviderService<
       }
       const moduleFields = envKeys[moduleCategory as keyof typeof envKeys];
       const moduleType = envVars[envKey] as keyof typeof moduleFields;
-      if (!moduleFields[moduleType]) {
+      if (!(moduleType in moduleFields)) {
         continue;
       }
-      if (!moduleNamesByCategoryAndType[moduleCategory]) {
+      if (!(moduleCategory in moduleNamesByCategoryAndType)) {
         moduleNamesByCategoryAndType[moduleCategory] = {};
       }
-      if (!moduleNamesByCategoryAndType[moduleCategory][moduleType]) {
+      if (!(moduleType in moduleNamesByCategoryAndType[moduleCategory])) {
         moduleNamesByCategoryAndType[moduleCategory][moduleType] = [];
       }
       moduleNamesByCategoryAndType[moduleCategory][moduleType].push(moduleName);

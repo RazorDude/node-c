@@ -66,13 +66,13 @@ export class IAMAuthenticationUserLocalService<
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
         logger.error(
-          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${String(userIdentifierValue)}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
         logger.error(
-          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${String(userIdentifierValue)}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -127,7 +127,7 @@ export class IAMAuthenticationUserLocalService<
           validWithoutUser: false
         }
       };
-    return ld.merge(defaultConfig, steps || {});
+    return ld.merge(defaultConfig, steps);
   }
 
   async initiate(
@@ -171,7 +171,7 @@ export class IAMAuthenticationUserLocalService<
     }
     if (wrongPassword) {
       logger.error(
-        `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - wrong password.`
+        `[${moduleName}][${serviceName}]: Login attempt failed for user "${String(userIdentifierValue)}" - wrong password.`
       );
       throw new ApplicationError('Authentication failed.');
     }
@@ -179,13 +179,13 @@ export class IAMAuthenticationUserLocalService<
       const mfaService = mfaServices?.[mfaType];
       if (!mfaService) {
         logger.error(
-          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - MFA service ${mfaType} not configured.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${String(userIdentifierValue)}" - MFA service ${mfaType} not configured.`
         );
         throw new ApplicationError('Authentication failed.');
       }
       if (!mfaData) {
         logger.error(
-          `[${moduleName}][${serviceName}]: Login attempt failed for user "${userIdentifierValue}" - no MFA data provided.`
+          `[${moduleName}][${serviceName}]: Login attempt failed for user "${String(userIdentifierValue)}" - no MFA data provided.`
         );
         throw new ApplicationError('Authentication failed.');
       }

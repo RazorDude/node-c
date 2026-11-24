@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RelationFieldsWithAliases1794340998273
-  implements MigrationInterface
-{
+export class RelationFieldsWithAliases1794340998273 implements MigrationInterface {
   name = 'RelationFieldsWithAliases1794340998273';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

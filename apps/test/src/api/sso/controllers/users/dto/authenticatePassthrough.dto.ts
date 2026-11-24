@@ -44,13 +44,10 @@ export class SSOUsersAuthenticatePassthroughFiltersDto extends GenericObjectClas
   email: string;
 }
 
-export class SSOUsersAuthenticatePassthroughDto
-  implements
-    Omit<
-      IAMAuthenticationManagerAuthenticateOptions,
-      'auth' | 'mainFilterField'
-    >
-{
+export class SSOUsersAuthenticatePassthroughDto implements Omit<
+  IAMAuthenticationManagerAuthenticateOptions,
+  'auth' | 'mainFilterField'
+> {
   @IsDefined()
   @IsObject()
   @Type(() => SSOUsersAuthenticatePassthroughAuthDto)

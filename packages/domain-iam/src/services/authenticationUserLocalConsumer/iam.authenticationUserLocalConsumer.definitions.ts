@@ -32,4 +32,5 @@ export type IAMAuthenticationUserLocalConsumerInitiateOptions<
 
 export type IAMAuthenticationUserLocalConsumerInitiateResult =
   IAMAuthenticationUserLocalInitiateResult &
+    // oxlint-disable-next-line typescript/no-duplicate-type-constituents -- Kept separate on purpose, for future extension.
     IAMAuthenticationConsumerInitiateResult;

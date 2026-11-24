@@ -94,7 +94,7 @@ export class TypeORMDBModule {
               toRetry?: TypeOrmModuleOptions['toRetry'];
             } = {};
             if (!failOnConnectionError) {
-              dataSourceOptions.toRetry = () => {
+              dataSourceOptions.toRetry = (): boolean => {
                 const now = Date.now();
                 // 1 minute retry interval
                 if (Math.abs(lastRetryAt - now) > RETRY_INTERVAL_MS) {

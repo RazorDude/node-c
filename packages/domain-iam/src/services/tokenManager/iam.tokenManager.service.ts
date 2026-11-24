@@ -81,30 +81,38 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     if (type === TokenType.Access) {
       secret = moduleConfig.jwtAccessSecret;
       if (expiresInMinutes) {
-        signOptions.expiresIn = expiresInMinutes * 60;
+        signOptions.expiresIn =
+          expiresInMinutes * Constants.SECONDS_IN_A_MINUTE;
       } else if (moduleConfig.accessTokenExpiryTimeInMinutes) {
         signOptions.expiresIn =
-          moduleConfig.accessTokenExpiryTimeInMinutes * 60;
+          moduleConfig.accessTokenExpiryTimeInMinutes *
+          Constants.SECONDS_IN_A_MINUTE;
       }
     }
     // id token options: this intentionally uses the jwtAccessSecret and the jwtRefreshTokenExpiryTimeInMinutes
     else if (type === TokenType.Id) {
       secret = moduleConfig.jwtAccessSecret;
       if (expiresInMinutes) {
-        signOptions.expiresIn = expiresInMinutes * 60;
+        signOptions.expiresIn =
+          expiresInMinutes * Constants.SECONDS_IN_A_MINUTE;
       } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
         signOptions.expiresIn =
-          moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
+          moduleConfig.refreshTokenExpiryTimeInHours *
+          Constants.MINUTES_IN_AN_HOUR *
+          Constants.SECONDS_IN_A_MINUTE;
       }
     }
     // refresh token options
     else if (type === TokenType.Refresh) {
       secret = moduleConfig.jwtRefreshSecret;
       if (expiresInMinutes) {
-        signOptions.expiresIn = expiresInMinutes * 60;
+        signOptions.expiresIn =
+          expiresInMinutes * Constants.SECONDS_IN_A_MINUTE;
       } else if (moduleConfig.refreshTokenExpiryTimeInHours) {
         signOptions.expiresIn =
-          moduleConfig.refreshTokenExpiryTimeInHours * 60 * 60;
+          moduleConfig.refreshTokenExpiryTimeInHours *
+          Constants.MINUTES_IN_AN_HOUR *
+          Constants.SECONDS_IN_A_MINUTE;
       }
     } else {
       throw new ApplicationError(
@@ -352,7 +360,7 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     }
     if (content?.data) {
       let idTokenContent: DecodedTokenContent<TokenEntityFields> | undefined;
-      let identifierValue: unknown | undefined;
+      let identifierValue: unknown;
       // find and decode the id token, and add its data to the content
       if (identifierDataField) {
         if (!domainTokensEntityService) {
@@ -515,26 +523,26 @@ export class IAMTokenManagerService<TokenEntityFields extends object> {
     if (
       verifyExternal &&
       tokenPayload?.externalToken &&
-      tokenPayload?.externalTokenAuthService
+      tokenPayload.externalTokenAuthService
     ) {
       const authServiceConfig =
         moduleConfig.authServiceSettings?.[
-          tokenPayload?.externalTokenAuthService
+          tokenPayload.externalTokenAuthService
         ];
       if (
         authServiceConfig?.processExternalTokensOnVerify ||
         forceVerifyExternal
       ) {
         const authService =
-          this.authServices[tokenPayload?.externalTokenAuthService];
+          this.authServices[tokenPayload.externalTokenAuthService];
         if (!authService) {
           throw new ApplicationError(
-            `[IAMTokenManagerService.verify]: Auth service ${tokenPayload?.externalTokenAuthService} not configured.`
+            `[IAMTokenManagerService.verify]: Auth service ${tokenPayload.externalTokenAuthService} not configured.`
           );
         }
         returnData.externalTokenData =
           await authService.verifyExternalAccessToken({
-            accessToken: tokenPayload?.externalToken
+            accessToken: tokenPayload.externalToken
           });
       }
     }

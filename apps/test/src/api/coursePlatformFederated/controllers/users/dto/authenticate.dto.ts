@@ -47,9 +47,7 @@ export class APICoursePlatformFederatedUsersAuthenticateFiltersDto extends Gener
   email: string;
 }
 
-export class APICoursePlatformFederatedUsersAuthenticateDto
-  implements AuthenticateOptionsCustomFinal
-{
+export class APICoursePlatformFederatedUsersAuthenticateDto implements AuthenticateOptionsCustomFinal {
   @IsDefined()
   @IsObject()
   @Type(() => APICoursePlatformFederatedUsersAuthenticateAuthDto)

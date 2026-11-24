@@ -47,9 +47,7 @@ export class APICoursePlatformStandaloneUsersAuthenticateFiltersDto extends Gene
   email: string;
 }
 
-export class APICoursePlatformStandaloneUsersAuthenticateDto
-  implements AuthenticateOptionsCustomFinal
-{
+export class APICoursePlatformStandaloneUsersAuthenticateDto implements AuthenticateOptionsCustomFinal {
   @IsDefined()
   @IsObject()
   @Type(() => APICoursePlatformStandaloneUsersAuthenticateAuthDto)

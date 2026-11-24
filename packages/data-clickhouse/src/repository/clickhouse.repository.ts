@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 
 import { GenericObject } from '@node-c/core';
 import {
@@ -13,9 +13,9 @@ import * as ClickhouseRepositoryDefinitions from './clickhouse.repository.defini
 
 // TODO: save method
 @Injectable()
-export class ClickHouseDBRepository<Entity extends GenericObject<unknown>>
-  implements RDBRepository<Entity>
-{
+export class ClickHouseDBRepository<
+  Entity extends GenericObject<unknown>
+> implements RDBRepository<Entity> {
   readonly metadata: { name: string; tableName: string };
   readonly primaryKeys: string[];
   readonly target: string;

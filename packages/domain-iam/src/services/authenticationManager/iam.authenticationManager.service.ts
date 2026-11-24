@@ -7,8 +7,8 @@ import {
   DataEntityService,
   DomainEntityServiceDefaultData,
   GenericObject,
-  getNested,
   LoggerService,
+  getNested,
   setNested
 } from '@node-c/core';
 
@@ -47,12 +47,10 @@ import {
 // TODO: periodic checking of external access tokens and their revoking
 export class IAMAuthenticationManagerService<
   User extends object = object,
-  Data extends DomainEntityServiceDefaultData<
-    Partial<User>
-  > = DomainEntityServiceDefaultData<Partial<User>>,
-  DataEntityServiceData extends DataDefaultData<
-    Partial<User>
-  > = DataDefaultData<Partial<User>>
+  Data extends DomainEntityServiceDefaultData<Partial<User>> =
+    DomainEntityServiceDefaultData<Partial<User>>,
+  DataEntityServiceData extends DataDefaultData<Partial<User>> =
+    DataDefaultData<Partial<User>>
 > {
   // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
@@ -65,7 +63,11 @@ export class IAMAuthenticationManagerService<
         object,
         object
       >;
-    } & { [serviceName: string]: IAMAuthenticationService<object, object> },
+    } & {
+      [serviceName: string]:
+        | IAMAuthenticationService<object, object>
+        | undefined;
+    },
     protected configProvider: ConfigProviderService,
     protected logger: LoggerService,
     protected moduleName: string,
@@ -106,10 +108,7 @@ export class IAMAuthenticationManagerService<
       `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt started${options.step ? ` for step ${options.step}` : ''}.`
     );
     // 1. Make sure the authentication service actually exists - local, oauth2, etc.
-    const authService = this.authServices[authType] as IAMAuthenticationService<
-      object,
-      object
-    >;
+    const authService = this.authServices[authType];
     if (!authService) {
       logger.info(
         `[Domain.${moduleName}.AuthenticationManager][${authType}]: No authService ${authType} found.`
@@ -123,7 +122,7 @@ export class IAMAuthenticationManagerService<
     let issueTokens = false;
     let step: AppConfigDomainIAMAuthenticationStep;
     let userFilterField: string | undefined;
-    let userFilterValue: unknown | undefined;
+    let userFilterValue: unknown;
     // 3. Prepare the step behavior based on the configuration.
     // 3.1. Complete step
     if (options.step === AppConfigDomainIAMAuthenticationStep.Complete) {
@@ -196,7 +195,7 @@ export class IAMAuthenticationManagerService<
       // Make sure we have an accessToken in the response and set the access and refresh tokens in variables for later use.
       if (!actualStepResult.accessToken) {
         logger.info(
-          `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt failed for ${userFilterField} ${userFilterValue} - no accessToken returned from the authService and useReturnedTokens is set to true.`
+          `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt failed for ${userFilterField} ${String(userFilterValue)} - no accessToken returned from the authService and useReturnedTokens is set to true.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -241,18 +240,21 @@ export class IAMAuthenticationManagerService<
           actualStepResult.refreshTokenExpiresIn
         ) {
           // the step results have the expiry in seconds
-          refreshTokenExpiresIn = actualStepResult.refreshTokenExpiresIn / 60;
+          refreshTokenExpiresIn =
+            actualStepResult.refreshTokenExpiresIn /
+            Constants.SECONDS_IN_A_MINUTE;
         } else if (!rememberUser) {
           refreshTokenExpiresIn =
             (refreshTokenExpiryTimeInHours
               ? refreshTokenExpiryTimeInHours
-              : Constants.DEFAULT_REFRESH_TOKEN_EXPIRY_TIME_IN_HOURS) * 60;
+              : Constants.DEFAULT_REFRESH_TOKEN_EXPIRY_TIME_IN_HOURS) *
+            Constants.MINUTES_IN_AN_HOUR;
         }
         if (refreshTokenExpiresIn) {
           // the store's TTL is in seconds
           refreshTokenTTL =
             refreshTokenExpiresIn *
-            60 *
+            Constants.SECONDS_IN_A_MINUTE *
             (moduleConfig.refreshTokenExpiryStorageTTLMultiplier ||
               Constants.DEFAULT_REFRESH_TOKEN_STORAGE_TTL_MULTIPLIER);
         }
@@ -284,15 +286,18 @@ export class IAMAuthenticationManagerService<
         (externalAccessToken &&
           'accessTokenExpiresIn' in actualStepResult &&
           actualStepResult.accessTokenExpiresIn &&
-          actualStepResult.accessTokenExpiresIn / 60) ||
+          actualStepResult.accessTokenExpiresIn /
+            Constants.SECONDS_IN_A_MINUTE) ||
         accessTokenExpiryTimeInMinutes ||
-        Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS * 60;
+        Constants.DEFAULT_ACCESS_TOKEN_EXPIRY_TIME_IN_HOURS *
+          Constants.MINUTES_IN_AN_HOUR;
       // the store's TTL is in seconds
       const accessTokenTTL =
         (refreshTokenExpiresIn ||
           accessTokenExpiresIn *
             (moduleConfig.accessTokenExpiryStorageTTLMultiplier ||
-              Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER)) * 60;
+              Constants.DEFAULT_ACCESS_TOKEN_STORAGE_TTL_MULTIPLIER)) *
+        Constants.SECONDS_IN_A_MINUTE;
       const {
         result: { token: accessToken }
       } = await tokenManager.create(
@@ -341,7 +346,7 @@ export class IAMAuthenticationManagerService<
         }
       );
       logger.info(
-        `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt successful for ${userFilterField} ${userFilterValue}.`
+        `[Domain.${moduleName}.AuthenticationManager][${authType}]: Login attempt successful for ${userFilterField} ${String(userFilterValue)}.`
       );
       return { accessToken, idToken, refreshToken, user };
     }
@@ -397,7 +402,7 @@ export class IAMAuthenticationManagerService<
     let runFindUserInExternalTokenPayloads = false;
     let user: IAMUserWithPermissionsData<User, unknown> | null = null;
     let userFilterField: string | undefined;
-    let userFilterValue: unknown | undefined;
+    let userFilterValue: unknown;
     // 1. Find the user based on the provided filters, if enabled.
     if (findUser && findUserBeforeAuth) {
       if (!hasFilters) {
@@ -414,7 +419,7 @@ export class IAMAuthenticationManagerService<
       });
       if (!user) {
         logger.info(
-          `${logPrefix}[Part 1]: Login attempt failed for ${userFilterField} ${userFilterValue} - user not found.`
+          `${logPrefix}[Part 1]: Login attempt failed for ${userFilterField} ${String(userFilterValue)} - user not found.`
         );
         throw new ApplicationError('Authentication failed.');
       }
@@ -581,7 +586,7 @@ export class IAMAuthenticationManagerService<
     }
     if (validWithoutUser !== true && !user) {
       logger.info(
-        `${logPrefix}[Part 7]: Login attempt failed ${userFilterField && userFilterValue ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
+        `${logPrefix}[Part 7]: Login attempt failed ${userFilterField && (typeof userFilterValue === 'string' || typeof userFilterValue === 'number') ? `for ${userFilterField} ${userFilterValue} ` : ''}- user not found.`
       );
       throw new ApplicationError('Authentication failed.');
     }
@@ -664,7 +669,6 @@ export class IAMAuthenticationManagerService<
       const mainFilterFieldResult = await domainUsersEntityService.findOne({
         filters
       });
-      // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
       if (!mainFilterFieldResult.result) {
         return null;
       }

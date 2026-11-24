@@ -16,9 +16,7 @@ import { DataDBUsersService } from './users.service.js';
 
 // TODO: move the password properties logic away and into the domain
 @Injectable()
-export class DataDBUserSubscriber
-  implements EntitySubscriberInterface<DataDBUser>
-{
+export class DataDBUserSubscriber implements EntitySubscriberInterface<DataDBUser> {
   constructor(
     protected configProvider: ConfigProviderService,
     @Inject(Constants.RDB_REPOSITORY_DATASOURCE)

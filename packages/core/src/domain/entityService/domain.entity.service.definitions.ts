@@ -29,7 +29,7 @@ export type DomainBaseOptions<Options> = Options &
 export interface DomainBaseOptionsForAdditionalServices<Options> {
   dataServices?: DomainDataServicesKey[];
   optionsOverridesByService?: GenericObject<
-    Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides
+    (Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides) | undefined
   >;
 }
 
@@ -51,7 +51,7 @@ export interface DomainBaseOptionsWithSearchData<
 
 export interface DomainBaseResult<Result> {
   result: Result;
-  resultsByService?: GenericObject<Result>;
+  resultsByService?: GenericObject<Result | undefined>;
 }
 
 export type DomainBulkCreatePrivateOptions = DataBulkCreatePrivateOptions;
@@ -136,7 +136,7 @@ export interface DomainRunMethodInAdditionalServicesOptions<Options> {
   methodName: string;
   optionsArgIndex?: number;
   optionsOverridesByService?: GenericObject<
-    Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides
+    (Partial<Options> & DomainBaseAdditionalServiceOptionsOverrides) | undefined
   >;
 }
 

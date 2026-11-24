@@ -5,8 +5,8 @@ import {
   ConfigProviderService,
   GenericObject,
   HttpMethod,
-  httpRequest,
-  LoggerService
+  LoggerService,
+  httpRequest
 } from '@node-c/core';
 
 import ld from 'lodash';
@@ -114,7 +114,7 @@ export class IAMAuthenticationConsumerService<
           validWithoutUser: true
         }
       };
-    return ld.merge(defaultConfig, steps || {});
+    return ld.merge(defaultConfig, steps);
   }
 
   // oxlint-disable-next-line eslint/require-await -- Abstract method.

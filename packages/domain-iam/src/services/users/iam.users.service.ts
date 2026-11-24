@@ -4,26 +4,26 @@ import { Injectable } from '@nestjs/common';
 
 import {
   ApplicationError,
+  DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DataDefaultData,
   DataEntityService,
-  DOMAIN_ENTITY_SERVICE_DEFAULT_METHODS,
   DomainEntityService,
   DomainEntityServiceDefaultData,
   LoggerService
 } from '@node-c/core';
 
 import {
+  IAMUserWithPermissionsData,
   IAMUsersGetUserWithPermissionsDataOptions,
-  IAMUsersGetUserWithPermissionsDataPrivateOptions,
-  IAMUserWithPermissionsData
+  IAMUsersGetUserWithPermissionsDataPrivateOptions
 } from './iam.users.definitions.js';
 
 @Injectable()
 export class IAMUsersService<
   User extends object,
   EntityService extends DataEntityService<User, DataEntityServiceData>,
-  Data extends
-    DomainEntityServiceDefaultData<User> = DomainEntityServiceDefaultData<User>,
+  Data extends DomainEntityServiceDefaultData<User> =
+    DomainEntityServiceDefaultData<User>,
   AdditionalEntityServices extends
     | Record<string, DataEntityService<Partial<User>, DataDefaultData<object>>>
     | undefined = undefined,

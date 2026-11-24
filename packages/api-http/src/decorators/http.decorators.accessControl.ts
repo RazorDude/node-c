@@ -1,9 +1,8 @@
 import { Reflector } from '@nestjs/core';
 
-import { GenericObject } from '@node-c/core';
+import { AccessControlContextValue } from './http.decorators.accessControl.definitions.js';
 
-export const AccessControlContext = Reflector.createDecorator<
-  string | { context: string; resourceMap: GenericObject<string> }
->();
+export const AccessControlContext =
+  Reflector.createDecorator<AccessControlContextValue>();
 
 export const AccessControlResource = Reflector.createDecorator<string>();

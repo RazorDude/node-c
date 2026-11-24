@@ -21,10 +21,10 @@ import {
   Constants as NodeCDomainIAMConstants
 } from '@node-c/domain-iam';
 
-// oxlint-disable-next-line typescript/no-deprecated -- False positive.
-import { map, Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { RequestWithLocals } from '../common/definitions/common.definitions.js';
+import { AccessControlContextValue } from '../decorators/http.decorators.accessControl.definitions.js';
 import {
   AccessControlContext,
   AccessControlResource
@@ -36,8 +36,7 @@ import {
 @Injectable()
 export class HTTPAccessControlInterceptor<
   User extends IAMUserWithPermissionsData<unknown, unknown>
-> implements NestInterceptor
-{
+> implements NestInterceptor {
   constructor(
     protected logger: LoggerService,
     protected moduleRef: ModuleRef,
@@ -49,7 +48,7 @@ export class HTTPAccessControlInterceptor<
     next: CallHandler
   ): Promise<Observable<unknown>> {
     const [req]: [RequestWithLocals<User>, unknown] = context.getArgs();
-    const locals = req.locals!;
+    const locals = req.locals;
     if (!locals) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
@@ -71,16 +70,16 @@ export class HTTPAccessControlInterceptor<
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-    const resourceContextData = reflector.get(
-      AccessControlContext,
-      contextClass
-    );
+    // undefined when the controller has no AccessControlContext decorator
+    const resourceContextData = reflector.get<
+      AccessControlContextValue | undefined
+    >(AccessControlContext.KEY, contextClass);
     const accessControlOptions = {
       moduleName,
       resource:
         reflector.get(AccessControlResource, contextHandler) ||
         (typeof resourceContextData !== 'string' &&
-          resourceContextData?.resourceMap?.[contextHandler.name]) ||
+          resourceContextData?.resourceMap[contextHandler.name]) ||
         contextHandler.name,
       resourceContext:
         (typeof resourceContextData === 'string' && resourceContextData) ||

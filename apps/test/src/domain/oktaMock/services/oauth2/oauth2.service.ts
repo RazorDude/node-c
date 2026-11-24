@@ -3,16 +3,18 @@ import * as crypto from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 
 import {
-  type AppConfigDomainIAM,
   ApplicationError,
   ConfigProviderService,
   type GenericObject
 } from '@node-c/core';
 
+import { Constants } from '../../../../common/definitions/common.constants.js';
+import { AppConfigTestApp } from '../../../../common/definitions/common.definitions.js';
+import { DataOktaMockUsersService } from '../../../../data/oktaMock/entities/users/users.service.js';
+
 import {
   DomainOktaMockOAuth2AuthorizationCodeData,
   DomainOktaMockOAuth2AuthorizeData,
-  DomainOktaMockOAuth2Settings,
   DomainOktaMockOAuth2TokenData,
   DomainOktaMockOAuth2TokenResult
 } from './oauth2.definitions.js';
@@ -24,25 +26,17 @@ import {
  */
 @Injectable()
 export class DomainOktaMockOAuth2Service {
-  static readonly ACCESS_TOKEN_EXPIRES_IN_SECONDS = 3600;
-  static readonly AUTHORIZATION_CODE_LENGTH_IN_BYTES = 16;
-  static readonly MILLISECONDS_IN_A_SECOND = 1000;
-  static readonly REFRESH_TOKEN_LENGTH_IN_BYTES = 32;
-  // the users that can log in, and their names - an object whose keys are the emails
-  static readonly USERS: Record<string, string> = {
-    'admin@node-c.com': 'Admin User',
-    'user0@node-c.com': 'User Zero'
-  };
-
   protected authorizationCodes = new Map<
     string,
     DomainOktaMockOAuth2AuthorizationCodeData
   >();
 
-  constructor(protected configProvider: ConfigProviderService) {}
+  constructor(
+    protected configProvider: ConfigProviderService<AppConfigTestApp>,
+    protected dataUsersService: DataOktaMockUsersService
+  ) {}
 
-  // returns the URL to redirect the user to - with a code, or with an error
-  authorize(data: DomainOktaMockOAuth2AuthorizeData): string {
+  async authorize(data: DomainOktaMockOAuth2AuthorizeData): Promise<string> {
     const {
       clientId,
       codeChallenge,
@@ -54,26 +48,29 @@ export class DomainOktaMockOAuth2Service {
       scope,
       state
     } = data;
-    const settings = this.getSettings();
-    const name = loginHint ? DomainOktaMockOAuth2Service.USERS[loginHint] : '';
+    const { domain } = this.configProvider.config;
+    const oktaSettings = domain.iam.authServiceSettings!.okta.oauth2!;
+    const user = loginHint
+      ? await this.dataUsersService.findOne({ filters: { email: loginHint } })
+      : null;
     const redirectUrl = new URL(redirectUri);
     redirectUrl.searchParams.set('state', state);
     if (
       responseType !== 'code' ||
-      clientId !== settings.clientId ||
+      clientId !== oktaSettings.clientId ||
       codeChallengeMethod !== 'S256' ||
-      !name
+      !user
     ) {
       redirectUrl.searchParams.set('error', 'access_denied');
       return redirectUrl.toString();
     }
     const code = crypto
-      .randomBytes(DomainOktaMockOAuth2Service.AUTHORIZATION_CODE_LENGTH_IN_BYTES)
+      .randomBytes(domain.oktaMock.authorizationCodeLengthInBytes)
       .toString('hex');
     this.authorizationCodes.set(code, {
       codeChallenge,
-      email: loginHint!,
-      name,
+      email: user.email,
+      name: user.name,
       nonce,
       redirectUri,
       scope
@@ -82,16 +79,71 @@ export class DomainOktaMockOAuth2Service {
     return redirectUrl.toString();
   }
 
-  protected getSettings(): DomainOktaMockOAuth2Settings {
-    // the mock serves the Okta logins of the IAM domain module (the SSO app)
-    const { accessTokenAudiences, clientId, clientSecret, issuerUri } = (
-      this.configProvider.config.domain.iam as AppConfigDomainIAM
-    ).authServiceSettings!.okta.oauth2!;
+  exchangeAuthorizationCode(
+    data: DomainOktaMockOAuth2TokenData
+  ): DomainOktaMockOAuth2TokenResult {
+    const { domain } = this.configProvider.config;
+    const { accessTokenExpiresInSeconds, refreshTokenLengthInBytes } =
+      domain.oktaMock;
+    const { accessTokenAudiences, clientId, clientSecret, issuerUri } =
+      domain.iam.authServiceSettings!.okta.oauth2!;
+    const code = data.code || '';
+    const codeData = this.authorizationCodes.get(code);
+    // an authorization code can only be used once
+    this.authorizationCodes.delete(code);
+    const expectedCodeChallenge = crypto
+      .createHash('sha256')
+      .update(data.codeVerifier || '')
+      .digest('base64url');
+    if (
+      data.grantType !== 'authorization_code' ||
+      data.clientId !== clientId ||
+      data.clientSecret !== clientSecret ||
+      !codeData ||
+      codeData.redirectUri !== data.redirectUri ||
+      codeData.codeChallenge !== expectedCodeChallenge
+    ) {
+      throw new ApplicationError(
+        'invalid_grant: The authorization code is invalid or has expired.'
+      );
+    }
+    const { email, name, nonce, scope } = codeData;
+    const issuedAt = Math.floor(
+      Date.now() / Constants.MILLISECONDS_IN_A_SECOND
+    );
+    const expiresAt = issuedAt + accessTokenExpiresInSeconds;
     return {
-      audience: accessTokenAudiences![0],
-      clientId,
-      clientSecret,
-      issuer: issuerUri!
+      access_token: this.signToken(
+        {
+          aud: accessTokenAudiences![0],
+          cid: clientId,
+          exp: expiresAt,
+          iat: issuedAt,
+          iss: issuerUri,
+          scp: scope.split(' '),
+          sub: email
+        },
+        clientSecret
+      ),
+      expires_in: accessTokenExpiresInSeconds,
+      id_token: this.signToken(
+        {
+          aud: clientId,
+          email,
+          exp: expiresAt,
+          iat: issuedAt,
+          iss: issuerUri,
+          name,
+          nonce,
+          sub: email
+        },
+        clientSecret
+      ),
+      refresh_token: crypto
+        .randomBytes(refreshTokenLengthInBytes)
+        .toString('hex'),
+      scope,
+      token_type: 'Bearer'
     };
   }
 
@@ -105,68 +157,5 @@ export class DomainOktaMockOAuth2Service {
       .update(`${header}.${body}`)
       .digest('base64url');
     return `${header}.${body}.${signature}`;
-  }
-
-  token(data: DomainOktaMockOAuth2TokenData): DomainOktaMockOAuth2TokenResult {
-    const settings = this.getSettings();
-    const code = data.code || '';
-    const codeData = this.authorizationCodes.get(code);
-    // an authorization code can only be used once
-    this.authorizationCodes.delete(code);
-    const expectedCodeChallenge = crypto
-      .createHash('sha256')
-      .update(data.codeVerifier || '')
-      .digest('base64url');
-    if (
-      data.grantType !== 'authorization_code' ||
-      data.clientId !== settings.clientId ||
-      data.clientSecret !== settings.clientSecret ||
-      !codeData ||
-      codeData.redirectUri !== data.redirectUri ||
-      codeData.codeChallenge !== expectedCodeChallenge
-    ) {
-      throw new ApplicationError(
-        'invalid_grant: The authorization code is invalid or has expired.'
-      );
-    }
-    const { email, name, nonce, scope } = codeData;
-    const issuedAt = Math.floor(
-      Date.now() / DomainOktaMockOAuth2Service.MILLISECONDS_IN_A_SECOND
-    );
-    const expiresAt =
-      issuedAt + DomainOktaMockOAuth2Service.ACCESS_TOKEN_EXPIRES_IN_SECONDS;
-    return {
-      access_token: this.signToken(
-        {
-          aud: settings.audience,
-          cid: settings.clientId,
-          exp: expiresAt,
-          iat: issuedAt,
-          iss: settings.issuer,
-          scp: scope.split(' '),
-          sub: email
-        },
-        settings.clientSecret
-      ),
-      expires_in: DomainOktaMockOAuth2Service.ACCESS_TOKEN_EXPIRES_IN_SECONDS,
-      id_token: this.signToken(
-        {
-          aud: settings.clientId,
-          email,
-          exp: expiresAt,
-          iat: issuedAt,
-          iss: settings.issuer,
-          name,
-          nonce,
-          sub: email
-        },
-        settings.clientSecret
-      ),
-      refresh_token: crypto
-        .randomBytes(DomainOktaMockOAuth2Service.REFRESH_TOKEN_LENGTH_IN_BYTES)
-        .toString('hex'),
-      scope,
-      token_type: 'Bearer'
-    };
   }
 }

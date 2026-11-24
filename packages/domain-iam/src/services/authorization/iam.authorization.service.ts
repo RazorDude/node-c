@@ -4,8 +4,8 @@ import crypto from 'node:crypto';
 import {
   ApplicationError,
   GenericObject,
-  getNested,
   LoggerService,
+  getNested,
   setNested
 } from '@node-c/core';
 
@@ -25,8 +25,8 @@ import {
 } from './iam.authorization.definitions.js';
 
 export class IAMAuthorizationService<
-  TokenManager extends
-    IAMTokenManagerService<object> = IAMTokenManagerService<object>
+  TokenManager extends IAMTokenManagerService<object> =
+    IAMTokenManagerService<object>
 > {
   constructor(
     protected logger: LoggerService,

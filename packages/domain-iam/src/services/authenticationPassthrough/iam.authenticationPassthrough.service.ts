@@ -99,7 +99,7 @@ export class IAMAuthenticationPassthroughService<
           validWithoutUser: true
         }
       };
-    return ld.merge(defaultConfig, steps || {});
+    return ld.merge(defaultConfig, steps);
   }
 
   async initiate(

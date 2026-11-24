@@ -214,6 +214,5 @@ export class InitialData1741714457251 implements MigrationInterface {
     );
   }
 
-  // oxlint-disable-next-line eslint/no-empty -- Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

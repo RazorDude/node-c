@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ApForProcessingOutputData1767547007695
-  implements MigrationInterface
-{
+export class ApForProcessingOutputData1767547007695 implements MigrationInterface {
   name = 'ApForProcessingOutputData1767547007695';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -42,7 +42,8 @@ export class UpdatableValidationPipe extends ValidationPipe {
     value: unknown,
     metadata: ArgumentMetadata
   ): Promise<unknown> {
-    const overrideOptions = this.reflector.get<ValidatorOptions>(
+    // undefined when the DTO has no validation options of its own
+    const overrideOptions = this.reflector.get<ValidatorOptions | undefined>(
       REWRITE_VALIDATION_OPTIONS,
       metadata.metatype as Type<unknown>
     );

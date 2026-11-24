@@ -36,9 +36,9 @@ const regExps = {
  * Authorization middleware - used for general authorization of the HTTP resource.
  */
 @Injectable()
-export class HTTPAuthorizationMiddleware<User extends object>
-  implements NestMiddleware
-{
+export class HTTPAuthorizationMiddleware<
+  User extends object
+> implements NestMiddleware {
   // oxlint-disable-next-line eslint/max-params -- DI in constructor.
   constructor(
     @Optional()
@@ -69,7 +69,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
       moduleName,
       tokenManager
     } = this;
-    (async () => {
+    (async (): Promise<void> => {
       const moduleConfig = configProvider.config.api![
         moduleName
       ] as AppConfigAPIHTTP;
@@ -118,12 +118,11 @@ export class HTTPAuthorizationMiddleware<User extends object>
       );
       if (hasApiKey) {
         const [apiKeyFromHeader, requestSignature] =
-          req.headers.authorization?.replace(regExps.apiKey, '')?.split(' ') ||
+          req.headers.authorization?.replace(regExps.apiKey, '').split(' ') ||
           [];
         let signatureContent = '';
         if (
           requestMethod === HttpMethod.GET &&
-          req.query &&
           Object.keys(req.query).length > 0
         ) {
           signatureContent = qs.stringify(req.query);
@@ -245,7 +244,7 @@ export class HTTPAuthorizationMiddleware<User extends object>
           );
         }
         // use the bearer access/id token decoded payload for the user data, if configured this way
-        const user = tokenContent?.data?.user;
+        const user = tokenContent.data?.user;
         if (user) {
           req.locals!.user = user;
         } else if (moduleConfig.localSearchForUsersEnabledOnAuthorization) {

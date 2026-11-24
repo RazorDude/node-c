@@ -20,13 +20,6 @@ export interface DomainOktaMockOAuth2AuthorizeData {
   state: string;
 }
 
-export interface DomainOktaMockOAuth2Settings {
-  audience: string;
-  clientId: string;
-  clientSecret: string;
-  issuer: string;
-}
-
 export interface DomainOktaMockOAuth2TokenData {
   clientId?: string;
   clientSecret?: string;

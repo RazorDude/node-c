@@ -5,8 +5,7 @@ import ld from 'lodash';
 
 import { getDefaultEntitySchema } from '../../../cacheBase/entity/base.redis.entity.js';
 
-export interface DataCacheStandaloneUserStepDataItem
-  extends GenericObject<unknown> {
+export interface DataCacheStandaloneUserStepDataItem extends GenericObject<unknown> {
   codeVerifier: string;
   state: string;
 }

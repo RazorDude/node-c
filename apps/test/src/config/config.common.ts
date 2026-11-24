@@ -144,6 +144,11 @@ export const appConfigCommon: AppConfigCommon = {
       checkAccessTokenExistenceLocally: true,
       defaultUserIdentifierField: 'id',
       refreshTokenExpiryTimeInHours: 24
+    },
+    oktaMock: {
+      accessTokenExpiresInSeconds: 3600,
+      authorizationCodeLengthInBytes: 16,
+      refreshTokenLengthInBytes: 32
     }
   },
   general: {
@@ -197,6 +202,11 @@ export const appConfigCommon: AppConfigCommon = {
       connectionName: Constants.DATA_DB_CONFIGS_MODULE_CONNECTION_NAME,
       // failOnConnectionError: false,
       type: RDBType.MySQL
+    },
+    oktaMock: {
+      connectionName: Constants.DATA_OKTA_MOCK_MODULE_CONNECTION_NAME,
+      database: path.resolve(import.meta.dirname, '../../okta-mock.sqlite'),
+      type: RDBType.SQLite
     }
     // pgDB: { type: RDBType.PG }
   }

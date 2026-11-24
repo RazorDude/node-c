@@ -28,6 +28,7 @@ import { DataCacheFederatedModule } from './data/cacheFederated/cacheFederated.m
 import { DataCacheStandaloneModule } from './data/cacheStandalone/cacheStandalone.module.js';
 import { DataDBModule } from './data/db/db.module.js';
 import { DataDBConfigsModule } from './data/dbConfigs/dbConfigs.module.js';
+import { DataOktaMockModule } from './data/oktaMock/oktaMock.module.js';
 import { DomainCoursePlatformDelegatedModule } from './domain/coursePlatformDelegated/coursePlatformDelegated.module.js';
 import { DomainCoursePlatformFederatedModule } from './domain/coursePlatformFederated/coursePlatformFederated.module.js';
 import { DomainCoursePlatformStandaloneModule } from './domain/coursePlatformStandalone/coursePlatformStandalone.module.js';
@@ -120,11 +121,7 @@ export class AppModuleBase {
       pinoParams: {
         ...DEFAULT_PINO_PARAMS,
         pinoHttp: {
-          // the default pinoHttp params are an object, not the [options, stream] tuple
-          ...(DEFAULT_PINO_PARAMS.pinoHttp as Exclude<
-            Params['pinoHttp'],
-            unknown[]
-          >),
+          ...DEFAULT_PINO_PARAMS.pinoHttp,
           transport: {
             targets: [
               {
@@ -193,11 +190,11 @@ export class AppModuleCoursePlatformFederated extends AppModuleBase {}
 })
 export class AppModuleCoursePlatformStandalone extends AppModuleBase {}
 
-// a mock of the Okta API, for the e2e tests - it reads the Okta settings of the IAM domain module from the config
 @Module({
   imports: [
     ...AppModuleBase.imports,
     APIOktaMockModule.register(APIOktaMockModule.moduleOptions),
+    DataOktaMockModule.register(),
     DomainOktaMockModule
   ]
 })

@@ -36,7 +36,8 @@ export class RedisStoreService {
   protected defaultTTL?: number;
   protected storeDelimiter: string;
   protected storeKey: string;
-  protected transactions: GenericObject<ChainableCommander>;
+  // a transaction is removed when it ends
+  protected transactions: GenericObject<ChainableCommander | undefined>;
   protected useHashmap: boolean;
 
   constructor(
@@ -195,10 +196,11 @@ export class RedisStoreService {
         `[RedisStoreService][${dataModuleName}]: Connecting to Redis...`
       );
       await client.connect();
-      const pingResult = await client.ping();
+      // a string, since the server can return something else than ioredis types it as
+      const pingResult: string = await client.ping();
       if (pingResult !== 'PONG') {
         throw new ApplicationError(
-          `Invalid ping result: ${pingResult}. Expected PONG`
+          `Invalid ping result: ${String(pingResult)}. Expected PONG`
         );
       }
       logger.info(
@@ -491,14 +493,15 @@ export class RedisStoreService {
         // }
       } else {
         const fullKey = `${storeKey}${storeDelimiter}${handle}`;
-        transactions[transactionId] = transaction.set(fullKey, valueToSet);
+        let updatedTransaction = transaction.set(fullKey, valueToSet);
         if (actualTTL) {
-          transactions[transactionId] = transactions[transactionId].expire(
+          updatedTransaction = updatedTransaction.expire(
             fullKey,
             actualTTL,
             'NX'
           );
         }
+        transactions[transactionId] = updatedTransaction;
       }
       return;
     }
@@ -518,7 +521,7 @@ export class RedisStoreService {
     }
     if (result !== 'OK' && result !== 1) {
       throw new ApplicationError(
-        `[RedisStoreService][Error]: Value not set for handle "${handle}". Result: ${result}`
+        `[RedisStoreService][Error]: Value not set for handle "${handle}". Result: ${String(result)}`
       );
     }
   }

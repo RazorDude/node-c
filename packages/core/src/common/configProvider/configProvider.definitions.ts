@@ -85,16 +85,7 @@ export type AppConfig = AppConfigIntermediate &
 type AppConfigAPIHTTPIntermediate = AppConfigCommonAPIHTTP &
   AppConfigFromEnvAPIHTTP;
 export type AppConfigAPIHTTP = AppConfigAPIHTTPIntermediate &
-  Required<
-    Pick<
-      AppConfigAPIHTTPIntermediate,
-      | 'allowedOrigins'
-      | 'allowedApiKeyRoutes'
-      | 'anonymousAccessRoutes'
-      | 'hostname'
-      | 'port'
-    >
-  >;
+  Required<Pick<AppConfigAPIHTTPIntermediate, 'hostname' | 'port'>>;
 export type AppConfigAPIREST = AppConfigCommonAPIREST & AppConfigFromEnvAPIREST;
 
 export type AppConfigDomainIAM = AppConfigCommonDomainIAM &
@@ -108,9 +99,11 @@ export enum AppConfigDomainIAMAuthenticationStep {
 
 export type AppConfigDataNoSQL = AppConfigCommonDataNoSQL &
   AppConfigFromEnvDataNoSQL &
+  // oxlint-disable-next-line typescript/no-duplicate-type-constituents
   AppConfigProfileDataNoSQL;
 export type AppConfigDataRDB = AppConfigCommonDataClickHouse &
   AppConfigCommonDataRDB &
+  // oxlint-disable-next-line typescript/no-duplicate-type-constituents
   AppConfigCommonDataClickHouse &
   AppConfigFromEnvDataRDB &
   AppConfigProfileDataClickHouse &
@@ -125,7 +118,9 @@ export interface AppConfigCommon {
     [apiName: string]:
       | GenericObject
       | AppConfigCommonAPIHTTP
-      | AppConfigCommonAPIREST;
+      // oxlint-disable-next-line typescript/no-duplicate-type-constituents
+      | AppConfigCommonAPIREST
+      | undefined;
   };
   domain: { [domainName: string]: GenericObject | AppConfigCommonDomainIAM };
   general: {
@@ -220,8 +215,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCacheUsageSettingsItem
   use: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
-  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   authReturnsTokens?: boolean;
   cache?: {
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -235,8 +229,7 @@ export interface AppConfigCommonDomainIAMAuthServiceConfigCompleteSettings
   useReturnedTokensAsLocal?: boolean;
 }
 
-export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings
-  extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
+export interface AppConfigCommonDomainIAMAuthServiceConfigInitiateSettings extends AppConfigCommonDomainIAMAuthServiceConfigBaseStepSettings {
   cache?: {
     populate?: AppConfigCommonDomainIAMAuthServiceConfigCachePopulationSettings;
     settings: AppConfigCommonDomainIAMAuthServiceConfigCacheSettings;
@@ -285,8 +278,7 @@ export interface AppConfigCommonDataNoSQL extends AppConfigCommonData {
   validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
 }
 
-export interface AppConfigCommonDataNoSQLEntityServiceSettings
-  extends AppConfigCommonDataEntityServiceSettings {
+export interface AppConfigCommonDataNoSQLEntityServiceSettings extends AppConfigCommonDataEntityServiceSettings {
   defaultIndividualSearchEnabled?: boolean;
   ttl?: number;
   validationSettings?: AppConfigCommonDataNoSQLValidationSettings;
@@ -312,7 +304,9 @@ export interface AppConfigFromEnv {
     [apiName: string]:
       | GenericObject
       | AppConfigFromEnvAPIHTTP
-      | AppConfigFromEnvAPIREST;
+      // oxlint-disable-next-line typescript/no-duplicate-type-constituents
+      | AppConfigFromEnvAPIREST
+      | undefined;
   };
   domain?: { [domainName: string]: GenericObject | AppConfigFromEnvDomainIAM };
   data?: {
@@ -386,7 +380,9 @@ export interface AppConfigProfile {
     [apiName: string]:
       | GenericObject
       | AppConfigProfileAPIHTTP
-      | AppConfigProfileAPIREST;
+      // oxlint-disable-next-line typescript/no-duplicate-type-constituents
+      | AppConfigProfileAPIREST
+      | undefined;
   };
   domain?: { [domainName: string]: GenericObject | AppConfigProfileDomainIAM };
   general: {

@@ -14,7 +14,7 @@ export interface RDBEntitySchema {
     relations?: {
       [relationName: string]:
         | {
-            target: string | unknown;
+            target: unknown;
             type: RDBEntityRelationType;
           }
         | undefined;

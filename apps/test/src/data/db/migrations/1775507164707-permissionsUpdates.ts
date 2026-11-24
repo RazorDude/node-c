@@ -39,6 +39,5 @@ export class PermissionsUpdates1775507164707 implements MigrationInterface {
     );
   }
 
-  // oxlint-disable-next-line eslint/no-empty -- Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

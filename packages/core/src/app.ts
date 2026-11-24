@@ -16,11 +16,13 @@ import { LoggerService } from './common/logger/logger.service.js';
 const HTTP_STATUS_REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
 
 export interface NodeCAppGenerateOrmConfigModuleOptions {
-  [moduleName: string]: {
-    entitiesPathInModule: string;
-    migrationsPathInModule: string;
-    modulePathInProject: string;
-  };
+  [moduleName: string]:
+    | {
+        entitiesPathInModule: string;
+        migrationsPathInModule: string;
+        modulePathInProject: string;
+      }
+    | undefined;
 }
 
 export interface NodeCAppStartOptions {
@@ -111,7 +113,13 @@ export class NodeCApp {
       // start an API server, if requested in the options
       if (apiConfig) {
         const { hostname, port } = apiConfig;
-        if (hostname && port) {
+        // the port is a string when it comes from the environment
+        if (
+          typeof hostname === 'string' &&
+          hostname.length > 0 &&
+          ((typeof port === 'number' && port) ||
+            (typeof port === 'string' && port.length > 0))
+        ) {
           console.info(
             `[Node-C][${i}/${apiModuleName}]: Starting listeners...`
           );
@@ -186,7 +194,7 @@ export class NodeCApp {
               );
             }
           );
-          await app.listen(port as number, hostname as string);
+          await app.listen(port, hostname);
           console.info(
             `[NODE-C][${i}/${apiModuleName}] Server listening at ${hostname}:${port}.`
           );

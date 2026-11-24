@@ -48,11 +48,12 @@ export class HTTPAPIModule {
   }
 
   static rawBodyBuffer(
+    this: void,
     req: RequestWithLocals<unknown>,
     _res: Response,
     buffer: Buffer
   ): void {
-    if (buffer && buffer.length > 0) {
+    if (buffer.length > 0) {
       req.rawBody = buffer.toString();
     }
   }

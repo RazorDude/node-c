@@ -21,7 +21,7 @@ export const httpRequest = async <ResponseData = unknown>(
   const method = data.method || HttpMethod.GET;
   const requestConfig = {
     // return the error responses instead of throwing, so that they're handled by hasError and throwOnError
-    validateStatus: () => true,
+    validateStatus: (): boolean => true,
     ...(data.axiosConfig || {}),
     method,
     url

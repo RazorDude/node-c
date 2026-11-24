@@ -5,8 +5,9 @@ import {
   DBEntitySchema
 } from '../../../dbBase/entity/base.db.entity.js';
 
-export interface DataDBUserAccountStatus<User extends DBEntity = DBEntity>
-  extends DBEntity {
+export interface DataDBUserAccountStatus<
+  User extends DBEntity = DBEntity
+> extends DBEntity {
   label: string;
   name: string;
   userLoginAllowed: boolean;

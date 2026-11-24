@@ -337,7 +337,50 @@ export async function setup(): Promise<void> {
       resolve();
     });
   });
-  console.info('[TestLogs]: Configs DB set up. Setting up the audit DB...');
+  console.info('[TestLogs]: Configs DB set up. Setting up the Okta mock DB...');
+  await fs.rm(
+    path.resolve(import.meta.dirname, '../apps/test/okta-mock.sqlite'),
+    {
+      force: true
+    }
+  );
+  await new Promise<void>((resolve, reject) => {
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests MODULE_NAMES=oktaMock npm run generate:datasource-files:local',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
+      }
+    );
+  });
+  await new Promise<void>((resolve, reject) => {
+    exec(
+      'cd apps/test && DATASOURCE_ENV=endToEndTests npm run typeorm:migration:run:oktaMock',
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (stdout) {
+          console.info(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
+        resolve();
+      }
+    );
+  });
+  console.info('[TestLogs]: Okta mock DB set up. Setting up the audit DB...');
   const clickHouseDBName = envVars.DATA_AUDIT_DATABASE_NAME;
   const clickHouseClient = clickHouse.createClient({
     // database: clickHouseDBName,
@@ -423,7 +466,7 @@ export async function setup(): Promise<void> {
       reject();
     });
     appsProcess.on('message', (data) => {
-      const dataText = data?.toString() || '';
+      const dataText = data.toString() || '';
       if (dataText.match(/Nest\sapplication\ssuccessfully\sstarted/)) {
         appPromiseFulfilled = true;
         resolve();

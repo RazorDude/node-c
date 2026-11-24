@@ -2,9 +2,7 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AdditionalUsersNoAccessChecks1779746793020
-  implements MigrationInterface
-{
+export class AdditionalUsersNoAccessChecks1779746793020 implements MigrationInterface {
   name = 'AdditionalUsersNoAccessChecks1779746793020';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -66,6 +64,5 @@ export class AdditionalUsersNoAccessChecks1779746793020
     );
   }
 
-  // oxlint-disable-next-line eslint/no-empty -- Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

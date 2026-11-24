@@ -44,29 +44,34 @@ export interface CreatePrivateOptions extends DataCreatePrivateOptions {
 }
 
 export interface DeleteOptions
-  extends BaseOptions,
-    Omit<DataDeleteOptions, 'softDelete'> {}
+  extends BaseOptions, Omit<DataDeleteOptions, 'softDelete'> {}
 
 export type DeletePrivateOptions = DataDeletePrivateOptions;
 
 export interface FindOneOptions
-  extends BaseOptions,
+  extends
+    BaseOptions,
     Omit<
       DataFindOneOptions,
       'include' | 'orderBy' | 'select' | 'selectOperator'
     > {}
 
-export interface FindOnePrivateOptions
-  extends Omit<DataFindOnePrivateOptionsBase, 'withDeleted'> {
+export interface FindOnePrivateOptions extends Omit<
+  DataFindOnePrivateOptionsBase,
+  'withDeleted'
+> {
   requirePrimaryKeys?: boolean;
 }
 
 export interface FindOptions
-  extends BaseOptions,
+  extends
+    BaseOptions,
     Omit<DataFindOptions, 'include' | 'select' | 'selectOperator'> {}
 
-export interface FindPrivateOptions
-  extends Omit<DataFindPrivateOptionsBase, 'withDeleted'> {
+export interface FindPrivateOptions extends Omit<
+  DataFindPrivateOptionsBase,
+  'withDeleted'
+> {
   requirePrimaryKeys?: boolean;
 }
 

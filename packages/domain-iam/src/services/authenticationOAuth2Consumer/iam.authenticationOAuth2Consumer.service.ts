@@ -67,7 +67,7 @@ export class IAMAuthenticationOAuth2ConsumerService<
           stepResultPublicFields: ['authorizationCodeRequestURL']
         }
       },
-      steps || {}
+      steps
     );
   }
 

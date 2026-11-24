@@ -1,5 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
-import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm';
 
 import { Constants, SQLQueryBuilderService } from '@node-c/data-rdb';
 

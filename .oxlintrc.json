@@ -52,6 +52,8 @@
     "typescript/no-empty-interface": "error",
     "typescript/no-empty-object-type": "error",
     "typescript/no-explicit-any": "error",
+    "typescript/no-for-in-array": "off",
+    "typescript/no-misused-spread": "off",
     "typescript/no-non-null-assertion": "off",
     "typescript/no-unnecessary-condition": "error",
     "typescript/no-unsafe-function-type": "error",

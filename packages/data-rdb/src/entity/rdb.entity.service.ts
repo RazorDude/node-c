@@ -16,6 +16,7 @@ import {
   ProcessObjectAllowedFieldsType
 } from '@node-c/core';
 
+import { Constants } from '../common/definitions/common.constants.js';
 import { OrmUpdateQueryBuilderUpdateResult } from '../ormQueryBuilder/rdb.ormQueryBuilder.js';
 import {
   RDBEntityManager,
@@ -323,7 +324,7 @@ export class RDBEntityService<
       }
     );
     const includeKeys = Object.keys(include);
-    let where: { [fieldName: string]: ParsedFilter } = {};
+    let where: { [fieldName: string]: ParsedFilter | undefined } = {};
     if (includeKeys.length > 0 || returnOriginalItems) {
       const findData = await this.find(
         {
@@ -396,7 +397,7 @@ export class RDBEntityService<
       : 1; // make sure it's truly a number - it could come as string from GET requests
     const perPage = optPerPage
       ? Number.parseInt(optPerPage as unknown as string, 10)
-      : 10; // same as above - must be a number
+      : Constants.DEFAULT_PER_PAGE; // same as above - must be a number
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
     const findResults: DataFindResults<Entity> = {
       page: 1,
@@ -413,7 +414,7 @@ export class RDBEntityService<
       })) as GenericObject;
     const queryBuilder =
       this.getRepository(transactionManager).createQueryBuilder(entityName);
-    let where: { [fieldName: string]: ParsedFilter } = {};
+    let where: { [fieldName: string]: ParsedFilter | undefined } = {};
     let include: IncludeItems = {};
     let orderBy: DataOrderBy[] = [];
     if (Object.keys(processedFilters).length > 0) {
@@ -685,9 +686,11 @@ export class RDBEntityService<
         ];
       });
     });
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
     if (runDeleteQuery) {
       await transactionManager.query(deleteQuery, deleteQueryValues);
     }
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
     if (runInsertQuery) {
       await transactionManager.query(`${insertQuery}`, insertQueryValues);
     }
@@ -770,7 +773,7 @@ export class RDBEntityService<
   protected processDBError(e: unknown): unknown {
     const error = e as Record<string, unknown>;
     const errorMessage = (error.message as string) || '';
-    if (!RDBEntityService.handledErrorCodes.has(`${error.code}`)) {
+    if (!RDBEntityService.handledErrorCodes.has(`${String(error.code)}`)) {
       return e;
     }
     // TODO: move this functionality out of here and make this abstract
@@ -778,14 +781,13 @@ export class RDBEntityService<
       const extractVariableName = new RegExp(/^Key \((.*)\)=(.*)$/gu);
       const result = extractVariableName.exec(errorMessage);
       return new ApplicationError(
-        // oxlint-disable-next-line typescript/no-unnecessary-condition -- False positive.
-        `${error.table}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
+        `${String(error.table)}: ${result ? result[1] : 'a column value you have provided'} needs to be unique`,
         { cause: e, statusCode: HttpStatus.BAD_REQUEST }
       );
     }
     // yes, I am a grammer n*zi :)
     return new ApplicationError(
-      `[RBDEntityService][${error.code}]: ${errorMessage}${errorMessage.endsWith('.') ? '' : '.'}`,
+      `[RBDEntityService][${String(error.code)}]: ${errorMessage}${errorMessage.endsWith('.') ? '' : '.'}`,
       {
         cause: e,
         statusCode: HttpStatus.BAD_REQUEST
@@ -875,7 +877,7 @@ export class RDBEntityService<
     const hasInclude = includeKeys.length;
     let includeParsedForFind: string[] = [];
     let originalItems: Entity[] = [];
-    let where: { [fieldName: string]: ParsedFilter } = {};
+    let where: { [fieldName: string]: ParsedFilter | undefined } = {};
     if (hasInclude || returnOriginalItems) {
       includeParsedForFind = includeKeys.map((item) => {
         const [, ...itemData] = include[item].split('__');

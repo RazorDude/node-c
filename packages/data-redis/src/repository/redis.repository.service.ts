@@ -7,14 +7,14 @@ import {
   ConfigProviderService,
   Constants as CoreConstants,
   GenericObject,
-  getNested,
   LoggerService,
+  getNested,
   setNested
 } from '@node-c/core';
 
 import {
-  registerSchema,
   type ValidationSchema,
+  registerSchema,
   validate
 } from 'class-validator';
 import ld from 'lodash';
@@ -115,12 +115,11 @@ export class RedisRepositoryService<Entity> {
     );
     this._primaryKeysMap = primaryKeysMap;
     this.defaultTTL = settingsPerEntity?.[entityName]?.ttl || defaultTTL;
-    if (
-      typeof settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled !==
-      'undefined'
-    ) {
+    const entityDefaultIndividualSearchEnabled =
+      settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled;
+    if (typeof entityDefaultIndividualSearchEnabled !== 'undefined') {
       this.defaultIndividualSearchEnabled =
-        settingsPerEntity?.[entityName]?.defaultIndividualSearchEnabled;
+        entityDefaultIndividualSearchEnabled;
     } else if (typeof defaultIndividualSearchEnabled === 'undefined') {
       this.defaultIndividualSearchEnabled = false;
     } else {
@@ -163,10 +162,10 @@ export class RedisRepositoryService<Entity> {
       storeEntityKeys.push('');
       primaryKeys.forEach((field) => {
         const value = filters[field];
+        // the primary key values are UUID strings or integers
         if (
-          typeof value !== 'undefined' &&
-          typeof value !== 'object' &&
-          (typeof value !== 'string' || value.length)
+          (typeof value === 'string' && value.length > 0) ||
+          typeof value === 'number'
         ) {
           primaryKeyFiltersCount++;
           storeEntityKeys.forEach((_key, keyIndex) => {
@@ -224,6 +223,7 @@ export class RedisRepositoryService<Entity> {
         }
         storeEntityKeys[0] += `${storeDelimiter}*`;
       });
+      // oxlint-disable-next-line typescript/no-unnecessary-condition - False positive
       if (!hasNonPrimaryKeyFilters) {
         hasNonPrimaryKeyFilters =
           primaryKeyFiltersCount < Object.keys(filters).length;
@@ -281,7 +281,7 @@ export class RedisRepositoryService<Entity> {
     // non-findAll logic:
     // if doing an inidividual search, go through the store keys one by one; all PKs are required;
     // if doing a wildcard search, iterate a cursor through the whole database until the pagination end is reached
-    const { page, perPage } = options || {};
+    const { page, perPage } = options;
     // for non-individual search, we'll only have the first key anyway
     // TODO: check whether the above is true nad apply it to findAll if it isn't
     const [storeEntityKey] = storeEntityKeys;
@@ -372,7 +372,7 @@ export class RedisRepositoryService<Entity> {
         // so compare them as strings - the same way SQL databases coerce the values
         let hasMatch = false;
         for (const i in filterValue) {
-          if (`${filterValue[i]}` === `${itemValue}`) {
+          if (`${filterValue[i]}` === `${String(itemValue)}`) {
             hasMatch = true;
             break;
           }
@@ -384,7 +384,7 @@ export class RedisRepositoryService<Entity> {
         continue;
       }
       // TODO: filter operators
-      if (`${filterValue}` !== `${itemValue}`) {
+      if (`${String(filterValue)}` !== `${String(itemValue)}`) {
         filterResult = false;
         break;
       }
@@ -463,7 +463,8 @@ export class RedisRepositoryService<Entity> {
       onConflict: optOnConflict,
       validate: optValidate
     } = opt;
-    const onConflict =
+    // a string, since an invalid value can come from the options - it's handled below
+    const onConflict: string =
       optOnConflict ||
       RedisRepositoryDefinitions.SaveOptionsOnConflict.ThrowError;
     let allPKValuesExist = true;
@@ -479,11 +480,10 @@ export class RedisRepositoryService<Entity> {
     for (const columnName of primaryKeys) {
       const { generated, type } = columns[columnName];
       const value = preparedDataForPrimaryKeyFilters[columnName];
-      const valueExists = !(
-        typeof value === 'undefined' ||
-        (typeof value === 'string' && value.length === 0) ||
-        typeof value === 'object'
-      );
+      // the primary key values are UUID strings or integers
+      const valueExists =
+        (typeof value === 'string' && value.length > 0) ||
+        typeof value === 'number';
       if (generated) {
         if (valueExists) {
           storeEntityKey += `${value}${storeDelimiter}`;
@@ -697,7 +697,6 @@ export class RedisRepositoryService<Entity> {
       // this is kind of a repeat of find, but with the key paths included and with dedicated
       // filtering by inner primary keys
       if (
-        // oxlint-disable-next-line typescript/no-unnecessary-condition -- WIP functionality for future use.
         experimentalDeletionEnabled &&
         (isArray || nestedObjectContainerPath) &&
         innerPrimaryKeys.length > 0 &&

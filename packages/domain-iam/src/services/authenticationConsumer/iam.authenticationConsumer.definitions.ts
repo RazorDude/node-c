@@ -18,8 +18,7 @@ export type IAMAuthenticationConsumerCompleteData =
 export type IAMAuthenticationConsumerCompleteOptions<Context extends object> =
   IAMAuthenticationCompleteOptions<Context>;
 
-export interface IAMAuthenticationConsumerCompleteResult
-  extends IAMAuthenticationCompleteResult {
+export interface IAMAuthenticationConsumerCompleteResult extends IAMAuthenticationCompleteResult {
   idToken?: string;
   refreshToken?: string;
 }

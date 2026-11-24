@@ -57,7 +57,7 @@ export interface IAMAuthenticationManagerExecuteStepResult<
   stepResult: IAMAuthenticationCompleteResult | IAMAuthenticationInitiateResult;
   user: IAMUserWithPermissionsData<User, unknown> | null;
   userFilterField?: string | undefined;
-  userFilterValue?: unknown | undefined;
+  userFilterValue?: unknown;
 }
 
 export interface IAMAuthenticationManagerUserTokenEnityFields<

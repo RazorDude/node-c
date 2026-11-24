@@ -57,6 +57,7 @@ export class ClickHouseConnectionModule {
               connectionOptions.request_timeout = requestTimeout;
             }
             if (useHostParam) {
+              // oxlint-disable-next-line typescript/no-deprecated -- Kept for the useHostParam option.
               connectionOptions.host = url;
             } else {
               connectionOptions.url = url;

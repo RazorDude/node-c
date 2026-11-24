@@ -14,7 +14,7 @@ const regExps = {
  * @returns The decoded object or value.
  */
 export function getNested<ReturnData = unknown>(
-  parent: unknown | unknown[],
+  parent: unknown,
   field: string,
   options?: GetNestedOptions
 ): {
@@ -98,8 +98,7 @@ export function getNested<ReturnData = unknown>(
           innerValue.forEach((innerValueItem, innerValueItemIndex) => {
             if (
               !arrayItemsShouldBeUnique ||
-              (arrayItemsShouldBeUnique &&
-                values.indexOf(innerValueItem as ReturnData) === -1)
+              values.indexOf(innerValueItem as ReturnData) === -1
             ) {
               paths.push(
                 `${currentPath}.${itemIndex}.${innerPaths[innerValueItemIndex]}`

@@ -32,7 +32,7 @@ export abstract class RDBRepository<Entity extends GenericObject<unknown>> {
       propertyName: string;
       propertyPath: string;
       relationType: string;
-      target: string | unknown;
+      target: unknown;
       // unfortunately, we need to use this type definition here, otherwise it won't match the one in TypeOrm
       // oxlint-disable-next-line typescript/no-unsafe-function-type -- No other way.
       type: string | Function;

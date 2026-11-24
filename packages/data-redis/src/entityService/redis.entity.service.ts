@@ -14,6 +14,7 @@ import {
 
 import ld from 'lodash';
 
+import { Constants } from '../common/definitions/common.constants.js';
 import { RedisRepositoryService } from '../repository/redis.repository.service.js';
 import { RedisStoreService } from '../store/redis.store.service.js';
 
@@ -218,7 +219,7 @@ export class RedisEntityService<
     // same as above - must be a number
     const perPage = optPerPage
       ? Number.parseInt(optPerPage as unknown as string, 10)
-      : 10;
+      : Constants.DEFAULT_PER_PAGE;
     const findAll = optFindAll === true || (optFindAll as unknown) === 'true';
     const findResults: DataFindResults<Entity> = {
       page: 1,
@@ -326,7 +327,7 @@ export class RedisEntityService<
       transactionId,
       ttl,
       validate
-    } = options || {};
+    } = options;
     if (optDelete) {
       return (await repository.save(data as unknown as Entity, {
         delete: true,

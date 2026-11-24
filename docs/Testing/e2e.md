@@ -18,7 +18,8 @@ The config is [test/vitest.config.ts](https://github.com/RazorDude/node-c/blob/m
 flowchart LR
   A[Stop old app servers] --> B[Recreate MySQL DBs<br/>main + configs]
   B --> C[Run migrations + seeds<br/>from dist, by timestamp]
-  C --> D[Recreate ClickHouse<br/>audit DB]
+  C --> O[Recreate the Okta mock's<br/>SQLite DB + seeds]
+  O --> D[Recreate ClickHouse<br/>audit DB]
   D --> E[Flush Valkey]
   E --> F[Start apps with<br/>NODE_V8_COVERAGE]
   F --> G[Run spec files 00, 01, ...<br/>sequentially]
@@ -26,9 +27,10 @@ flowchart LR
 
 1. Stops any app/SSO servers still running from a previous run (by port).
 2. Drops and recreates the main and configs MySQL databases, regenerates the datasource files (`DATASOURCE_ENV=endToEndTests`) and runs the migrations - **seeds run together with the migrations**, ordered by timestamp.
-3. Drops and recreates the ClickHouse audit database and its `userLoginLogs` table.
-4. Flushes both Valkey instances.
-5. Deletes the old log file and starts the apps (`npm run start:apps-test:direct`) with `NODE_V8_COVERAGE=coverage/results-data`.
+3. Deletes the Okta mock's SQLite database (`apps/test/okta-mock.sqlite`), regenerates its datasource file and runs its migrations and seeds.
+4. Drops and recreates the ClickHouse audit database and its `userLoginLogs` table.
+5. Flushes both Valkey instances.
+6. Deletes the old log file and starts the apps (`npm run start:apps-test:direct`) with `NODE_V8_COVERAGE=coverage/results-data`.
 
 App logs go to `logs/app_logs_<NODE_ENV>.txt` - the first place to look when a request returns an unexpected 400/403/500.
 
@@ -87,7 +89,7 @@ The permissions are in the seeds in `apps/test/src/data/db/seeds/common` - see [
 > [!TIP]
 > The suite is a good map of what the framework does: filters, relations, multi-service reads, permissions, local logins and Okta logins all have tests in the numbered spec files. The token refresh flow isn't covered yet.
 
-The Okta logins use the `oktaMock` API of the reference app (`apps/test/src/api/oktaMock`, port 2091) instead of Okta. It has no login page - the user is picked by the `login_hint` query param (`admin@node-c.com` or `user0@node-c.com`), and its tokens are signed with the client secret.
+The Okta logins use the `oktaMock` API of the reference app (`apps/test/src/api/oktaMock`, port 2091) instead of Okta. It has no login page - the user is picked by the `login_hint` query param, and its tokens are signed with the client secret. Its users (`admin@node-c.com` and `user0@node-c.com`) are in its own SQLite database, seeded by `apps/test/src/data/oktaMock/seeds/common/1795510000001-initialData.ts`, and its token settings are in `config.domain.oktaMock`.
 
 ---
 

@@ -38,6 +38,7 @@ export type IAMAuthenticationPassthroughConsumerCompleteResult =
 
 export type IAMAuthenticationPassthroughConsumerGetUserAuthenticationConfigResult =
   IAMAuthenticationPassthroughGetUserAuthenticationConfigResult &
+    // oxlint-disable-next-line typescript/no-duplicate-type-constituents -- Kept separate on purpose, for future extension.
     IAMAuthenticationConsumerGetUserAuthenticationConfigResult;
 
 export type IAMAuthenticationPassthroughConsumerInitiateData =
@@ -49,6 +50,7 @@ export type IAMAuthenticationPassthroughConsumerInitiateOptions<
 
 export type IAMAuthenticationPassthroughConsumerInitiateResult =
   IAMAuthenticationPassthroughInitiateResult &
+    // oxlint-disable-next-line typescript/no-duplicate-type-constituents -- Kept separate on purpose, for future extension.
     IAMAuthenticationConsumerInitiateResult;
 
 export type IAMAuthenticationPassthroughConsumerRefreshExternalAccessTokenData =

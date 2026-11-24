@@ -79,11 +79,7 @@ export class DomainCoursePlatformStandaloneAuthenticationManagerService extends 
     ) {
       return authenticateResult;
     }
-    if (
-      'accessToken' in authenticateResult &&
-      authenticateResult.accessToken &&
-      authenticateResult.user
-    ) {
+    if ('accessToken' in authenticateResult && authenticateResult.accessToken) {
       // Here, the local tokens are intentionally set as "external", so that they're used as such by the
       // passthrough provider. It'll then decode them and find the user based on the idToken data.
       const passthroughResult = await this.authenticate({

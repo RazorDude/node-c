@@ -23,7 +23,7 @@ import { VersionCommand } from 'typeorm/commands/VersionCommand.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-yargs(hideBin(process.argv))
+void yargs(hideBin(process.argv))
   .usage('Usage: $0 <command> [options]')
   .command(new CacheClearCommand())
   .command(new EntityCreateCommand())

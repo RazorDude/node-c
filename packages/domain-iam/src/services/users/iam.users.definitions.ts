@@ -7,8 +7,7 @@ import { IAMAuthorizationUser } from '../authorization/iam.authorization.definit
 
 export type IAMUsersGetUserWithPermissionsDataOptions = DomainFindOneOptions;
 
-export interface IAMUsersGetUserWithPermissionsDataPrivateOptions
-  extends DomainFindOnePrivateOptions {
+export interface IAMUsersGetUserWithPermissionsDataPrivateOptions extends DomainFindOnePrivateOptions {
   keepPassword?: boolean;
 }
 

@@ -20,8 +20,7 @@ export type IAMAuthenticationUserLocalCompleteResult =
 export type IAMAuthenticationUserLocalGetUserAuthenticationConfigResult =
   IAMAuthenticationGetUserAuthenticationConfigResult;
 
-export interface IAMAuthenticationUserLocalInitiateData
-  extends IAMAuthenticationInitiateData {
+export interface IAMAuthenticationUserLocalInitiateData extends IAMAuthenticationInitiateData {
   password: string;
 }
 

@@ -29,11 +29,11 @@ export class APIOktaMockOAuth2Controller {
   constructor(protected domainOAuth2Service: DomainOktaMockOAuth2Service) {}
 
   @Get('authorize')
-  authorize(
+  async authorize(
     @Query() query: APIOktaMockOAuth2AuthorizeDto,
     @Res() res: Response
-  ): void {
-    const redirectUrl = this.domainOAuth2Service.authorize({
+  ): Promise<void> {
+    const redirectUrl = await this.domainOAuth2Service.authorize({
       clientId: query.client_id,
       codeChallenge: query.code_challenge,
       codeChallengeMethod: query.code_challenge_method,
@@ -49,10 +49,10 @@ export class APIOktaMockOAuth2Controller {
 
   @HttpCode(HttpStatus.OK)
   @Post('token')
-  token(
+  exchangeAuthorizationCode(
     @Body() body: APIOktaMockOAuth2TokenDto
   ): DomainOktaMockOAuth2TokenResult {
-    return this.domainOAuth2Service.token({
+    return this.domainOAuth2Service.exchangeAuthorizationCode({
       clientId: body.client_id,
       clientSecret: body.client_secret,
       code: body.code,

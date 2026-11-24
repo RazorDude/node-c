@@ -80,10 +80,10 @@ export class RESTAPIEntityControllerWithoutDto<
     DomainEntityServiceData,
     DataEntityServiceData
   >,
-  DomainEntityServiceData extends
-    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  DataEntityServiceData extends
-    DataDefaultData<Entity> = DataDefaultData<Entity>
+  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> =
+    DomainEntityServiceDefaultData<Entity>,
+  DataEntityServiceData extends DataDefaultData<Entity> =
+    DataDefaultData<Entity>
 > {
   static allDefaultRoutes = [
     'bulkCreate',
@@ -172,16 +172,13 @@ export class RESTAPIEntityControllerWithoutDto<
   @Get('/item/:id')
   async findOne(
     @Param('id') id: number | string,
-    @Query() query: DomainFindOneOptions
+    @Query() query: Omit<DomainFindOneOptions, 'filters'> &
+      Partial<Pick<DomainFindOneOptions, 'filters'>>
   ): Promise<DomainFindOneResult<Entity> | void> {
     this.checkRoute('findOne');
-    let filters = query.filters;
-    if (!filters) {
-      filters = {};
-      query.filters = filters;
-    }
+    const filters = query.filters || {};
     filters.id = id;
-    return await this.domainEntityService.findOne(query);
+    return await this.domainEntityService.findOne({ ...query, filters });
   }
 
   protected refreshDefaultRoutes(newDefaultRoutes?: string[]): void {
@@ -223,10 +220,10 @@ export class RESTAPIEntityController<
     DataEntityServiceData
   >,
   Dto extends DefaultDtos<Entity> = DefaultDtos<Entity>,
-  DomainEntityServiceData extends
-    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
-  DataEntityServiceData extends
-    DataDefaultData<Entity> = DataDefaultData<Entity>
+  DomainEntityServiceData extends DomainEntityServiceDefaultData<Entity> =
+    DomainEntityServiceDefaultData<Entity>,
+  DataEntityServiceData extends DataDefaultData<Entity> =
+    DataDefaultData<Entity>
 > extends RESTAPIEntityControllerWithoutDto<Entity, EntityDomainService> {
   protected settings: { validationWhitelist?: boolean } = {
     validationWhitelist: true
@@ -382,7 +379,7 @@ export class RESTAPIEntityController<
 
   protected async processNestedValidations<
     InputData extends {
-      optionsOverridesByService?: GenericObject<BaseAdditionalServiceOptionsOverridesDto>;
+      optionsOverridesByService?: GenericObject<BaseAdditionalServiceOptionsOverridesDto> | null;
     }
   >(
     data: InputData,
@@ -404,7 +401,7 @@ export class RESTAPIEntityController<
       !(optionsOverridesByService instanceof Date) &&
       !Array.isArray(optionsOverridesByService)
     ) {
-      const validatedOptionsOverridesByService: typeof optionsOverridesByService =
+      const validatedOptionsOverridesByService: GenericObject<BaseAdditionalServiceOptionsOverridesDto> =
         {};
       for (const serviceName in optionsOverridesByService) {
         validatedOptionsOverridesByService[serviceName] =

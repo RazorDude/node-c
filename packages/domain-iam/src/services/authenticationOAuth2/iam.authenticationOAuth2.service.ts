@@ -4,11 +4,11 @@ import {
   AppConfigDomainIAM,
   AppConfigDomainIAMAuthenticationStep,
   ApplicationError,
-  base64UrlEncode,
   ConfigProviderService,
   HttpMethod,
-  httpRequest,
-  LoggerService
+  LoggerService,
+  base64UrlEncode,
+  httpRequest
 } from '@node-c/core';
 
 import ld from 'lodash';
@@ -262,7 +262,7 @@ export class IAMAuthenticationOAuth2Service<
           validWithoutUser: true
         }
       };
-    return ld.merge(defaultConfig, steps || {});
+    return ld.merge(defaultConfig, steps);
   }
 
   // TODO: the custom param mapping will potentially be needed here.

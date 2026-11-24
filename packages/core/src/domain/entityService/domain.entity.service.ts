@@ -41,16 +41,16 @@ import {
 export class DomainEntityService<
   Entity,
   EntityService extends DataEntityService<Entity, DataEntityServiceData>,
-  Data extends
-    DomainEntityServiceDefaultData<Entity> = DomainEntityServiceDefaultData<Entity>,
+  Data extends DomainEntityServiceDefaultData<Entity> =
+    DomainEntityServiceDefaultData<Entity>,
   AdditionalEntityServices extends
     | Record<
         string,
         DataEntityService<Partial<Entity>, DataDefaultData<object>>
       >
     | undefined = undefined,
-  DataEntityServiceData extends
-    DataDefaultData<Entity> = DataDefaultData<Entity>
+  DataEntityServiceData extends DataDefaultData<Entity> =
+    DataDefaultData<Entity>
 > {
   // oxlint-disable-next-line eslint/max-params -- DI in constructor
   constructor(
@@ -95,14 +95,12 @@ export class DomainEntityService<
       otherOptions,
       privateOptions
     );
-    let actualOtherServiceNames: string[] = [];
     let actualOptionsOverridesByService: typeof optionsOverridesByService = {};
-    actualOtherServiceNames = otherServiceNames || [];
     actualOptionsOverridesByService = optionsOverridesByService;
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(
-        actualOtherServiceNames,
+        otherServiceNames,
         {
           firstServiceResult: result,
           hasFirstServiceResult: result.length > 0,
@@ -144,7 +142,7 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(
-        otherServiceNames || [],
+        otherServiceNames,
         {
           firstServiceResult: result,
           hasFirstServiceResult:
@@ -175,7 +173,7 @@ export class DomainEntityService<
       optionsOverridesByService,
       dataServices = [DomainDataEntityServiceType.Main],
       ...otherOptions
-    } = options || {};
+    } = options;
     const [firstServiceName, ...otherServiceNames] = dataServices;
     const result = await this.getDataService(firstServiceName).delete(
       otherOptions,
@@ -184,7 +182,7 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(
-        otherServiceNames || [],
+        otherServiceNames,
         {
           firstServiceResult: { ...result, items: result.originalItems || [] },
           hasFirstServiceResult: !result.count,
@@ -222,7 +220,7 @@ export class DomainEntityService<
     const hasFirstServiceResult = result.items.length > 0;
     const resultsByService = await this.runMethodInAdditionalServices<
       DataFindResults<Entity>
-    >(otherServiceNames || [], {
+    >(otherServiceNames, {
       firstServiceResult: result,
       hasFirstServiceResult,
       methodArgs: [otherOptions, privateOptions],
@@ -233,8 +231,9 @@ export class DomainEntityService<
     if (saveAdditionalResultsInFirstService && resultsByService) {
       const { saveOptions, serviceName, useResultsForFirstServiceReturnData } =
         saveAdditionalResultsInFirstService;
+      // undefined when the service isn't one of the additional services
       const dataFromAdditionalService = resultsByService[serviceName];
-      if (dataFromAdditionalService?.items?.length) {
+      if (dataFromAdditionalService?.items.length) {
         const bulkCreateResult = await firstService.bulkCreate(
           dataFromAdditionalService.items,
           saveOptions
@@ -275,7 +274,7 @@ export class DomainEntityService<
       dataServices = [DomainDataEntityServiceType.Main],
       saveAdditionalResultsInFirstService,
       ...otherOptions
-    } = options || {};
+    } = options;
     const [firstServiceName, ...otherServiceNames] = dataServices;
     const firstService = this.getDataService(firstServiceName);
     let result: Entity | null = await firstService.findOne(
@@ -286,7 +285,7 @@ export class DomainEntityService<
       typeof result !== 'undefined' && result !== null;
     const resultsByService =
       await this.runMethodInAdditionalServices<Entity | null>(
-        otherServiceNames || [],
+        otherServiceNames,
         {
           firstServiceResult: result,
           hasFirstServiceResult,
@@ -331,7 +330,7 @@ export class DomainEntityService<
   protected async runMethodInAdditionalServices<ServiceReturnData>(
     serviceNames: string[],
     options: DomainRunMethodInAdditionalServicesOptions<unknown>
-  ): Promise<GenericObject<ServiceReturnData> | undefined> {
+  ): Promise<GenericObject<ServiceReturnData | undefined> | undefined> {
     if (serviceNames.length === 0) {
       return undefined;
     }
@@ -343,7 +342,8 @@ export class DomainEntityService<
       optionsArgIndex,
       optionsOverridesByService = {}
     } = options;
-    const returnDataByService: GenericObject<ServiceReturnData> = {};
+    const returnDataByService: GenericObject<ServiceReturnData | undefined> =
+      {};
     if (!this.additionalDataEntityServices) {
       throw new ApplicationError(
         `No additional DataEntityServices exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
@@ -361,12 +361,8 @@ export class DomainEntityService<
     }
     for (const i in serviceNames) {
       const serviceName = serviceNames[i];
+      // getDataService throws if the service doesn't exist
       const service = this.getDataService(serviceName);
-      if (!service) {
-        throw new ApplicationError(
-          `DataEntityService ${serviceName} does not exist for DomainEntityService ${this.dataEntityService.getEntityName(true) || '(no entity name)'}.`
-        );
-      }
       const serviceMethodOptionsOverrides =
         optionsOverridesByService[serviceName] || {};
       const {
@@ -392,15 +388,22 @@ export class DomainEntityService<
           ...(optionsArgValue as object),
           ...ld.omit(actualMethodOptionsOverrides, ['filters'])
         };
-        const existingServiceMethodArgs = optionsArgValue as Record<string, unknown>;
-        const overridesFilters = (actualMethodOptionsOverrides as { filters: unknown }).filters;
+        const existingServiceMethodArgs = optionsArgValue as Record<
+          string,
+          unknown
+        >;
+        const overridesFilters = (
+          actualMethodOptionsOverrides as { filters: unknown }
+        ).filters;
         if (existingServiceMethodArgs.filters && overridesFilters) {
-          (serviceMethodArgs[optionsArgIndex!] as { filters: unknown }).filters = {
+          (
+            serviceMethodArgs[optionsArgIndex!] as { filters: unknown }
+          ).filters = {
             [DataSelectOperator.And]: [
               existingServiceMethodArgs.filters,
               overridesFilters
             ]
-          }
+          };
         }
       }
       if (
@@ -411,7 +414,8 @@ export class DomainEntityService<
           continue;
         }
         const filters: GenericObject = {};
-        const resultItems: GenericObject[] = (
+        // the first service's result is null when findOne doesn't find anything
+        const resultItems: (GenericObject | null)[] = (
           firstServiceResult as { items?: GenericObject[] }
         ).items || [firstServiceResult as GenericObject];
         resultItems.forEach((resultItem) => {
@@ -488,7 +492,7 @@ export class DomainEntityService<
     return {
       result,
       resultsByService: await this.runMethodInAdditionalServices(
-        otherServiceNames || [],
+        otherServiceNames,
         {
           firstServiceResult: result,
           hasFirstServiceResult: !result.count,

@@ -59,7 +59,7 @@ export class SQLQueryBuilderService {
     public dataModuleName: string,
     public logger: LoggerService
   ) {
-    const { type } = ld.get(configProvider, dbConfigPath) as { type: RDBType };
+    const { type }: { type: string } = ld.get(configProvider, dbConfigPath);
     this.dbType = type;
     if (
       type === RDBType.Aurora ||
@@ -77,6 +77,10 @@ export class SQLQueryBuilderService {
       this.columnQuotesSymbol = '"';
       this.iLikeSupported = false;
       this.returningSupported = false;
+    } else {
+      throw new ApplicationError(
+        `[SQLQueryBuilderService][${dataModuleName}]: Unsupported RDB type "${type}".`
+      );
     }
   }
 
@@ -149,7 +153,7 @@ export class SQLQueryBuilderService {
       let isFirst = true;
       for (const fieldName in where) {
         const whereItem = where[fieldName];
-        if (whereItem.query.length === 0) {
+        if (!whereItem || whereItem.query.length === 0) {
           continue;
         }
         let methodName = 'where';
@@ -245,7 +249,7 @@ export class SQLQueryBuilderService {
         dbType === RDBType.MySQL
       ) {
         query = `${isNot ? 'not ' : ''}JSON_CONTAINS(${fieldString}, :${paramName})`;
-        parsedInnerValue = `"${parsedInnerValue}"`;
+        parsedInnerValue = `"${String(parsedInnerValue)}"`;
       } else if (dbType === RDBType.PG) {
         query = `${isNot ? 'not ' : ''}(${fieldString} ? :${paramName})`;
       } else if (dbType === RDBType.SQLite) {
@@ -352,10 +356,8 @@ export class SQLQueryBuilderService {
         paramsForQuery[queryParamName] = fieldValueItem.valueOf();
         continue;
       }
-      if (isSimple) {
-        isSimple = false;
-        break;
-      }
+      isSimple = false;
+      break;
     }
     return {
       hasNullValues,
@@ -453,14 +455,14 @@ export class SQLQueryBuilderService {
   ): {
     fieldUniqueIteration: number;
     include: IncludeItems;
-    where: { [fieldName: string]: ParsedFilter };
+    where: { [fieldName: string]: ParsedFilter | undefined };
   } {
     const cqs = this.columnQuotesSymbol;
     const { currentDepth = 0, isNot, maxDepth = 10, operator } = options;
     const fieldAliases = options.fieldAliases || {};
     const parameterNamesToFieldAliasesMap =
       options.parameterNamesToFieldAliasesMap || {};
-    const where: { [fieldName: string]: ParsedFilter } = {};
+    const where: { [fieldName: string]: ParsedFilter | undefined } = {};
     let fieldUniqueIteration = Number(options.fieldUniqueIteration ?? -1);
     let include: IncludeItems = {};
     if (currentDepth > maxDepth) {
@@ -733,7 +735,7 @@ export class SQLQueryBuilderService {
       if (!fieldWhereData) {
         continue;
       }
-      const innerQuery = itemData.where[actualFieldName].query;
+      const innerQuery = fieldWhereData.query;
       parsedFilterItem.params = {
         ...parsedFilterItem.params,
         ...(fieldWhereData.params || {})

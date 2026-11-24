@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ApForProcessingOutputDataData1767547007700
-  implements MigrationInterface
-{
+export class ApForProcessingOutputDataData1767547007700 implements MigrationInterface {
   name = 'ApForProcessingOutputDataData1767547007700';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -14,6 +12,5 @@ export class ApForProcessingOutputDataData1767547007700
     );
   }
 
-  // oxlint-disable-next-line eslint/no-empty -- Personal preference.
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

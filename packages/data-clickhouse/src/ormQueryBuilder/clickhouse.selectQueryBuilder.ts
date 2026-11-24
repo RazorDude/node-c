@@ -15,9 +15,9 @@ import { ClickHouseDBEntitySchema } from '../repository/clickhouse.repository.de
 const paramNameRegex = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 // TODO: field selection, join, update, delete
-export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
-  implements OrmSelectQueryBuilder<Entity>
-{
+export class ClickHouseSelectQueryBuilder<
+  Entity extends GenericObject<unknown>
+> implements OrmSelectQueryBuilder<Entity> {
   protected deletedColumn?: string;
   protected limitClause = '';
   protected offsetClause = '';
@@ -81,7 +81,7 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    const result = await this.manager.query<{ data: [{ 'count()': string }] }>(
+    const result = await this.manager.query<{ data: { 'count()': string }[] }>(
       `select count() from \`${tableName}\` as \`${name}\` ` +
         `${this.addDeletedToWhereClause()} ${orderByClause} ${limitClause} ${offsetClause}`,
       this.queryParams
@@ -113,7 +113,7 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
         options: { name, tableName }
       }
     } = this;
-    const result = await this.manager.query<{ data: Entity }>(
+    const result = await this.manager.query<{ data?: Entity }>(
       `select * from \`${tableName}\` as \`${name}\` ${this.addDeletedToWhereClause()} ${orderByClause} limit 1`,
       this.queryParams
     );
@@ -142,10 +142,7 @@ export class ClickHouseSelectQueryBuilder<Entity extends GenericObject<unknown>>
     return this;
   }
 
-  protected parseOrderByClause(
-    field: string,
-    direction: DataOrderByDirection
-  ): string {
+  protected parseOrderByClause(field: string, direction: string): string {
     const {
       options: { columns, name }
     } = this.schema;

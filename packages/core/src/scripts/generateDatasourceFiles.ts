@@ -11,7 +11,7 @@ import { ConfigProviderService } from '../common/configProvider/configProvider.s
 
 const processEnv: NodeJS.ProcessEnv = env;
 
-(async () => {
+(async (): Promise<void> => {
   const logPrefix = '[Node-C][generateDatasourceFiles]';
   console.info(`${logPrefix}: Loading configurations...`);
   const appModule = await import(path.resolve(cwd(), './dist/app.module.js'));

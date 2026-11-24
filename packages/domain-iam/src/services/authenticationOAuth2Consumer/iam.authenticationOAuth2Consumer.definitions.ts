@@ -5,8 +5,7 @@ import {
 import {
   IAMAuthenticationConsumerCompleteResult,
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult,
-  IAMAuthenticationConsumerInitiateResult,
-  IAMAuthenticationConsumerRefreshExternalAccessTokenResult
+  IAMAuthenticationConsumerInitiateResult
 } from '../authenticationConsumer/iam.authenticationConsumer.definitions.js';
 
 import {
@@ -37,8 +36,7 @@ export type IAMAuthenticationOAuth2ConsumerCompleteResult =
 export type IAMAuthenticationOAuth2ConsumerGetUserAuthenticationConfigResult =
   IAMAuthenticationConsumerGetUserAuthenticationConfigResult;
 
-export interface IAMAuthenticationOAuth2ConsumerInitiateData
-  extends IAMAuthenticationOAuth2InitiateData {
+export interface IAMAuthenticationOAuth2ConsumerInitiateData extends IAMAuthenticationOAuth2InitiateData {
   scope: string;
 }
 
@@ -53,8 +51,7 @@ export type IAMAuthenticationOAuth2ConsumerInitiateResult =
 export type IAMAuthenticationOAuth2ConsumerRefreshExternalAccessTokenData =
   IAMAuthenticationRefreshExternalAccessTokenData;
 export type IAMAuthenticationOAuth2ConsumerRefreshExternalAccessTokenResult =
-  IAMAuthenticationRefreshExternalAccessTokenResult &
-    IAMAuthenticationConsumerRefreshExternalAccessTokenResult;
+  IAMAuthenticationRefreshExternalAccessTokenResult;
 
 export type IAMAuthenticationOAuth2ConsumerVerifyExternalAccessTokenData =
   IAMAuthenticationOAuth2VerifyExternalAccessTokenData;

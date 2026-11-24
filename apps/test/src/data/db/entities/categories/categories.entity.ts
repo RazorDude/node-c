@@ -5,8 +5,9 @@ import {
   DBEntitySchema
 } from '../../../dbBase/entity/base.db.entity.js';
 
-export interface DataDBCategory<Course extends DBEntity = DBEntity>
-  extends DBEntity {
+export interface DataDBCategory<
+  Course extends DBEntity = DBEntity
+> extends DBEntity {
   courses?: Course[];
   name: string;
 }
